@@ -1,9 +1,13 @@
 from colabfit.tools.database import MongoDatabase, load_data
 from colabfit.tools.property_definitions import (
-    potential_energy_pd,
+    # total energy not yet implemented in colabfit module
+    # total_energy_pd,
     atomic_forces_pd,
 )
 import ase
+
+# temporary import until property definitions implemented in colabfit module
+import property_definitions_additional as pda
 
 if "__name__" == "__main__":
     client = MongoDatabase("test", drop_database=True)
@@ -27,14 +31,14 @@ if "__name__" == "__main__":
         generator=False,
     )
     # Load from colabfit's definitions
-    client.insert_property_definition(potential_energy_pd)
+    client.insert_property_definition(pda.total_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
     metadata = {
         "software": {"value": ["LAMMPS", "i-PI"]},
         "method": {"value": ["revPBE0-D3", "DFT"]},
     }
     property_map = {
-        "potential-energy": [
+        "total-energy": [
             {
                 "energy": {"field": "TotEnergy", "units": "eV"},
                 "per-atom": {"value": False, "units": None},
@@ -91,7 +95,7 @@ if "__name__" == "__main__":
             "https://www.pnas.org/doi/full/10.1073/pnas.1815117116",
         ],
         description="1590 configurations of H2O/water "
-        "with potential energy and forces calculated using "
+        "with total energy and forces calculated using "
         "a hybrid approach, DFT and revPBE0-D3 ",
         verbose=True,
     )

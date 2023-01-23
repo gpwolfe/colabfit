@@ -19,6 +19,27 @@ dipole_moment_pd = {
     },
 }
 
+dipole_polarizability_pd = {
+    "property-id": "tag:staff@noreply.colabfit.org,2022-05-30:property/dipole-polarizability",
+    "property-name": "dipole-polarizability",
+    "property-title": "Dipole polarizability",
+    "property-description": "Dipole polarizability of a molecule",
+    "dipole-polarizability": {
+        "type": "float",
+        "has-unit": True,
+        "extent": [],
+        "required": False,
+        "description": "Dipole polarizability of the molecule.",
+    },
+    "per-atom": {
+        "type": "bool",
+        "has-unit": False,
+        "extent": [],
+        "required": False,
+        "description": ".",
+    },
+}
+
 lumo_energy_pd = {
     "property-id": "tag:staff@noreply.colabfit.org,2022-05-30:property/lumo-energy",
     "property-name": "lumo-energy",
@@ -82,7 +103,6 @@ isotropic_polarizability_pd = {
     },
 }
 
-
 homo_lumo_gap_pd = {
     "property-id": "tag:staff@noreply.colabfit.org,2022-05-30:property/homo-lumo-gap",
     "property-name": "homo-lumo-gap",
@@ -145,7 +165,6 @@ zpve_pd = {
         "description": ".",
     },
 }
-
 
 internal_energy_pd = {
     "property-id": "tag:staff@noreply.colabfit.org,2022-05-30:property/internal-energy",
@@ -256,6 +275,27 @@ heat_capacity_pd = {
         "extent": [],
         "required": True,
         "description": "Temperature for which heat capacity was calculated.",
+    },
+    "per-atom": {
+        "type": "bool",
+        "has-unit": False,
+        "extent": [],
+        "required": False,
+        "description": ".",
+    },
+}
+
+total_energy_pd = {
+    "property-id": "tag:staff@noreply.colabfit.org,2022-05-30:property/total-energy",
+    "property-name": "total-energy",
+    "property-title": "Total energy",
+    "property-description": "Total energy of a molecule",
+    "heat-capacity": {
+        "type": "float",
+        "has-unit": True,
+        "extent": [],
+        "required": False,
+        "description": "The total energy of a molecule",
     },
     "per-atom": {
         "type": "bool",
