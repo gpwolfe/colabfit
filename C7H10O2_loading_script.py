@@ -289,4 +289,3 @@ if __name__ == "__main__":
         description="6095 isomers of C7O2H10, energetics were calculated at the G4MP2 level of theory",
         verbose=True,
     )
-    client.datasets.find_one()

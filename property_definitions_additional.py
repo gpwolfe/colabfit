@@ -81,7 +81,7 @@ lumo_energy_pd = {
     "property-name": "lumo-energy",
     "property-title": "Lowest unoccupied molecular orbital (LUMO)",
     "property-description": "Energy of the lowest unoccupied molecular orbital (LUMO)",
-    "lumo-energy": {
+    "energy": {
         "type": "float",
         "has-unit": True,
         "extent": [],
@@ -102,7 +102,7 @@ homo_energy_pd = {
     "property-name": "homo-energy",
     "property-title": "Highest occupied molecular orbital (HOMO)",
     "property-description": "Energy of the highest occupied molecular orbital (HOMO)",
-    "homo-energy": {
+    "energy": {
         "type": "float",
         "has-unit": True,
         "extent": [],
@@ -207,7 +207,7 @@ internal_energy_pd = {
     "property-name": "internal-energy",
     "property-title": "Internal energy",
     "property-description": "Internal energy of a molecule at defined temperature",
-    "internal-energy": {
+    "energy": {
         "type": "float",
         "has-unit": True,
         "extent": [],
