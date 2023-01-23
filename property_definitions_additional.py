@@ -1,3 +1,39 @@
+polarizability_pd = {
+    "property-id": "tag:staff@noreply.colabfit.org,2022-05-30:property/polarizability",
+    "property-name": "polarizability",
+    "property-title": "Polarizability",
+    "property-description": "Polarizability of a molecule",
+    "polarizability": {
+        "type": "float",
+        "has-unit": True,
+        "extent": [],
+        "required": False,
+        "description": "Polarizability of the molecule.",
+    },
+    "di-quad": {
+        "type": "string",
+        "has-unit": False,
+        "extent": [],
+        "required": False,
+        "description": "Whether polarizability is [dipole] or [quadrupole]",
+    },
+    "iso-aniso": {
+        "type": "string",
+        "has-unit": False,
+        "extent": [],
+        "required": False,
+        "description": "Whether polarizability is [isotropic] or [anisotropic]",
+    },
+    "per-atom": {
+        "type": "bool",
+        "has-unit": False,
+        "extent": [],
+        "required": False,
+        "description": ".",
+    },
+}
+
+
 dipole_moment_pd = {
     "property-id": "tag:staff@noreply.colabfit.org,2022-05-30:property/dipole-moment",
     "property-name": "dipole-moment",
@@ -290,7 +326,7 @@ total_energy_pd = {
     "property-name": "total-energy",
     "property-title": "Total energy",
     "property-description": "Total energy of a molecule",
-    "heat-capacity": {
+    "energy": {
         "type": "float",
         "has-unit": True,
         "extent": [],

@@ -42,15 +42,11 @@ if __name__ == "__main__":
         groups = parser_match.match(line)
         return groups.groupdict()
 
-    def coord_parser(line):
-        groups = coord_match.match(line)
-        return groups.groupdict()
-
     # Create functions to run file and heading parsers
     def xyz_parser(file_path):
         file_path = Path(file_path)
         name = file_path.stem
-        properties = defaultdict(list)
+        elem_coords = defaultdict(list)
         n_atoms = int()
         with open(file_path, "r") as f:
             line_num = 0
@@ -68,22 +64,24 @@ if __name__ == "__main__":
                         line = line.replace("*^", "e")
                     groups = coord_match.match(line)
                     try:
-                        for property, val in groups.groupdict().items():
-                            properties[property].append(val)
+                        for elem_coord, val in groups.groupdict().items():
+                            elem_coords[elem_coord].append(val)
                     except ValueError:
                         print("ValueError at {line} in {file_path}")
                     line_num += 1
                 elif line_num >= n_atoms + 2:
-                    return name, n_atoms, properties, property_dict
+                    return name, n_atoms, elem_coords, property_dict
                 else:
                     print(f"{file_path} finished at line {line_num}.")
                     break
 
     def reader(file_path):
-        name, n_atoms, coords, properties = xyz_parser(file_path)
-        positions = list(zip(coords["x"], coords["y"], coords["z"]))
+        name, n_atoms, elem_coords, properties = xyz_parser(file_path)
+        positions = list(
+            zip(elem_coords["x"], elem_coords["y"], elem_coords["z"])
+        )
         atoms = AtomicConfiguration(
-            names=[name], symbols=coords["element"], positions=positions
+            names=[name], symbols=elem_coords["element"], positions=positions
         )
         atoms.info["name"] = name
         atoms.info["n_atoms"] = n_atoms
@@ -152,14 +150,14 @@ if __name__ == "__main__":
         ],
         "lumo-energy": [
             {
-                "lumo-energy": {"field": "lumo", "units": "Ha"},
+                "energy": {"field": "lumo", "units": "Ha"},
                 "per-atom": {"value": False, "units": None},
                 "_metadata": metadata,
             }
         ],
         "homo-energy": [
             {
-                "homo-energy": {"field": "homo", "units": "Ha"},
+                "energy": {"field": "homo", "units": "Ha"},
                 "per-atom": {"value": False, "units": None},
                 "_metadata": metadata,
             }
@@ -200,7 +198,7 @@ if __name__ == "__main__":
         ],
         "internal-energy": [
             {
-                "internal-energy": {
+                "energy": {
                     "field": "internal_energy_0",
                     "units": "Ha",
                 },
