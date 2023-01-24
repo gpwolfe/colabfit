@@ -172,13 +172,6 @@ enthalpy_pd = {
         "required": True,
         "description": "Temperature for which enthalpy was calculated.",
     },
-    "per-atom": {
-        "type": "bool",
-        "has-unit": False,
-        "extent": [],
-        "required": False,
-        "description": ".",
-    },
 }
 
 free_energy_pd = {
@@ -248,5 +241,12 @@ total_energy_pd = {
         "extent": [],
         "required": False,
         "description": "The total energy of a molecule",
+    },
+    "per-atom": {
+        "type": "bool",
+        "has-unit": False,
+        "extent": [],
+        "required": False,
+        "description": ".",
     },
 }

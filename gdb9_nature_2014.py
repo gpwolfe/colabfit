@@ -124,28 +124,24 @@ if __name__ == "__main__":
         "dipole-moment": [
             {
                 "dipole-moment": {"field": "dipole_moment", "units": "Debye"},
-                "per-atom": {"value": False, "units": None},
                 "_metadata": metadata,
             }
         ],
         "lumo-energy": [
             {
                 "energy": {"field": "lumo", "units": "Ha"},
-                "per-atom": {"value": False, "units": None},
                 "_metadata": metadata,
             }
         ],
         "homo-energy": [
             {
                 "energy": {"field": "homo", "units": "Ha"},
-                "per-atom": {"value": False, "units": None},
                 "_metadata": metadata,
             }
         ],
         "homo-lumo-gap": [
             {
                 "homo-lumo-gap": {"field": "homo_lumo_gap", "units": "Ha"},
-                "per-atom": {"value": False, "units": None},
                 "_metadata": metadata,
             }
         ],
@@ -157,7 +153,6 @@ if __name__ == "__main__":
                 },
                 "iso-aniso": {"value": "isotropic", "units": None},
                 "di-quad": {"value": "dipole", "units": None},
-                "per-atom": {"value": False, "units": None},
                 "_metadata": metadata,
             }
         ],
@@ -167,14 +162,12 @@ if __name__ == "__main__":
                     "field": "elec_spatial_extent",
                     "units": "Bohr^2",
                 },
-                "per-atom": {"value": False, "units": None},
                 "_metadata": metadata,
             }
         ],
         "zpve": [
             {
                 "zpve": {"field": "zpve", "units": "Ha"},
-                "per-atom": {"value": False, "units": None},
                 "_metadata": metadata,
             }
         ],
@@ -189,7 +182,6 @@ if __name__ == "__main__":
         "enthalpy": [
             {
                 "enthalpy": {"field": "enthalpy", "units": "Ha"},
-                "per-atom": {"value": False, "units": None},
                 "temperature": {"value": 298.15, "units": "K"},
                 "_metadata": metadata,
             }
@@ -200,7 +192,6 @@ if __name__ == "__main__":
                     "field": "heat-capacity",
                     "units": "cal/(mol K)",
                 },
-                "per-atom": {"value": False, "units": None},
                 "temperature": {"value": 298, "units": "K"},
                 "_metadata": metadata,
             }

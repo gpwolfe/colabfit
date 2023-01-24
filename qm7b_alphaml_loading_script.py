@@ -224,14 +224,12 @@ def main():
         "lumo-energy": [
             {
                 "energy": {"field": "lumo_energy", "units": "atomic units"},
-                "per-atom": {"value": False, "units": None},
                 "_metadata": b3lyp_metadata,
             }
         ],
         "homo-energy": [
             {
                 "energy": {"field": "homo_energy", "units": "atomic units"},
-                "per-atom": {"value": False, "units": None},
                 "_metadata": b3lyp_metadata,
             }
         ],
