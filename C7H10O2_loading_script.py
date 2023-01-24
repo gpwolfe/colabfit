@@ -87,19 +87,8 @@ if __name__ == "__main__":
         )
         atoms.info["name"] = name
         atoms.info["n_atoms"] = n_atoms
-        atoms.info["free_energy"] = properties["g"]
-        atoms.info["dipole_moment"] = properties["mu"]
-        atoms.info["lumo"] = properties["lumo"]
-        atoms.info["homo"] = properties["homo"]
-        atoms.info["gap"] = properties["gap"]
-        atoms.info["polarizability"] = properties["alpha"]
-        atoms.info["spatial_extent"] = properties["r2"]
-        atoms.info["zpve"] = properties["zpve"]
-        atoms.info["internal_energy_0"] = properties["u0"]
-        atoms.info["internal_energy_298"] = properties["u"]
-        atoms.info["enthalpy"] = properties["h"]
-        atoms.info["heat_capacity"] = properties["cv"]
-
+        for key in properties.keys():
+            atoms.info[key] = properties[key]
         return [atoms]
 
     # Load configurations
@@ -123,7 +112,7 @@ if __name__ == "__main__":
         pda.enthalpy_pd,
         pda.homo_energy_pd,
         pda.lumo_energy_pd,
-        pda.isotropic_polarizability_pd,
+        pda.polarizability_pd,
         pda.homo_lumo_gap_pd,
         pda.internal_energy_pd,
         pda.zpve_pd,
@@ -174,11 +163,13 @@ if __name__ == "__main__":
                 "_metadata": metadata,
             }
         ],
-        "isotropic-polarizability": [
+        "polarizability": [
             {
-                "isotropic-polarizability": {
+                "polarizability": {
                     "field": "polarizability",
                     "units": "Bohr^3",
+                    "di-quad": {"value": "dipole", "units": None},
+                    "iso-aniso": {"value": "isotropic", "units": None},
                 },
                 "per-atom": {"value": False, "units": None},
                 "_metadata": metadata,
