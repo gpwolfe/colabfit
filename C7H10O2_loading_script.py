@@ -14,10 +14,12 @@ if __name__ == "__main__":
     parser_match = re.compile(
         r"gdb (?P<index>\d+)\s(?P<rotational_a>-?\d+\.(\d+)?)\s"
         r"(?P<rotational_b>-?\d+\.(\d+)?)\s(?P<rotational_c>-?\d+\.(\d+)?)\s"
-        r"(?P<mu>-?\d+\.(\d+)?)\s(?P<alpha>-?\d+\.(\d+)?)\s(?P<homo>-?\d+\.(\d+)?)"
-        r"\s(?P<lumo>-?\d+\.(\d+)?)\s(?P<gap>-?\d+\.(\d+)?)\s(?P<r2>-?\d+\.(\d+)?)"
-        r"\s(?P<zpve>-?\d+\.(\d+)?)\s(?P<u0>-?\d+\.(\d+)?)\s(?P<u>-?\d+\.(\d+)?)\s"
-        r"(?P<h>-?\d+\.(\d+)?)\s(?P<g>-?\d+\.(\d+)?)\s(?P<cv>-?\d+\.(\d+)?)"
+        r"(?P<mu>-?\d+\.(\d+)?)\s(?P<alpha>-?\d+\.(\d+)?)\s"
+        r"(?P<homo>-?\d+\.(\d+)?)\s(?P<lumo>-?\d+\.(\d+)?)"
+        r"\s(?P<gap>-?\d+\.(\d+)?)\s(?P<r2>-?\d+\.(\d+)?)"
+        r"\s(?P<zpve>-?\d+\.(\d+)?)\s(?P<u0>-?\d+\.(\d+)?)\s"
+        r"(?P<u>-?\d+\.(\d+)?)\s(?P<h>-?\d+\.(\d+)?)\s"
+        r"(?P<g>-?\d+\.(\d+)?)\s(?P<cv>-?\d+\.(\d+)?)"
     )
     # format to match 'gdb 1	3.1580357	1.2436329	1.1060216	1.1312	77.92	-0.21236	0.02396	0.23632	1176.6995	0.155411	-422.593067	-422.583794	-422.58285	-422.62703	34.695'
     # The numeric values on the xyz comment line indicate the following in this

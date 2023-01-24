@@ -27,14 +27,16 @@ def main():
 
     CCSD_HEADER_RE = re.compile(
         r"Properties,(?P<iso_di_pol>[-\d\.]+),(?P<aniso_di_pol>[-\d\.]+),"
-        r"(?P<di_pol_1>[-\d\.]+),(?P<di_pol_2>[-\d\.]+),(?P<di_pol_3>[-\d\.]+),"
-        r"(?P<di_pol_4>[-\d\.]+),(?P<di_pol_5>[-\d\.]+),(?P<di_pol_6>[-\d\.]+),"
-        r"(?P<di_moment_1>[-\d\.]+),(?P<di_moment_2>[-\d\.]+),(?P<di_moment_3>[-\d\.]+),"
-        r"(?P<quad_moment_1>[-\d\.]+),(?P<quad_moment_2>[-\d\.]+),"
-        r"(?P<quad_moment_3>[-\d\.]+),(?P<quad_moment_4>[-\d\.]+),"
-        r"(?P<quad_moment_5>[-\d\.]+),(?P<quad_moment_6>[-\d\.]+),"
-        r"(?P<total_energy>[-\d\.]+),(?P<same_spin_mp2_corr>[-\d\.]+),"
-        r"(?P<oppos_spin_mp2_corr>[-\d\.]+),(?P<same_spin_ccsd_corr>[-\d\.]+),"
+        r"(?P<di_pol_1>[-\d\.]+),(?P<di_pol_2>[-\d\.]+),"
+        r"(?P<di_pol_3>[-\d\.]+),(?P<di_pol_4>[-\d\.]+),"
+        r"(?P<di_pol_5>[-\d\.]+),(?P<di_pol_6>[-\d\.]+),"
+        r"(?P<di_moment_1>[-\d\.]+),(?P<di_moment_2>[-\d\.]+),"
+        r"(?P<di_moment_3>[-\d\.]+),(?P<quad_moment_1>[-\d\.]+),"
+        r"(?P<quad_moment_2>[-\d\.]+),(?P<quad_moment_3>[-\d\.]+),"
+        r"(?P<quad_moment_4>[-\d\.]+),(?P<quad_moment_5>[-\d\.]+),"
+        r"(?P<quad_moment_6>[-\d\.]+),(?P<total_energy>[-\d\.]+),"
+        r"(?P<same_spin_mp2_corr>[-\d\.]+),(?P<oppos_spin_mp2_corr>[-\d\.]+),"
+        r"(?P<same_spin_ccsd_corr>[-\d\.]+),"
         r"(?P<oppos_spin_ccsd_corr>[-\d\.]+)$"
     )
 
@@ -273,22 +275,26 @@ def main():
         [
             "B3LYP_daTZ",
             "B3LYP_daTZ",
-            "Configurations gathered using DFT B3LYP methods and the d-aug-cc-pVTZ basis set",
+            "Configurations gathered using DFT B3LYP methods and the "
+            "d-aug-cc-pVTZ basis set",
         ],
         [
             "B3LYP_daDZ",
             "B3LYP_daDZ",
-            "Configurations gathered using DFT B3LYP methods and the d-aug-cc-pVDZ basis set",
+            "Configurations gathered using DFT B3LYP methods and the "
+            "d-aug-cc-pVDZ basis set",
         ],
         [
             "SCAN0",
             "SCAN0",
-            "Configurations gathered using DFT SCAN0 methods and the d-aug-cc-pVDZ basis set",
+            "Configurations gathered using DFT SCAN0 methods and the "
+            "d-aug-cc-pVDZ basis set",
         ],
         [
             "CCSD_daDZ",
             "CCSD_daDZ",
-            "Configurations gathered using quantum calculation CCSD methods and the d-aug-cc-pVDZ basis set",
+            "Configurations gathered using quantum calculation CCSD methods"
+            " and the d-aug-cc-pVDZ basis set",
         ],
     ]
 
@@ -321,21 +327,23 @@ def main():
             cs_ids.append(cs_id)
 
     # Insert dataset
-    ds_id = client.insert_dataset(
+    client.insert_dataset(
         cs_ids,
         list(all_do_ids),
         name="QM7b_AlphaML",
         authors=[
-            "Y. Yang, K. Un Lao, D.M. Wilkins, A. Grisafi, M. Ceriotti, R.A. DiStasio Jr"
+            "Y. Yang, K. Un Lao, D.M. Wilkins, A. Grisafi, "
+            "M. Ceriotti, R.A. DiStasio Jr"
         ],
         links=[
             "https://archive.materialscloud.org/record/2019.0002/v3",
             "https://doi.org/10.24435/materialscloud:2019.0002/v3",
             "https://www.nature.com/articles/s41597-019-0157-8",
         ],
-        description="Polarizability and total energy, computed with LR-CCSD, hybrid DFT (B3LYP & SCAN0) "
-        "for 7211 molecules in QM7b and 52 molecules in AlphaML showcase database."
-        " Folders used are SCAN0_DADZ, B3LYP_daTZ, BELYP_daDZ, and CCSD_daDZ.",
+        description="Polarizability and total energy, computed with LR-CCSD, "
+        "hybrid DFT (B3LYP & SCAN0) for 7211 molecules in QM7b and 52 "
+        "molecules in AlphaML showcase database. Folders used are SCAN0_DADZ,"
+        " B3LYP_daTZ, BELYP_daDZ, and CCSD_daDZ.",
         verbose=True,
     )
 
