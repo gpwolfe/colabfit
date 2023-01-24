@@ -24,13 +24,6 @@ polarizability_pd = {
         "required": False,
         "description": "Whether polarizability is [isotropic] or [anisotropic]",
     },
-    "per-atom": {
-        "type": "bool",
-        "has-unit": False,
-        "extent": [],
-        "required": False,
-        "description": ".",
-    },
 }
 
 
@@ -46,13 +39,6 @@ dipole_moment_pd = {
         "required": False,
         "description": "Dipole moment of the molecule.",
     },
-    "per-atom": {
-        "type": "bool",
-        "has-unit": False,
-        "extent": [],
-        "required": False,
-        "description": ".",
-    },
 }
 
 dipole_polarizability_pd = {
@@ -66,13 +52,6 @@ dipole_polarizability_pd = {
         "extent": [],
         "required": False,
         "description": "Dipole polarizability of the molecule.",
-    },
-    "per-atom": {
-        "type": "bool",
-        "has-unit": False,
-        "extent": [],
-        "required": False,
-        "description": ".",
     },
 }
 
@@ -88,13 +67,6 @@ lumo_energy_pd = {
         "required": False,
         "description": "Energy of the lowest unoccupied molecular orbital (LUMO).",
     },
-    "per-atom": {
-        "type": "bool",
-        "has-unit": False,
-        "extent": [],
-        "required": False,
-        "description": ".",
-    },
 }
 
 homo_energy_pd = {
@@ -108,34 +80,6 @@ homo_energy_pd = {
         "extent": [],
         "required": False,
         "description": "Energy of the highest occupied molecular orbital (HOMO).",
-    },
-    "per-atom": {
-        "type": "bool",
-        "has-unit": False,
-        "extent": [],
-        "required": False,
-        "description": ".",
-    },
-}
-
-isotropic_polarizability_pd = {
-    "property-id": "tag:staff@noreply.colabfit.org,2022-05-30:property/isotropic-polarizability",
-    "property-name": "isotropic-polarizability",
-    "property-title": "Isotropic polarizability",
-    "property-description": "Polarizability of a molecule",
-    "isotropic-polarizability": {
-        "type": "float",
-        "has-unit": True,
-        "extent": [],
-        "required": False,
-        "description": "Polarizability of a molecule.",
-    },
-    "per-atom": {
-        "type": "bool",
-        "has-unit": False,
-        "extent": [],
-        "required": False,
-        "description": ".",
     },
 }
 
@@ -151,13 +95,6 @@ homo_lumo_gap_pd = {
         "required": False,
         "description": "Difference in energy between the highest occupied molecular orbit (HOMO) and the lowest unoccupied molecular orbital (LUMO)",
     },
-    "per-atom": {
-        "type": "bool",
-        "has-unit": False,
-        "extent": [],
-        "required": False,
-        "description": ".",
-    },
 }
 
 electronic_spatial_extent_pd = {
@@ -172,13 +109,6 @@ electronic_spatial_extent_pd = {
         "required": False,
         "description": "A measure of the size of a molecule, using electron density and distance from molecular center of mass",
     },
-    "per-atom": {
-        "type": "bool",
-        "has-unit": False,
-        "extent": [],
-        "required": False,
-        "description": ".",
-    },
 }
 
 zpve_pd = {
@@ -192,13 +122,6 @@ zpve_pd = {
         "extent": [],
         "required": False,
         "description": "Calculated vibrational energy in a molecule at 0 degrees Kelvin",
-    },
-    "per-atom": {
-        "type": "bool",
-        "has-unit": False,
-        "extent": [],
-        "required": False,
-        "description": ".",
     },
 }
 
@@ -312,13 +235,6 @@ heat_capacity_pd = {
         "required": True,
         "description": "Temperature for which heat capacity was calculated.",
     },
-    "per-atom": {
-        "type": "bool",
-        "has-unit": False,
-        "extent": [],
-        "required": False,
-        "description": ".",
-    },
 }
 
 total_energy_pd = {
@@ -332,12 +248,5 @@ total_energy_pd = {
         "extent": [],
         "required": False,
         "description": "The total energy of a molecule",
-    },
-    "per-atom": {
-        "type": "bool",
-        "has-unit": False,
-        "extent": [],
-        "required": False,
-        "description": ".",
     },
 }
