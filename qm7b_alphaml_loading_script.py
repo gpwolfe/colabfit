@@ -187,8 +187,8 @@ def main():
     ]
 
     polars = [
-        ("iso_di_pol", "dipolar", "isotropic"),
-        ("aniso_di_pol", "dipolar", "anisotropic"),
+        ("iso_di_pol", "dipole", "isotropic"),
+        ("aniso_di_pol", "dipole", "anisotropic"),
     ]
 
     # Metadata and property maps
@@ -335,7 +335,7 @@ def main():
         ],
         description="Polarizability and total energy, computed with LR-CCSD, hybrid DFT (B3LYP & SCAN0) "
         "for 7211 molecules in QM7b and 52 molecules in AlphaML showcase database."
-        "Folders used are SCAN0_DADZ, B3LYP_daTZ, BELYP_daDZ, and CCSD_daDZ.",
+        " Folders used are SCAN0_DADZ, B3LYP_daTZ, BELYP_daDZ, and CCSD_daDZ.",
         verbose=True,
     )
 

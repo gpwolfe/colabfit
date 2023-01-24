@@ -131,7 +131,10 @@ if __name__ == "__main__":
         client.insert_property_definition(pd)
 
     # Define properties
-    metadata = {"software": {"value": "MOPAC"}, "method": {"value": "G4MP2"}}
+    metadata = {
+        "software": {"value": ["MOPAC", "Gaussian 09"]},
+        "method": {"value": "G4MP2"},
+    }
     property_map = {
         "free-energy": [
             {
@@ -237,7 +240,8 @@ if __name__ == "__main__":
     )
 
     all_co_ids, all_do_ids = list(zip(*ids))
-    # Add second set of internal energy properties with different temperature value
+    # Add second set of internal energy properties with different
+    # temperature value
     property_map2 = {
         "internal-energy": [
             {
@@ -286,6 +290,7 @@ if __name__ == "__main__":
         name="COH_SD_2014",
         authors=["R. Ramakrishnan, P.O. Dral, M. Rupp, O.A. von Lilienfeld"],
         links=["https://doi.org/10.6084/m9.figshare.c.978904.v5"],
-        description="6095 isomers of C7O2H10, energetics were calculated at the G4MP2 level of theory",
+        description="6095 isomers of C7O2H10, energetics were calculated"
+        " at the G4MP2 level of theory",
         verbose=True,
     )
