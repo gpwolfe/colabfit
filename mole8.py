@@ -51,6 +51,7 @@ def main():
     )
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
+
     metadata = {
         "software": {"value": "Gaussian 09"},
         "method": {"value": ["B3LYP/6-31g(2df,p)", "DFT"]},
