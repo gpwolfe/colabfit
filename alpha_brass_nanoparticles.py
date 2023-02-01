@@ -7,73 +7,85 @@ https://archive.materialscloud.org/record/2021.153
 Change DATASET_FP to reflect location of parent folder
 Change database name as appropriate
 """
+from argparse import ArgumentParser
 from colabfit.tools.database import MongoDatabase, load_data
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.property_definitions import atomic_forces_pd
-import property_definitions_additional as pda
+
 from collections import defaultdict
 import numpy as np
+from pathlib import Path
+import sys
+
+# import property_definitions_additional as pda
+
+DATASET_FP = Path("data/brass_DFT_data/brass_data/")
 
 
-def main():
-    DATASET_FP = "/Users/piper/Code/colabfit/data/brass_data/"
-    client = MongoDatabase("test", drop_database=True)
+def read_npz(filepath):
+    print(filepath)
+    data = defaultdict(list)
+    with np.load(filepath, allow_pickle=True) as f:
+        for key in f.files:
+            data[key] = f[key]
+    return data
 
-    def read_npz(filepath):
-        data = defaultdict(list)
-        with np.load(filepath, allow_pickle=True) as f:
-            for key in f.files:
-                data[key] = f[key]
-        return data
 
-    def reader(filepath):
-        name = "alpha-brass-nanoparticles"
-        data = read_npz(filepath)
-        old_keys = (
-            "coords",
-            "latt",
-            "z",
-            "F",
-            "E",
-            "E_coh",
-            "comp",
-            "cmts",
-            "theory",
-            "name",
-            "citation",
+def reader(filepath):
+    name = "alpha-brass-nanoparticles"
+    data = read_npz(filepath)
+    old_keys = (
+        "coords",
+        "latt",
+        "z",
+        "F",
+        "E",
+        "E_coh",
+        "comp",
+        "cmts",
+        "theory",
+        "name",
+        "citation",
+    )
+
+    new_keys = (
+        "coords",
+        "lattice",
+        "atomic_num",
+        "forces",
+        "total_energy",
+        "cohesive_energy",
+        "composition_dict",
+        "comments",
+        "vasp_pbe",
+        "citation",
+    )
+    for old, new in zip(old_keys, new_keys):
+        data[new] = data.pop(old)
+
+    atoms = [
+        AtomicConfiguration(
+            names=[name],
+            positions=data["coords"][i],
+            cell=data["lattice"][i],
+            numbers=data["atomic_num"][i],
+            pbc=True,
         )
+        for i, val in enumerate(data["coords"])
+    ]
+    using_keys = ("forces", "total_energy")
+    for i, atom in enumerate(atoms):
+        for key in using_keys:
+            atom.info[key] = data[key][i]
+        atom.info["name"] = name
+    return atoms
 
-        new_keys = (
-            "coords",
-            "lattice",
-            "atomic_num",
-            "forces",
-            "total_energy",
-            "cohesive_energy",
-            "composition_dict",
-            "comments",
-            "vasp_pbe",
-            "citation",
-        )
-        for old, new in zip(old_keys, new_keys):
-            data[new] = data.pop(old)
 
-        atoms = [
-            AtomicConfiguration(
-                names=[name],
-                positions=data["coords"][i],
-                cell=data["lattice"][i],
-                numbers=data["atomic_num"][i],
-                pbc=True,
-            )
-            for i, val in enumerate(data["coords"])
-        ]
-        using_keys = ("forces", "total_energy")
-        for i, atom in enumerate(atoms):
-            for key in using_keys:
-                atom.info[key] = data[key][i]
-            atom.info["name"] = name
-        return atoms
+def main(argv):
+    parser = ArgumentParser()
+    parser.add_argument("--ip", type=str, help="IP of host mongod")
+    args = parser.parse_args(argv)
+    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
 
     configurations = load_data(
         # Data can be downloaded here:
@@ -86,7 +98,10 @@ def main():
         glob_string="*.npz",
         generator=False,
     )
-    pds = [atomic_forces_pd, pda.total_energy_pd]
+    pds = [
+        atomic_forces_pd,
+        # pda.total_energy_pd
+    ]
     for pd in pds:
         client.insert_property_definition(pd)
     metadata = {
@@ -94,13 +109,13 @@ def main():
         "method": {"value": ["DFT", "PBE"]},
     }
     property_map = {
-        "total-energy": [
-            {
-                "energy": {"field": "total_energy", "units": "meV"},
-                "per-atom": {"value": True, "units": None},
-                "_metadata": metadata,
-            }
-        ],
+        # "total-energy": [
+        #     {
+        #         "energy": {"field": "total_energy", "units": "meV"},
+        #         "per-atom": {"value": True, "units": None},
+        #         "_metadata": metadata,
+        #     }
+        # ],
         "atomic-forces": [
             {
                 "forces": {"field": "forces", "units": "meV Å^-1"},
@@ -199,4 +214,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
