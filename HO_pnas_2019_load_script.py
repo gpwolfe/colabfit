@@ -1,28 +1,54 @@
+"""
+author:gpwolfe
+
+Data can be downloaded from:
+https://archive.materialscloud.org/record/2018.0020/v1
+
+The only file necessary is:
+https://archive.materialscloud.org/record/file?filename=training-set.zip&record_id=71
+
+File address:
+
+Unzip file to a new parent directory before running script.
+mkdir <project_dir>/data/HO_pnas_2019
+
+tar xf training-set.zip  -C <project_directory>/data/HO_pnas_2019/
+
+Change DATASET_FP to reflect location of parent folder
+Change database name as appropriate
+"""
+from argparse import ArgumentParser
+import ase
 from colabfit.tools.database import MongoDatabase, load_data
 from colabfit.tools.property_definitions import (
     # total energy not yet implemented in colabfit module
     # total_energy_pd,
     atomic_forces_pd,
 )
-import ase
+from pathlib import Path
 
-# temporary import until property definitions implemented in colabfit module
-import property_definitions_additional as pda
+# import property_definitions_additional as pda
+import sys
 
-if "__name__" == "__main__":
-    client = MongoDatabase("test", drop_database=True)
+DATASET_FP = Path("data/HO_pnas_2019")
 
-    def reader(file_path):
-        file_name = file_path.stem
-        atoms = ase.io.read(file_path, index=":")
-        for atom in atoms:
-            atom.info["name"] = file_name
-        return atoms
+
+def reader(file_path):
+    file_name = file_path.stem
+    atoms = ase.io.read(file_path, index=":")
+    for atom in atoms:
+        atom.info["name"] = file_name
+    return atoms
+
+
+def main(argv):
+    parser = ArgumentParser()
+    parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
+    args = parser.parse_args(argv)
+    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
 
     configurations = load_data(
-        # Data can be downloaded here:
-        # https://archive.materialscloud.org/record/2018.0020/v1
-        file_path="/Users/piper/Code/colabfit/data/liquid_solid_water/",
+        file_path=DATASET_FP,
         file_format="folder",
         name_field="name",
         elements=["H", "O"],
@@ -31,20 +57,20 @@ if "__name__" == "__main__":
         generator=False,
     )
     # Load from colabfit's definitions
-    client.insert_property_definition(pda.total_energy_pd)
+    # client.insert_property_definition(pda.total_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
     metadata = {
-        "software": {"value": ["LAMMPS", "i-PI"]},
-        "method": {"value": ["revPBE0-D3", "DFT"]},
+        "software": {"value": "LAMMPS, i-PI"},
+        "method": {"value": "DFT-revPBE0-D3"},
     }
     property_map = {
-        "total-energy": [
-            {
-                "energy": {"field": "TotEnergy", "units": "eV"},
-                "per-atom": {"value": False, "units": None},
-                "_metadata": metadata,
-            }
-        ],
+        # "total-energy": [
+        #     {
+        #         "energy": {"field": "TotEnergy", "units": "eV"},
+        #         "per-atom": {"value": False, "units": None},
+        #         "_metadata": metadata,
+        #     }
+        # ],
         "atomic-forces": [
             {
                 "forces": {"field": "force", "units": "eV/Ang"},
@@ -85,7 +111,7 @@ if "__name__" == "__main__":
     )
 
     cs_ids.append(cs_id)
-    ds_id = client.insert_dataset(
+    client.insert_dataset(
         cs_ids,
         all_do_ids,
         name="HO_pnas_2019",
@@ -96,6 +122,10 @@ if "__name__" == "__main__":
         ],
         description="1590 configurations of H2O/water "
         "with total energy and forces calculated using "
-        "a hybrid approach, DFT and revPBE0-D3 ",
+        "a hybrid approach, DFT and revPBE0-D3.",
         verbose=True,
     )
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

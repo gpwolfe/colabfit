@@ -3,10 +3,18 @@ author:gpwolfe
 
 Data can be downloaded from:
 https://archive.materialscloud.org/record/2021.171
+
+File address:
+https://archive.materialscloud.org/record/file?filename=zeo-1.tar.gz&record_id=1083
+
+Unzip files to a new parent directory before running script.
+mkdir <project_dir>/data/zeo-1
+tar xf zeo-1.tar.bz2 -C <project_dir>/data/zeo-1
+
 Change DATASET_FP to reflect location of parent folder
 Change database name as appropriate
 """
-
+from argparse import ArgumentParser
 from ase import Atoms
 from colabfit.tools.database import MongoDatabase, load_data
 from colabfit.tools.property_definitions import (
@@ -16,40 +24,46 @@ from colabfit.tools.property_definitions import (
 )
 import numpy as np
 from pathlib import Path
+import sys
+
+DATASET_FP = Path("data/zeo-1/npz")
 
 
-def main():
-    DATASET_FP = Path("/Users/piper/Code/colabfit/data/zeo-1/npz/")
-    client = MongoDatabase("test", drop_database=True)
-
-    def reader(file):
-        npz = np.load(file)
-        name = file.stem
-        atoms = []
-        for xyz, lattice, energy, stress, gradients, charges in zip(
-            npz["xyz"],
-            npz["lattice"],
-            npz["energy"],
-            npz["stress"],
-            npz["gradients"],
-            npz["charges"],
-        ):
-            atoms.append(
-                Atoms(
-                    numbers=npz["numbers"],
-                    positions=xyz,
-                    cell=lattice,
-                    pbc=True,
-                    info={
-                        "name": name,
-                        "potential_energy": energy,
-                        "cauchy_stress": stress,
-                        "nuclear_gradients": gradients,
-                        "partial_charges": charges,
-                    },
-                )
+def reader(file):
+    npz = np.load(file)
+    name = file.stem
+    atoms = []
+    for xyz, lattice, energy, stress, gradients, charges in zip(
+        npz["xyz"],
+        npz["lattice"],
+        npz["energy"],
+        npz["stress"],
+        npz["gradients"],
+        npz["charges"],
+    ):
+        atoms.append(
+            Atoms(
+                numbers=npz["numbers"],
+                positions=xyz,
+                cell=lattice,
+                pbc=True,
+                info={
+                    "name": name,
+                    "potential_energy": energy,
+                    "cauchy_stress": stress,
+                    "nuclear_gradients": gradients,
+                    "partial_charges": charges,
+                },
             )
-        return atoms
+        )
+    return atoms
+
+
+def main(argv):
+    parser = ArgumentParser()
+    parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
+    args = parser.parse_args(argv)
+    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -139,4 +153,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])

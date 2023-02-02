@@ -1,183 +1,207 @@
+"""
+author:gpwolfe
+
+The properties in these files are not yet implemented in colabfit-tools
+
+
+Download from:
+https://doi.org/10.24435/materialscloud:2019.0002/v3
+
+Folders should be SCAN0_DADZ, B3LYP_daTZ, BELYP_daDZ,
+and CCSD_daDZ
+
+Unzip files to single parent directory before running script:
+mkdir data/qm7_alphaml
+tar xf *Z.tar.gz -C data/qm7_alphaml
+
+Change DB_PATH to reflect location of parent folder if necessary
+Change database name as appropriate
+"""
+from argparse import ArgumentParser
 from colabfit.tools.database import MongoDatabase, load_data
 from colabfit.tools.configuration import AtomicConfiguration
 from collections import defaultdict
 from pathlib import Path
 import property_definitions_additional as pda
 import re
+import sys
 
 
-def main():
+DATASET_PATH = Path("data/qm7_alphaml")
 
-    # Set parent folder location below
-    # Subfolders should include SCAN0_DADZ, B3LYP_daTZ, BELYP_daDZ,
-    # and CCSD_daDZ
-    # as downloaded from the MaterialsCloud website:
-    # https://doi.org/10.24435/materialscloud:2019.0002/v3
+# Regex parsers for header line and coordinate lines
 
-    DATASET_PATH = "/Users/piper/Code/colabfit/data/qm7_alphaml/"
+# For CCSD folder
+# Pattern to match (in some files, some num. values replaced by hyphen)
+# Properties,75.615177454043703,4.939919779917851,78.387507863214978,75.767797915524383,72.690226583391762,0.001369360429452,0.044615618191013,-0.007312056508349,0.0021,-0.5290,-0.1546,1.5527,-2.8038,1.2511,0.0195,0.0045,-1.5023,-288.067480970457609,-0.260956266998665,-0.795712498569882,-0.238171179770555,-0.885417704524427
 
-    # Connect to MongoDB instance
-    client = MongoDatabase("test2", drop_database=True)
+CCSD_HEADER_RE = re.compile(
+    r"Properties,(?P<iso_di_pol>[-\d\.]+),(?P<aniso_di_pol>[-\d\.]+),"
+    r"(?P<di_pol_1>[-\d\.]+),(?P<di_pol_2>[-\d\.]+),"
+    r"(?P<di_pol_3>[-\d\.]+),(?P<di_pol_4>[-\d\.]+),"
+    r"(?P<di_pol_5>[-\d\.]+),(?P<di_pol_6>[-\d\.]+),"
+    r"(?P<di_moment_1>[-\d\.]+),(?P<di_moment_2>[-\d\.]+),"
+    r"(?P<di_moment_3>[-\d\.]+),(?P<quad_moment_1>[-\d\.]+),"
+    r"(?P<quad_moment_2>[-\d\.]+),(?P<quad_moment_3>[-\d\.]+),"
+    r"(?P<quad_moment_4>[-\d\.]+),(?P<quad_moment_5>[-\d\.]+),"
+    r"(?P<quad_moment_6>[-\d\.]+),(?P<total_energy>[-\d\.]+),"
+    r"(?P<same_spin_mp2_corr>[-\d\.]+),(?P<oppos_spin_mp2_corr>[-\d\.]+),"
+    r"(?P<same_spin_ccsd_corr>[-\d\.]+),"
+    r"(?P<oppos_spin_ccsd_corr>[-\d\.]+)$"
+)
 
-    # Regex parsers for header line and coordinate lines
+# B3LYP and SCAN0 folders
+# Pattern to match (in some files, some num. values replaced by hyphen)
+# Properties,16.939854052467204,0.003828440619037,16.942383975424679,16.938517010826502,16.938661171150429,-0.000267048928424,0.000028373634520,0.000089186068862,-0.0000,-0.0001,0.0000,-0.0001,0.0000,0.0001,0.0001,-0.0001,-0.0001,-40.48621978,-0.411,0.006
 
-    # For CCSD folder
-    # Pattern to match (in some files, some num. values replaced by hyphen)
-    # Properties,75.615177454043703,4.939919779917851,78.387507863214978,75.767797915524383,72.690226583391762,0.001369360429452,0.044615618191013,-0.007312056508349,0.0021,-0.5290,-0.1546,1.5527,-2.8038,1.2511,0.0195,0.0045,-1.5023,-288.067480970457609,-0.260956266998665,-0.795712498569882,-0.238171179770555,-0.885417704524427
+B3LYP_SCAN0_HEADER_RE = re.compile(
+    r"Properties,(?P<iso_di_pol>[-\d\.]+),(?P<aniso_di_pol>[-\d\.]+),"
+    r"(?P<di_pol_1>[-\d\.]+),(?P<di_pol_2>[-\d\.]+),(?P<di_pol_3>[-\d\.]+),"
+    r"(?P<di_pol_4>[-\d\.]+),(?P<di_pol_5>[-\d\.]+),(?P<di_pol_6>[-\d\.]+),"
+    r"(?P<di_moment_1>[-\d\.]+),(?P<di_moment_2>[-\d\.]+),"
+    r"(?P<di_moment_3>[-\d\.]+),(?P<quad_moment_1>[-\d\.]+),"
+    r"(?P<quad_moment_2>[-\d\.]+),(?P<quad_moment_3>[-\d\.]+),"
+    r"(?P<quad_moment_4>[-\d\.]+),(?P<quad_moment_5>[-\d\.]+),"
+    r"(?P<quad_moment_6>[-\d\.]+),(?P<total_energy>[-\d\.]+),"
+    r"(?P<homo_energy>[-\d\.]+),(?P<lumo_energy>[-\d\.]+)$"
+)
 
-    CCSD_HEADER_RE = re.compile(
-        r"Properties,(?P<iso_di_pol>[-\d\.]+),(?P<aniso_di_pol>[-\d\.]+),"
-        r"(?P<di_pol_1>[-\d\.]+),(?P<di_pol_2>[-\d\.]+),"
-        r"(?P<di_pol_3>[-\d\.]+),(?P<di_pol_4>[-\d\.]+),"
-        r"(?P<di_pol_5>[-\d\.]+),(?P<di_pol_6>[-\d\.]+),"
-        r"(?P<di_moment_1>[-\d\.]+),(?P<di_moment_2>[-\d\.]+),"
-        r"(?P<di_moment_3>[-\d\.]+),(?P<quad_moment_1>[-\d\.]+),"
-        r"(?P<quad_moment_2>[-\d\.]+),(?P<quad_moment_3>[-\d\.]+),"
-        r"(?P<quad_moment_4>[-\d\.]+),(?P<quad_moment_5>[-\d\.]+),"
-        r"(?P<quad_moment_6>[-\d\.]+),(?P<total_energy>[-\d\.]+),"
-        r"(?P<same_spin_mp2_corr>[-\d\.]+),(?P<oppos_spin_mp2_corr>[-\d\.]+),"
-        r"(?P<same_spin_ccsd_corr>[-\d\.]+),"
-        r"(?P<oppos_spin_ccsd_corr>[-\d\.]+)$"
+# For element/coordinate lines in all folders
+# Pattern to match:
+# O	-0.9033863347	-2.7689731175	-0.4116379574
+COORD_RE = re.compile(
+    r"(?P<element>[a-zA-Z]{1,2})\s+(?P<x>[-\d\.]+)\s+"
+    r"(?P<y>[-\d\.]+)\s+(?P<z>[-\d\.]+)$"
+)
+polars = [
+    ("iso_di_pol", "dipole", "isotropic"),
+    ("aniso_di_pol", "dipole", "anisotropic"),
+]
+# File parsing and reading functions
+
+
+def properties_parser(re_match, line):
+    groups = re_match.match(line)
+    return groups.groupdict().items()
+
+
+def xyz_parser(file_path, header_regex):
+    file_path = Path(file_path)
+    name = f"qm7_{file_path.parent.name}"
+    elem_coords = defaultdict(list)
+    n_atoms = int()
+    property_dict = defaultdict(float)
+    with open(file_path, "r") as f:
+        line_num = 0
+        for line in f:
+            if line_num == 0:
+                n_atoms = int(line)
+                line_num += 1
+            elif line_num == 1:
+                for k, v in properties_parser(header_regex, line):
+                    if v == "-":
+                        pass
+                    else:
+                        property_dict[k] = float(v)
+                line_num += 1
+            elif line_num < n_atoms + 2:
+                elem_coord_items = properties_parser(COORD_RE, line)
+                try:
+                    for elem_coord, val in elem_coord_items:
+                        elem_coords[elem_coord].append(val)
+                except ValueError:
+                    print("ValueError at {line} in {file_path}")
+                line_num += 1
+            else:
+                print(f"{file_path} finished at line {line_num}.")
+                break
+    return name, n_atoms, elem_coords, property_dict
+
+
+def reader_ccsd(file_path):
+    name, n_atoms, elem_coords, properties = xyz_parser(
+        file_path, CCSD_HEADER_RE
     )
-
-    # B3LYP and SCAN0 folders
-    # Pattern to match (in some files, some num. values replaced by hyphen)
-    # Properties,16.939854052467204,0.003828440619037,16.942383975424679,16.938517010826502,16.938661171150429,-0.000267048928424,0.000028373634520,0.000089186068862,-0.0000,-0.0001,0.0000,-0.0001,0.0000,0.0001,0.0001,-0.0001,-0.0001,-40.48621978,-0.411,0.006
-
-    B3LYP_SCAN0_HEADER_RE = re.compile(
-        r"Properties,(?P<iso_di_pol>[-\d\.]+),(?P<aniso_di_pol>[-\d\.]+),"
-        r"(?P<di_pol_1>[-\d\.]+),(?P<di_pol_2>[-\d\.]+),(?P<di_pol_3>[-\d\.]+),"
-        r"(?P<di_pol_4>[-\d\.]+),(?P<di_pol_5>[-\d\.]+),(?P<di_pol_6>[-\d\.]+),"
-        r"(?P<di_moment_1>[-\d\.]+),(?P<di_moment_2>[-\d\.]+),"
-        r"(?P<di_moment_3>[-\d\.]+),(?P<quad_moment_1>[-\d\.]+),"
-        r"(?P<quad_moment_2>[-\d\.]+),(?P<quad_moment_3>[-\d\.]+),"
-        r"(?P<quad_moment_4>[-\d\.]+),(?P<quad_moment_5>[-\d\.]+),"
-        r"(?P<quad_moment_6>[-\d\.]+),(?P<total_energy>[-\d\.]+),"
-        r"(?P<homo_energy>[-\d\.]+),(?P<lumo_energy>[-\d\.]+)$"
+    positions = list(zip(elem_coords["x"], elem_coords["y"], elem_coords["z"]))
+    atoms = AtomicConfiguration(
+        names=[name], symbols=elem_coords["element"], positions=positions
     )
+    atoms.info["name"] = name
+    atoms.info["n_atoms"] = n_atoms
+    for key in properties.keys():
+        atoms.info[key] = properties[key]
+    return [atoms]
 
-    # For element/coordinate lines in all folders
-    # Pattern to match:
-    # O	-0.9033863347	-2.7689731175	-0.4116379574
-    COORD_RE = re.compile(
-        r"(?P<element>[a-zA-Z]{1,2})\s+(?P<x>[-\d\.]+)\s+"
-        r"(?P<y>[-\d\.]+)\s+(?P<z>[-\d\.]+)$"
+
+def reader_b3lyp(file_path):
+    name, n_atoms, elem_coords, properties = xyz_parser(
+        file_path, B3LYP_SCAN0_HEADER_RE
     )
+    positions = list(zip(elem_coords["x"], elem_coords["y"], elem_coords["z"]))
+    atoms = AtomicConfiguration(
+        names=[name], symbols=elem_coords["element"], positions=positions
+    )
+    atoms.info["name"] = name
+    atoms.info["n_atoms"] = n_atoms
+    for key in properties.keys():
+        atoms.info[key] = properties[key]
+    return [atoms]
 
-    # File parsing and reading functions
 
-    def properties_parser(re_match, line):
-        groups = re_match.match(line)
-        return groups.groupdict().items()
-
-    def xyz_parser(file_path, header_regex):
-        file_path = Path(file_path)
-        name = f"qm7_{file_path.parent.name}"
-        elem_coords = defaultdict(list)
-        n_atoms = int()
-        property_dict = defaultdict(float)
-        with open(file_path, "r") as f:
-            line_num = 0
-            for line in f:
-                if line_num == 0:
-                    n_atoms = int(line)
-                    line_num += 1
-                elif line_num == 1:
-                    for k, v in properties_parser(header_regex, line):
-                        if v == "-":
-                            pass
-                        else:
-                            property_dict[k] = float(v)
-                    line_num += 1
-                elif line_num < n_atoms + 2:
-                    elem_coord_items = properties_parser(COORD_RE, line)
-                    try:
-                        for elem_coord, val in elem_coord_items:
-                            elem_coords[elem_coord].append(val)
-                    except ValueError:
-                        print("ValueError at {line} in {file_path}")
-                    line_num += 1
-                else:
-                    print(f"{file_path} finished at line {line_num}.")
-                    break
-        return name, n_atoms, elem_coords, property_dict
-
-    def reader_ccsd(file_path):
-        name, n_atoms, elem_coords, properties = xyz_parser(
-            file_path, CCSD_HEADER_RE
-        )
-        positions = list(
-            zip(elem_coords["x"], elem_coords["y"], elem_coords["z"])
-        )
-        atoms = AtomicConfiguration(
-            names=[name], symbols=elem_coords["element"], positions=positions
-        )
-        atoms.info["name"] = name
-        atoms.info["n_atoms"] = n_atoms
-        for key in properties.keys():
-            atoms.info[key] = properties[key]
-        return [atoms]
-
-    def reader_b3lyp(file_path):
-        name, n_atoms, elem_coords, properties = xyz_parser(
-            file_path, B3LYP_SCAN0_HEADER_RE
-        )
-        positions = list(
-            zip(elem_coords["x"], elem_coords["y"], elem_coords["z"])
-        )
-        atoms = AtomicConfiguration(
-            names=[name], symbols=elem_coords["element"], positions=positions
-        )
-        atoms.info["name"] = name
-        atoms.info["n_atoms"] = n_atoms
-        for key in properties.keys():
-            atoms.info[key] = properties[key]
-        return [atoms]
-
-    def load_data_wrapper(reader, glob_string, metadata, energy_map):
-        configurations = load_data(
-            # Data can be downloaded here:
-            # 'https://archive.materialscloud.org/record/2019.0002/v3'
-            file_path=DATASET_PATH,
-            file_format="folder",
-            name_field="name",
-            elements=["C", "O", "H", "N", "S", "Cl"],
-            reader=reader,
-            glob_string=glob_string,
+def load_data_wrapper(client, reader, glob_string, metadata, energy_map):
+    configurations = load_data(
+        # Data can be downloaded here:
+        # 'https://archive.materialscloud.org/record/2019.0002/v3'
+        file_path=DATASET_PATH,
+        file_format="folder",
+        name_field="name",
+        elements=["C", "O", "H", "N", "S", "Cl"],
+        reader=reader,
+        glob_string=glob_string,
+        generator=False,
+    )
+    if len(configurations) == 0:
+        print(f"Check glob {glob_string}. No configurations found.")
+        return [], []
+    ids = list(
+        client.insert_data(
+            configurations,
+            property_map=energy_map,
             generator=False,
+            verbose=True,
         )
-        ids = list(
-            client.insert_data(
-                configurations,
-                property_map=energy_map,
-                generator=False,
-                verbose=True,
-            )
+    )
+
+    for p in polars:
+        property_map_polar = {
+            "polarizability": [
+                {
+                    "polarizability": {
+                        "field": p[0],
+                        "units": "atomic units",
+                    },
+                    "di-quad": {"value": p[1], "units": None},
+                    "iso-aniso": {"value": p[2], "units": None},
+                    "_metadata": metadata,
+                }
+            ],
+        }
+
+        client.insert_data(
+            configurations,
+            property_map=property_map_polar,
+            generator=False,
+            verbose=True,
         )
+    all_co_ids, all_do_ids = list(zip(*ids))
+    return all_co_ids, all_do_ids
 
-        for p in polars:
-            property_map_polar = {
-                "polarizability": [
-                    {
-                        "polarizability": {
-                            "field": p[0],
-                            "units": "atomic units",
-                        },
-                        "di-quad": {"value": p[1], "units": None},
-                        "iso-aniso": {"value": p[2], "units": None},
-                        "_metadata": metadata,
-                    }
-                ],
-            }
 
-            client.insert_data(
-                configurations,
-                property_map=property_map_polar,
-                generator=False,
-                verbose=True,
-            )
-        all_co_ids, all_do_ids = list(zip(*ids))
-        return all_co_ids, all_do_ids
+def main(argv):
+    parser = ArgumentParser()
+    parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
+    args = parser.parse_args(argv)
+    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
 
     # Add property definitions
     pds = [
@@ -186,11 +210,6 @@ def main():
         pda.total_energy_pd,
         pda.homo_energy_pd,
         pda.lumo_energy_pd,
-    ]
-
-    polars = [
-        ("iso_di_pol", "dipole", "isotropic"),
-        ("aniso_di_pol", "dipole", "anisotropic"),
     ]
 
     # Metadata and property maps
@@ -247,22 +266,38 @@ def main():
     all_co_ids = set()
     all_do_ids = set()
     co_ids, do_ids = load_data_wrapper(
-        reader_ccsd, "CCSD_daDZ/*.xyz", ccsd_metadata, ccsd_total_energy_map
+        client,
+        reader_ccsd,
+        "CCSD_daDZ/*.xyz",
+        ccsd_metadata,
+        ccsd_total_energy_map,
     )
     all_co_ids.update(co_ids)
     all_do_ids.update(do_ids)
     co_ids, do_ids = load_data_wrapper(
-        reader_b3lyp, "B3LYP_daTZ/*xyz", b3lyp_metadata, b3lyp_energy_map
+        client,
+        reader_b3lyp,
+        "B3LYP_daTZ/*xyz",
+        b3lyp_metadata,
+        b3lyp_energy_map,
     )
     all_co_ids.update(co_ids)
     all_do_ids.update(do_ids)
     co_ids, do_ids = load_data_wrapper(
-        reader_b3lyp, "B3LYP_daDZ/*.xyz", b3lyp_metadata, b3lyp_energy_map
+        client,
+        reader_b3lyp,
+        "B3LYP_daDZ/*.xyz",
+        b3lyp_metadata,
+        b3lyp_energy_map,
     )
     all_co_ids.update(co_ids)
     all_do_ids.update(do_ids)
     co_ids, do_ids = load_data_wrapper(
-        reader_b3lyp, "SCAN0_daDZ/*.xyz", scan0_metadata, b3lyp_energy_map
+        client,
+        reader_b3lyp,
+        "SCAN0_daDZ/*.xyz",
+        scan0_metadata,
+        b3lyp_energy_map,
     )
     all_co_ids.update(co_ids)
     all_do_ids.update(do_ids)
@@ -393,4 +428,4 @@ def main():
 # lumo_energy
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])

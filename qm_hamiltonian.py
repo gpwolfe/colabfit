@@ -12,11 +12,14 @@ different level of theory.
 Uracil file has failed multiple times to download properly--
 This could be a result of the size or might be a problem with the uploaded file
 
-Unzip files to one parent folder before running script.
+Unzip files before running script:
+mkdir data/schnorb_hamiltonian
+tar zxvf schnorb_hamiltonian*.tgz -C data/schnorb_hamiltonian
+
 Change DB_PATH to reflect location of parent folder
 Change database name as appropriate
 """
-
+from argparse import ArgumentParser
 from ase.db import connect
 from colabfit.tools.database import MongoDatabase, load_data
 from colabfit.tools.property_definitions import (
@@ -24,24 +27,30 @@ from colabfit.tools.property_definitions import (
     atomic_forces_pd,
 )
 from pathlib import Path
+import sys
+
+DB_PATH = Path("data/schnorb_hamiltonian")
 
 
-def main():
-    DB_PATH = "/Users/piper/Code/colabfit/data/qm_hamiltonian/"
-    client = MongoDatabase("test", drop_database=True)
+def reader(filepath):
+    filepath = Path(filepath)
+    db = connect(filepath)
+    atoms = []
+    for row in db.select():
+        atom = row.toatoms()
+        atom.info = row.data
+        atom.info["name"] = filepath.stem.split("_")[-1]
+        atoms.append(atom)
+        if type(atom.info["energy"] == list):
+            atom.info["energy"] = float(atom.info["energy"][0])
+    return atoms
 
-    def reader(filepath):
-        filepath = Path(filepath)
-        db = connect(filepath)
-        atoms = []
-        for row in db.select():
-            atom = row.toatoms()
-            atom.info = row.data
-            atom.info["name"] = filepath.stem.split("_")[-1]
-            atoms.append(atom)
-            if type(atom.info["energy"] == list):
-                atom.info["energy"] = float(atom.info["energy"][0])
-        return atoms
+
+def main(argv):
+    parser = ArgumentParser()
+    parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
+    args = parser.parse_args(argv)
+    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
 
     configurations = load_data(
         file_path=DB_PATH,
@@ -166,4 +175,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])

@@ -3,9 +3,16 @@ author:gpwolfe
 
 Data can be downloaded from:
 https://doi.org/10.6084/m9.figshare.12672038.v3
+Exact file location:
+https://figshare.com/ndownloader/files/23950376
+
+Unzip files before running script.
+tar xf rmd17.tar.bz2 -C <project_dir>/data/
+
 Change DATASET_FP to reflect location of parent folder
 Change database name as appropriate
 """
+from argparse import ArgumentParser
 from ase import Atoms
 from colabfit.tools.database import MongoDatabase, load_data
 from colabfit.tools.property_definitions import (
@@ -14,36 +21,41 @@ from colabfit.tools.property_definitions import (
 )
 import numpy as np
 from pathlib import Path
+import sys
+
+DATASET_FP = Path("data/rmd17")
 
 
-def main():
-
-    DATASET_FP = Path("/Users/piper/Code/colabfit/data/rmd17")
-    client = MongoDatabase("test", drop_database=True)
-
-    def reader(file):
-        atoms = []
-        with np.load(file) as npz:
-            npz = np.load(file)
-            for coords, energy, forces, md17_index in zip(
-                npz["coords"],
-                npz["energies"],
-                npz["forces"],
-                npz["old_indices"],
-            ):
-                atoms.append(
-                    Atoms(
-                        numbers=npz["nuclear_charges"],
-                        positions=coords,
-                        info={
-                            "name": file.stem,
-                            "energy": energy,
-                            "forces": forces,
-                            "md17_index": md17_index,
-                        },
-                    )
+def reader(file):
+    atoms = []
+    with np.load(file) as npz:
+        npz = np.load(file)
+        for coords, energy, forces, md17_index in zip(
+            npz["coords"],
+            npz["energies"],
+            npz["forces"],
+            npz["old_indices"],
+        ):
+            atoms.append(
+                Atoms(
+                    numbers=npz["nuclear_charges"],
+                    positions=coords,
+                    info={
+                        "name": file.stem,
+                        "energy": energy,
+                        "forces": forces,
+                        "md17_index": md17_index,
+                    },
                 )
-        return atoms
+            )
+    return atoms
+
+
+def main(argv):
+    parser = ArgumentParser()
+    parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
+    args = parser.parse_args(argv)
+    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -137,10 +149,11 @@ def main():
         description="A dataset of 10 molecules (aspirin, "
         "azobenzene, benzene, ethanol, malonaldehyde, naphthalene, "
         "paracetamol, salicylic, toluene, uracil) with 100,000 structures"
-        "calculated for each at the PBE/def2-SVP level of theory, using ORCA.",
+        "calculated for each at the PBE/def2-SVP level of theory using ORCA."
+        "Based on the MD17 dataset, but with refined measurements.",
         verbose=True,
     )
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
