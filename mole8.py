@@ -3,10 +3,24 @@ author:gpwolfe
 
 Data can be downloaded from:
 https://rdmc.nottingham.ac.uk/handle/internal/9356
+
+File addresses:
+https://rdmc.nottingham.ac.uk/bitstream/handle/internal/9356/MolE8_moldata_p1.zip?sequence=1&isAllowed=y
+https://rdmc.nottingham.ac.uk/bitstream/handle/internal/9356/MolE8_moldata_p2.zip?sequence=2&isAllowed=y
+https://rdmc.nottingham.ac.uk/bitstream/handle/internal/9356/MolE8_moldata_p3.zip?sequence=3&isAllowed=y
+https://rdmc.nottingham.ac.uk/bitstream/handle/internal/9356/MolE8_moldata_p4.zip?sequence=4&isAllowed=y
+https://rdmc.nottingham.ac.uk/bitstream/handle/internal/9356/MolE8_moldata_p5.zip?sequence=5&isAllowed=y
+https://rdmc.nottingham.ac.uk/bitstream/handle/internal/9356/MolE8_moldata_p6.zip?sequence=6&isAllowed=y
+https://rdmc.nottingham.ac.uk/bitstream/handle/internal/9356/MolE8_moldata_p7.zip?sequence=7&isAllowed=y
+
+Unzip files to new parent folder:
+mkdir <project_directory>/data/mole8
+unzip -q 'MolE8_moldata_*.zip' '*.out' -d <project_directory>/data/mole8
+
 Change DATASET_FP to reflect location of parent folder
 Change database name as appropriate
 """
-
+from argparse import ArgumentParser
 import ase
 from ase.calculators.calculator import PropertyNotImplementedError
 from colabfit.tools.database import MongoDatabase, load_data
@@ -15,31 +29,37 @@ from colabfit.tools.property_definitions import (
     potential_energy_pd,
 )
 from pathlib import Path
+import sys
 
 
-def main():
-    client = MongoDatabase("test2", drop_database=True)
-    DATASET_FP = Path("/Users/piper/Code/colabfit/data/mole8/")
+DATASET_FP = Path("data/mole8")
 
-    def reader(file_path):
-        file_name = file_path.stem
-        atom = ase.io.read(file_path, format="gaussian-out")
-        atom.info["name"] = file_name
-        # ase.io.reader fails to parse a small number of .out files
-        try:
-            atom.info["forces"] = atom.get_forces() * (
-                ase.units.Bohr / ase.units.Hartree
-            )
-        except PropertyNotImplementedError:
-            pass
-        try:
-            atom.info["potential_energy"] = (
-                atom.get_total_energy() / ase.units.Hartree
-            )
-        except PropertyNotImplementedError:
-            pass
-        yield atom
 
+def reader(file_path):
+    file_name = file_path.stem
+    atom = ase.io.read(file_path, format="gaussian-out")
+    atom.info["name"] = file_name
+    # ase.io.reader fails to parse a small number of .out files
+    try:
+        atom.info["forces"] = atom.get_forces() * (
+            ase.units.Bohr / ase.units.Hartree
+        )
+    except PropertyNotImplementedError:
+        pass
+    try:
+        atom.info["potential_energy"] = (
+            atom.get_total_energy() / ase.units.Hartree
+        )
+    except PropertyNotImplementedError:
+        pass
+    yield atom
+
+
+def main(argv):
+    parser = ArgumentParser()
+    parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
+    args = parser.parse_args(argv)
+    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
     configurations = load_data(
         file_path=DATASET_FP,
         file_format="folder",
@@ -117,4 +137,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
