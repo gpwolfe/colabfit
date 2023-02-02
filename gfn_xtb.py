@@ -1,44 +1,55 @@
 """
 author:gpwolfe
 
+Script assumes file has been unzipped and placed in the following relative
+path (name of file unchanged after unzipping):
+./data/
+
 Data can be downloaded from:
 https://doi.org/10.24435/materialscloud:14-4m
-Change DATASET_FP to reflect location of parent folder
+Exact file:
+https://archive.materialscloud.org/record/file?filename=gfn-xtb-si.tar.gz&record_id=1032
+
 Change database name as appropriate
 """
+from argparse import ArgumentParser
 from ase import Atoms
 from colabfit.tools.database import MongoDatabase, load_data
 from colabfit.tools.property_definitions import potential_energy_pd
 import numpy as np
 from pathlib import Path
+import sys
+
+DATASET_FP = Path("data/gfn-xtb-si/npz")
 
 
-def main():
-
-    DATASET_FP = Path("/Users/piper/Code/colabfit/data/gfn-xtb-si/npz/")
-    client = MongoDatabase("test", drop_database=True)
-
-    def reader(file):
-        npz = np.load(file)
-        name = file.stem
-        atoms = []
-        for xyz, energy, gradients in zip(
-            npz["xyz"], npz["energy"], npz["gradients"]
-        ):
-            atoms.append(
-                Atoms(
-                    numbers=npz["numbers"],
-                    positions=xyz,
-                    pbc=False,
-                    info={
-                        "name": name,
-                        "potential_energy": energy,
-                        "nuclear_gradients": gradients,
-                    },
-                )
+def reader(file):
+    npz = np.load(file)
+    name = file.stem
+    atoms = []
+    for xyz, energy, gradients in zip(
+        npz["xyz"], npz["energy"], npz["gradients"]
+    ):
+        atoms.append(
+            Atoms(
+                numbers=npz["numbers"],
+                positions=xyz,
+                pbc=False,
+                info={
+                    "name": name,
+                    "potential_energy": energy,
+                    "nuclear_gradients": gradients,
+                },
             )
-        return atoms
+        )
+    return atoms
 
+
+def main(argv):
+    parser = ArgumentParser()
+    parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
+    args = parser.parse_args(argv)
+    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
     configurations = load_data(
         file_path=DATASET_FP,
         file_format="folder",
@@ -103,4 +114,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])

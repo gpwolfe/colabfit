@@ -19,7 +19,7 @@ import sys
 
 # import property_definitions_additional as pda
 
-DATASET_FP = Path("data/brass_DFT_data/brass_data/")
+DATASET_FP = Path("data/brass_DFT_data/")
 
 
 def read_npz(filepath):
@@ -83,7 +83,7 @@ def reader(filepath):
 
 def main(argv):
     parser = ArgumentParser()
-    parser.add_argument("--ip", type=str, help="IP of host mongod")
+    parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     args = parser.parse_args(argv)
     client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
 

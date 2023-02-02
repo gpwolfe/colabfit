@@ -11,33 +11,39 @@ This data represents total energy, which is not yet implemented.
 Therefore, only atomic forces are imported
 Unzip folder before running script.
 """
+from argparse import ArgumentParser
 from ase.db import connect
 from colabfit.tools.database import MongoDatabase, load_data
 from colabfit.tools.property_definitions import (
-    potential_energy_pd,
+    # total_energy_pd,
     atomic_forces_pd,
 )
 from pathlib import Path
+import sys
 
 
-def main():
+DB_PATH = Path("data/iso17")
 
-    DB_PATH = "/Users/piper/Code/colabfit/data/iso17/"
-    client = MongoDatabase("test", drop_database=True)
 
-    def reader(filepath):
-        filepath = Path(filepath)
-        db = connect(filepath)
-        atoms = []
-        for row in db.select():
-            atom = row.toatoms()
-            atom.info = row.data
-            atom.info["name"] = "iso-17"
-            atom.info["energy"] = row.key_value_pairs["total_energy"]
-            atoms.append(atom)
+def reader(filepath):
+    filepath = Path(filepath)
+    db = connect(filepath)
+    atoms = []
+    for row in db.select():
+        atom = row.toatoms()
+        atom.info = row.data
+        atom.info["name"] = "iso17"
+        atom.info["energy"] = row.key_value_pairs["total_energy"]
+        atoms.append(atom)
 
-        return atoms
+    return atoms
 
+
+def main(argv):
+    parser = ArgumentParser()
+    parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
+    args = parser.parse_args(argv)
+    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
     configurations = load_data(
         file_path=DB_PATH,
         file_format="folder",
@@ -48,7 +54,7 @@ def main():
         generator=False,
     )
 
-    client.insert_property_definition(potential_energy_pd)
+    # client.insert_property_definition(total_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
     metadata = {
         "software": {"value": "FHI-aims"},
@@ -58,7 +64,7 @@ def main():
     property_map = {
         # This data represents total energy, not potential energy
         # Total energy is not yet implemented as a property
-        # 'potential-energy': [{
+        # 'total-energy': [{
         #     'energy':   {'field': 'energy',  'units': 'eV'},
         #     'per-atom': {'value': False, 'units': None},
         #     '_metadata': metadata
@@ -123,4 +129,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
