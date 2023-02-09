@@ -13,6 +13,8 @@ unzip training.zip "*.out" -d <project_dir>/data/HPt_nc_2022/
 
 Change DATASET_FP to reflect location of parent folder
 Change database name as appropriate
+
+Run: $ python3 HPt_nc_2022.py -i (or --ip) <database_ip>
 """
 from argparse import ArgumentParser
 import ase
@@ -531,5 +533,3 @@ def get_thermostat(thermostat, kw, line):
             thermostat[kw] = [value]
 
 
-if __name__ == "__main__":
-    main(sys.argv[1:])
