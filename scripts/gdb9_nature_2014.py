@@ -239,13 +239,12 @@ def main(argv):
     #     verbose=True,
     # )
     all_co_ids, all_do_ids = list(zip(*ids))
-    hashes = client.get_data("configurations", fields=["hash"])
     name = "GDB_9"
     cs_ids = []
     co_ids = client.get_data(
         "configurations",
         fields="hash",
-        query={"hash": {"$in": hashes}},
+        query={"hash": {"$in": all_co_ids}},
         ravel=True,
     ).tolist()
 

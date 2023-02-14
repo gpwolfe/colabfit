@@ -247,14 +247,13 @@ if __name__ == "__main__":
             verbose=True,
         )
     )
-    hashes = client.get_data("configurations", fields=["hash"])
     # Name according to spreadsheet, not according to ReadMe file/filenames
     name = "C7H10O2"
     cs_ids = []
     co_ids = client.get_data(
         "configurations",
         fields="hash",
-        query={"hash": {"$in": hashes}},
+        query={"hash": {"$in": all_co_ids}},
         ravel=True,
     ).tolist()
 

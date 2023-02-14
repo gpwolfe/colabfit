@@ -133,14 +133,13 @@ def main(argv):
     )
 
     all_co_ids, all_do_ids = list(zip(*ids))
-    hashes = client.get_data("configurations", fields=["hash"])
 
     name = "alpha-brass-nanoparticles"
     cs_ids = []
     co_ids = client.get_data(
         "configurations",
         fields="hash",
-        query={"hash": {"$in": hashes}},
+        query={"hash": {"$in": all_co_ids}},
         ravel=True,
     ).tolist()
 
@@ -160,7 +159,7 @@ def main(argv):
     cu_ids = client.get_data(
         "configurations",
         fields=["hash", "nelements"],
-        query={"hash": {"$in": hashes}, "nelements": {"$eq": 1}},
+        query={"hash": {"$in": all_co_ids}, "nelements": {"$eq": 1}},
         ravel=True,
     )["hash"]
     print(
@@ -182,7 +181,7 @@ def main(argv):
     cuzn_ids = cu_ids = client.get_data(
         "configurations",
         fields=["hash", "nelements"],
-        query={"hash": {"$in": hashes}, "nelements": {"$eq": 2}},
+        query={"hash": {"$in": all_co_ids}, "nelements": {"$eq": 2}},
         ravel=True,
     )["hash"]
     print(
