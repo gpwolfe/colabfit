@@ -13,6 +13,15 @@ def read_npz(filepath):
     return data
 
 
+def assemble_npy_properties(filepath: Path):
+    prop_path = filepath.glob('*.npy')
+    props = {}
+    for p in prop_path:
+        key = p.stem
+        props[key] = np.load(p)
+    return props
+
+
 def basic_npz_reader(file):
     """This reader works for compressed numpy files (.npz)"""
     atoms = []

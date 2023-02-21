@@ -156,7 +156,7 @@ def main(argv):
         ["CuO", "Cu", "All Cu(x)O(y) configurations from TdS-PdV & Atari5200"],
         [
             "MgO",
-            "(0_mp\-1265_files)|(additional*)|(thermal*)|bulk",
+            r"(0_mp\-1265_files)|(additional*)|(thermal*)|bulk",
             "All Mg(x)O(y) configurations from TdS-PdV & Atari5200",
         ],
         ["ZnO", "Zn", "All Zn(x)O(y) configurations from TdS-PdV & Atari5200"],
@@ -196,10 +196,10 @@ def main(argv):
             "https://github.com/saidigroup/Metal-Oxide-Dataset/tree/v1.0",
             "https://doi.org/10.1021/acs.jpclett.2c03445",
         ],
-        description="Configurations of metal oxides of "
-        "Mg, Ag, Pt, Cu and Zn, with initial training "
-        "structures taken from the Materials Project database."
-        "",
+        description="Approximately 45,000 configurations "
+        "of metal oxides of Mg, Ag, Pt, Cu and Zn, with "
+        "initial training structures taken from the "
+        "Materials Project database.",
         verbose=True,
     )
 

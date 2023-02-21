@@ -21,26 +21,32 @@ def convert(calc, task_id):
             a = AseAtomsAdaptor.get_atoms(
                 calc[j]["output"]["ionic_steps"][i]["structure"]
             )
-            a.info["e_fr_energy"] = calc[j]["output"]["ionic_steps"][i][
-                "e_fr_energy"
-            ]
-            a.info["e_wo_entrp"] = calc[j]["output"]["ionic_steps"][i][
-                "e_wo_entrp"
-            ]
-            a.info["e_0_energy"] = calc[j]["output"]["ionic_steps"][i][
-                "e_0_energy"
-            ]
-            a.info["stress"] = np.array(
-                calc[j]["output"]["ionic_steps"][i]["stress"]
+            print(
+                "steps",
+                len(calc[j]["output"]["ionic_steps"][i]["electronic_steps"]),
             )
-            a.arrays["forces"] = np.array(
-                calc[j]["output"]["ionic_steps"][i]["forces"]
-            )
-            a.info["material_id"] = D[task_id]["material_id"]
-            a.info["task_id"] = task_id
-            a.info["name"] = "%s-%s-%s" % (task_id, j, i)
-            a.info["calc_type"] = D[task_id]["calc_type"]
+
+            #         a.info["e_fr_energy"] = calc[j]["output"]["ionic_steps"][i][
+            #             "e_fr_energy"
+            #         ]
+            #         a.info["e_wo_entrp"] = calc[j]["output"]["ionic_steps"][i]['electronic_steps'][
+            #             "e_wo_entrp"
+            #         ]
+            #         a.info["e_0_energy"] = calc[j]["output"]["ionic_steps"][i][
+            #             "e_0_energy"
+            #         ]
+            #         a.info["stress"] = np.array(
+            #             calc[j]["output"]["ionic_steps"][i]["stress"]
+            #         )
+            #         a.arrays["forces"] = np.array(
+            #             calc[j]["output"]["ionic_steps"][i]["forces"]
+            #         )
+            #         a.info["material_id"] = D[task_id]["material_id"]
+            #         a.info["task_id"] = task_id
+            #         a.info["name"] = "%s-%s-%s" % (task_id, j, i)
+            #         a.info["calc_type"] = D[task_id]["calc_type"]
             atoms.append(a)
+    print("atoms", len(atoms))
     return atoms
 
 
@@ -65,15 +71,15 @@ def get_xyz_from_mp(mpr, ind):
         # dct = doc.dict()
         atoms.extend(convert(doc["calcs_reversed"], doc["task_id"]))
 
-        # print(len(atoms))
-        write(
-            f"mp_xyz_files_error_redos/mp_{ind}.xyz",
-            atoms,
-        )
-        return 1
+    #     # print(len(atoms))
+    #     write(
+    #         f"mp_xyz_files_error_124s/mp_{ind}.xyz",
+    #         atoms,
+    #     )
+    #     return 1
     except KeyError as e:
         print(f"Error at {ind}\n", e)
-        with open("error_file_singles_new.txt", "a") as f:
+        with open("error_file_singles_124s.txt", "a") as f:
             f.write(f"Error at {ind}\n")
         return 0
 
