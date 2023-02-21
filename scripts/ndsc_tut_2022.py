@@ -30,7 +30,7 @@ from pathlib import Path
 import sys
 
 DATASET_FP = Path(
-    "data/ndsc_tut/hcp_Mg_geomopti_randshear_pm_0.01_product_symm_k0p012.extxyz"
+    "data/ndsc_tut/hcp_Mg_geomopti_randshear_pm_0.01_product_symm_k0p012.extxyz"  # noqa E501
 )
 
 
@@ -55,7 +55,6 @@ def main(argv):
         # glob_string='glass.xyz',
         generator=False,
     )
-    configurations[0].cell
     client.insert_property_definition(atomic_forces_pd)
 
     metadata = {
