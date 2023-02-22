@@ -23,7 +23,7 @@ def assemble_npy_properties(filepath: Path):
 
 
 def basic_npz_reader(file):
-    """This reader works for compressed numpy files (.npz)"""
+    """This is an example for compressed numpy files (.npz)"""
     atoms = []
     with np.load(file) as npz:
         npz = np.load(file)

@@ -2,11 +2,12 @@
 author:gpwolfe
 
 Data can be downloaded from:
-https://github.com/jla-gardner/carbon-data
+https://doi.org/10.6084/m9.figshare.19601689.v3
+Download link:
+https://figshare.com/ndownloader/files/36445941
 
-Clone GitHub repository (1.41 GB)
-git clone https://github.com/jla-gardner/carbon-data.git
-xyz files found in carbon-data/results/
+Unzip to project folder
+unzip unzip H2COMBUSTION_DATA-main-2.zip -d  <project_dir>/data/
 
 Change DATASET_FP to reflect location of parent folder
 Change database name as appropriate
