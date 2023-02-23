@@ -21,6 +21,7 @@ Other properties added to metadata:
 Total energy 
 """
 from argparse import ArgumentParser
+from ase import Atom
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import MongoDatabase, load_data
 from colabfit.tools.property_definitions import atomic_forces_pd
@@ -71,15 +72,13 @@ def reader(filepath):
     lattice = np.array(lattice)
     lattice.reshape(lattice.shape[0] // 3, 3, 3)
 
-    for i, coord in enumerate(coords):
-        atom = AtomicConfiguration(
-            positions=[coord], symbols=elements[i], cell=lattice
-        )
-        atom.info["force"] = [forces[i]]
-        atom.info["name"] = filepath.stem
-        atom.info["total-energy"] = energy
-        atoms.append(atom)
-    return atoms
+    atoms = AtomicConfiguration(
+        positions=coords, symbols=elements, cell=lattice
+    )
+    atoms.info["force"] = forces
+    atoms.info["name"] = filepath.stem
+    atoms.info["total-energy"] = energy
+    return [atoms]
 
 
 def main(argv):
@@ -166,7 +165,7 @@ def main(argv):
             "http://ann.atomistic.net/download/",
             "http://dx.doi.org/10.1016/j.commatsci.2015.11.047",
         ],
-        description="Approximately 165,000 configurations of TiO2 used in the "
+        description="Approximately 7,800 configurations of TiO2 used in the "
         "training and testing of the software package aenet. "
         "DFT calculations performed using Quantum ESPRESSO.",
         verbose=True,
