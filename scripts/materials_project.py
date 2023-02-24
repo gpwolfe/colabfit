@@ -9,6 +9,8 @@ from colabfit.tools.property_definitions import (
 from pathlib import Path
 import sys
 
+DATASET_FP = Path("/home/gpwolfe/colabfit/mp_xyz_files_error_124s")
+
 elements = [
     "H",
     "He",
@@ -101,15 +103,13 @@ elements = [
     "Pu",
 ]
 
-DATASET_FP = Path("/scratch/work/martiniani/for_gregory/mat_proj_xyz_files")
-
 
 def reader(file_path):
     atom = read(file_path, index=":")
     return atom
 
 
-def main(ip, fileset: list):
+def main(ip, fileset: list, dataset_id=None, config_set_id=None):
     client = MongoDatabase("----", uri=f"mongodb://{ip}:27017")
     configurations = []
     for path in fileset:
@@ -124,12 +124,14 @@ def main(ip, fileset: list):
         )
         configurations += configs
 
-    for pd in [
-        atomic_forces_pd,
-        cauchy_stress_pd,
-        free_energy_pd,
-    ]:
-        client.insert_property_definition(pd)
+    # Skip if dataset has already been created
+    if dataset_id is None:
+        for pd in [
+            atomic_forces_pd,
+            cauchy_stress_pd,
+            free_energy_pd,
+        ]:
+            client.insert_property_definition(pd)
 
     metadata = {
         "software": {"value": "VASP"},
@@ -176,45 +178,65 @@ def main(ip, fileset: list):
         ravel=True,
     ).tolist()
 
-    desc = "Materials Project dataset"
-    cs_ids = []
-    cs_id = client.insert_configuration_set(
-        co_ids, description=desc, name="materials_project"
-    )
-    cs_ids.append(cs_id)
-    client.insert_dataset(
-        cs_ids,
-        all_do_ids,
-        name="Materials Project",
-        authors=[
-            "A. Jain, S.P. Ong, G. Hautier, W. Chen, W.D. Richards, S. Dacek,"
-            " S. Cholia, D. Gunter, D. Skinner, G. Ceder, K.A. Persson"
-        ],
-        links=[
-            "https://materialsproject.org/",
-        ],
-        description="Configurations from the Materials Project database:"
-        " an online resource with the goal of computing properties of all"
-        " inorganic materials.",
-        verbose=True,
-    )
+    # Create a dataset/config set if none exists, otherwise reuse MP dataset
+    # Currently, update_dataset requires configurations sets to be updated
+    # as well.
+    if dataset_id is None:
+        desc = "Materials Project dataset"
+        cs_ids = []
+        config_set_id = client.insert_configuration_set(
+            co_ids, description=desc, name="materials_project"
+        )
+        cs_ids.append(config_set_id)
+
+        dataset_id = client.insert_dataset(
+            cs_ids,
+            all_do_ids,
+            name="Materials Project",
+            authors=[
+                "A. Jain, S.P. Ong, G. Hautier, W. Chen, W.D. Richards, S. Dacek,"
+                " S. Cholia, D. Gunter, D. Skinner, G. Ceder, K.A. Persson"
+            ],
+            links=[
+                "https://materialsproject.org/",
+            ],
+            description="Configurations from the Materials Project database:"
+            " an online resource with the goal of computing properties of all"
+            " inorganic materials.",
+            verbose=True,
+        )
+        return dataset_id, config_set_id
+    else:
+        config_set_id = client.update_configuration_set(
+            cs_id=config_set_id, add_ids=all_co_ids
+        )
+        dataset_id = client.update_dataset(
+            ds_id=dataset_id, add_cs_ids=config_set_id, add_do_ids=all_do_ids
+        )
+    return dataset_id, config_set_id
 
 
 if __name__ == "__main__":
-    batch_size = 10
+    batch_size = 50
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     args = parser.parse_args(sys.argv[1:])
     ip = args.ip
 
     files = list(DATASET_FP.glob("*.xyz"))
-    # main(ip, files)
 
+    # Import by batch, with first batch returning dataset-id and config-set-id
     n_batches = len(files) // batch_size
-
-    for n in range(n_batches):
-        batch_f = files[batch_size * n : batch_size * (n + 1)]
-        main(ip, batch_f)
+    batch_1 = files[:batch_size]
+    dataset_id, config_set_id = main(ip, batch_1, None, None)
+    print(dataset_id)
+    for n in range(1, n_batches):
+        batch_n = files[batch_size * n : batch_size * (n + 1)]
+        dataset_id, config_set_id = main(
+            ip, batch_n, dataset_id=dataset_id, config_set_id=config_set_id
+        )
     if len(files) % batch_size:
-        batch_f = files[batch_size * n_batches :]
-        main(ip, batch_f)
+        batch_n = files[batch_size * n_batches :]
+        dataset_id, config_set_id = main(
+            ip, batch_n, dataset_id, config_set_id
+        )

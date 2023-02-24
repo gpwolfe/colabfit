@@ -21,30 +21,26 @@ def convert(calc, task_id):
             a = AseAtomsAdaptor.get_atoms(
                 calc[j]["output"]["ionic_steps"][i]["structure"]
             )
-            print(
-                "steps",
-                len(calc[j]["output"]["ionic_steps"][i]["electronic_steps"]),
-            )
 
-            #         a.info["e_fr_energy"] = calc[j]["output"]["ionic_steps"][i][
-            #             "e_fr_energy"
-            #         ]
-            #         a.info["e_wo_entrp"] = calc[j]["output"]["ionic_steps"][i]['electronic_steps'][
-            #             "e_wo_entrp"
-            #         ]
-            #         a.info["e_0_energy"] = calc[j]["output"]["ionic_steps"][i][
-            #             "e_0_energy"
-            #         ]
-            #         a.info["stress"] = np.array(
-            #             calc[j]["output"]["ionic_steps"][i]["stress"]
-            #         )
-            #         a.arrays["forces"] = np.array(
-            #             calc[j]["output"]["ionic_steps"][i]["forces"]
-            #         )
-            #         a.info["material_id"] = D[task_id]["material_id"]
-            #         a.info["task_id"] = task_id
-            #         a.info["name"] = "%s-%s-%s" % (task_id, j, i)
-            #         a.info["calc_type"] = D[task_id]["calc_type"]
+            a.info["e_fr_energy"] = calc[j]["output"]["ionic_steps"][i][
+                "e_fr_energy"
+            ]
+            a.info["e_wo_entrp"] = calc[j]["output"]["ionic_steps"][i][
+                "electronic_steps"
+            ]["e_wo_entrp"]
+            a.info["e_0_energy"] = calc[j]["output"]["ionic_steps"][i][
+                "e_0_energy"
+            ]
+            a.info["stress"] = np.array(
+                calc[j]["output"]["ionic_steps"][i]["stress"]
+            )
+            a.arrays["forces"] = np.array(
+                calc[j]["output"]["ionic_steps"][i]["forces"]
+            )
+            a.info["material_id"] = D[task_id]["material_id"]
+            a.info["task_id"] = task_id
+            a.info["name"] = "%s-%s-%s" % (task_id, j, i)
+            a.info["calc_type"] = D[task_id]["calc_type"]
             atoms.append(a)
     print("atoms", len(atoms))
     return atoms
