@@ -20,6 +20,10 @@ Run: $ python3 <script_name>.py -i (or --ip) <database_ip>
 Properties:
 
 Other properties added to metadata:
+None
+
+For database format details, see:
+https://compphysvienna.github.io/n2p2/topics/cfg_file.html
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
@@ -117,6 +121,9 @@ def main(argv):
         "method": {"field": METHODS},
     }
     property_map = {
+        # According to N2P2 docs, energy value represents "total potential
+        # energy".
+        # see: https://compphysvienna.github.io/n2p2/topics/cfg_file.html
         "potential-energy": [
             {
                 "energy": {"field": "energy", "units": "eV"},
@@ -145,7 +152,7 @@ def main(argv):
         [
             f"{DATASET}-Fe",
             ["Fe"],
-            f"Iron-only configurations from {DATASET} dataset",
+            f"alpha-iron-only configurations from {DATASET} dataset",
         ],
         [
             f"{DATASET}-H",
@@ -155,7 +162,8 @@ def main(argv):
         [
             f"{DATASET}-Fe",
             ["Fe", "H"],
-            f"Iron-hydrogen configurations from {DATASET} dataset",
+            "Configurations containing alpha-iron with hydrogen "
+            f"from {DATASET} dataset",
         ],
     ]
 
