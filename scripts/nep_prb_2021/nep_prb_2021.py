@@ -2,7 +2,7 @@
 author:gpwolfe
 
 Data can be downloaded from:
-https://gpumd.zheyongfan.org/index.php/Main_Page
+https://doi.org/10.5281/zenodo.5109599
 Download link:
 https://zenodo.org/record/5519311/files/zenodo_nep_version_2.zip?download=1
 
