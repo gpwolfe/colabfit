@@ -14,7 +14,7 @@ def read_npz(filepath):
 
 
 def assemble_npy_properties(filepath: Path):
-    prop_path = filepath.glob('*.npy')
+    prop_path = filepath.parent.glob('*.npy')
     props = {}
     for p in prop_path:
         key = p.stem
