@@ -37,7 +37,6 @@ from colabfit.tools.property_definitions import (
 from collections import defaultdict
 import numpy as np
 from pathlib import Path
-import re
 import sys
 
 DATASET_FP = Path("scripts/ho_combustion/H2COMBUSTION_DATA-main-2")

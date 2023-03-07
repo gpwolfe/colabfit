@@ -103,7 +103,7 @@ def main(argv):
 
     metadata = {
         "software": {"value": SOFTWARE},
-        "method": {"field": METHODS},
+        "method": {"value": METHODS},
     }
     property_map = {
         "potential-energy": [

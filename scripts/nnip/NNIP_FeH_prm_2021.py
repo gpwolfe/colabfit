@@ -124,7 +124,7 @@ def main(argv):
 
     metadata = {
         "software": {"value": SOFTWARE},
-        "method": {"field": METHODS},
+        "method": {"value": METHODS},
     }
     property_map = {
         # According to N2P2 docs, energy value represents "total potential

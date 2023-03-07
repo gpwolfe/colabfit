@@ -234,7 +234,7 @@ def main(argv):
 
     metadata = {
         "software": {"value": SOFTWARE},
-        "method": {"field": METHODS},
+        "method": {"value": METHODS},
         "virials": {
             "field": "virials",
             "units": "eV/atom",

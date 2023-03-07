@@ -112,7 +112,7 @@ def main(argv):
 
     metadata = {
         "software": {"value": SOFTWARE},
-        "method": {"field": METHODS},
+        "method": {"value": METHODS},
         "fermi": {"field": "fermi"},
     }
     property_map = {
