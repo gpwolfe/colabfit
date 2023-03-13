@@ -106,6 +106,13 @@ def main(argv):
         # "": {"field": ""},
     }
     property_map = {
+        "cauchy-stress": [
+            {
+                "stress": {"field": "virial", "units": "eV"},
+                "per-atom": {"value": False, "units": None},
+                "_metadata": metadata,
+            }
+        ],
         "potential-energy": [
             {
                 "energy": {"field": "energy", "units": "eV"},

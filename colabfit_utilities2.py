@@ -1,9 +1,8 @@
 from ase import Atoms
+from colabfit.tools.converters import AtomicConfiguration
 from collections import defaultdict
 import numpy as np
 from pathlib import Path
-
-# import shutil as sh
 
 def read_npz(filepath):
     data = defaultdict(list)
@@ -11,6 +10,56 @@ def read_npz(filepath):
         for key in f.files:
             data[key] = f[key]
     return data
+
+# For assembling data in npy format scattered into a single category 
+# with a type.raw file in parent directory
+ELEM_KEY = {1: "H", 2: "O"}
+def assemble_props(filepath: Path):
+    props = {}
+    prop_paths = list(filepath.parent.glob("*.npy"))
+    type_path = list(filepath.parents[1].glob("type.raw"))[0]
+    # Use below if multiple configuration types with different elements can be
+    # sorted by parts of the filepath
+    # for key in ELEM_KEY:
+    #     if key in type_path.parts[-7:]:
+    #         elem_key = ELEM_KEY[key]
+
+    with open(type_path, "r") as f:
+        nums = f.read().rstrip().split(" ")
+        # If multiple config types and using "elem_key" above, change below
+        props["symbols"] = [ELEM_KEY[int(num)] for num in nums]
+
+    for p in prop_paths:
+        key = p.stem
+        props[key] = np.load(p)
+    num_configs = props["force"].shape[0]
+    num_atoms = len(props["symbols"])
+    props["forces"] = props["force"].reshape(num_configs, num_atoms, 3)
+    props["coord"] = props["coord"].reshape(num_configs, num_atoms, 3)
+    props["box"] = props["box"].reshape(num_configs, 3, 3)
+    return props
+
+
+# Above used with below:
+
+def reader(filepath):
+    props = assemble_props(filepath)
+    print(filepath)
+    configs = [
+        AtomicConfiguration(
+            symbols=props["symbols"], positions=pos, cell=props["box"][i]
+        )
+        for i, pos in enumerate(props["coord"])
+    ]
+    energy = props.get("energy")
+    for i, c in enumerate(configs):
+        c.info["forces"] = props["force"][i]
+        # if energy is not None:
+        c.info["energy"] = float(energy[i])
+        c.info[
+            "name"
+        ] = f"{filepath.parts[-3]}_{filepath.parts[-5]}_{filepath.parts[-3]}_{i}"
+    return configs
 
 
 def assemble_npy_properties(filepath: Path):
