@@ -48,7 +48,7 @@ import re
 import sys
 
 
-DATASET_FP = Path("scripts/c_gardner_2022")
+DATASET_FP = Path().cwd()
 
 NAME_RE = re.compile(
     r"density\-(?P<density>\d\.\d)\-T\-(?P<temp>\d{4}).extxyz"
@@ -67,7 +67,7 @@ def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     args = parser.parse_args(argv)
-    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase("----", nprocs=4, uri=f"mongodb://{args.ip}:27017")
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -106,16 +106,11 @@ def main(argv):
     )
 
     all_co_ids, all_do_ids = list(zip(*ids))
-    cs_regexes = [
-        [
-            "C_gardner_2022_all",
-            ".*",
-            "All configurations from C_gardner_2022 dataset",
-        ]
-    ]
-    for fn in DATASET_FP.glob("*.extxyz"):
+    cs_regexes = []
+    for fn in DATASET_FP.rglob("*.extxyz"):
+        print(fn)
         groups = NAME_RE.match(fn.name).groupdict()
-
+        print(groups)
         cs_regexes.append(
             [
                 f"D_{groups['density']}_T_{groups['temp']}",
@@ -154,8 +149,8 @@ def main(argv):
             pass
 
     client.insert_dataset(
-        cs_ids,
-        all_do_ids,
+        cs_ids=cs_ids,
+        pr_hashes=all_do_ids,
         name="C_gardner_2022",
         authors="J.L.A. Gardner, Z.F. Beaulieu, V.L. Deringer",
         links=[

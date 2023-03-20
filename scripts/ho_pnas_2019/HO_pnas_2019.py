@@ -26,7 +26,7 @@ from colabfit.tools.property_definitions import (
 from pathlib import Path
 import sys
 
-DATASET_FP = Path("scripts/ho_pnas_2019/training-set")
+DATASET_FP = Path("training-set")
 
 
 def reader(file_path):
@@ -85,31 +85,30 @@ def main(argv):
 
     all_co_ids, all_do_ids = list(zip(*ids))
 
-    name = "HO_pnas_2019"
-    cs_ids = []
-    co_ids = client.get_data(
-        "configurations",
-        fields="hash",
-        query={"hash": {"$in": all_co_ids}},
-        ravel=True,
-    ).tolist()
+    # name = "HO_pnas_2019"
+    # cs_ids = []
+    # co_ids = client.get_data(
+    #     "configurations",
+    #     fields="hash",
+    #     query={"hash": {"$in": all_co_ids}},
+    #     ravel=True,
+    # ).tolist()
 
-    print(
-        "Configuration set ",
-        f"({name}):".rjust(22),
-        f"{len(co_ids)}".rjust(7),
-    )
+    # print(
+    #     "Configuration set ",
+    #     f"({name}):".rjust(22),
+    #     f"{len(co_ids)}".rjust(7),
+    # )
 
-    cs_id = client.insert_configuration_set(
-        co_ids,
-        description="Liquid and solid H2O/water thermodynamics",
-        name=name,
-    )
+    # cs_id = client.insert_configuration_set(
+    #     co_ids,
+    #     description="Liquid and solid H2O/water thermodynamics",
+    #     name=name,
+    # )
 
-    cs_ids.append(cs_id)
+    # cs_ids.append(cs_id)
     client.insert_dataset(
-        cs_ids,
-        all_do_ids,
+        pr_hashes=all_do_ids,
         name="HO_pnas_2019",
         authors=["B. Cheng, E. Engel, J. Behler, C. Dellago, M. Ceriotti"],
         links=[

@@ -33,12 +33,12 @@ from colabfit.tools.database import MongoDatabase, load_data
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
-    cauchy_stress_pd,
+    # cauchy_stress_pd,
 )
 from pathlib import Path
 import sys
 
-DATASET_FP = Path("")
+DATASET_FP = Path("").cwd()
 DATASET = "DAS_ML-IP_CoSb_MgSb"
 
 SOFTWARE = "VASP, LAMMPS"
@@ -113,7 +113,7 @@ def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     args = parser.parse_args(argv)
-    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase("----", nprocs=4, uri=f"mongodb://{args.ip}:27017")
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -206,8 +206,8 @@ def main(argv):
             pass
 
     client.insert_dataset(
-        cs_ids,
-        all_do_ids,
+        cs_ids=cs_ids,
+        pr_hashes=all_do_ids,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,

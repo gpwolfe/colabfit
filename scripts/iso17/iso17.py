@@ -35,7 +35,7 @@ from pathlib import Path
 import sys
 
 
-DB_PATH = Path("scripts/iso17")
+DB_PATH = Path().cwd()
 
 
 def reader(filepath):
@@ -56,7 +56,7 @@ def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     args = parser.parse_args(argv)
-    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase("----", nprocs=4, uri=f"mongodb://{args.ip}:27017")
     configurations = load_data(
         file_path=DB_PATH,
         file_format="folder",
@@ -100,28 +100,27 @@ def main(argv):
     )
 
     all_co_ids, all_do_ids = list(zip(*ids))
-    cs_ids = []
-    desc = "Configurations of C7O2H10 from ISO17"
-    name = "ISO17"
-    co_ids = client.get_data(
-        "configurations",
-        fields="hash",
-        query={"hash": {"$in": all_co_ids}},
-        ravel=True,
-    ).tolist()
+    # cs_ids = []
+    # desc = "Configurations of C7O2H10 from ISO17"
+    # name = "ISO17"
+    # co_ids = client.get_data(
+    #     "configurations",
+    #     fields="hash",
+    #     query={"hash": {"$in": all_co_ids}},
+    #     ravel=True,
+    # ).tolist()
 
-    print(
-        "Configuration set", f"({name}):".rjust(22), f"{len(co_ids)}".rjust(7)
-    )
+    # print(
+    #     "Configuration set", f"({name}):".rjust(22), f"{len(co_ids)}".rjust(7)
+    # )
 
-    if len(co_ids) > 0:
-        cs_id = client.insert_configuration_set(
-            co_ids, description=desc, name=name
-        )
+    # if len(co_ids) > 0:
+    #     cs_id = client.insert_configuration_set(
+    #         co_ids, description=desc, name=name
+    #     )
 
-        cs_ids.append(cs_id)
+    #     cs_ids.append(cs_id)
     client.insert_dataset(
-        cs_ids,
         all_do_ids,
         name="ISO17_anips_2017",
         authors=[

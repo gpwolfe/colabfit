@@ -39,7 +39,7 @@ import numpy as np
 from pathlib import Path
 import sys
 
-DATASET_FP = Path("scripts/ho_combustion/H2COMBUSTION_DATA-main-2")
+DATASET_FP = Path("H2COMBUSTION_DATA-main-2")
 METH_DICT = {
     "nm": "DFT Normal Mode displacement",
     "aimd": "DFT AIMD",
@@ -85,7 +85,7 @@ def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     args = parser.parse_args(argv)
-    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase("----", nprocs=4, uri=f"mongodb://{args.ip}:27017")
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -131,11 +131,6 @@ def main(argv):
     all_co_ids, all_do_ids = list(zip(*ids))
     cs_regexes = [
         [
-            DATASET,
-            ".*",
-            f"All configurations from {DATASET} dataset",
-        ],
-        [
             f"IRC_{DATASET}",
             ".*irc",
             f"Intrinsic reaction coordinate configurations from {DATASET}",
@@ -180,8 +175,8 @@ def main(argv):
             pass
 
     client.insert_dataset(
-        cs_ids,
-        all_do_ids,
+        cs_ids=cs_ids,
+        pr_hashes=all_do_ids,
         name=DATASET,
         authors="X. Guan, A.K. Das, C. Stein, F. Heidar-Zadeh, L. Bertels, "
         "M. Liu, M. Haghighatlari, J. Li, O. Zhang, H. Hao, I. Leven, "

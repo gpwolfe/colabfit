@@ -29,7 +29,7 @@ from pathlib import Path
 from pymongo.errors import OperationFailure
 import sys
 
-DATASET_FP = Path("scripts/hpt_nc_2022/training")
+DATASET_FP = Path("training")
 
 
 def reader(filepath):
@@ -42,7 +42,7 @@ def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     args = parser.parse_args(argv)
-    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase("----", nprocs=4, uri=f"mongodb://{args.ip}:27017")
 
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
@@ -86,11 +86,6 @@ def main(argv):
     all_co_ids, all_do_ids = list(zip(*ids))
 
     cs_regexes = [
-        [
-            "All_H2/Pt(III)",
-            ".*",
-            "All configurations from H/Pt(III)",
-        ],
         [
             "H2_H2/Pt(III)",
             "H2*",
@@ -146,8 +141,8 @@ def main(argv):
             cs_ids.append(cs_id)
 
     client.insert_dataset(
-        cs_ids,
-        all_do_ids,
+        cs_ids=cs_ids,
+        pr_hashes=all_do_ids,
         name="HPt_nc_2022",
         authors=["S. Lee, K. Ermanis, J.M. Goodman"],
         links=[

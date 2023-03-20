@@ -26,7 +26,7 @@ from pathlib import Path
 from pymongo.errors import OperationFailure
 import sys
 
-DATASET_FP = Path("scripts/tsff/")
+DATASET_FP = Path().cwd()
 
 
 def reader(filepath):
@@ -40,7 +40,7 @@ def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     args = parser.parse_args(argv)
-    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase("----", nprocs=4, uri=f"mongodb://{args.ip}:27017")
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -84,48 +84,47 @@ def main(argv):
 
     all_co_ids, all_do_ids = list(zip(*ids))
 
-    cs_regexes = [
-        [
-            "TSFF reference configuration",
-            ".*",
-            "Reference configuration for HMGR transition state",
-        ]
-    ]
+    # cs_regexes = [
+    #     [
+    #         "TSFF reference configuration",
+    #         ".*",
+    #         "Reference configuration for HMGR transition state",
+    #     ]
+    # ]
 
-    cs_ids = []
+    # cs_ids = []
 
-    for i, (name, regex, desc) in enumerate(cs_regexes):
-        try:
-            co_ids = client.get_data(
-                "configurations",
-                fields="hash",
-                query={
-                    "hash": {"$in": all_co_ids},
-                    "names": {"$regex": regex},
-                },
-                ravel=True,
-            ).tolist()
-        except OperationFailure:
-            print(f"No match for regex: {regex}")
-            continue
+    # for i, (name, regex, desc) in enumerate(cs_regexes):
+    #     try:
+    #         co_ids = client.get_data(
+    #             "configurations",
+    #             fields="hash",
+    #             query={
+    #                 "hash": {"$in": all_co_ids},
+    #                 "names": {"$regex": regex},
+    #             },
+    #             ravel=True,
+    #         ).tolist()
+    #     except OperationFailure:
+    #         print(f"No match for regex: {regex}")
+    #         continue
 
-        print(
-            f"Configuration set {i}",
-            f"({name}):".rjust(25),
-            f"{len(co_ids)}".rjust(7),
-        )
+    #     print(
+    #         f"Configuration set {i}",
+    #         f"({name}):".rjust(25),
+    #         f"{len(co_ids)}".rjust(7),
+    #     )
 
-        if len(co_ids) == 0:
-            pass
-        else:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+    #     if len(co_ids) == 0:
+    #         pass
+    #     else:
+    #         cs_id = client.insert_configuration_set(
+    #             co_ids, description=desc, name=name
+    #         )
 
-            cs_ids.append(cs_id)
+    #         cs_ids.append(cs_id)
 
     client.insert_dataset(
-        cs_ids,
         all_do_ids,
         name="TSFF_plos_2022",
         authors=[

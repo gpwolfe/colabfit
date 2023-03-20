@@ -40,7 +40,7 @@ from pathlib import Path
 import sys
 
 DATASET_FP = Path(
-    "data/ndsc_tut/hcp_Mg_geomopti_randshear_pm_0.01_product_symm_k0p012.extxyz"  # noqa E501
+    "ndsc_tut-master/example_data/hcp_Mg_geomopti_randshear_pm_0.01_product_symm_k0p012.extxyz"
 )
 
 
@@ -91,40 +91,39 @@ def main(argv):
     )
 
     all_co_ids, all_do_ids = list(zip(*ids))
-    cs_regexes = [
-        [
-            "hcp_Mg_geomopti_randshear_pm_0.01_product_symm_k0p012",
-            ".*",
-            "All configurations from ndsc_tut dataset (only Mg)",
-        ]
-    ]
-    cs_ids = []
+    # cs_regexes = [
+    #     [
+    #         "hcp_Mg_geomopti_randshear_pm_0.01_product_symm_k0p012",
+    #         ".*",
+    #         "All configurations from ndsc_tut dataset (only Mg)",
+    #     ]
+    # ]
+    # cs_ids = []
 
-    for i, (name, regex, desc) in enumerate(cs_regexes):
-        co_ids = client.get_data(
-            "configurations",
-            fields="hash",
-            query={
-                "hash": {"$in": all_co_ids},
-                "chemical_formula_reduced": {"$regex": regex},
-            },
-            ravel=True,
-        ).tolist()
+    # for i, (name, regex, desc) in enumerate(cs_regexes):
+    #     co_ids = client.get_data(
+    #         "configurations",
+    #         fields="hash",
+    #         query={
+    #             "hash": {"$in": all_co_ids},
+    #             "chemical_formula_reduced": {"$regex": regex},
+    #         },
+    #         ravel=True,
+    #     ).tolist()
 
-        print(
-            f"Configuration set {i}",
-            f"({name}):".rjust(22),
-            f"{len(co_ids)}".rjust(7),
-        )
+    #     print(
+    #         f"Configuration set {i}",
+    #         f"({name}):".rjust(22),
+    #         f"{len(co_ids)}".rjust(7),
+    #     )
 
-        cs_id = client.insert_configuration_set(
-            co_ids, description=desc, name=name
-        )
+    #     cs_id = client.insert_configuration_set(
+    #         co_ids, description=desc, name=name
+    #     )
 
-        cs_ids.append(cs_id)
+    #     cs_ids.append(cs_id)
     client.insert_dataset(
-        cs_ids,
-        all_do_ids,
+        pr_hashes=all_do_ids,
         name="ndsc_tut_2022",
         authors=["C. Allen, A.P. Bartok"],
         links=[

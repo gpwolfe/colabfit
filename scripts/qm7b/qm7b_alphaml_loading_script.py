@@ -37,7 +37,7 @@ import re
 import sys
 
 
-DATASET_PATH = Path("scripts/qm7b")
+DATASET_PATH = Path().cwd()
 
 # Regex parsers for header line and coordinate lines
 
@@ -186,7 +186,7 @@ def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     args = parser.parse_args(argv)
-    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase("----", nprocs=4, uri=f"mongodb://{args.ip}:27017")
 
     # Metadata and property maps
     ccsd_metadata = {
@@ -326,8 +326,8 @@ def main(argv):
 
     # Insert dataset
     client.insert_dataset(
-        cs_ids,
-        list(all_do_ids),
+        cs_ids=cs_ids,
+        pr_hashes=list(all_do_ids),
         name="QM7b_AlphaML",
         authors=[
             "Y. Yang, K. Un Lao, D.M. Wilkins, A. Grisafi, "

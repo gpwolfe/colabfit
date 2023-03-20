@@ -44,7 +44,7 @@ from pathlib import Path
 import re
 import sys
 
-DATASET_FP = Path("/home/gpwolfe/colabfit/data/c7h10o2")
+DATASET_FP = Path().cwd()
 DATASET = "C7H10O2"
 # Create custom regex parser for header and coordinate rows
 parser_match = re.compile(
@@ -132,7 +132,7 @@ def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     args = parser.parse_args(argv)
-    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase("----", nprocs=4, uri=f"mongodb://{args.ip}:27017")
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -209,30 +209,30 @@ def main(argv):
 
     all_co_ids, all_do_ids = list(zip(*ids))
 
-    name = "C7H10O2"
-    cs_ids = []
-    co_ids = client.get_data(
-        "configurations",
-        fields="hash",
-        query={"hash": {"$in": all_co_ids}},
-        ravel=True,
-    ).tolist()
+    # name = "C7H10O2"
+    # cs_ids = []
+    # co_ids = client.get_data(
+    #     "configurations",
+    #     fields="hash",
+    #     query={"hash": {"$in": all_co_ids}},
+    #     ravel=True,
+    # ).tolist()
 
-    print(
-        "Configuration set", "({name}):".rjust(22), f"{len(co_ids)}".rjust(7)
-    )
+    # print(
+    #     "Configuration set", "({name}):".rjust(22), f"{len(co_ids)}".rjust(7)
+    # )
 
-    cs_id = client.insert_configuration_set(
-        co_ids,
-        description=f"All configurations from {name} dataset",
-        name=name,
-    )
+    # cs_id = client.insert_configuration_set(
+    #     co_ids,
+    #     description=f"All configurations from {name} dataset",
+    #     name=name,
+    # )
 
-    cs_ids.append(cs_id)
+    # cs_ids.append(cs_id)
 
     client.insert_dataset(
-        cs_ids,
-        all_do_ids,
+        # cs_ids,
+        pr_hashes=all_do_ids,
         name=DATASET,
         authors="R. Ramakrishnan, P.O. Dral, M. Rupp, O.A. von Lilienfeld",
         links=["https://doi.org/10.6084/m9.figshare.c.978904.v5"],

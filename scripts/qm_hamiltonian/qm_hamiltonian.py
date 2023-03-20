@@ -42,7 +42,7 @@ from colabfit.tools.property_definitions import (
 from pathlib import Path
 import sys
 
-DB_PATH = Path("scripts/qm_hamiltonian")
+DB_PATH = Path().cwd()
 
 
 def reader(filepath):
@@ -63,7 +63,7 @@ def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     args = parser.parse_args(argv)
-    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase("----", nprocs=4, uri=f"mongodb://{args.ip}:27017")
 
     configurations = load_data(
         file_path=DB_PATH,
@@ -163,8 +163,8 @@ def main(argv):
             cs_ids.append(cs_id)
 
     client.insert_dataset(
-        cs_ids,
-        all_do_ids,
+        cs_ids=cs_ids,
+        pr_hashes=all_do_ids,
         name="QM_hamiltonian_nature_2019",
         authors=[
             "K. T. Schütt, M. Gastegger, A. Tkatchenko, K.-R. Müller, \

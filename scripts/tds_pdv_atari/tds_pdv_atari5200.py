@@ -40,7 +40,7 @@ import numpy as np
 from pathlib import Path
 import sys
 
-DATASET_FP = Path("scripts/tds_pdv_atari")
+DATASET_FP = Path().cwd()
 
 name_dict = {
     "mp-1986_ZnO": ("Zn", "O"),
@@ -116,7 +116,7 @@ def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     args = parser.parse_args(argv)
-    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase("----", nprocs=4, uri=f"mongodb://{args.ip}:27017")
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -199,8 +199,8 @@ def main(argv):
 
             cs_ids.append(cs_id)
     client.insert_dataset(
-        cs_ids,
-        all_do_ids,
+        cs_ids=cs_ids,
+        pr_hashes=all_do_ids,
         name="TdS-PdV_Atari5200",
         authors=["P Wisesa, C.M. Andolina, W.A. Saidi"],
         links=[

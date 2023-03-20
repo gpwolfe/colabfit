@@ -49,7 +49,7 @@ from colabfit.tools.property_definitions import (
 from pathlib import Path
 import sys
 
-DATASET_FP = Path("scripts/carbon_gap20")
+DATASET_FP = Path().cwd()
 DATASET = "Carbon-GAP20"
 
 SOFTWARE = "VASP"
@@ -80,7 +80,7 @@ def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     args = parser.parse_args(argv)
-    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase("----", nprocs=4, uri=f"mongodb://{args.ip}:27017")
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -139,11 +139,6 @@ def main(argv):
     all_co_ids, all_do_ids = list(zip(*ids))
     cs_regexes = [
         [
-            DATASET,
-            ".*",
-            f"All configurations from {DATASET} dataset",
-        ],
-        [
             f"{DATASET}-training-set",
             ".*Training_Set",
             f"Training set configurations from {DATASET} dataset",
@@ -178,8 +173,8 @@ def main(argv):
             pass
 
     client.insert_dataset(
-        cs_ids,
-        all_do_ids,
+        cs_ids=cs_ids,
+        pr_hashes=all_do_ids,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,

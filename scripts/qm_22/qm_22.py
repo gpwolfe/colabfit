@@ -96,7 +96,7 @@ def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     args = parser.parse_args(argv)
-    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase("----", nprocs=4, uri=f"mongodb://{args.ip}:27017")
     client.insert_property_definition(potential_energy_pd)
     configurations = load_data(
         file_path=DATASET_FP,
@@ -125,7 +125,7 @@ def main(argv):
         client.insert_data(
             configurations,
             property_map=property_map,
-            generator=False,
+            # generator=False,
             verbose=True,
         )
     )
@@ -185,7 +185,7 @@ def main(argv):
                 client.insert_data(
                     configurations,
                     property_map=property_map,
-                    generator=False,
+                    # generator=False,
                     verbose=True,
                 )
             )
@@ -193,7 +193,7 @@ def main(argv):
             all_co_ids.extend(co_ids)  # This is not used again
             all_do_ids.extend(do_ids)
 
-            name = f"{DATASET}_{name}"
+            cset_name = f"{DATASET}_{name}"
             desc = f"{name} configurations from {DATASET} dataset"
 
             print(
@@ -203,7 +203,7 @@ def main(argv):
             )
             if len(co_ids) > 0:
                 cs_id = client.insert_configuration_set(
-                    co_ids, description=desc, name=name
+                    co_ids, description=desc, name=cset_name
                 )
 
                 cs_ids.append(cs_id)
@@ -211,8 +211,8 @@ def main(argv):
                 pass
 
     client.insert_dataset(
-        cs_ids,
-        all_do_ids,
+        cs_ids=cs_ids,
+        pr_hashes=all_do_ids,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,

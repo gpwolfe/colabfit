@@ -37,7 +37,7 @@ from pathlib import Path
 import re
 import sys
 
-DATASET_FP = Path("scripts/reann")
+DATASET_FP = Path().cwd()
 DATASET = "REANN_CO2_Ni100"
 
 SOFTWARE = "VASP"
@@ -48,10 +48,8 @@ LINKS = [
     "https://doi.org/10.1063/5.0080766",
 ]
 AUTHORS = "Y. Zhang, J. Xia, B. Jiang"
-DS_DESC = """Approximately 9,850 configurations of CO2 with a movable Ni(100)
- surface."""
-
-RE = re.compile(r"")
+DS_DESC = "Approximately 9,850 configurations of CO2 with a movable Ni(100)\
+ surface."
 
 
 def reader(filepath):
@@ -125,7 +123,7 @@ def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     args = parser.parse_args(argv)
-    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase("----", nprocs=4, uri=f"mongodb://{args.ip}:27017")
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -169,44 +167,43 @@ def main(argv):
     )
 
     all_co_ids, all_do_ids = list(zip(*ids))
-    cs_regexes = [
-        [
-            DATASET,
-            ".*",
-            f"All configurations from {DATASET} dataset",
-        ]
-    ]
+    # cs_regexes = [
+    #     [
+    #         DATASET,
+    #         ".*",
+    #         f"All configurations from {DATASET} dataset",
+    #     ]
+    # ]
 
-    cs_ids = []
+    # cs_ids = []
 
-    for i, (name, regex, desc) in enumerate(cs_regexes):
-        co_ids = client.get_data(
-            "configurations",
-            fields="hash",
-            query={
-                "hash": {"$in": all_co_ids},
-                "names": {"$regex": regex},
-            },
-            ravel=True,
-        ).tolist()
+    # for i, (name, regex, desc) in enumerate(cs_regexes):
+    #     co_ids = client.get_data(
+    #         "configurations",
+    #         fields="hash",
+    #         query={
+    #             "hash": {"$in": all_co_ids},
+    #             "names": {"$regex": regex},
+    #         },
+    #         ravel=True,
+    #     ).tolist()
 
-        print(
-            f"Configuration set {i}",
-            f"({name}):".rjust(22),
-            f"{len(co_ids)}".rjust(7),
-        )
-        if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+    #     print(
+    #         f"Configuration set {i}",
+    #         f"({name}):".rjust(22),
+    #         f"{len(co_ids)}".rjust(7),
+    #     )
+    #     if len(co_ids) > 0:
+    #         cs_id = client.insert_configuration_set(
+    #             co_ids, description=desc, name=name
+    #         )
 
-            cs_ids.append(cs_id)
-        else:
-            pass
+    #         cs_ids.append(cs_id)
+    #     else:
+    #         pass
 
     client.insert_dataset(
-        cs_ids,
-        all_do_ids,
+        pr_hashes=all_do_ids,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,

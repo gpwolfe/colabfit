@@ -35,7 +35,7 @@ import numpy as np
 from pathlib import Path
 import sys
 
-DATASET_FP = Path("scripts/rmd17")
+DATASET_FP = Path().cwd()
 
 
 def reader(file):
@@ -67,7 +67,7 @@ def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     args = parser.parse_args(argv)
-    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase("----", nprocs=2, uri=f"mongodb://{args.ip}:27017")
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -83,7 +83,7 @@ def main(argv):
     metadata = {
         "software": {"value": "ORCA"},
         "method": {"value": "DFT-PBE def2-SVP"},
-        "MD17-index": {"value": "md17_index"},
+        "MD17-index": {"field": "md17_index"},
     }
     property_map = {
         "potential-energy": [
@@ -151,8 +151,8 @@ def main(argv):
 
             cs_ids.append(cs_id)
     client.insert_dataset(
-        cs_ids,
-        all_do_ids,
+        cs_ids=cs_ids,
+        pr_hashes=all_do_ids,
         name="rMD17",
         authors=["A. Christensen, O. A. von Lilienfeld"],
         links=[

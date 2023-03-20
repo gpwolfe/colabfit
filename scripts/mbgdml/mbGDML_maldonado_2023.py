@@ -75,7 +75,7 @@ import numpy as np
 from pathlib import Path
 import sys
 
-DATASET_FP = Path("scripts/mbgdml/mbgdml-h2o-meoh-mecn-md/")
+DATASET_FP = Path("mbgdml-h2o-meoh-mecn-md/")
 
 soft_meth = namedtuple("soft_meth", ["method", "software"])
 # The [-3]rd element of the Path(filepath).parts == key below
@@ -124,7 +124,7 @@ def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     args = parser.parse_args(argv)
-    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase("----", nprocs=4, uri=f"mongodb://{args.ip}:27017")
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -177,7 +177,6 @@ def main(argv):
 
     all_co_ids, all_do_ids = list(zip(*ids))
     cs_regexes = [
-        ["mbGDML dataset", ".*", "All configurations in the mbGDML set"],
         [
             "mbGDML ",
             "md-mbgdml",
@@ -228,8 +227,8 @@ def main(argv):
 
             cs_ids.append(cs_id)
     client.insert_dataset(
-        cs_ids,
-        all_do_ids,
+        cs_ids=cs_ids,
+        pr_hashes=all_do_ids,
         name="mbGDML_maldonado_2023",
         authors=["A.M. Maldonado"],
         links=[

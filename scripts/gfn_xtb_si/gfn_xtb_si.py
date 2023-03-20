@@ -36,7 +36,7 @@ import numpy as np
 from pathlib import Path
 import sys
 
-DATASET_FP = Path("/home/gpwolfe/colabfit/scripts/gfn_xtb_si/gfn_data/npz/")
+DATASET_FP = Path("gfn_data/npz/")
 
 
 def reader(file):
@@ -65,7 +65,7 @@ def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     args = parser.parse_args(argv)
-    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase("----", nprocs=4, uri=f"mongodb://{args.ip}:27017")
     configurations = load_data(
         file_path=DATASET_FP,
         file_format="folder",
@@ -101,22 +101,22 @@ def main(argv):
     )
 
     all_co_ids, all_do_ids = list(zip(*ids))
-    co_ids = client.get_data(
-        "configurations",
-        fields="hash",
-        query={"hash": {"$in": all_co_ids}},
-        ravel=True,
-    ).tolist()
+    # co_ids = client.get_data(
+    #     "configurations",
+    #     fields="hash",
+    #     query={"hash": {"$in": all_co_ids}},
+    #     ravel=True,
+    # ).tolist()
 
-    desc = "All configurations from GFN-xTB dataset"
-    cs_ids = []
-    cs_id = client.insert_configuration_set(
-        co_ids, description=desc, name="GFN-xTB"
-    )
-    cs_ids.append(cs_id)
+    # desc = "All configurations from GFN-xTB dataset"
+    # cs_ids = []
+    # cs_id = client.insert_configuration_set(
+    #     co_ids, description=desc, name="GFN-xTB"
+    # )
+    # cs_ids.append(cs_id)
     client.insert_dataset(
-        cs_ids,
-        all_do_ids,
+        # cs_ids,
+        pr_hashes=all_do_ids,
         name="GFN-xTB_jcim_2021",
         authors=["L. Komissarov, T. Verstraelen"],
         links=[
