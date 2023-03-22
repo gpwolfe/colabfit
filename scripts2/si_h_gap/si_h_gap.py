@@ -105,7 +105,7 @@ def main(argv):
         "cauchy-stress": [
             {
                 "stress": {"field": "stress", "units": "eV"},
-                "volume-normalized": {"value": [False], "units": None},
+                "volume-normalized": {"value": True, "units": None},
                 "_metadata": metadata,
             }
         ],

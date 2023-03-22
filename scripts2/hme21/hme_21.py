@@ -47,8 +47,8 @@ AUTHORS = "S. Takamoto, C. Shinagawa, D. Motoki, K. Nakago, W. Li, I. Kurata,\
 DS_DESC = "Approximately 25,000 configurations, including 37 elements, used in\
  the training of a universal NNP called PreFerential Potential (PFP). The\
  dataset specifically contains disordered and unstable structures, and\
- structures that include irregular substitutions, as well as varied temperature\
- and density."
+ structures that include irregular substitutions, as well as varied\
+ temperature and density."
 ELEMENTS = [
     "H",
     "Li",
