@@ -2,100 +2,82 @@
 author:gpwolfe
 
 Data can be downloaded from:
-https://github.com/LiuGroupHNU/nvnmd
-Download link:
-https://github.com/LiuGroupHNU/nvnmd/archive/refs/heads/master.zip
+https://doi.org/10.24435/materialscloud:2020.0037/v1
+
 Change database name as appropriate
 
 Run: $ python3 <script_name>.py -i (or --ip) <database_ip>
 
 Properties
 ----------
-forces
 potential energy
+forces
 
 Other properties added to metadata
 ----------------------------------
-dipole
 
 File notes
 ----------
-Not sure whether atom type mapping is correct.
-For now, Ge=0, Te=1, but this might be reversed?
-change ELEM_KEY if necessary
+
 """
 from argparse import ArgumentParser
-from colabfit.tools.configuration import AtomicConfiguration
+from ase.io import read
 from colabfit.tools.database import MongoDatabase, load_data
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
 )
-import numpy as np
 from pathlib import Path
+import re
 import sys
 
-DATASET_FP = Path("nvnmd-master/examples/data/GeTe")
-DATASET = "NVNMD-GeTe"
+DATASET_FP = Path().cwd()
+DATASET = "HO-LiMoNiTi-NPJCM-2020"
 
-SOFTWARE = "DeePMD"
-METHODS = "NVT"
+SOFTWARE = "VASP"
 LINKS = [
-    "https://github.com/LiuGroupHNU/nvnmd",
-    "https://doi.org/10.1038/s41524-022-00773-z",
+    "https://doi.org/10.24435/materialscloud:2020.0037/v1",
+    "https://doi.org/10.1038/s41524-020-0323-8",
 ]
-AUTHORS = "P. Mo, C. Li, D. Zhao, Y. Zhang, M. Shi, J. Li, J. Liu"
-DS_DESC = "Approximately 5,000 configurations of GeTe used in training and\
- testing of a non-von Neumann multiplication-less DNN model."
-ELEMENTS = ["Ge", "Te"]
-GLOB_STR = "box.npy"
+AUTHORS = "A. Cooper, J. Kästner1, A. Urban, N. Artrith"
+DS_DESC = "Approximately 6,900 configurations of bulk water, water clusters\
+ and Li8Mo2Ni7Ti7O32 used in the training of an ANN, whereby total energy\
+ is extrapolated by a Taylor expansion as a means of reducing computational\
+ costs."
+ELEMENTS = ["H", "O", "Li", "Mo", "Ni", "Ti"]
+GLOB_STR = "*.xsf"
 
-ELEM_KEY = {0: "Ge", 1: "Te"}
+E_RE = re.compile(r"# total energy = (\S+)( eV)?$")
 
 
-def assemble_props(filepath: Path):
-    props = {}
-    prop_paths = list(filepath.parent.glob("*.npy"))
-    type_path = list(filepath.parents[1].glob("type.raw"))[0]
-
-    with open(type_path, "r") as f:
-        nums = f.read().strip().split("\n")
-        props["symbols"] = [ELEM_KEY[int(num)] for num in nums]
-
-    for p in prop_paths:
-        key = p.stem
-        props[key] = np.load(p)
-    num_configs = props["force"].shape[0]
-    num_atoms = props["force"].shape[1] // 3
-    props["force"] = props["force"].reshape(num_configs, num_atoms, 3)
-    props["coord"] = props["coord"].reshape(num_configs, num_atoms, 3)
-    props["dipole"] = props["dipole"].reshape(num_configs, num_atoms, 3)
-    props["box"] = props["box"].reshape(num_configs, 3, 3)
-    return props
+def get_method_name(filepath):
+    if "LMNTO-SCAN" in filepath.parts[-2]:
+        return ("SCAN", filepath.parts[-2])
+    elif "water-clusters" in filepath.parts[-3]:
+        return ("DFT-BLYP-D3/def2-TZVP", filepath.parts[-3])
+    elif "liquid-64water" in filepath.parts[-2]:
+        return ("DFT-revPBE+D3", filepath.parts[-2])
+    else:
+        return None
 
 
 def reader(filepath):
-    props = assemble_props(filepath)
-    configs = [
-        AtomicConfiguration(
-            symbols=props["symbols"], positions=pos, cell=props["box"][i]
-        )
-        for i, pos in enumerate(props["coord"])
-    ]
-    energy = props.get("energy")
-    for i, c in enumerate(configs):
-        c.info["forces"] = props["force"][i]
-        c.info["dipole"] = props["dipole"][i]
-        c.info["energy"] = float(energy[i])
-        c.info["name"] = f"{filepath.parts[-3]}_{filepath.parts[-2]}_{i}"
-    return configs
+    methods, name = get_method_name(filepath)
+    config = read(filepath)
+    config.info["methods"] = methods
+    config.info["name"] = name
+    with open(filepath, "r") as f:
+        match = E_RE.match(f.readline())
+    config.info["energy"] = float(match.groups()[0])
+    config.info["forces"] = config.get_forces()
+    return [config]
 
 
 def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     args = parser.parse_args(argv)
-    client = MongoDatabase("----", uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase("----", nprocs=4, uri=f"mongodb://{args.ip}:27017")
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -111,8 +93,8 @@ def main(argv):
 
     metadata = {
         "software": {"value": SOFTWARE},
-        "method": {"value": METHODS},
-        "dipole": {"field": "dipole"},
+        "method": {"field": "methods"},
+        # "": {"field": ""}
     }
     property_map = {
         "potential-energy": [
@@ -139,12 +121,33 @@ def main(argv):
     )
 
     all_co_ids, all_do_ids = list(zip(*ids))
+
     cs_regexes = [
         [
-            f"{DATASET}_train",
-            ".*train.*",
-            f"Training configurations from {DATASET} dataset",
-        ]
+            f"{DATASET}-LiMoNiTi-train",
+            "LMNTO-SCAN-train-data",
+            f"Training configurations of Li8Mo2Ni7Ti7O32 from {DATASET} dataset",
+        ],
+        [
+            f"{DATASET}-LiMoNiTi-validation",
+            "LMNTO-SCAN-validation-data",
+            f"Validation configurations of Li8Mo2Ni7Ti7O32 from {DATASET} dataset",
+        ],
+        [
+            f"{DATASET}-bulk-water-train-test",
+            "liquid-64water-AIMD-RPBE-D3-train-test-data",
+            f"Training and testing configurations of bulk water from {DATASET} dataset",
+        ],
+        [
+            f"{DATASET}-bulk-water-validation",
+            "liquid-64water-AIMD-RPBE-D3-validation-data",
+            f"Validation configurations of bulk water from {DATASET} dataset",
+        ],
+        [
+            f"{DATASET}-water-clusters",
+            "water-clusters-BLYP-D3",
+            f"Configurations of water clusters from {DATASET} dataset",
+        ],
     ]
 
     cs_ids = []
@@ -181,6 +184,7 @@ def main(argv):
         links=LINKS,
         description=DS_DESC,
         verbose=True,
+        cs_ids=cs_ids,
     )
 
 
