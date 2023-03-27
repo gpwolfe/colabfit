@@ -13,6 +13,7 @@ def read_npz(filepath):
 
 # For assembling data in npy format scattered into a single category 
 # with a type.raw file in parent directory
+# This is the format associated with DeePMD models/datasets
 ELEM_KEY = {1: "H", 2: "O"}
 def assemble_props(filepath: Path):
     props = {}
@@ -53,7 +54,7 @@ def reader(filepath):
     ]
     energy = props.get("energy")
     for i, c in enumerate(configs):
-        c.info["forces"] = props["force"][i]
+        c.info["forces"] = props["forces"][i]
         # if energy is not None:
         c.info["energy"] = float(energy[i])
         c.info[
