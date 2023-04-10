@@ -85,6 +85,13 @@ def main(argv):
             {
                 "forces": {"field": "forces", "units": "eV/A"},
                 "_metadata": metadata,
+            },
+        ],
+        "cauchy-stress": [
+            {
+                "stress": {"field": "stress", "units": "eV"},
+                "volume-normalized": {"value": True, "units": None},
+                "_metadata": metadata,
             }
         ],
     }

@@ -25,6 +25,13 @@ def assemble_props(filepath: Path):
     #     if key in type_path.parts[-7:]:
     #         elem_key = ELEM_KEY[key]
 
+    # if type_map.raw file is present, use below to create on-the-fly atom type map
+    # elem_map = dict()
+    # with open(filepath.parents[1] / "type_map.raw", "r") as f:
+    #     types = [x.strip() for x in f.readlines()]
+    #     for i, t in enumerate(types):
+    #         elem_map[i] = t
+
     with open(type_path, "r") as f:
         nums = f.read().rstrip().split(" ")
         # If multiple config types and using "elem_key" above, change below
