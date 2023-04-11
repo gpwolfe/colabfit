@@ -133,7 +133,7 @@ def reader(filepath):
         c.info["software"] = software
 
         c.info["name"] = f"{name}_{i}"
-    return configs
+    return configs[::50]
 
 
 def main(argv):
@@ -244,7 +244,7 @@ def main(argv):
             fields="hash",
             query={
                 "hash": {"$in": all_co_ids},
-                "name": {"$regex": regex},
+                "names": {"$regex": regex},
             },
             ravel=True,
         ).tolist()
