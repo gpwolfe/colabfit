@@ -2,7 +2,7 @@
 author:gpwolfe
 
 Data can be downloaded from:
-https://aisquare-zjk.oss-cn-zhangjiakou.aliyuncs.com/AIS-Square/datasets/Ag-PBE/Ag-PBE.zip
+https://www.aissquare.com/datasets/detail?pageType=datasets&name=AgAu-nanoalloy
 
 Change database name as appropriate
 
@@ -33,19 +33,20 @@ from pathlib import Path
 import sys
 
 DATASET_FP = Path().cwd()
-DATASET = "Au-PBE-MSMSE-2021"
+DATASET = "AuAu-nanoalloy-MSMSE-2021"
 
 SOFTWARE = "VASP, DP-GEN"
 METHODS = "DFT-PBE-D3"
 LINKS = [
-    "https://www.aissquare.com/datasets/detail?pageType=datasets&name=Au-PBE",
+    "https://www.aissquare.com/datasets/detail?pageType=datasets&name=AgAu-nanoalloy",
     "https://doi.org/10.48550/arXiv.2108.06232",
 ]
 AUTHORS = "Y. Wang, X. Wang, L. Zhang, B. Xu, H. Wang"
-DS_DESC = "Approximately 20,000 configurations of Au used as part of a \
+DS_DESC = "Approximately 50,000 configurations of Au, Ag and AuAg\
+ used as part of a \
  training dataset for a DP-GEN-based ML model for a Ag-Au nanoalloy \
  potential."
-ELEMENTS = ["Au"]
+ELEMENTS = ["Au", "Ag"]
 GLOB_STR = "box.npy"
 
 
@@ -105,7 +106,7 @@ def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     args = parser.parse_args(argv)
-    client = MongoDatabase("--", nprocs=2, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase("----", nprocs=4, uri=f"mongodb://{args.ip}:27017")
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -157,6 +158,51 @@ def main(argv):
     )
 
     all_co_ids, all_do_ids = list(zip(*ids))
+
+    cs_regexes = [
+        [
+            f"{DATASET}-Ag",
+            ["Ag"],
+            f"Ag-only configurations from {DATASET} dataset",
+        ],
+        [
+            f"{DATASET}-Au",
+            ["Au"],
+            f"Au-only configurations from {DATASET} dataset",
+        ],
+        [
+            f"{DATASET}-AgAu",
+            ["Ag", "Au"],
+            f"Ag-Au configurations from {DATASET} dataset",
+        ],
+    ]
+
+    cs_ids = []
+
+    for i, (name, regex, desc) in enumerate(cs_regexes):
+        co_ids = client.get_data(
+            "configurations",
+            fields="hash",
+            query={
+                "hash": {"$in": all_co_ids},
+                "elements": {"$eq": regex},
+            },
+            ravel=True,
+        ).tolist()
+
+        print(
+            f"Configuration set {i}",
+            f"({name}):".rjust(22),
+            f"{len(co_ids)}".rjust(7),
+        )
+        if len(co_ids) > 0:
+            cs_id = client.insert_configuration_set(
+                co_ids, description=desc, name=name
+            )
+
+            cs_ids.append(cs_id)
+        else:
+            pass
 
     client.insert_dataset(
         pr_hashes=all_do_ids,
