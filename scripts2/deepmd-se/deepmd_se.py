@@ -133,7 +133,7 @@ def reader(filepath):
         c.info["software"] = software
 
         c.info["name"] = f"{name}_{i}"
-    return configs[::50]
+    return configs
 
 
 def main(argv):
