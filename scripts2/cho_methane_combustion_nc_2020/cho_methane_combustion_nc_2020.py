@@ -41,7 +41,13 @@ LINKS = [
     "https://doi.org/10.6084/m9.figshare.12973055.v3",
     "https://doi.org/10.1038/s41467-020-19497-z",
 ]
-AUTHORS = "J. Zeng, L. Cao, M. Xu, T. Zhu, J.Z.H. Zhang"
+AUTHORS = [
+    "Jinzhe Zeng",
+    "Liqun Cao",
+    "Mingyuan Xu",
+    "Tong Zhu",
+    "John Z. H. Zhang",
+]
 DS_DESC = "Configurations of simulated methane combustion used to develop\
  a potential energy surface neural network using DeePMD."
 ELEMENTS = ["C", "H", "O"]

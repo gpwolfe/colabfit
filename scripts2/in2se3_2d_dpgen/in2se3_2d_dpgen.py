@@ -36,12 +36,19 @@ DATASET_FP = Path().cwd()
 DATASET = "In2Se3-2D-DPGEN"
 
 SOFTWARE = "VASP, DP-GEN"
-METHODS = "DFT-PBE"
+METHODS = "DFT(PBE)"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=In2Se3-2D-dpgen",
     "https://doi.org/10.1103/PhysRevB.104.174107",
 ]
-AUTHORS = "J. Wu, L. Bai, J. Huang, L. Ma, J. Liu, S. Liu"
+AUTHORS = [
+    "Jing Wu",
+    "Liyi Bai",
+    "Jiawei Huang",
+    "Liyang Ma",
+    "Jian Liu",
+    "Shi Liu",
+]
 DS_DESC = "Approximately 11,500 configurations of In2Se3, including monolayer\
  (20-atom slab) and bulk (30-atom supercell) models."
 ELEMENTS = ["In", "Se"]

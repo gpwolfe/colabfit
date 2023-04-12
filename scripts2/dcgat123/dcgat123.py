@@ -39,13 +39,21 @@ DATASET_FP = Path("data")
 DATASET = "DCGAT"
 
 SOFTWARE = "VASP"
-METHODS = "DFT-PBE"
+METHODS = "DFT(PBE)"
 LINKS = [
     "https://doi.org/10.24435/materialscloud:m7-50",
     "https://doi.org/10.1002/adma.202210788",
 ]
-AUTHORS = "J. Schmidt, N. Hoffmann, H.-C. Wang, P. Borlido, P.J.M.A. Carriço,\
- T.F.T. Cerqueira, S. Botti, M.A.L. Marques"
+AUTHORS = [
+    "Jonathan Schmidt",
+    "Noah Hoffmann",
+    "Hai-Chen Wang",
+    "Pedro Borlido",
+    "Pedro J. M. A. Carriço",
+    "Tiago F. T. Cerqueira",
+    "Silvana Botti",
+    "Miguel A. L. Marques",
+]
 DS_DESC = "Approximately 2.3 million configurations from 3 datasets curate\
  for the purpose of training a crystal graph attention network machine\
  learning model. Includes structures gathered from the Materials Project and\

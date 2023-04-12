@@ -36,12 +36,18 @@ DATASET_FP = Path().cwd()
 DATASET = "Au-PBE-MSMSE-2021"
 
 SOFTWARE = "VASP, DP-GEN"
-METHODS = "DFT-PBE-D3"
+METHODS = "DFT(PBE+D3)"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=Au-PBE",
     "https://doi.org/10.48550/arXiv.2108.06232",
 ]
-AUTHORS = "Y. Wang, X. Wang, L. Zhang, B. Xu, H. Wang"
+AUTHORS = [
+    "Yinan Wang",
+    "Xiaoyang Wang",
+    "Linfeng Zhang",
+    "Ben Xu",
+    "Han Wang",
+]
 DS_DESC = "Approximately 20,000 configurations of Au used as part of a \
  training dataset for a DP-GEN-based ML model for a Ag-Au nanoalloy \
  potential."

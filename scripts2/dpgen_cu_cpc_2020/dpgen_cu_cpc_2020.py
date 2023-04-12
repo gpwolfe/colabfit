@@ -38,12 +38,20 @@ DATASET_FP = Path().cwd()
 DATASET = "DP-GEN-Cu"
 
 SOFTWARE = "VASP, DP-GEN"
-METHODS = "DFT-PBE"
+METHODS = "DFT(PBE)"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=Cu-dpgen",
     "https://doi.org/10.1016/j.cpc.2020.107206",
 ]
-AUTHORS = "Y. Zhang, H. Wang, W. Chen, J. Zeng, L. Zhang, H. Wang, W. E"
+AUTHORS = [
+    "Yuzhi Zhang",
+    "Haidi Wang",
+    "Weijie Chen",
+    "Jinzhe Zeng",
+    "Linfeng Zhang",
+    "Han Wang",
+    "Weinan E",
+]
 DS_DESC = "Approximately 15,000 configurations of copper used to demonstrate \
  the DP-GEN data generator for PES machine learning models."
 ELEMENTS = ["Cu"]

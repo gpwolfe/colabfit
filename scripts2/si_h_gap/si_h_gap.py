@@ -44,12 +44,18 @@ DATASET_FP = Path("Si-H-GAP-main/structural_data")
 DATASET = "Si-H-GAP"
 
 SOFTWARE = "Quantum ESPRESSO"
-METHODS = "DFT-PBE"
+METHODS = "DFT(PBE)"
 LINKS = [
     "https://github.com/dgunruh/Si-H-GAP",
     "https://doi.org/10.1103/PhysRevMaterials.6.065603",
 ]
-AUTHORS = "D. Unruh, R.V. Meidanshahi, S.M. Goodnick, G. Csányi, G.T. Zimányi"
+AUTHORS = [
+    "Davis Unruh",
+    "Reza Vatan Meidanshahi",
+    "Stephen M. Goodnick",
+    "Gábor Csányi",
+    "Gergely T. Zimányi",
+]
 DS_DESC = "656 configurations of hydrogenated liquid and amorphous silicon,\
  divided into reference, training and validation sets. "
 ELEMENTS = ["Si", "H"]

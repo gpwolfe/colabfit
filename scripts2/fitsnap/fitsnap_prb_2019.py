@@ -39,12 +39,12 @@ DATASET_FP = Path("examples/WBe_PRB2019/JSON")
 DATASET = "FitSNAP-WBe-PRB-2019"
 
 SOFTWARE = "VASP"
-METHODS = "DFT-PBE-GGA"
+METHODS = "DFT(PBE+GGA)"
 LINKS = [
     "https://github.com/FitSNAP",
     "https://doi.org/10.1103/PhysRevB.99.184305",
 ]
-AUTHORS = "M. A. Wood, M. A. Cusentino, B. D. Wirth, and A. P. Thompson"
+AUTHORS = ["M. A. Wood", "M. A. Cusentino", "B. D. Wirth", "A. P. Thompson"]
 DS_DESC = "About 25,000 configurations of tungsten and beryllium used in\
  the training of a SNAP interatomic potential machine learning model with the\
  goal of modeling the interactions of Be and W in fusion reactor plasma-facing\

@@ -44,7 +44,15 @@ LINKS = [
     "https://github.com/LiuGroupHNU/nvnmd",
     "https://doi.org/10.1038/s41524-022-00773-z",
 ]
-AUTHORS = "P. Mo, C. Li, D. Zhao, Y. Zhang, M. Shi, J. Li, J. Liu"
+AUTHORS = [
+    "Pinghui Mo",
+    "Chang Li",
+    "Dan Zhao",
+    "Yujia Zhang",
+    "Mengchao Shi",
+    "Junhua Li",
+    "Jie Liu",
+]
 DS_DESC = "Approximately 5,000 configurations of GeTe used in training and\
  testing of a non-von Neumann multiplication-less DNN model."
 ELEMENTS = ["Ge", "Te"]

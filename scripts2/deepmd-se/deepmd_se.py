@@ -19,7 +19,6 @@ Other properties added to metadata
 
 File notes
 ----------
-Weinan E is the name of the last author. "W. E" is not a typo
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
@@ -40,7 +39,14 @@ LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=deepmd-se-dataset",
     "https://doi.org/10.48550/arXiv.1805.09003",
 ]
-AUTHORS = "L. Zhang, J. Han, H. Wang, W.A. Saidi, R. Car, W. E"
+AUTHORS = [
+    "Linfeng Zhang",
+    "Jiequn Han",
+    "Han Wang",
+    "Wissam A. Saidi",
+    "Roberto Car",
+    "Weinan E",
+]
 DS_DESC = "127,000 configurations from a dataset used to benchmark and train\
  a modified DeePMD model called DeepPot-SE, or Deep Potential - Smooth Edition"
 ELEMENTS = [
@@ -105,7 +111,7 @@ def meta_namer(filepath):
     elif parts[-4] == "pyridine":
         return (
             f"{parts[-4]}__{parts[-3]}_{parts[-2]}",
-            "DFT-PBE-GGA",
+            "DFT(PBE+GGA)",
             "Quantum ESPRESSO",
         )
     elif parts[-5] == "HEA":

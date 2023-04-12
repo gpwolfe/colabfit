@@ -37,8 +37,8 @@ DATASET_FP = Path().cwd()
 DATASET = "NequIP-NC-2022"
 
 SOFT_METH = {
-    "lipo-quench": ("DFT-PBE", "VASP"),
-    "lips": ("DFT-PBE", "VASP"),
+    "lipo-quench": ("DFT(PBE)", "VASP"),
+    "lips": ("DFT(PBE)", "VASP"),
     "fcu": ("DFT", "CP2K"),
 }
 
@@ -46,8 +46,17 @@ LINKS = [
     "https://doi.org/10.24435/materialscloud:s0-5n",
     "https://doi.org/10.1038/s41467-022-29939-5",
 ]
-AUTHORS = "S. Batzner, A. Musaelian, L. Sun, M. Geiger, J.P. Mailoa, \
- M. Kornbluth, N. Molinari, T.E. Smidt, B. Kozinsky"
+AUTHORS = [
+    "Simon Batzner",
+    "Albert Musaelian",
+    "Lixin Sun",
+    "Mario Geiger",
+    "Jonathan P. Mailoa",
+    "Mordechai Kornbluth",
+    "Nicola Molinari",
+    "Tess E. Smidt",
+    "Boris Kozinsky",
+]
 DS_DESC = "Approximately 57,000 configurations from the evaluation datasets\
  for NequIP graph neural network model for\
  interatomic potentials. Trajectories have been taken from LIPS, LIPO glass\

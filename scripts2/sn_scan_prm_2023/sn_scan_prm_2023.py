@@ -36,12 +36,20 @@ DATASET_FP = Path().cwd()
 DATASET = "Sn-SCAN-PRM-2023"
 
 SOFTWARE = "VASP, DP-GEN"
-METHODS = "DFT-SCAN"
+METHODS = "DFT(SCAN)"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=Sn-SCAN",
     "https://doi.org/10.48550/arXiv.2209.05059",
 ]
-AUTHORS = "T. Chen, F. Yuan, J. Liu, H. Geng, L. Zhang, H. Wang, M. Chen"
+AUTHORS = [
+    "Tao Chen",
+    "Fengbo Yuan",
+    "Jianchuan Liu",
+    "Huayun Geng",
+    "Linfeng Zhang",
+    "Han Wang",
+    "Mohan Chen",
+]
 DS_DESC = "Approximately 6,500 configurations of Sn, including Sn8, Sn16 and\
  Sn32, used in developing a deep potential that predicts the phase diagram of\
  Sn"

@@ -36,12 +36,12 @@ DATASET_FP = Path().cwd()
 DATASET = "HfO2-DPGEN-PRB-2021"
 
 SOFTWARE = "VASP, DP-GEN"
-METHODS = "DFT-PBE"
+METHODS = "DFT(PBE)"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=HfO2-dpgen",
     "https://doi.org/10.1103/PhysRevB.103.024108",
 ]
-AUTHORS = "J. Wu1, Y. Zhang, L. Zhang, S. Liu"
+AUTHORS = ["Jing Wu", "Yuzhi Zhang", "Linfeng Zhang", "Shi Liu"]
 DS_DESC = "Approximately 28,500 configurations of hafnia (HfO2) used in the\
  training of a DP model for the prediction of properties of various hafnia\
  polymorphs, including transition barriers between different phases."

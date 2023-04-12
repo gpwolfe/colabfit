@@ -39,7 +39,12 @@ LINKS = [
     "https://doi.org/10.24435/materialscloud:2020.0037/v1",
     "https://doi.org/10.1038/s41524-020-0323-8",
 ]
-AUTHORS = "A. Cooper, J. Kästner1, A. Urban, N. Artrith"
+AUTHORS = [
+    "April M. Cooper",
+    "Johannes Kästner",
+    "Alexander Urban",
+    "Nongnuch Artrith",
+]
 DS_DESC = "Approximately 6,900 configurations of bulk water, water clusters\
  and Li8Mo2Ni7Ti7O32 used in the training of an ANN, whereby total energy\
  is extrapolated by a Taylor expansion as a means of reducing computational\
@@ -54,9 +59,9 @@ def get_method_name(filepath):
     if "LMNTO-SCAN" in filepath.parts[-2]:
         return ("SCAN", filepath.parts[-2])
     elif "water-clusters" in filepath.parts[-3]:
-        return ("DFT-BLYP-D3/def2-TZVP", filepath.parts[-3])
+        return ("DFT(BLYP-D3)/def2-TZVP", filepath.parts[-3])
     elif "liquid-64water" in filepath.parts[-2]:
-        return ("DFT-revPBE+D3", filepath.parts[-2])
+        return ("DFT(revPBE+D3)", filepath.parts[-2])
     else:
         return None
 

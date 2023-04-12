@@ -41,12 +41,18 @@ DATASET_FP = Path("examples/Ta_Linear_JCP2014/")
 DATASET = "FitSNAP-Ta-Linear-JCP-2014"
 
 SOFTWARE = "VASP"
-METHODS = "DFT-PBE"
+METHODS = "DFT(PBE)"
 LINKS = [
     "https://github.com/FitSNAP",
     "https://doi.org/10.1016/j.jcp.2014.12.018",
 ]
-AUTHORS = "A.P. Thompson, L.P. Swiler, C.R. Trott, S.M. Foiles, G.J. Tucker"
+AUTHORS = [
+    "A.P. Thompson",
+    "L.P. Swiler",
+    "C.R. Trott",
+    "S.M. Foiles",
+    "G.J. Tucker",
+]
 DS_DESC = "363 configurations of Ta used in the training of\
  a Spectral Neighbor Analysis Potential (SNAP) interatomic potential ML\
  model with the goal of modeling the migration of screw dislocations in\

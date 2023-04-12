@@ -40,7 +40,7 @@ LINKS = [
     "https://doi.org/10.1103/PhysRevLett.98.146401",
     "https://doi.org/10.1073/pnas.1602375113",
 ]
-AUTHORS = "T. Morawietz, J. Behler"
+AUTHORS = ["Tobias Morawietz", "Joerg Behler"]
 DS_DESC = "Approximately 28,000 configurations split into 4 datasets, each\
  using a different functional, used in the training of a high-dimensional\
  neural network potential (HDNNP). "
@@ -78,7 +78,7 @@ def reader(filepath):
                 config.info["energy"] = energy
                 config.info["charge"] = charge
                 config.info["name"] = filepath.name
-                config.info["method"] = f"DFT-{filepath.name.split('.')[-1]}"
+                config.info["method"] = f"DFT({filepath.name.split('.')[-1]})"
 
                 configs.append(config)
             elif line.startswith("atom"):

@@ -42,8 +42,16 @@ LINKS = [
     "https://github.com/argonne-lcf/active-learning-md",
     "https://doi.org/10.1038/s41524-020-00367-7",
 ]
-AUTHORS = "G. Sivaraman, A.N. Krishnamoorthy, M. Baur, C. Holm, M. Stan,\
- G. Csányi, C. Benmore, Á. Vázquez-Mayagoitia"
+AUTHORS = [
+    "Ganesh Sivaraman",
+    "Anand Narayanan Krishnamoorthy",
+    "Matthias Baur",
+    "Christian Holm",
+    "Marius Stan",
+    "Gábor Csányi",
+    "Chris Benmore",
+    "Álvaro Vázquez-Mayagoitia",
+]
 DS_DESC = "6000 configurations of liquid and amorphous HfO2 generated for use\
  with an active learning ML model."
 ELEMENTS = ["Hf", "O"]

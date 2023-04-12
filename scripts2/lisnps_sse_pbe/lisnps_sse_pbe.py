@@ -19,7 +19,6 @@ Other properties added to metadata
 
 File notes
 ----------
-The last author name is Weinan E -- this is not a misspelling
 
 This appears to be an exact copy of the dataset that uses the PBEsol
 functional (from the same source, supposedly two datasets with different
@@ -41,12 +40,19 @@ DATASET_FP = Path().cwd()
 DATASET = "LiSnPS-SSE-PBE"
 
 SOFTWARE = "VASP, DP-GEN"
-METHODS = "DFT-PBE"
+METHODS = "DFT(PBE)"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=LiSnPS-SSE-PBE",
     "https://doi.org/10.1063/5.0041849",
 ]
-AUTHORS = "J. Huang, L. Zhang, H. Wang, J. Zhao, J. Cheng, and W. E"
+AUTHORS = [
+    "Jianxing Huang",
+    "Linfeng Zhang",
+    "Han Wang",
+    "Jinbao Zhao",
+    "Jun Cheng",
+    "Weinan E",
+]
 DS_DESC = "Approximately 2,700 configurations of Li10SnP2S12, based on crystal\
  structures from the Materials Project database, material ID mp-696123. One of\
  two LiSnPS datasets from this source. The other uses the PBEsol functional,\

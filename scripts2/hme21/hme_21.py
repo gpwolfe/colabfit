@@ -35,15 +35,35 @@ DATASET_FP = Path().cwd()
 DATASET = "HME21"
 
 SOFTWARE = "VASP"
-METHODS = "DFT-PBE"
+METHODS = "DFT(PBE)"
 LINKS = [
     "https://doi.org/10.6084/m9.figshare.19658538.v2",
     "https://doi.org/10.1038/s41467-022-30687-9",
 ]
-AUTHORS = "S. Takamoto, C. Shinagawa, D. Motoki, K. Nakago, W. Li, I. Kurata,\
- T. Watanabe, Y. Yayama, H. Iriguchi, Y. Asano, T. Onodera, T. Ishii, T. Kudo,\
- H. Ono, R. Sawada, R. Ishitani, M. Ong, T. Yamaguchi, T. Kataoka, A. Hayashi,\
- N. Charoenphakdee, T. Ibuka"
+AUTHORS = [
+    "So Takamoto",
+    "Chikashi Shinagawa",
+    "Daisuke Motoki",
+    "Kosuke Nakago",
+    "Wenwen Li",
+    "Iori Kurata",
+    "Taku Watanabe",
+    "Yoshihiro Yayama",
+    "Hiroki Iriguchi",
+    "Yusuke Asano",
+    "Tasuku Onodera",
+    "Takafumi Ishii",
+    "Takao Kudo",
+    "Hideki Ono",
+    "Ryohto Sawada",
+    "Ryuichiro Ishitani",
+    "Marc Ong",
+    "Taiki Yamaguchi",
+    "Toshiki Kataoka",
+    "Akihide Hayashi",
+    "Nontawat Charoenphakdee",
+    "Takeshi Ibuka",
+]
 DS_DESC = "Approximately 25,000 configurations, including 37 elements, used in\
  the training of a universal NNP called PreFerential Potential (PFP). The\
  dataset specifically contains disordered and unstable structures, and\

@@ -19,7 +19,6 @@ Other properties added to metadata
 
 File notes
 ----------
-The last author name is Weinan E -- this is not a misspelling
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
@@ -37,12 +36,19 @@ DATASET_FP = Path().cwd()
 DATASET = "LiGePS-SSE-PBE"
 
 SOFTWARE = "VASP, DP-GEN"
-METHODS = "DFT-PBE"
+METHODS = "DFT(PBE)"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=LiGePS-SSE-PBE",
     "https://doi.org/10.1063/5.0041849",
 ]
-AUTHORS = "J. Huang, L. Zhang, H. Wang, J. Zhao, J. Cheng, and W. E"
+AUTHORS = [
+    "Jianxing Huang",
+    "Linfeng Zhang",
+    "Han Wang",
+    "Jinbao Zhao",
+    "Jun Cheng",
+    "Weinan E",
+]
 DS_DESC = "Approximately 6,500 configurations of Li10GeP2S12, based on crystal\
  structures from the Materials Project database, material ID mp-696129. One of\
  two LiGePS datasets from this source. The other uses the PBEsol functional,\

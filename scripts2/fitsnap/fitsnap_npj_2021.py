@@ -40,13 +40,21 @@ DATASET_FP = Path("examples/Fe_Linear_NPJ2021/JSON")
 DATASET = "FitSNAP-Fe-NPJ-2021"
 
 SOFTWARE = "VASP"
-METHODS = "DFT-PBE"
+METHODS = "DFT(PBE)"
 LINKS = [
     "https://github.com/FitSNAP",
     "https://doi.org/10.1038/s41524-021-00617-2",
 ]
-AUTHORS = "S. Nikolov, M.A. Wood, A. Cangi, J.\
- Maillet, M. Marinica, A.P. Thompson, M.P. Desjarlais, J. Tranchida"
+AUTHORS = [
+    "Svetoslav Nikolov",
+    "Mitchell A. Wood",
+    "Attila Cangi",
+    "Jean-Bernard Maillet",
+    "Mihai-Cosmin Marinica",
+    "Aidan P. Thompson",
+    "Michael P. Desjarlais",
+    "Julien Tranchida",
+]
 DS_DESC = "About 2,500 configurations of alpha-Fe used in the training and\
  testing of a ML model with the goal of building magneto-elastic\
  machine-learning interatomic potentials for large-scale spin-lattice\

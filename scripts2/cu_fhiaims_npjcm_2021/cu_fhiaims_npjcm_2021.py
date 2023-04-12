@@ -43,14 +43,24 @@ DATASET_FP = Path().cwd()
 DATASET = "Cu_FHIaims_NPJCM_2021"
 
 SOFTWARE = "FHI–aims"
-METHODS = "DFT-PBE"
+METHODS = "DFT(PBE)"
 LINKS = [
     "https://doi.org/10.5281/zenodo.4734035",
     "https://doi.org/10.1038/s41524-021-00559-9",
 ]
-AUTHORS = "Y. Lysogorskiy, C. van der Oord, A. Bochkarev, S. Menon, \
- M. Rinaldi, T. Hammerschmidt, M. Mrovec, A. Thompson, G. Csányi,\
- C. Ortner, R. Drautz"
+AUTHORS = [
+    "Yury Lysogorskiy",
+    "Cas van der Oord",
+    "Anton Bochkarev",
+    "Sarath Menon",
+    "Matteo Rinaldi",
+    "Thomas Hammerschmidt",
+    "Matous Mrovec",
+    "Aidan Thompson",
+    "Gábor Csányi",
+    "Christoph Ortner",
+    "Ralf Drautz",
+]
 DS_DESC = "Approximately 46,000 configurations of copper, including small and\
  bulk structures, surfaces, interfaces, point defects, and randomly modified\
  variants. Also includes structures with displaced or missing atoms."

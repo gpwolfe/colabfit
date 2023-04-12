@@ -38,12 +38,20 @@ DATASET_FP = Path().cwd()
 DATASET = "Ti-NPJCM-2021"
 
 SOFTWARE = "VASP, LAMMPS"
-METHODS = "DFT-PBE"
+METHODS = "DFT(PBE)"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=Ti",
     "https://doi.org/10.1038/s41524-021-00661-y",
 ]
-AUTHORS = "T. Wen, R. Wang, L. Zhu, L. Zhang, H. Wang,  D.J. Srolovitz, Z. Wu"
+AUTHORS = [
+    "Tongqi Wen",
+    "Rui Wang",
+    "Lingyu Zhu",
+    "Linfeng Zhang",
+    "Han Wang",
+    "David J. Srolovitz",
+    "Zhaoxuan Wu",
+]
 DS_DESC = "Approximately 7,400 configurations of titanium"
 ELEMENTS = ["Ti"]
 GLOB_STR = "box.npy"
