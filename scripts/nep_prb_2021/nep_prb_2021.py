@@ -44,15 +44,17 @@ import sys
 
 DATASET_FP = Path("zenodo_nep_version_2")
 DATASET = "NEP_PRB_2021"
-
-SOFTWARE = "VASP (PbTe), Quantum ESPRESSO (Silicene), CASTEP (Si)"
-METHODS = "DFT-PBE (PbTe and Silicene), DFT-PW91 (Si)"
+SOFT_METH = {
+    "PbTe_Fan_2021": ("VASP", "DFT(PBE)"),
+    "Si_Fan_2021": ("CASTEP", "DFT(PW91)"),
+    "Silicene_Fan_2021": ("Quantum ESPRESSO", "DFT(PBE)"),
+}
 
 LINKS = [
     "https://doi.org/10.5281/zenodo.5109599",
     "https://doi.org/10.1103/PhysRevB.104.104309",
 ]
-AUTHORS = "Z. Fan"
+AUTHORS = "Zheyong Fan"
 DS_DESC = """Approximately 7,000 distinct configurations of 2D-silicene,
  silicon, and PbTe. Silicon data used from
  http://dx.doi.org/10.1103/PhysRevX.8.041048. Dataset includes predicted
@@ -207,6 +209,8 @@ def reader(filepath):
         atom.info["forces"] = forces[i]
         atom.info["virials"] = virials[i]
         atom.info["energy"] = energy[i]
+        atom.info["software"] = SOFT_METH[dir_name][0]
+        atom.info["methods"] = SOFT_METH[dir_name][1]
         configs.append(atom)
 
     return configs
@@ -231,8 +235,8 @@ def main(argv):
     client.insert_property_definition(potential_energy_pd)
 
     metadata = {
-        "software": {"value": SOFTWARE},
-        "method": {"value": METHODS},
+        "software": {"field": "software"},
+        "method": {"field": "methods"},
         "virials": {
             "field": "virials",
             "units": "eV/atom",

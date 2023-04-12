@@ -46,11 +46,15 @@ METHODS = "DFT"
 LINKS = [
     "https://doi.org/10.1038/s41467-022-28526-y",
     "https://github.com/atomistic-machine-learning/cG-SchNet/",
-    "https://www.nature.com/articles/s41467-022-28526-y#data-availability",
+    "https://www.nature.com/articles/s41467-022-28526-y",
 ]
-AUTHORS = (
-    "N.W.A. Gebauer, M. Gastegger, S.S.P. Hessmann, K.-R. Müller, K.T. Schütt"
-)
+AUTHORS = [
+    "Niklas W.A. Gebauer",
+    "Michael Gastegger",
+    "Stefaan S.P. Hessmann",
+    "Klaus-Robert Müller",
+    "Kristof T. Schütt",
+]
 DS_DESC = "Configurations from a cG-SchNet trained on a subset of the QM9\
  dataset. Model was trained with the intention of providing molecules with\
  specified functional groups or motifs, relying on sampling of molecular\

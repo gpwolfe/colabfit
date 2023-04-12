@@ -52,7 +52,7 @@ from pathlib import Path
 import sys
 
 DATASET_FP = Path().cwd()
-METHOD = "DFT-GAP"
+METHOD = "DFT+GAP"
 SOFTWARE = "QuantumEspresso, CatKit"
 
 
@@ -183,13 +183,19 @@ def main(argv):
         cs_ids=cs_ids,
         pr_hashes=all_do_ids,
         name="COHInPt_schaaf_2023",
-        authors=["L. Schaaf, E. Fako, S. De, A. Schaefer, G. Csanyi"],
+        authors=[
+            "Lars Schaaf",
+            "Edvin Fako",
+            "Sandip De",
+            "Ansgar Schafer",
+            "Gabor Csanyi",
+        ],
         links=[
             "https://github.com/LarsSchaaf/reaction-barriers-mlffs",
             "https://arxiv.org/pdf/2301.09931",
         ],
-        description="Training and simulation data from machine learning "
-        "force field model applied to steps of the hydrogenation of carbon"
+        description="Training and simulation data from machine learning"
+        " force field model applied to steps of the hydrogenation of carbon"
         " dioxide to methanol over an indium oxide catalyst, with and"
         " without platinum doping.",
         verbose=True,

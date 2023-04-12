@@ -230,7 +230,7 @@ def main(argv):
         cs_ids=cs_ids,
         pr_hashes=all_do_ids,
         name="mbGDML_maldonado_2023",
-        authors=["A.M. Maldonado"],
+        authors=["Alex M. Maldonado"],
         links=[
             "https://doi.org/10.5281/zenodo.7112197",
             "https://doi.org/10.26434/chemrxiv-2023-wdd1r",

@@ -205,7 +205,7 @@ def main(argv):
 
     b3lyp_metadata = {
         "software": {"value": "Psi4"},
-        "method": {"value": ["B3LYP", "DFT"]},
+        "method": {"value": "DFT(B3LYP)"},
         "lumo-energy": {"field": "lumo_energy", "units": "a.u."},
         "homo-energy": {"field": "homo_energy", "units": "a.u."},
     }
@@ -222,7 +222,7 @@ def main(argv):
 
     scan0_metadata = {
         "software": {"value": "Q-Chem"},
-        "method": {"value": "SCAN0, DFT"},
+        "method": {"value": "DFT(SCAN0)"},
     }
 
     client.insert_property_definition(potential_energy_pd)
@@ -330,8 +330,12 @@ def main(argv):
         pr_hashes=list(all_do_ids),
         name="QM7b_AlphaML",
         authors=[
-            "Y. Yang, K. Un Lao, D.M. Wilkins, A. Grisafi, "
-            "M. Ceriotti, R.A. DiStasio Jr"
+            "Yang Yang",
+            "Ka Un Lao",
+            "David M. Wilkins",
+            "Andrea Grisafi",
+            "Michele Ceriotti",
+            "Robert A. DiStasio Jr",
         ],
         links=[
             "https://doi.org/10.24435/materialscloud:2019.0002/v3",

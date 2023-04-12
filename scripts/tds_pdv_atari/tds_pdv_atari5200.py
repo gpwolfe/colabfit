@@ -21,9 +21,10 @@ Run: $ python3 <script_name>.py -i (or --ip) <database_ip>
 Properties:
 potential energy
 forces
+virial
 
 Other properties added to metadata:
-virial
+
 
 File notes
 ----------
@@ -33,6 +34,7 @@ from colabfit.tools.database import MongoDatabase, load_data
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.property_definitions import (
     potential_energy_pd,
+    cauchy_stress_pd,
     atomic_forces_pd,
 )
 
@@ -129,10 +131,11 @@ def main(argv):
     )
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
+    client.insert_property_definition(cauchy_stress_pd)
     metadata = {
         "software": {"value": "VASP, LAMMPS"},
-        "method": {"value": "DFT-DeePot-SE"},
-        "virial": {"field": "virial"},
+        "method": {"value": "DFT"},
+        # "virial": {"field": "virial"},
     }
     property_map = {
         "potential-energy": [
@@ -145,6 +148,13 @@ def main(argv):
         "atomic-forces": [
             {
                 "forces": {"field": "force", "units": "eV/A"},
+                "_metadata": metadata,
+            }
+        ],
+        "cauchy-stress": [
+            {
+                "stress": {"field": "virial", "units": "eV"},
+                "volume-normalized": {"value": True, "units": None},
                 "_metadata": metadata,
             }
         ],
@@ -202,7 +212,7 @@ def main(argv):
         cs_ids=cs_ids,
         pr_hashes=all_do_ids,
         name="TdS-PdV_Atari5200",
-        authors=["P Wisesa, C.M. Andolina, W.A. Saidi"],
+        authors=["Pandu Wisesa", "Christopher M. Andolina", "Wissam A. Saidi"],
         links=[
             "https://doi.org/10.5281/zenodo.7278341"
             "https://github.com/saidigroup/Metal-Oxide-Dataset/tree/v1.0",

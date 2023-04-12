@@ -71,7 +71,7 @@ def main(argv):
     client.insert_property_definition(atomic_forces_pd)
     metadata = {
         "software": {"value": "FHI-aims"},
-        "method": {"value": "DFT-GGA-PBE"},
+        "method": {"value": "DFT(PBE-GGA)"},
     }
 
     property_map = {
@@ -122,10 +122,13 @@ def main(argv):
     #     cs_ids.append(cs_id)
     client.insert_dataset(
         all_do_ids,
-        name="ISO17_anips_2017",
+        name="ISO17_NC_2017",
         authors=[
-            "K.T. Schütt, P.-J. Kindermans, H.E. Sauceda, "
-            "S. Chmiela, A. Tkatchenko, K.-R. Müller"
+            "Jonathan Vandermause",
+            "Yu Xie",
+            "Jin Soo Lim",
+            "Cameron J. Owen",
+            "Boris Kozinsky",
         ],
         links=[
             "http://quantum-machine.org/datasets/",

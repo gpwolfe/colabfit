@@ -73,17 +73,17 @@ GLOB_STR = "OUTCAR*"
 DATASET = "SIMPLE_NN_SiO2"
 
 SOFTWARE = "VASP"
-METHODS = "DFT-GGA-PBE"
+METHODS = "DFT(PBE-GGA)"
 LINKS = [
     "https://doi.org/10.17632/pjv2yr7pvr.1",
     "https://doi.org/10.1016/j.cpc.2019.04.014",
 ]
-AUTHORS = "K. Lee, D. Yoo, W. Jeong, S. Han"
-DS_DESC = """10,000 configurations of SiO2 used as an example for the
- SIMPLE-NN machine learning model. Dataset includes three types of crystals:
- quartz, cristobalite and tridymite; amorphous; and liquid phase SiO2.
- Structures with distortion from compression, monoaxial strain and shear
- strain were also included in the training set."""
+AUTHORS = "Kyuhyun Lee", "Dongsun Yoo", "Wonseok Jeong", "Seungwu Han"
+DS_DESC = "10,000 configurations of SiO2 used as an example for the\
+ SIMPLE-NN machine learning model. Dataset includes three types of crystals:\
+ quartz, cristobalite and tridymite; amorphous; and liquid phase SiO2.\
+ Structures with distortion from compression, monoaxial strain and shear\
+ strain were also included in the training set."
 ELEMENTS = ["O", "Si"]
 
 

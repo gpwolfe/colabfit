@@ -42,11 +42,11 @@ from pathlib import Path
 import re
 import sys
 
-DATASET_FP = Path("scripts/nnip")
-DATASET = "NNIP_FeH_prm_2021"
+DATASET_FP = Path().cwd()
+DATASET = "NNIP_FeH_PRM_2021"
 
 SOFTWARE = "VASP"
-METHODS = "DFT-GGA-PBE"
+METHODS = "DFT(PBE+GGA)"
 
 ATOM_RE = re.compile(
     r"atom\s+(\-?\d+\.\d+)\s+(\-?\d+\.\d+)\s+"
@@ -201,11 +201,19 @@ def main(argv):
             pass
 
     client.insert_dataset(
-        cs_ids,
-        all_do_ids,
+        cs_ids=cs_ids,
+        pr_hashes=all_do_ids,
         name=DATASET,
-        authors="F. Meng, J. Du, S. Shinzato, H. Mori, P. Yu, K. Matsubara, \
-            N. Ishikawa, S. Ogata",
+        authors=[
+            "Fan-Shun Meng",
+            "Jun-Ping Du",
+            "Shuhei Shinzato",
+            "Hideki Mori",
+            "Peijun Yu",
+            "Kazuki Matsubara",
+            "Nobuyuki Ishikawa",
+            "Shigenobu Ogata",
+        ],
         links=[
             "https://github.com/mengfsou/NNIP-FeH",
             "https://doi.org/10.1103/PhysRevMaterials.5.113606",

@@ -81,9 +81,14 @@ LINKS = [
     "https://doi.org/10.24435/materialscloud:6h-yj",
     "https://doi.org/10.1016/j.cartre.2021.100027",
 ]
-AUTHORS = (
-    "D. Hedman, T. Rothe, G. Johansson, F. Sandin, J.A. Larsson, Y. Miyamoto"
-)
+AUTHORS = [
+    "Daniel Hedman",
+    "Tom Rothe",
+    "Gustav Johansson",
+    "Fredrik Sandin",
+    "J. Andreas Larsson",
+    "Yoshiyuki Miyamoto",
+]
 DS_DESC = "Approximately 50,000 configurations of carbon with curated subsets\
  chosen to test the effects of intentionally choosing dissimilar\
  configurations when training neural network potentials"

@@ -64,8 +64,6 @@ MD17_FP = DATASET_FP / "mdsim_data/md17"
 
 DATASET = "Forces-are-not-Enough"
 
-SOFTWARE = "GROMACS, PLUMED, ASE, DeepPot-SE, NequIP, Open Catalyst Project"
-METHODS = "SPC/E-fw (water), AMBER-03 FF (alanine dipeptide)"
 LINKS = [
     "https://doi.org/10.5281/zenodo.7196578",
     "https://doi.org/10.48550/arXiv.2210.07237",
@@ -81,17 +79,17 @@ DS_DESC = """Approximately 300,000 benchmarking configurations
 RE = re.compile(r"")
 
 ELEM_KEY = {
-    "ala": ("H", "C", "N", "O"),
-    "lips": ("Li", "P", "S"),
-    "aspirin": ("H", "C", "O"),
-    "benzene": ("H", "C"),
-    "ethanol": ("H", "C", "O"),
-    "malonaldehyde": ("H", "C", "O"),
-    "naphthalene": ("H", "C"),
-    "salicylic_acid": ("H", "C", "O"),
-    "toluene": ("H", "C"),
-    "uracil": ("H", "C", "N", "O"),
-    "water": ("H", "O"),
+    "ala": (("H", "C", "N", "O"), "AMBER-03", "GROMACS"),
+    "lips": (("Li", "P", "S"), "PBE+PAW", "VASP"),
+    "aspirin": (("H", "C", "O"), "AIMD(PBE+vdW-TS)", "i-PI"),
+    "benzene": (("H", "C"), "AIMD(PBE+vdW-TS)", "i-PI"),
+    "ethanol": (("H", "C", "O"), "AIMD(PBE+vdW-TS)", "i-PI"),
+    "malonaldehyde": (("H", "C", "O"), "AIMD(PBE+vdW-TS)", "i-PI"),
+    "naphthalene": (("H", "C"), "AIMD(PBE+vdW-TS)", "i-PI"),
+    "salicylic_acid": (("H", "C", "O"), "AIMD(PBE+vdW-TS)", "i-PI"),
+    "toluene": (("H", "C"), "AIMD(PBE+vdW-TS)", "i-PI"),
+    "uracil": (("H", "C", "N", "O"), "AIMD(PBE+vdW-TS)", "i-PI"),
+    "water": (("H", "O"), "NPT+PME+SHAKE", "DLPOLY"),
 }
 
 
@@ -101,8 +99,9 @@ def assemble_props(filepath: Path):
     type_path = list(filepath.parents[1].glob("type.raw"))[0]
     for key in ELEM_KEY:
         if key in type_path.parts[-7:]:
-            elem_key = ELEM_KEY[key]
-
+            elem_key = ELEM_KEY[key][0]
+            methods = ELEM_KEY[key][1]
+            software = ELEM_KEY[key][2]
     with open(type_path, "r") as f:
         nums = f.read().split(" ")
         props["symbols"] = [elem_key[int(num)] for num in nums]
@@ -115,6 +114,8 @@ def assemble_props(filepath: Path):
     props["force"] = props["force"].reshape(num_configs, num_atoms, 3)
     props["coord"] = props["coord"].reshape(num_configs, num_atoms, 3)
     props["box"] = props["box"].reshape(num_configs, 3, 3)
+    props["methods"] = methods
+    props["software"] = software
     return props
 
 
@@ -129,6 +130,8 @@ def reader(filepath):
     energy = props.get("energy")
     for i, c in enumerate(configs):
         c.info["forces"] = props["force"][i]
+        c.info["software"] = props["software"]
+        c.info["methods"] = props["methods"]
         # alanine has no energy data
         if energy is not None:
             c.info["energy"] = float(energy[i])
@@ -148,7 +151,7 @@ def main(argv):
         file_path=ALA_FP,
         file_format="folder",
         name_field="name",
-        elements=["C", "H", "O", "N", "Li", "S", "P"],
+        elements=["C", "H", "O", "N"],
         reader=reader,
         glob_string="box.npy",
         generator=False,
@@ -157,7 +160,7 @@ def main(argv):
         file_path=WATER_FP,
         file_format="folder",
         name_field="name",
-        elements=["C", "H", "O", "N", "Li", "S", "P"],
+        elements=["H", "O"],
         reader=reader,
         glob_string="box.npy",
         generator=False,
@@ -167,7 +170,7 @@ def main(argv):
             file_path=LIPS_FP,
             file_format="folder",
             name_field="name",
-            elements=["C", "H", "O", "N", "Li", "S", "P"],
+            elements=["Li", "S", "P"],
             reader=reader,
             glob_string="box.npy",
             generator=False,
@@ -178,7 +181,7 @@ def main(argv):
             file_path=MD17_FP,
             file_format="folder",
             name_field="name",
-            elements=["C", "H", "O", "N", "Li", "S", "P"],
+            elements=["C", "H", "O", "N"],
             reader=reader,
             glob_string="box.npy",
             generator=False,
@@ -189,8 +192,8 @@ def main(argv):
     client.insert_property_definition(potential_energy_pd)
 
     metadata = {
-        "software": {"value": SOFTWARE},
-        "method": {"value": METHODS},
+        "software": {"field": "software"},
+        "method": {"field": "methods"},
     }
     property_map = {
         "potential-energy": [

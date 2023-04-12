@@ -126,10 +126,15 @@ def main(argv):
 
     client.insert_dataset(
         all_do_ids,
-        name="TSFF_plos_2022",
+        name="TSFF_PLOS_2022",
         authors=[
-            "T.R. Quinn, H.N. Patel, K.H. Koh, B.E. Haines, \
-                P. Norrby, P. Helquist, O. Wiest"
+            "Taylor R. Quinn",
+            "Himani N. Patel",
+            "Kevin H. Koh",
+            "Brandon E. Haines",
+            "Per-Ola Norrby",
+            "Paul Helquist",
+            "Olaf Wiest",
         ],
         links=[
             "https://doi.org/10.1371/journal.pone.0264960.s001",

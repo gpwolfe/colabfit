@@ -44,8 +44,15 @@ DATASET = "3BPA"
 SOFTWARE = "ORCA"
 METHODS = "DFT-(omega)B97X-6-31G(d)"
 LINKS = ["https://doi.org/10.1021/acs.jctc.1c00647"]
-AUTHORS = "D.P. Kovács, C. van der Oord, J. Kucera, A.E.A. Allen, D.J. \
-Cole, C. Ortner, G. Csányi"
+AUTHORS = [
+    "Dávid Péter Kovács",
+    "Cas van der Oord",
+    "Jiri Kucera",
+    "Alice E. A. Allen",
+    "Daniel J. Cole",
+    "Christoph Ortner",
+    "Gábor Csányi",
+]
 DS_DESC = "Approximately 14,000 configurations from the training sets and\
  test sets used to showcase the performance of linear atomic cluster expansion\
  (ACE) force fields in a machine learning model to predict the potential \

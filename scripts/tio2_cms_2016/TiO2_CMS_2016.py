@@ -16,9 +16,9 @@ Run: $ python3 <script_name>.py -i (or --ip) <database_ip>
 
 Properties:
 forces
+potential energy
 
 Other properties added to metadata:
-total energy
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
@@ -36,7 +36,7 @@ DATASET_FP = Path().cwd()
 DATASET = "TiO2_bulk_structures_2016"
 
 SOFTWARE = "Quantum ESPRESSO"
-METHODS = "DFT-PBE"
+METHODS = "DFT(PBE)"
 
 EN_RE = re.compile(r"^# total energy = (?P<energy>\-?\d+\.\d+) eV")
 LATT_RE = re.compile(r"(\-?\d+\.\d+)\s+(\-?\d+\.\d+)\s+(\-?\d+\.\d+)")
@@ -169,7 +169,7 @@ def main(argv):
     client.insert_dataset(
         pr_hashes=all_do_ids,
         name=DATASET,
-        authors="N. Artrith, A. Urban",
+        authors=["Nongnuch Artrith", "Alexander Urban"],
         links=[
             "http://ann.atomistic.net/download/",
             "http://dx.doi.org/10.1016/j.commatsci.2015.11.047",

@@ -117,7 +117,7 @@ def main(argv):
         ],
         description="1590 configurations of H2O/water "
         "with total energy and forces calculated using "
-        "a hybrid approach, DFT and revPBE0-D3.",
+        "a hybrid approach at DFT/revPBE0-D3 level of theory.",
         verbose=True,
     )
 

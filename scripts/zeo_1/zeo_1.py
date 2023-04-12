@@ -150,8 +150,8 @@ def main(argv):
     # cs_ids.append(cs_id)
     client.insert_dataset(
         pr_hashes=all_do_ids,
-        name="Zeo-1_sd_2022",
-        authors=["A. Christensen, O. A. von Lilienfeld"],
+        name="Zeo-1_SD_2022",
+        authors=["Leonid Komissarov", "Toon Verstraelen"],
         links=[
             "https://doi.org/10.24435/materialscloud:cv-zd",
             "https://doi.org/10.1038/s41597-022-01160-5",

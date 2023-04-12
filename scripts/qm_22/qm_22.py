@@ -31,8 +31,18 @@ import sys
 DATASET_FP = Path("QM-22-main")
 DATASET = "QM-22"
 
-LINKS = ["https://github.com/jmbowma/QM-22", ""]
-AUTHORS = "J.M. Bowman, C. Qu, R. Conte, A. Nandi, P.L. Houston, Q. Yu"
+LINKS = [
+    "https://github.com/jmbowma/QM-22",
+    "https://doi.org/10.1063/5.0089200",
+]
+AUTHORS = [
+    "Joel M. Bowman",
+    "Chen Qu",
+    "Riccardo Conte",
+    "Apurba Nandi",
+    "Paul L. Houston",
+    "Qi Yu",
+]
 DS_DESC = "Includes CHON molecules of 4-15 atoms, developed in counterpoint\
  to the MD17 dataset, run at higher total energies (above 500 K) and with a\
  broader configuration space."

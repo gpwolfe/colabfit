@@ -144,7 +144,13 @@ def main(argv):
         cs_ids=cs_ids,
         pr_hashes=all_do_ids,
         name="HPt_nc_2022",
-        authors=["S. Lee, K. Ermanis, J.M. Goodman"],
+        authors=[
+            "Jonathan Vandermause",
+            "Yu Xie",
+            "Jin Soo Lim",
+            "Cameron J. Owen",
+            "Boris Kozinsky",
+        ],
         links=[
             "https://doi.org/10.24435/materialscloud:r0-84",
             "https://doi.org/10.1038/s41467-022-32294-0",

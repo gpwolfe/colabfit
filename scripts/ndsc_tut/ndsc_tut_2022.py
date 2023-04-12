@@ -16,10 +16,11 @@ Change database name as appropriate
 Run: $ python3 <script_name>.py -i (or --ip) <database_ip>
 Properties:
 forces
+virial
 
 Other properties added to metadata:
 total energy
-virial
+
 
 File notes
 ----------
@@ -35,7 +36,10 @@ pbc
 from argparse import ArgumentParser
 import ase
 from colabfit.tools.database import MongoDatabase, load_data
-from colabfit.tools.property_definitions import atomic_forces_pd
+from colabfit.tools.property_definitions import (
+    atomic_forces_pd,
+    cauchy_stress_pd,
+)
 from pathlib import Path
 import sys
 
@@ -66,6 +70,7 @@ def main(argv):
         generator=False,
     )
     client.insert_property_definition(atomic_forces_pd)
+    client.insert_property_definition(cauchy_stress_pd)
 
     metadata = {
         "software": {"value": "QUIP, ASE"},
@@ -79,7 +84,14 @@ def main(argv):
                 "forces": {"field": "forces", "units": "eV/Ang"},
                 "_metadata": metadata,
             }
-        ]
+        ],
+        "cauchy-stress": [
+            {
+                "stress": {"field": "virial", "units": "eV"},
+                "volume-normalized": {"value": True, "units": None},
+                "_metadata": metadata,
+            }
+        ],
     }
     ids = list(
         client.insert_data(
@@ -124,8 +136,8 @@ def main(argv):
     #     cs_ids.append(cs_id)
     client.insert_dataset(
         pr_hashes=all_do_ids,
-        name="ndsc_tut_2022",
-        authors=["C. Allen, A.P. Bartok"],
+        name="NDSC_TUT_2022",
+        authors=["Connor Allen", "Albert P. Bartok"],
         links=[
             "https://github.com/ConnorSA/ndsc_tut",
             "https://arxiv.org/pdf/2207.11828.pdf",

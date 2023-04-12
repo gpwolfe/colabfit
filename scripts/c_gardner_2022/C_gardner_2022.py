@@ -8,7 +8,7 @@ Clone GitHub repository (1.41 GB)
 git clone https://github.com/jla-gardner/carbon-data.git
 xyz files found in carbon-data/results/
 or download zip file
-unzip carbon-data-main.zip "*xyz" -d $project_dir/scripts/c_gardner_2022
+
 
 Change DATASET_FP to reflect location of parent folder
 Change database name as appropriate
@@ -47,8 +47,19 @@ from pathlib import Path
 import re
 import sys
 
-
+DATASET = "C_Gardner_2022"
 DATASET_FP = Path().cwd()
+AUTHORS = ["John L. A. Gardner", "Zoé Faure Beaulieu", "Volker L. Deringer"]
+LINKS = [
+    "https://github.com/jla-gardner/carbon-data",
+    "https://doi.org/10.48550/arXiv.2211.16443",
+]
+METHODS = "DFT, C-GAP-17"
+SOFTWARE = "LAMMPS, ASE"
+DESCRIPTION = "Approximately 115,000 configurations of carbon with 200 \
+atoms, with simulated melt, quench, reheat, then annealing \
+at the noted temperature. Includes a variety of carbon \
+structures."
 
 NAME_RE = re.compile(
     r"density\-(?P<density>\d\.\d)\-T\-(?P<temp>\d{4}).extxyz"
@@ -81,8 +92,8 @@ def main(argv):
     client.insert_property_definition(atomic_forces_pd)
 
     metadata = {
-        "software": {"value": "LAMMPS, ASE"},
-        "method": {"value": "DFT, C-GAP-17"},
+        "software": {"value": SOFTWARE},
+        "method": {"value": METHODS},
         "density": {"field": "density"},
         "anneal-temp": {"field": "anneal_T", "units": "K"},
         "gap-17-energy": {"field": "gap17_energy"},
@@ -106,61 +117,55 @@ def main(argv):
     )
 
     all_co_ids, all_do_ids = list(zip(*ids))
-    cs_regexes = []
-    for fn in DATASET_FP.rglob("*.extxyz"):
-        print(fn)
-        groups = NAME_RE.match(fn.name).groupdict()
-        print(groups)
-        cs_regexes.append(
-            [
-                f"D_{groups['density']}_T_{groups['temp']}",
-                rf"{fn.stem}",
-                f"Configurations from C_gardner_2022 with "
-                f"density {groups['density']} "
-                f"and annealing temperature {groups['temp']}.",
-            ]
-        )
+    # cs_regexes = []
+    # for fn in DATASET_FP.rglob("*.extxyz"):
+    #     print(fn)
+    #     groups = NAME_RE.match(fn.name).groupdict()
+    #     print(groups)
+    #     cs_regexes.append(
+    #         [
+    #             f"D_{groups['density']}_T_{groups['temp']}",
+    #             rf"{fn.stem}",
+    #             f"Configurations from C_gardner_2022 with "
+    #             f"density {groups['density']} "
+    #             f"and annealing temperature {groups['temp']}.",
+    #         ]
+    #     )
 
-    cs_ids = []
+    # cs_ids = []
 
-    for i, (name, regex, desc) in enumerate(cs_regexes):
-        co_ids = client.get_data(
-            "configurations",
-            fields="hash",
-            query={
-                "hash": {"$in": all_co_ids},
-                "names": {"$regex": regex},
-            },
-            ravel=True,
-        ).tolist()
+    # for i, (name, regex, desc) in enumerate(cs_regexes):
+    #     co_ids = client.get_data(
+    #         "configurations",
+    #         fields="hash",
+    #         query={
+    #             "hash": {"$in": all_co_ids},
+    #             "names": {"$regex": regex},
+    #         },
+    #         ravel=True,
+    #     ).tolist()
 
-        print(
-            f"Configuration set {i}",
-            f"({name}):".rjust(22),
-            f"{len(co_ids)}".rjust(7),
-        )
-        if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+    #     print(
+    #         f"Configuration set {i}",
+    #         f"({name}):".rjust(22),
+    #         f"{len(co_ids)}".rjust(7),
+    #     )
+    #     if len(co_ids) > 0:
+    #         cs_id = client.insert_configuration_set(
+    #             co_ids, description=desc, name=name
+    #         )
 
-            cs_ids.append(cs_id)
-        else:
-            pass
+    #         cs_ids.append(cs_id)
+    #     else:
+    #         pass
 
     client.insert_dataset(
-        cs_ids=cs_ids,
+        # cs_ids=cs_ids,
         pr_hashes=all_do_ids,
-        name="C_gardner_2022",
-        authors="J.L.A. Gardner, Z.F. Beaulieu, V.L. Deringer",
-        links=[
-            "https://github.com/jla-gardner/carbon-data",
-            "https://doi.org/10.48550/arXiv.2211.16443",
-        ],
-        description="Approximately 115,000 configurations of carbon with 200 "
-        "atoms, with simulated melt, quench, reheat, then annealing "
-        "at the noted temperature. Includes a variety of carbon "
-        "structures.",
+        name=DATASET,
+        authors=AUTHORS,
+        links=LINKS,
+        description=DESCRIPTION,
         verbose=True,
     )
 

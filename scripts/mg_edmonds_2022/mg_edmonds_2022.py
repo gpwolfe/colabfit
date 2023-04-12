@@ -84,7 +84,6 @@ def reader(filepath: Path):
         atom.info["forces"] = forces
         atom.info["name"] = f"{file_key}_{names}"
         atoms.append(atom)
-    print(atoms[0].info["name"])
     return atoms
 
 
@@ -206,10 +205,10 @@ def main(argv):
         cs_ids=cs_ids,
         pr_hashes=all_do_ids,
         name="MG_edmonds_2022",
-        authors=["M. Poul"],
+        authors=["Marvin Poul"],
         links=[
             "https://github.com/eisenforschung/magnesium-mtp-training-data",
-            "doi:10.17617/3.A3MB7Z",
+            "https://doi.org/10.17617/3.A3MB7Z",
             "https://arxiv.org/abs/2207.04009",
         ],
         description="16748 configurations of magnesium with gathered energy, "

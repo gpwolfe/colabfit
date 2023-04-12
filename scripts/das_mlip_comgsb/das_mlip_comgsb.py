@@ -21,10 +21,10 @@ Other properties added to metadata
 ----------------------------------
 virial
 
+
 File notes
 ----------
-not sure what values to use for virial units
-virial can be added as cauchy-stress alternative later
+virial is a 6-vector, not a 9-vector
 
 """
 from argparse import ArgumentParser
@@ -42,9 +42,16 @@ DATASET_FP = Path("").cwd()
 DATASET = "DAS_ML-IP_CoSb_MgSb"
 
 SOFTWARE = "VASP, LAMMPS"
-METHODS = "DFT-PAW-PBE"
+METHODS = "DFT(PAW-PBE)"
 LINKS = ["https://doi.org/10.1103/PhysRevB.104.094310"]
-AUTHORS = "H. Yang, Y. Zhu, E. Dong, Y. Wu, J. Yang, W. Zhang"
+AUTHORS = [
+    "Hongliang Yang",
+    "Yifan Zhu",
+    "Erting Dong",
+    "Yabei Wu",
+    "Jiong Yang",
+    "Wenqing Zhang",
+]
 DS_DESC = "Approximately 850 configurations of CoSb3 and Mg3Sb2 generated\
  using a dual adaptive sampling (DAS) method for use with machine learning\
  of interatomic potentials (MLIP)."
@@ -150,7 +157,7 @@ def main(argv):
         ],
         # "cauchy-stress": [
         #     {
-        #         "stress": {"field": "virial", "units": "unknown"},
+        #         "stress": {"field": "virial", "units": "eV"},
         #         "_metadata": metadata,
         #     }
         # ],

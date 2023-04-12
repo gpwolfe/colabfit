@@ -82,7 +82,7 @@ def main(argv):
     client.insert_property_definition(atomic_forces_pd)
     metadata = {
         "software": {"value": "ORCA"},
-        "method": {"value": "DFT-PBE def2-SVP"},
+        "method": {"value": "DFT(PBE)/def2-SVP"},
         "MD17-index": {"field": "md17_index"},
     }
     property_map = {
@@ -154,7 +154,7 @@ def main(argv):
         cs_ids=cs_ids,
         pr_hashes=all_do_ids,
         name="rMD17",
-        authors=["A. Christensen, O. A. von Lilienfeld"],
+        authors=["Anders S. Christensen", "O. Anatole von Lilienfeld"],
         links=[
             "https://doi.org/10.6084/m9.figshare.12672038.v3",
             "https://doi.org/10.48550/arXiv.2007.09593",

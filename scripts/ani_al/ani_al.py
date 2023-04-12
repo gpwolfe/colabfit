@@ -65,11 +65,22 @@ LINKS = [
     "https://github.com/atomistic-ml/ani-al",
     "https://doi.org/10.1038/s41467-021-21376-0",
 ]
-AUTHORS = "J. Smith, B. Nebgen, N. Mathew, J. Chen, N. Lubbers, L. Burakovsky,\
-     S. Tretiak, H.A. Nam, T. Germann, S. Fensin, K. Barros"
-DS_DESC = """Approximately 2800 configurations from a training dataset and \
+AUTHORS = [
+    "Justin S. Smith",
+    "Benjamin Nebgen",
+    "Nithin Mathew",
+    "Jie Chen",
+    "Nicholas Lubbers",
+    "Leonid Burakovsky",
+    "Sergei Tretiak",
+    "Hai Ah Nam",
+    "Timothy Germann",
+    "Saryu Fensin",
+    "Kipton Barros",
+]
+DS_DESC = "Approximately 2800 configurations from a training dataset and \
 2800 from a test dataset of aluminum in crystal and melt phases, used for \
-training and testing the ANI neural network model."""
+training and testing the ANI neural network model."
 ELEMENTS = ["Al"]
 GLOB_STR = "*.h5"
 

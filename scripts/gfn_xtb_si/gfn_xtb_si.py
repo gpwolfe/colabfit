@@ -118,7 +118,7 @@ def main(argv):
         # cs_ids,
         pr_hashes=all_do_ids,
         name="GFN-xTB_jcim_2021",
-        authors=["L. Komissarov, T. Verstraelen"],
+        authors=["Leonid Komissarov", "Toon Verstraelen"],
         links=[
             "https://doi.org/10.24435/materialscloud:14-4m",
             "https://doi.org/10.1021/acs.jcim.1c01170",

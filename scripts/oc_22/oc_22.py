@@ -41,9 +41,25 @@ LINKS = [
     "https://opencatalystproject.org/",
     "https://doi.org/10.48550/arXiv.2206.08917",
 ]
-AUTHORS = "R. Tran, J. Lan, M. Shuaibi, B.M. Wood, S. Goyal, A. Das, J.\
- Heras-Domingo, A. Kolluru, A. Rizvi, N. Shoghi, A. Sriram, F. Therrien,\
- J. Abed, O. Voznyy, E.H. Sargent, Z. Ulissi, C.L. Zitnick"
+AUTHORS = [
+    "Richard Tran",
+    "Janice Lan",
+    "Muhammed Shuaibi",
+    "Brandon M. Wood",
+    "Siddharth Goyal",
+    "Abhishek Das",
+    "Javier Heras-Domingo",
+    "Adeesh Kolluru",
+    "Ammar Rizvi",
+    "Nima Shoghi",
+    "Anuroop Sriram",
+    "Felix Therrien",
+    "Jehad Abed",
+    "Oleksandr Voznyy",
+    "Edward H. Sargent",
+    "Zachary Ulissi",
+    "C. Lawrence Zitnick",
+]
 DS_DESC = "A database of training trajectories for predicting catalytic\
  reactions on oxide surfaces. OC22 is meant to complement OC20, which did not\
  contain oxide surfaces."

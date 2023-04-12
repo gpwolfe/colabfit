@@ -51,15 +51,15 @@ import re
 import sys
 
 DATASET_FP = Path("data")
-DATASET = ""
+DATASET = "NEP-qHPF"
 
 SOFTWARE = "VASP"
-METHODS = "DFT-PBE"
+METHODS = "DFT(PBE)"
 LINKS = [
     "https://doi.org/10.5281/zenodo.7018572",
     "https://doi.org/10.1016/j.eml.2022.101929",
 ]
-AUTHORS = "P. Ying"
+AUTHORS = "Penghua Ying"
 DS_DESC = "Approximately 275 configurations of training and testing data\
  of monolayer quasi-hexagonal-phase fullerene (qHPF) membrane."
 ELEMENTS = ["C"]

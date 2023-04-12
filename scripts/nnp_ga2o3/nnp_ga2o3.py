@@ -16,6 +16,8 @@ Run: $ python3 <script_name>.py -i (or --ip) <database_ip>
 
 Properties
 ----------
+potential energy
+forces
 
 Other properties added to metadata
 ----------------------------------
@@ -44,10 +46,18 @@ LINKS = [
     "https://github.com/RuiyangLi6/NNP_Ga2O3",
     "https://doi.org/10.1063/5.0025051",
 ]
-AUTHORS = "R. Li, Z. Liu, A. Rohskopf, K. Gordiz, A. Henry, E. Lee, T. Luo"
-DS_DESC = "9200 configurations of beta-Ga2O3, including two configuration\
- sets. One includes DFT data for 8400 configurations simulated between\
- temperatures of 50K - 600K. The second includes configurations with 0K\
+AUTHORS = [
+    "Ruiyang Li",
+    "Zeyu Liu",
+    "Andrew Rohskopf",
+    "Kiarash Gordiz",
+    "Asegun Henry",
+    "Eungkyu Lee",
+    "Tengfei Luo",
+]
+DS_DESC = "9,200 configurations of beta-Ga2O3, including two configuration\
+ sets. One contains DFT data for 8400 configurations simulated between\
+ temperatures of 50K - 600K. The second contains configurations with 0K\
  simulation temperature."
 ELEMENTS = ["Ga", "O"]
 GLOB_STR = "energy.npy"

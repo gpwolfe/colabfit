@@ -6,9 +6,6 @@ https://doi.org/10.6084/m9.figshare.19601689.v3
 Download link:
 https://figshare.com/ndownloader/files/36445941
 
-Unzip to project folder
-unzip H2COMBUSTION_DATA-main-2.zip "H2COMBUSTION_DATA-main-2/*.npz" -d  <project_dir>scripts/ho_combustion/
-
 Change DATASET_FP to reflect location of parent folder
 Change database name as appropriate
 
@@ -40,18 +37,10 @@ from pathlib import Path
 import sys
 
 DATASET_FP = Path("H2COMBUSTION_DATA-main-2")
-METH_DICT = {
-    "nm": "DFT Normal Mode displacement",
-    "aimd": "DFT AIMD",
-    "irc": "DFT ωB97X-V IRC",
-}
+
+METHODS = "DFT(ωB97X-V)"
 SOFTWARE = "Q-CHEM"
 DATASET = "H_nature_2022"
-
-
-def get_method(name):
-    method = name.split("_")[1]
-    return f"DFT-{METH_DICT[method]}"
 
 
 def read_npz(filepath):
@@ -74,7 +63,6 @@ def reader(filepath):
         atom = AtomicConfiguration(positions=coords, numbers=data["Z"][i][:N])
         atom.info["name"] = name
         atom.info["forces"] = data["F"][i][:N]
-        atom.info["method"] = get_method(name)
         atom.info["energy"] = data["E"][i][0]
         atom.info["reaction-number"] = rxn
         atoms.append(atom)
@@ -101,7 +89,7 @@ def main(argv):
 
     metadata = {
         "software": {"value": SOFTWARE},
-        "method": {"field": "method"},
+        "method": {"value": METHODS},
         "reaction-number": {"field": "reaction-number"},
     }
     property_map = {
@@ -178,9 +166,21 @@ def main(argv):
         cs_ids=cs_ids,
         pr_hashes=all_do_ids,
         name=DATASET,
-        authors="X. Guan, A.K. Das, C. Stein, F. Heidar-Zadeh, L. Bertels, "
-        "M. Liu, M. Haghighatlari, J. Li, O. Zhang, H. Hao, I. Leven, "
-        "M. Head-Gordon, T. Head-Gordon",
+        authors=[
+            "Xingyi Guan",
+            "Akshaya Das",
+            "Christopher J. Stein",
+            "Farnaz Heidar-Zadeh",
+            "Luke Bertels",
+            "Meili Liu",
+            "Mojtaba Haghighatlari",
+            "Jie Li",
+            "Oufan Zhang",
+            "Hongxia Hao",
+            "Itai Leven",
+            "Martin Head-Gordon",
+            "Teresa Head-Gordon",
+        ],
         links=[
             "https://doi.org/10.6084/m9.figshare.19601689.v3",
             "https://doi.org/10.1038/s41597-022-01330-5",

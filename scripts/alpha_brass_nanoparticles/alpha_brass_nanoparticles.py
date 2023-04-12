@@ -6,9 +6,6 @@ https://archive.materialscloud.org/record/2021.153
 
 https://archive.materialscloud.org/record/file?filename=brass_DFT_data.zip&record_id=1011
 
-unzip brass_DFT_data "*.npz" -d <project_dir>/scripts/alpha_brass_nanoparticles/
-
-Change DATASET_FP to reflect location of parent folder
 Change database name as appropriate
 
 Run: $ python3 <script_name>.py -i (or --ip) <database_ip>
@@ -120,8 +117,8 @@ def main(argv):
     for pd in pds:
         client.insert_property_definition(pd)
     metadata = {
-        "software": {"value": ["LAMMPS", "VASP"]},
-        "method": {"value": ["DFT", "PBE"]},
+        "software": {"value": "VASP"},
+        "method": {"value": "DFT(PBE)"},
     }
     property_map = {
         "potential-energy": [
@@ -215,7 +212,12 @@ def main(argv):
         cs_ids=cs_ids,
         pr_hashes=all_do_ids,
         name="alpha_brass_nanoparticles",
-        authors=["J. Weinreich, A. Römer, M.L. Paleico, J. Behler"],
+        authors=[
+            "Jan Weinreich",
+            "Anton Römer",
+            "Martín Leandro Paleico",
+            "Jörg Behler",
+        ],
         links=[
             "http://doi.org/10.1021/acs.jpcc.0c00559",
             "https://doi.org/10.24435/materialscloud:94-aq",

@@ -234,9 +234,14 @@ def main(argv):
         # cs_ids,
         pr_hashes=all_do_ids,
         name=DATASET,
-        authors="R. Ramakrishnan, P.O. Dral, M. Rupp, O.A. von Lilienfeld",
+        authors=[
+            "Raghunathan Ramakrishnan",
+            "Pavlo Dral",
+            "Matthias Rupp",
+            "O. Anatole von Lilienfeld",
+        ],
         links=["https://doi.org/10.6084/m9.figshare.c.978904.v5"],
-        description="6095 isomers of C7O2H10, energetics were calculated"
+        description="6095 isomers of C7O2H10. Energetics were calculated"
         " at the G4MP2 level of theory",
         verbose=True,
     )

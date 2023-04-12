@@ -44,6 +44,7 @@ from argparse import ArgumentParser
 from colabfit.tools.database import MongoDatabase, load_data
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
+    cauchy_stress_pd,
     potential_energy_pd,
 )
 from pathlib import Path
@@ -53,12 +54,12 @@ DATASET_FP = Path().cwd()
 DATASET = "Carbon-GAP20"
 
 SOFTWARE = "VASP"
-METHODS = "DFT optB88-vdW"
+METHODS = "DFT(optB88-vdW)"
 LINKS = [
     "https://doi.org/10.17863/CAM.54529",
     "https://doi.org/10.1063/5.0005084",
 ]
-AUTHORS = "G. Csanyi"
+AUTHORS = ["Gabor Csanyi"]
 DS_DESC = "Approximately 17,000 configurations of carbon, each containing 1 to\
  240 atoms/cell, including a subset of 6577 configurations used for training.\
  A variety of structure types are represented, including graphite, graphene,\
@@ -93,6 +94,7 @@ def main(argv):
     )
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
+    client.insert_property_definition(cauchy_stress_pd)
 
     metadata = {
         "software": {"value": SOFTWARE},
@@ -109,7 +111,7 @@ def main(argv):
         "cauchy-stress": [
             {
                 "stress": {"field": "virial", "units": "eV"},
-                "per-atom": {"value": False, "units": None},
+                "per-atom": {"value": True, "units": None},
                 "_metadata": metadata,
             }
         ],

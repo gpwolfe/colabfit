@@ -167,8 +167,11 @@ def main(argv):
         pr_hashes=all_do_ids,
         name="QM_hamiltonian_nature_2019",
         authors=[
-            "K. T. Schütt, M. Gastegger, A. Tkatchenko, K.-R. Müller, \
-                R. J. Maurer"
+            "K. T. Schütt",
+            "M. Gastegger",
+            "A. Tkatchenko",
+            "K.-R. Müller",
+            "R. J. Maurer",
         ],
         links=[
             "http://quantum-machine.org/datasets/",

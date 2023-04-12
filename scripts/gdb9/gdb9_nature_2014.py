@@ -137,7 +137,7 @@ def main(argv):
         client.insert_property_definition(pd)
     metadata = {
         "software": {"value": "MOPAC, Gaussian 09"},
-        "method": {"value": "DFT-B3LYP, 6-31G(2df,p)"},
+        "method": {"value": "DFT(B3LYP/6-31G(2df,p))"},
         "heat-capacity": {
             "field": "heat_capacity",
             "units": "cal/(mol K)",
@@ -213,7 +213,12 @@ def main(argv):
         # cs_ids,
         pr_hashes=all_do_ids,
         name="GDB_9_nature_2014",
-        authors="R. Ramakrishnan, P.O. Dral, M. Rupp, O.A. von Lilienfeld",
+        authors=[
+            "Raghunathan Ramakrishnan",
+            "Pavlo O. Dral",
+            "Matthias Rupp",
+            "O. Anatole von Lilienfeld",
+        ],
         links=[
             "https://doi.org/10.6084/m9.figshare.c.978904.v5",
             "https://doi.org/10.1038/sdata.2014.22",
@@ -221,7 +226,7 @@ def main(argv):
         description="133,855 configurations of stable small organic molecules"
         " composed of CHONF. A subset of GDB-17, with calculations of energies"
         ", dipole moment, polarizability and enthalpy. Calculations performed"
-        " at B3LYP/6-31G(2df,p) level of theory",
+        " at B3LYP/6-31G(2df,p) level of theory.",
         verbose=True,
     )
 

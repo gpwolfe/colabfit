@@ -16,6 +16,8 @@ Run: $ python3 <script_name>.py -i (or --ip) <database_ip>
 
 Properties
 ----------
+potential energy
+forces
 
 Other properties added to metadata
 ----------------------------------
@@ -34,20 +36,19 @@ from colabfit.tools.property_definitions import (
     potential_energy_pd,
 )
 from pathlib import Path
-import re
 import sys
 
 DATASET_FP = Path().cwd()
 DATASET = "REANN_CO2_Ni100"
 
 SOFTWARE = "VASP"
-METHODS = "DFT-PBE-GGA"
+METHODS = "DFT(PBE-GGA)"
 LINKS = [
     "https://github.com/zhangylch/REANN",
     "https://doi.org/10.1021/acs.jpclett.9b00085",
     "https://doi.org/10.1063/5.0080766",
 ]
-AUTHORS = "Y. Zhang, J. Xia, B. Jiang"
+AUTHORS = ["Yaolong Zhanga", "Junfan Xia", "Bin Jiang"]
 DS_DESC = "Approximately 9,850 configurations of CO2 with a movable Ni(100)\
  surface."
 
