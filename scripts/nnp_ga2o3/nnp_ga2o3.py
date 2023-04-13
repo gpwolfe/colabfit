@@ -87,7 +87,6 @@ def assemble_props(filepath: Path):
 
 def reader(filepath):
     props = assemble_props(filepath)
-    print(filepath)
     configs = [
         AtomicConfiguration(
             symbols=props["symbols"], positions=pos, cell=props["box"][i]

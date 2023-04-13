@@ -33,7 +33,7 @@ from pathlib import Path
 import sys
 
 DATASET_FP = Path().cwd()
-DATASET = "AuAu-nanoalloy-MSMSE-2021"
+DATASET = "AgAu-nanoalloy-MSMSE-2021"
 
 SOFTWARE = "VASP, DP-GEN"
 METHODS = "DFT(PBE+D3)"
