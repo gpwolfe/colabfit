@@ -185,8 +185,22 @@ def load_data_wrapper(client, reader, glob_string, metadata, energy_map):
 def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
+    parser.add_argument(
+        "-d",
+        "--db_name",
+        type=str,
+        help="Name of MongoDB database to add dataset to",
+        default="----",
+    )
+    parser.add_argument(
+        "-p",
+        "--nprocs",
+        type=int,
+        help="Number of processors to use for job",
+        default=4,
+    )
     args = parser.parse_args(argv)
-    client = MongoDatabase("----", nprocs=4, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
 
     # Metadata and property maps
     ccsd_metadata = {
@@ -327,7 +341,7 @@ def main(argv):
     # Insert dataset
     client.insert_dataset(
         cs_ids=cs_ids,
-        pr_hashes=list(all_do_ids),
+        do_hashes=list(all_do_ids),
         name="QM7b_AlphaML",
         authors=[
             "Yang Yang",
