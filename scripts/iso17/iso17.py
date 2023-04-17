@@ -70,7 +70,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
     configurations = load_data(
         file_path=DB_PATH,
         file_format="folder",
@@ -85,7 +87,7 @@ def main(argv):
     client.insert_property_definition(atomic_forces_pd)
     metadata = {
         "software": {"value": "FHI-aims"},
-        "method": {"value": "DFT(PBE-GGA)"},
+        "method": {"value": "DFT-PBE"},
     }
 
     property_map = {

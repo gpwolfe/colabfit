@@ -77,7 +77,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DB_PATH,
@@ -94,7 +96,8 @@ def main(argv):
 
     metadata = {
         "software": {"value": "ORCA, SchNOrb"},
-        "method": {"value": "PBE/def2-SVP"},
+        "method": {"value": "PBE"},
+        "basis-set": {"value": "def2-SVP"},
     }
     property_map = {
         "potential-energy": [

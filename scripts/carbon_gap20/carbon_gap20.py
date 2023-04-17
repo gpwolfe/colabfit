@@ -54,7 +54,7 @@ DATASET_FP = Path().cwd()
 DATASET = "Carbon-GAP20"
 
 SOFTWARE = "VASP"
-METHODS = "DFT(optB88-vdW)"
+METHODS = "DFT-optB88-vdW"
 LINKS = [
     "https://doi.org/10.17863/CAM.54529",
     "https://doi.org/10.1063/5.0005084",
@@ -95,7 +95,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,

@@ -45,7 +45,7 @@ import sys
 DATASET_FP = Path("AFF-master/dataset/")
 
 DATASET = "AFF_JCP_2022"
-METHODS = "PBE/6-31G(d,p)+TS-vdW"
+METHODS = "DFT-PBE-TS-vdW"
 SOFTWARE = "Q-Chem"
 LINKS = [
     "https://doi.org/10.1063/5.0088017",
@@ -107,7 +107,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -124,6 +126,7 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
+        "basis-set": {"value": "6-31G(d,p)"},
     }
     property_map = {
         "potential-energy": [

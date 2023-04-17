@@ -52,7 +52,7 @@ from pathlib import Path
 import sys
 
 DATASET_FP = Path().cwd()
-METHOD = "DFT+GAP"
+METHOD = "DFT"
 SOFTWARE = "QuantumEspresso, CatKit"
 
 
@@ -100,7 +100,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,

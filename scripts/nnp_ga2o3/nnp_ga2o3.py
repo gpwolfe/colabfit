@@ -41,7 +41,7 @@ DATASET_FP = Path("NNP_Ga2O3-master")
 DATASET = "NNP-Ga2O3"
 
 SOFTWARE = "CP2K"
-METHODS = "DFT(GTH-TZVP)"
+METHODS = "DFT"
 LINKS = [
     "https://github.com/RuiyangLi6/NNP_Ga2O3",
     "https://doi.org/10.1063/5.0025051",
@@ -121,7 +121,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -138,7 +140,7 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        # "": {"field": ""}
+        "basis-set": {"value": "GTH-TZVP"},
     }
     property_map = {
         "potential-energy": [

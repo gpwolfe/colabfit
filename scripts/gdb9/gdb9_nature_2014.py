@@ -135,7 +135,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
     # Load configurations
     configurations = load_data(
         file_path=DATASET_FP,
@@ -151,7 +153,8 @@ def main(argv):
         client.insert_property_definition(pd)
     metadata = {
         "software": {"value": "MOPAC, Gaussian 09"},
-        "method": {"value": "DFT(B3LYP/6-31G(2df,p))"},
+        "method": {"value": "DFT-B3LYP/"},
+        "basis-set": {"value": "6-31G(2df,p)"},
         "heat-capacity": {
             "field": "heat_capacity",
             "units": "cal/(mol K)",

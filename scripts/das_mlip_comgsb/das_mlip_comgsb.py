@@ -42,7 +42,7 @@ DATASET_FP = Path("").cwd()
 DATASET = "DAS_ML-IP_CoSb_MgSb"
 
 SOFTWARE = "VASP, LAMMPS"
-METHODS = "DFT(PAW-PBE)"
+METHODS = "DFT-PBE"
 LINKS = ["https://doi.org/10.1103/PhysRevB.104.094310"]
 AUTHORS = [
     "Hongliang Yang",
@@ -134,7 +134,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,

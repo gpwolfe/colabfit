@@ -98,7 +98,8 @@ def main(argv):
     client.insert_property_definition(atomic_forces_pd)
     metadata = {
         "software": {"value": "ORCA"},
-        "method": {"value": "DFT(PBE)/def2-SVP"},
+        "method": {"value": "DFT-PBE"},
+        "basis_set": {"value": "def2-SVP"},
         "MD17-index": {"field": "md17_index"},
     }
     property_map = {
@@ -147,25 +148,35 @@ def main(argv):
     cs_ids = []
 
     for i, (name, regex, desc) in enumerate(cs_regexes):
-        co_ids = client.get_data(
-            "configurations",
-            fields="hash",
-            query={"hash": {"$in": all_co_ids}, "names": {"$regex": regex}},
-            ravel=True,
-        ).tolist()
-
-        print(
-            f"Configuration set {i}",
-            f"({name}):".rjust(22),
-            f"{len(co_ids)}".rjust(7),
+        cs_id = client.query_and_insert_configuration_set(
+            co_hashes=all_co_ids,
+            name=name,
+            description=desc,
+            query={"names": {"$regex": regex}},
         )
 
-        if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+        cs_ids.append(cs_id)
 
-            cs_ids.append(cs_id)
+    # for i, (name, regex, desc) in enumerate(cs_regexes):
+    #     co_ids = client.get_data(
+    #         "configurations",
+    #         fields="hash",
+    #         query={"hash": {"$in": all_co_ids}, "names": {"$regex": regex}},
+    #         ravel=True,
+    #     ).tolist()
+
+    #     print(
+    #         f"Configuration set {i}",
+    #         f"({name}):".rjust(22),
+    #         f"{len(co_ids)}".rjust(7),
+    #     )
+
+    #     if len(co_ids) > 0:
+    #         cs_id = client.insert_configuration_set(
+    #             co_ids, description=desc, name=name
+    #         )
+
+    #         cs_ids.append(cs_id)
     client.insert_dataset(
         cs_ids=cs_ids,
         do_hashes=all_do_ids,

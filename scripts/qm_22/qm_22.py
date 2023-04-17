@@ -50,7 +50,11 @@ ELEMENTS = ["C", "H", "O", "N"]
 GLOB_STR = "*.xyz"
 
 SOFT_METH = {
-    "Acetaldehyde_singlet": {"software": "Molpro", "method": "CCSD(T)/AVTZ"},
+    "Acetaldehyde_singlet": {
+        "software": "Molpro",
+        "method": "CCSD(T)",
+        "basis-set": "AVTZ",
+    },
     "Acetaldehyde_triplet": {
         "software": "Molpro",
         "method": "RCCSD(T)/cc-pVTZ,",
@@ -60,21 +64,35 @@ SOFT_METH = {
         "software": "MULTIMODE",
         "method": "CCSD(T)-F12a/haTZ",
     },
-    "Glycine": {"software": "Molpro", "method": "DFT(B3LYP)/aug-cc-pVDZ"},
+    "Glycine": {
+        "software": "Molpro",
+        "method": "DFT-B3LYP",
+        "basis-set": "aug-cc-pVDZ",
+    },
     "H2CO_and_HCOH": {"software": "Molpro", "method": "MRCI"},
     "Hydronium": {"software": "Molpro", "method": "CCSD(T)"},
     "Malonaldehyde": {"software": "MULTIMODE", "method": "CCSD(T)"},
-    "Methane": {"software": "MSA", "method": "DFT(B3LYP)/6-31+G(d)"},
+    "Methane": {
+        "software": "MSA",
+        "method": "DFT-B3LYP",
+        "basis-set": "6-31+G(d)",
+    },
     "N-methylacetamide": {
         "software": "Molpro",
-        "method": "DFT(B3LYP)/cc-pVDZ",
+        "method": "DFT-B3LYP",
+        "basis-set": "cc-pVDZ",
     },
     "OCHCO_cation": {"software": "Molpro", "method": "CCSD(T)"},
     "syn-CH3CHOO": {
         "software": "MESMER",
-        "method": "CCSD(T)/aug-cc-pVTZ/M06-ZX",
+        "method": "CCSD(T)-M06-ZX",
+        "basis-set": "aug-cc-pVTZ",
     },
-    "Tropolone": {"software": "Molpro", "method": "DFT(B3LYP)/6-31+G(d)"},
+    "Tropolone": {
+        "software": "Molpro",
+        "method": "DFT-B3LYP",
+        "basis-set": "6-31+G(d)",
+    },
 }
 
 
@@ -97,6 +115,7 @@ def reader(filepath):
             config.info["e_corr_t"] = e_corr_t
             config.info["energy"] = float(energy)
             config.info["name"] = f"{name}_{i}"
+
             configs.append(config)
 
     return configs
@@ -120,7 +139,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
     client.insert_property_definition(potential_energy_pd)
     configurations = load_data(
         file_path=DATASET_FP,
@@ -135,6 +156,7 @@ def main(argv):
     metadata = {
         "software": {"value": SOFT_METH["Tropolone"]["software"]},
         "method": {"value": SOFT_METH["Tropolone"]["method"]},
+        "basis-set": {"value": SOFT_METH["Tropolone"]["basis-set"]},
     }
     property_map = {
         "potential-energy": [
@@ -195,7 +217,12 @@ def main(argv):
                 metadata = {
                     "software": {"value": SOFT_METH[name]["software"]},
                     "method": {"value": SOFT_METH[name]["method"]},
+                    "basis-set": {"value": SOFT_METH[name].get("basis-set")},
                 }
+                if SOFT_METH[name].get("basis-set"):
+                    metadata.update(
+                        {"basis-set": {"value": SOFT_METH[name]["basis-set"]}}
+                    )
             property_map = {
                 "potential-energy": [
                     {

@@ -200,7 +200,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     # Metadata and property maps
     ccsd_metadata = {
@@ -219,7 +221,7 @@ def main(argv):
 
     b3lyp_metadata = {
         "software": {"value": "Psi4"},
-        "method": {"value": "DFT(B3LYP)"},
+        "method": {"value": "DFT-B3LYP"},
         "lumo-energy": {"field": "lumo_energy", "units": "a.u."},
         "homo-energy": {"field": "homo_energy", "units": "a.u."},
     }
@@ -236,7 +238,7 @@ def main(argv):
 
     scan0_metadata = {
         "software": {"value": "Q-Chem"},
-        "method": {"value": "DFT(SCAN0)"},
+        "method": {"value": "DFT-SCAN0"},
     }
 
     client.insert_property_definition(potential_energy_pd)

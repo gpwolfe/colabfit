@@ -81,7 +81,7 @@ soft_meth = namedtuple("soft_meth", ["method", "software"])
 # The [-3]rd element of the Path(filepath).parts == key below
 method_soft_dict = {
     "gfn2": soft_meth("GFN2-xTB", "XTB"),
-    "orca": soft_meth("MP2 def2-TZVP", "ORCA"),
+    "orca": soft_meth("MP2", "ORCA"),
     "schnet": soft_meth("MBE", "SchNet"),
     "gap": soft_meth("MBE", "GAP"),
     "gdml": soft_meth("MBE", "mbGDML"),
@@ -138,7 +138,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,

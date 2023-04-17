@@ -134,7 +134,7 @@ def main(argv):
         client.insert_property_definition(pd)
     metadata = {
         "software": {"value": "VASP"},
-        "method": {"value": "DFT(PBE)"},
+        "method": {"value": "DFT-PBE"},
     }
     property_map = {
         "potential-energy": [

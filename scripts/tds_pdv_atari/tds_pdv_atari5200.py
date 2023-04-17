@@ -186,11 +186,6 @@ def main(argv):
 
     all_co_ids, all_do_ids = list(zip(*ids))
     cs_regexes = [
-        # [
-        #     "TdS-PdV & Atari5200",
-        #     ".*",
-        #     "All configurations from TdS-PdV & Atari5200",
-        # ],
         ["CuO", "Cu", "All Cu(x)O(y) configurations from TdS-PdV & Atari5200"],
         [
             "MgO",

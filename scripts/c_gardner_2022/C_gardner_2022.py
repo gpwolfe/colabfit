@@ -54,7 +54,7 @@ LINKS = [
     "https://github.com/jla-gardner/carbon-data",
     "https://doi.org/10.48550/arXiv.2211.16443",
 ]
-METHODS = "DFT, C-GAP-17"
+METHODS = "DFT"
 SOFTWARE = "LAMMPS, ASE"
 DESCRIPTION = "Approximately 115,000 configurations of carbon with 200 \
 atoms, with simulated melt, quench, reheat, then annealing \
@@ -92,7 +92,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,

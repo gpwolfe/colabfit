@@ -35,7 +35,7 @@ DATASET_FP = Path("oc22_trajectories")
 DATASET = "OC22"
 
 SOFTWARE = "VASP"
-METHODS = "DFT(PBE-GGA)"
+METHODS = "DFT-PBE"
 LINKS = [
     "https://github.com/Open-Catalyst-Project/ocp/blob/main/DATASET.md#open-catalyst-2022-oc22",
     "https://opencatalystproject.org/",

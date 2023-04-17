@@ -36,7 +36,7 @@ DATASET_FP = Path().cwd()
 DATASET = "TiO2_bulk_structures_2016"
 
 SOFTWARE = "Quantum ESPRESSO"
-METHODS = "DFT(PBE)"
+METHODS = "DFT-PBE"
 
 EN_RE = re.compile(r"^# total energy = (?P<energy>\-?\d+\.\d+) eV")
 LATT_RE = re.compile(r"(\-?\d+\.\d+)\s+(\-?\d+\.\d+)\s+(\-?\d+\.\d+)")
@@ -102,7 +102,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -145,40 +147,6 @@ def main(argv):
     )
 
     all_co_ids, all_do_ids = list(zip(*ids))
-    # cs_regexes = [
-    #     [
-    #         DATASET,
-    #         ".*",
-    #         f"All configurations from {DATASET} dataset",
-    #     ]
-    # ]
-
-    # cs_ids = []
-
-    # for i, (name, regex, desc) in enumerate(cs_regexes):
-    #     co_ids = client.get_data(
-    #         "configurations",
-    #         fields="hash",
-    #         query={
-    #             "hash": {"$in": all_co_ids},
-    #             "names": {"$regex": regex},
-    #         },
-    #         ravel=True,
-    #     ).tolist()
-
-    #     print(
-    #         f"Configuration set {i}",
-    #         f"({name}):".rjust(22),
-    #         f"{len(co_ids)}".rjust(7),
-    #     )
-    #     if len(co_ids) > 0:
-    #         cs_id = client.insert_configuration_set(
-    #             co_ids, description=desc, name=name
-    #         )
-
-    #         cs_ids.append(cs_id)
-    #     else:
-    #         pass
 
     client.insert_dataset(
         do_hashes=all_do_ids,

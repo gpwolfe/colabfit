@@ -46,7 +46,7 @@ DATASET_FP = Path().cwd()
 DATASET = "NNIP_FeH_PRM_2021"
 
 SOFTWARE = "VASP"
-METHODS = "DFT(PBE+GGA)"
+METHODS = "DFT-PBE"
 
 ATOM_RE = re.compile(
     r"atom\s+(\-?\d+\.\d+)\s+(\-?\d+\.\d+)\s+"

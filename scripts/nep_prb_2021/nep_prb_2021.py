@@ -45,9 +45,9 @@ import sys
 DATASET_FP = Path("zenodo_nep_version_2")
 DATASET = "NEP_PRB_2021"
 SOFT_METH = {
-    "PbTe_Fan_2021": ("VASP", "DFT(PBE)"),
-    "Si_Fan_2021": ("CASTEP", "DFT(PW91)"),
-    "Silicene_Fan_2021": ("Quantum ESPRESSO", "DFT(PBE)"),
+    "PbTe_Fan_2021": ("VASP", "DFT-PBE"),
+    "Si_Fan_2021": ("CASTEP", "DFT-PW91"),
+    "Silicene_Fan_2021": ("Quantum ESPRESSO", "DFT-PBE"),
 }
 
 LINKS = [
@@ -234,7 +234,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,

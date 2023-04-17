@@ -76,7 +76,7 @@ DATASET_FP = Path("ca_9_data")
 DATASET = "CA-9"
 
 SOFTWARE = "VASP"
-METHODS = "DFT(GGA-PBE)"
+METHODS = "DFT-PBE"
 LINKS = [
     "https://doi.org/10.24435/materialscloud:6h-yj",
     "https://doi.org/10.1016/j.cartre.2021.100027",
@@ -132,7 +132,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,

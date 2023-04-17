@@ -38,7 +38,7 @@ import sys
 
 DATASET_FP = Path("H2COMBUSTION_DATA-main-2")
 
-METHODS = "DFT(ωB97X-V)"
+METHODS = "DFT-ωB97X-V"
 SOFTWARE = "Q-CHEM"
 DATASET = "H_nature_2022"
 
@@ -87,7 +87,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,

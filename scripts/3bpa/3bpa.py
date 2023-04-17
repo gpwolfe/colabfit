@@ -42,7 +42,7 @@ DATASET_FP = Path().cwd()
 DATASET = "3BPA"
 
 SOFTWARE = "ORCA"
-METHODS = "DFT-(omega)B97X-6-31G(d)"
+METHODS = "DFT-(omega)B97X"
 LINKS = ["https://doi.org/10.1021/acs.jctc.1c00647"]
 AUTHORS = [
     "Dávid Péter Kovács",
@@ -109,6 +109,7 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
+        "basis_set": "6-31G(d)",
         "dihedrals": {"field": "dihedrals"},
     }
     property_map = {
