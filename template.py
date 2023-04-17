@@ -24,6 +24,7 @@ from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import MongoDatabase, load_data
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
+    # cauchy_stress_pd,
     potential_energy_pd,
 )
 import numpy as np
@@ -31,13 +32,13 @@ from pathlib import Path
 import re
 import sys
 
-DATASET_FP = Path("")
+DATASET_FP = Path("").cwd()
 DATASET = ""
 
 SOFTWARE = ""
 METHODS = ""
 LINKS = ["", ""]
-AUTHORS = ""
+AUTHORS = [""]
 DS_DESC = ""
 ELEMENTS = [""]
 GLOB_STR = ".*"
@@ -53,8 +54,24 @@ def reader(filepath):
 def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
+    parser.add_argument(
+        "-d",
+        "--db_name",
+        type=str,
+        help="Name of MongoDB database to add dataset to",
+        default="----",
+    )
+    parser.add_argument(
+        "-p",
+        "--nprocs",
+        type=int,
+        help="Number of processors to use for job",
+        default=4,
+    )
     args = parser.parse_args(argv)
-    client = MongoDatabase("----", nprocs=4, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -67,6 +84,7 @@ def main(argv):
     )
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
+    # client.insert_property_definition(cauchy_stress_pd)
 
     metadata = {
         "software": {"value": SOFTWARE},
@@ -87,13 +105,13 @@ def main(argv):
                 "_metadata": metadata,
             },
         ],
-        "cauchy-stress": [
-            {
-                "stress": {"field": "stress", "units": "eV"},
-                "volume-normalized": {"value": True, "units": None},
-                "_metadata": metadata,
-            }
-        ],
+        # "cauchy-stress": [
+        #     {
+        #         "stress": {"field": "stress", "units": "eV"},
+        #         "volume-normalized": {"value": True, "units": None},
+        #         "_metadata": metadata,
+        #     }
+        # ],
     }
     ids = list(
         client.insert_data(
@@ -141,7 +159,7 @@ def main(argv):
             pass
 
     client.insert_dataset(
-        pr_hashes=all_do_ids,
+        do_hashes=all_do_ids,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,
