@@ -53,7 +53,7 @@ def reader(file):
                     numbers=npz["nuclear_charges"],
                     positions=coords,
                     info={
-                        "name": file.stem,
+                        "name": f"{file.stem}",
                         "energy": energy,
                         "forces": forces,
                         "md17_index": md17_index,
@@ -91,7 +91,7 @@ def main(argv):
         name_field="name",
         elements=["C", "H", "O", "N"],
         reader=reader,
-        glob_string="*.npz",
+        glob_string="*azobenzene.npz",
         generator=False,
     )
     client.insert_property_definition(potential_energy_pd)
@@ -128,10 +128,9 @@ def main(argv):
 
     all_co_ids, all_do_ids = list(zip(*ids))
     cs_regexes = [
-        # ["rmd17_configurations", ".*", "All rmd17 configurations"],
-        ["aspirin", "aspirin", "Aspirin rmd17 configurations"],
         ["azobenzene", "azobenzene", "Azobenzene rmd17 configurations"],
-        ["benzene", "benzene", "Benzene rmd17 configurations"],
+        ["benzene", r"^benzene", "Benzene rmd17 configurations"],
+        ["aspirin", "aspirin", "Aspirin rmd17 configurations"],
         ["ethanol", "ethanol", "Ethanol rmd17 configurations"],
         [
             "malonaldehyde",
@@ -157,26 +156,6 @@ def main(argv):
 
         cs_ids.append(cs_id)
 
-    # for i, (name, regex, desc) in enumerate(cs_regexes):
-    #     co_ids = client.get_data(
-    #         "configurations",
-    #         fields="hash",
-    #         query={"hash": {"$in": all_co_ids}, "names": {"$regex": regex}},
-    #         ravel=True,
-    #     ).tolist()
-
-    #     print(
-    #         f"Configuration set {i}",
-    #         f"({name}):".rjust(22),
-    #         f"{len(co_ids)}".rjust(7),
-    #     )
-
-    #     if len(co_ids) > 0:
-    #         cs_id = client.insert_configuration_set(
-    #             co_ids, description=desc, name=name
-    #         )
-
-    #         cs_ids.append(cs_id)
     client.insert_dataset(
         cs_ids=cs_ids,
         do_hashes=all_do_ids,

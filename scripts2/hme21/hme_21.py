@@ -35,7 +35,7 @@ DATASET_FP = Path().cwd()
 DATASET = "HME21"
 
 SOFTWARE = "VASP"
-METHODS = "DFT(PBE)"
+METHODS = "DFT-PBE"
 LINKS = [
     "https://doi.org/10.6084/m9.figshare.19658538.v2",
     "https://doi.org/10.1038/s41467-022-30687-9",
@@ -139,7 +139,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,

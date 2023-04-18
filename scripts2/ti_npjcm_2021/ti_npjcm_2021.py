@@ -38,7 +38,7 @@ DATASET_FP = Path().cwd()
 DATASET = "Ti-NPJCM-2021"
 
 SOFTWARE = "VASP, LAMMPS"
-METHODS = "DFT(PBE)"
+METHODS = "DFT-PBE"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=Ti",
     "https://doi.org/10.1038/s41524-021-00661-y",
@@ -130,7 +130,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,

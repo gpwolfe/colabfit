@@ -36,7 +36,7 @@ DATASET_FP = Path().cwd()
 DATASET = "AgAu-nanoalloy-MSMSE-2021"
 
 SOFTWARE = "VASP, DP-GEN"
-METHODS = "DFT(PBE+D3)"
+METHODS = "DFT-PBE-D3)"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=AgAu-nanoalloy",
     "https://doi.org/10.48550/arXiv.2108.06232",
@@ -126,7 +126,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,

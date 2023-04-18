@@ -39,7 +39,7 @@ DATASET_FP = Path("data")
 DATASET = "DCGAT"
 
 SOFTWARE = "VASP"
-METHODS = "DFT(PBE)"
+METHODS = "DFT-PBE"
 LINKS = [
     "https://doi.org/10.24435/materialscloud:m7-50",
     "https://doi.org/10.1002/adma.202210788",
@@ -243,7 +243,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,

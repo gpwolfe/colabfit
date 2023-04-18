@@ -39,7 +39,7 @@ DATASET_FP = Path("examples/WBe_PRB2019/JSON")
 DATASET = "FitSNAP-WBe-PRB-2019"
 
 SOFTWARE = "VASP"
-METHODS = "DFT(PBE+GGA)"
+METHODS = "DFT-PBE"
 LINKS = [
     "https://github.com/FitSNAP",
     "https://doi.org/10.1103/PhysRevB.99.184305",
@@ -103,7 +103,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,

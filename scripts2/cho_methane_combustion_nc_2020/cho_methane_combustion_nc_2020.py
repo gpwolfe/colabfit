@@ -36,7 +36,7 @@ DATASET_FP = Path().cwd()
 DATASET = "CHO-methane-combustion-NC-2020"
 
 SOFTWARE = "LAMMPS, Material Studio, Gaussian 16"
-METHODS = "NVT, QM-MN15/6-31G**"
+METHODS = "NVT-QM-MN15"
 LINKS = [
     "https://doi.org/10.6084/m9.figshare.12973055.v3",
     "https://doi.org/10.1038/s41467-020-19497-z",
@@ -138,7 +138,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -156,7 +158,7 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        # "": {"field": ""}
+        "basis-set": {"value": "6-31G**"},
     }
     property_map = {
         "potential-energy": [

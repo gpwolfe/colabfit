@@ -41,7 +41,7 @@ DATASET_FP = Path("examples/InP_JPCA2020/JSON")
 DATASET = "FitSNAP-InP-JPCA-2020"
 
 SOFTWARE = "VASP"
-METHODS = "DFT(LDA)"
+METHODS = "DFT-LDA"
 LINKS = [
     "https://github.com/FitSNAP",
     "https://doi.org/10.1021/acs.jpca.0c02450",
@@ -103,7 +103,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -155,41 +157,6 @@ def main(argv):
     )
 
     all_co_ids, all_do_ids = list(zip(*ids))
-    # cs_regexes = [
-    #     [
-    #         f"{DATASET}",
-    #         ".*",
-    #         f"All configurations from {DATASET} dataset",
-    #     ]
-    # ]
-
-    # cs_ids = []
-
-    # for i, (name, regex, desc) in enumerate(cs_regexes):
-    #     co_ids = client.get_data(
-    #         "configurations",
-    #         fields="hash",
-    #         query={
-    #             "hash": {"$in": all_co_ids},
-    #             "names": {"$regex": regex},
-    #         },
-    #         ravel=True,
-    #     ).tolist()
-
-    #     print(
-    #         f"Configuration set {i}",
-    #         f"({name}):".rjust(22),
-    #         f"{len(co_ids)}".rjust(7),
-    #     )
-    #     if len(co_ids) > 0:
-    #         cs_id = client.insert_configuration_set(
-    #             co_ids, description=desc, name=name
-    #         )
-
-    #         cs_ids.append(cs_id)
-    #     else:
-    #         pass
-
     client.insert_dataset(
         do_hashes=all_do_ids,
         name=DATASET,

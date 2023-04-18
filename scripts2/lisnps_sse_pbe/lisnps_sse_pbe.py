@@ -40,7 +40,7 @@ DATASET_FP = Path().cwd()
 DATASET = "LiSnPS-SSE-PBE"
 
 SOFTWARE = "VASP, DP-GEN"
-METHODS = "DFT(PBE)"
+METHODS = "DFT-PBE"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=LiSnPS-SSE-PBE",
     "https://doi.org/10.1063/5.0041849",
@@ -128,7 +128,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,

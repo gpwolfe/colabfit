@@ -111,7 +111,7 @@ def meta_namer(filepath):
     elif parts[-4] == "pyridine":
         return (
             f"{parts[-4]}__{parts[-3]}_{parts[-2]}",
-            "DFT(PBE+GGA)",
+            "DFT-PBE",
             "Quantum ESPRESSO",
         )
     elif parts[-5] == "HEA":
@@ -160,7 +160,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,

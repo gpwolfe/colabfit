@@ -37,8 +37,8 @@ DATASET_FP = Path().cwd()
 DATASET = "NequIP-NC-2022"
 
 SOFT_METH = {
-    "lipo-quench": ("DFT(PBE)", "VASP"),
-    "lips": ("DFT(PBE)", "VASP"),
+    "lipo-quench": ("DFT-PBE", "VASP"),
+    "lips": ("DFT-PBE", "VASP"),
     "fcu": ("DFT", "CP2K"),
 }
 
@@ -96,7 +96,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,

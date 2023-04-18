@@ -36,7 +36,7 @@ DATASET_FP = Path().cwd()
 DATASET = "Sn-SCAN-PRM-2023"
 
 SOFTWARE = "VASP, DP-GEN"
-METHODS = "DFT(SCAN)"
+METHODS = "DFT-SCAN"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=Sn-SCAN",
     "https://doi.org/10.48550/arXiv.2209.05059",
@@ -141,7 +141,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,

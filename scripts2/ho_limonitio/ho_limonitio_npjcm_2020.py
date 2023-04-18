@@ -57,11 +57,11 @@ E_RE = re.compile(r"# total energy = (\S+)( eV)?$")
 
 def get_method_name(filepath):
     if "LMNTO-SCAN" in filepath.parts[-2]:
-        return ("SCAN", filepath.parts[-2])
+        return ("SCAN", filepath.parts[-2], None)
     elif "water-clusters" in filepath.parts[-3]:
-        return ("DFT(BLYP-D3)/def2-TZVP", filepath.parts[-3])
+        return ("DFT-BLYP-D3", filepath.parts[-3])
     elif "liquid-64water" in filepath.parts[-2]:
-        return ("DFT(revPBE+D3)", filepath.parts[-2])
+        return ("DFT-revPBE-D3", filepath.parts[-2], "")
     else:
         return None
 
@@ -96,7 +96,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,

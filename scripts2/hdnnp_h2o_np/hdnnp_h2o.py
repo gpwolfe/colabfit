@@ -78,7 +78,7 @@ def reader(filepath):
                 config.info["energy"] = energy
                 config.info["charge"] = charge
                 config.info["name"] = filepath.name
-                config.info["method"] = f"DFT({filepath.name.split('.')[-1]})"
+                config.info["method"] = f"DFT-{filepath.name.split('.')[-1]}"
 
                 configs.append(config)
             elif line.startswith("atom"):
@@ -114,7 +114,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,

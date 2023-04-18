@@ -38,7 +38,7 @@ DATASET_FP = Path().cwd()
 DATASET = "DP-GEN-Cu"
 
 SOFTWARE = "VASP, DP-GEN"
-METHODS = "DFT(PBE)"
+METHODS = "DFT-PBE"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=Cu-dpgen",
     "https://doi.org/10.1016/j.cpc.2020.107206",
@@ -125,7 +125,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,

@@ -44,7 +44,7 @@ DATASET_FP = Path("Si-H-GAP-main/structural_data")
 DATASET = "Si-H-GAP"
 
 SOFTWARE = "Quantum ESPRESSO"
-METHODS = "DFT(PBE)"
+METHODS = "DFT-PBE"
 LINKS = [
     "https://github.com/dgunruh/Si-H-GAP",
     "https://doi.org/10.1103/PhysRevMaterials.6.065603",

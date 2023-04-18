@@ -37,7 +37,7 @@ DATASET_FP = Path("data")
 DATASET = "HfO2"
 
 SOFTWARE = "VASP"
-METHODS = "NVT(PBE)"
+METHODS = "NVT-PBE"
 LINKS = [
     "https://github.com/argonne-lcf/active-learning-md",
     "https://doi.org/10.1038/s41524-020-00367-7",
@@ -83,7 +83,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,

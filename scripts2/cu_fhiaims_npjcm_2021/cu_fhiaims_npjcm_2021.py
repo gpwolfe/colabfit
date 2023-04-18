@@ -43,7 +43,7 @@ DATASET_FP = Path().cwd()
 DATASET = "Cu_FHIaims_NPJCM_2021"
 
 SOFTWARE = "FHI–aims"
-METHODS = "DFT(PBE)"
+METHODS = "DFT-PBE"
 LINKS = [
     "https://doi.org/10.5281/zenodo.4734035",
     "https://doi.org/10.1038/s41524-021-00559-9",
@@ -120,7 +120,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,
