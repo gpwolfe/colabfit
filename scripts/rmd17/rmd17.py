@@ -91,7 +91,7 @@ def main(argv):
         name_field="name",
         elements=["C", "H", "O", "N"],
         reader=reader,
-        glob_string="*azobenzene.npz",
+        glob_string="*.npz",
         generator=False,
     )
     client.insert_property_definition(potential_energy_pd)
