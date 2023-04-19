@@ -159,7 +159,6 @@ def main(argv):
     all_co_ids, all_do_ids = list(zip(*ids))
     cs_regexes = []
     sets = set([f.stem for f in DATASET_FP.glob("*")])
-    print(sets)
     for s in sets:
         cs_regexes.append(
             [

@@ -244,7 +244,7 @@ def main(argv):
     }
     cs_regexes = []
     for key, val in descriptions.items():
-        cs_regexes.append([f"{DATASET}_{key}", f".*{key}.*", val])
+        cs_regexes.append([f"{DATASET}_{key}", rf".*{key}.*", val])
 
     cs_ids = []
 

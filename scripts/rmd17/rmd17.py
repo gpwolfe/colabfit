@@ -129,7 +129,7 @@ def main(argv):
     all_co_ids, all_do_ids = list(zip(*ids))
     cs_regexes = [
         ["azobenzene", "azobenzene", "Azobenzene rmd17 configurations"],
-        ["benzene", r"^benzene", "Benzene rmd17 configurations"],
+        ["benzene", "rmd17_benzene", "Benzene rmd17 configurations"],
         ["aspirin", "aspirin", "Aspirin rmd17 configurations"],
         ["ethanol", "ethanol", "Ethanol rmd17 configurations"],
         [

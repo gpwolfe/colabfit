@@ -57,11 +57,11 @@ E_RE = re.compile(r"# total energy = (\S+)( eV)?$")
 
 def get_method_name(filepath):
     if "LMNTO-SCAN" in filepath.parts[-2]:
-        return ("SCAN", filepath.parts[-2], None)
+        return ("SCAN", filepath.parts[-2])
     elif "water-clusters" in filepath.parts[-3]:
         return ("DFT-BLYP-D3", filepath.parts[-3])
     elif "liquid-64water" in filepath.parts[-2]:
-        return ("DFT-revPBE-D3", filepath.parts[-2], "")
+        return ("DFT-revPBE-D3", filepath.parts[-2])
     else:
         return None
 
