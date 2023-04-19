@@ -36,6 +36,19 @@ from pathlib import Path
 import sys
 
 DATASET_FP = Path().cwd()
+DATASET_NAME = "rMD17"
+ELEMENTS = ["C", "H", "O", "N"]
+LINKS = [
+    "https://doi.org/10.6084/m9.figshare.12672038.v3",
+    "https://doi.org/10.48550/arXiv.2007.09593",
+]
+DESCRIPTION = "A dataset of 10 molecules (aspirin,\
+ azobenzene, benzene, ethanol, malonaldehyde, naphthalene,\
+ paracetamol, salicylic, toluene, uracil) with 100,000 structures\
+ calculated for each at the PBE/def2-SVP level of theory using ORCA.\
+ Based on the MD17 dataset, but with refined measurements."
+
+AUTHORS = ["Anders S. Christensen", "O. Anatole von Lilienfeld"]
 
 
 def reader(file):
@@ -84,12 +97,35 @@ def main(argv):
     client = MongoDatabase(
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
     )
+    client.insert_property_definition(potential_energy_pd)
+    client.insert_property_definition(atomic_forces_pd)
+    metadata = {
+        "software": {"value": "ORCA"},
+        "method": {"value": "DFT-PBE"},
+        "basis_set": {"value": "def2-SVP"},
+        "MD17-index": {"field": "md17_index"},
+    }
+    property_map = {
+        "potential-energy": [
+            {
+                "energy": {"field": "energy", "units": "kcal/mol"},
+                "per-atom": {"value": False, "units": None},
+                "_metadata": metadata,
+            }
+        ],
+        "atomic-forces": [
+            {
+                "forces": {"field": "forces", "units": "kcal/mol/A"},
+                "_metadata": metadata,
+            }
+        ],
+    }
 
     configurations = load_data(
         file_path=DATASET_FP,
         file_format="folder",
         name_field="name",
-        elements=["C", "H", "O", "N"],
+        elements=ELEMENTS,
         reader=reader,
         glob_string="*.npz",
         generator=False,
@@ -159,17 +195,10 @@ def main(argv):
     client.insert_dataset(
         cs_ids=cs_ids,
         do_hashes=all_do_ids,
-        name="rMD17",
-        authors=["Anders S. Christensen", "O. Anatole von Lilienfeld"],
-        links=[
-            "https://doi.org/10.6084/m9.figshare.12672038.v3",
-            "https://doi.org/10.48550/arXiv.2007.09593",
-        ],
-        description="A dataset of 10 molecules (aspirin, "
-        "azobenzene, benzene, ethanol, malonaldehyde, naphthalene, "
-        "paracetamol, salicylic, toluene, uracil) with 100,000 structures"
-        "calculated for each at the PBE/def2-SVP level of theory using ORCA."
-        "Based on the MD17 dataset, but with refined measurements.",
+        name=DATASET_NAME,
+        authors=AUTHORS,
+        links=LINKS,
+        description=DESCRIPTION,
         verbose=True,
     )
 

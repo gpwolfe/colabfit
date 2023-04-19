@@ -11,6 +11,51 @@ def read_npz(filepath):
             data[key] = f[key]
     return data
 
+###########################################################################
+## A workaround for datasets that have too many configurations for computer memory
+## to hold all at once, as long as there are multiple files scattered through
+## sufficient directories to divide the task
+
+globs = list(set([db.parent for db in DATASET_FP.rglob(GLOB_STR)]))
+configurations = load_data(
+    file_path=globs[0],
+    file_format="folder",
+    name_field="name",
+    elements=ELEMENTS,
+    reader=reader,
+    glob_string=GLOB_STR,
+    generator=False,
+)
+ids = list(
+    client.insert_data(
+        configurations,
+        property_map=property_map,
+        generator=False,
+        verbose=True,
+    )
+)
+for gl in globs:
+    configurations = load_data(
+        file_path=gl,
+        file_format="folder",
+        name_field="name",
+        elements=ELEMENTS,
+        reader=reader,
+        glob_string=GLOB_STR,
+        generator=False,
+    )
+
+    ids.extend(
+        client.insert_data(
+            configurations,
+            property_map=property_map,
+            generator=False,
+            verbose=True,
+        )
+    )
+
+###########################################################################
+
 # For assembling data in npy format scattered into a single category 
 # with a type.raw file in parent directory
 # This is the format associated with DeePMD models/datasets
@@ -70,6 +115,8 @@ def reader(filepath):
     return configs
 
 
+###########################################################################
+
 def assemble_npy_properties(filepath: Path):
     prop_path = filepath.parent.glob('*.npy')
     props = {}
@@ -104,6 +151,7 @@ def basic_npz_reader(file):
             )
     return atoms
 
+###########################################################################
 
 def read_np(filepath: str, props: dict):
 
@@ -148,6 +196,7 @@ def read_np(filepath: str, props: dict):
         )
     return atoms
 
+###########################################################################
 
 def assemble_np(fp_dict, props: dict):
     """
@@ -178,6 +227,7 @@ def assemble_np(fp_dict, props: dict):
     return file_props
 
 def insert_configuration_set(client, names, res, descs):
+
 
 
 cs_regexes = [
