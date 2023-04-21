@@ -181,8 +181,7 @@ def main(argv):
         "discussed in the paper.",
         "unrelaxed": "Contains 65 unrelaxed enumerated structures that are "
         "seeds for the phonon calculations.",
-        "relaxed": "Contains relaxed versions of respective unrelaxed"
-        " structures",
+        "relaxed": "Contains relaxed versions of respective unrelaxed" " structures",
     }
 
     cs_names = ["bcc", "fcc", "pathway", "unrelaxed", "relaxed"]

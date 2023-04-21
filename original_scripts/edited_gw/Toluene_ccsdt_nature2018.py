@@ -1,41 +1,40 @@
 #!/usr/bin/env python
 # coding: utf-8
-
 from argparse import ArgumentParser
 from pathlib import Path
 import sys
-from colabfit.tools.database import MongoDatabase, load_data
-from colabfit.tools.property_definitions import (
-    atomic_forces_pd,
-    potential_energy_pd,
-)
+
 from ase.io import read
+from colabfit.tools.database import MongoDatabase, load_data
 
-DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets")
 
-DATASET_NAME = "Aspirin_ccsd_NC2018"
+DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets/sGDML")
+DATASET = "Toluene_ccsdt_NC2018"
+
+LINKS = [
+    "https://doi.org/10.1038/s41467-018-06169-2",
+    "http://sgdml.org/",
+]
 AUTHORS = [
     "Stefan Chmiela",
     "Huziel E. Sauceda",
     "Klaus-Robert Müller",
     "Alexandre Tkatchenko",
 ]
-LINKS = [
-    "https://www.nature.com/articles/s41467-018-06169-2",
-    "http://sgdml.org/",
-]
-DESCRIPTION = (
-    "To create the coupled cluster datasets, "
-    "the data used for training the models were created by running "
-    "abinitio MD in the NVT ensemble using the Nosé-Hoover thermostat "
-    "at 500 K during a 200 ps simulation with a resolution of 0.5 fs. "
-    "Energies and forces were recalculated by all-electron coupled cluster "
-    "with single, double and perturbative triple excitations (CCSD(T)). "
-    "The Dunning correlation-consistent basis set CCSD/cc-pVDZ was used "
-    "for aspirin. All calculations were performed with the Psi4 software suite."
+DS_DESC = (
+    "To create the coupled cluster datasets, the data used "
+    "for training the models were created by running ab initio MD in the "
+    "NVT ensemble using the Nosé-Hoover thermostat at 500 K during a 200 ps "
+    "simulation with a resolution of 0.5 fs. Energies and forces were "
+    "recalculated using all-electron coupled cluster with single, "
+    "double and perturbative triple excitations (CCSD(T))."
+    "The Dunning correlation-consistent basis set cc-pVDZ was "
+    "used for malonaldehyde. All calculations were performed with the Psi4 software "
+    "suite."
 )
 
 
+# sGDML->checkout README
 def reader_sGDML(p):
     s = str(p).split("/")
     atoms = read(p, index=":", forces=True)
@@ -64,37 +63,33 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-
     client = MongoDatabase(
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
     )
 
     configurations = load_data(
-        file_path="/large_data/new_raw_datasets/sGDML",
+        file_path=DATASET_FP,
         file_format="folder",
         name_field="_name",
-        elements=["O", "H", "C"],
+        elements=["H", "C"],
         reader=reader_sGDML,
-        glob_string="aspirin_ccsd-test.xyz",
-        default_name="aspirin_ccsd-test",
+        glob_string="toluene_ccsd_t-test.xyz",
+        default_name="toluene_ccsd_t-test",
         verbose=True,
         generator=False,
     )
 
     configurations += load_data(
-        file_path="/large_data/new_raw_datasets/sGDML",
+        file_path=DATASET_FP,
         file_format="folder",
         name_field="_name",
-        elements=["O", "H", "C"],
+        elements=["H", "C"],
         reader=reader_sGDML,
-        glob_string="aspirin_ccsd-train.xyz",
-        default_name="aspirin_ccsd-train",
+        glob_string="toluene_ccsd_t-train.xyz",
+        default_name="toluene_ccsd_t-train",
         verbose=True,
         generator=False,
     )
-
-    client.insert_property_definition(potential_energy_pd)
-    client.insert_property_definition(atomic_forces_pd)
 
     property_map = {
         "potential-energy": [
@@ -103,7 +98,7 @@ def main(argv):
                 "per-atom": {"field": "per-atom", "units": None},
                 "_metadata": {
                     "software": {"value": "Psi4"},
-                    "method": {"value": "CCSD"},
+                    "method": {"value": "CCSD(T)"},
                     "basis": {"value": "cc-pVDZ"},
                 },
             }
@@ -113,7 +108,7 @@ def main(argv):
                 "forces": {"field": "forces", "units": "kcal/molAng"},
                 "_metadata": {
                     "software": {"value": "Psi4"},
-                    "method": {"value": "CCSD"},
+                    "method": {"value": "CCSD(T)"},
                     "basis": {"value": "cc-pVDZ"},
                 },
             }
@@ -132,12 +127,14 @@ def main(argv):
             verbose=True,
         )
     )
+
     all_co_ids, all_pr_ids = list(zip(*ids))
 
     cs_regexes = {
         "train": "Configurations used in training",
         "test": "Configurations used for testing",
     }
+
     cs_names = ["train", "test"]
 
     cs_ids = []
@@ -154,10 +151,10 @@ def main(argv):
     client.insert_dataset(
         cs_ids=cs_ids,
         do_hashes=all_pr_ids,
-        name=DATASET_NAME,
+        name=DATASET,
         authors=AUTHORS,
         links=LINKS,
-        description=DESCRIPTION,
+        description=DS_DESC,
         resync=True,
         verbose=True,
     )

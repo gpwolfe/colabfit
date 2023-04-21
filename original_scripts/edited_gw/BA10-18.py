@@ -12,9 +12,7 @@ import sys
 from colabfit.tools.database import MongoDatabase, load_data
 from colabfit.tools.property_definitions import potential_energy_pd
 
-DATASET_FP = Path(
-    "/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets"
-)
+DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets")
 
 DATASET_NAME = "BA10-18"
 LINKS = [
