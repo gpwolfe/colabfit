@@ -192,15 +192,6 @@ def main(argv):
     client = MongoDatabase(
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
     )
-    configurations = load_data(
-        file_path=DATASET_FP,
-        file_format="folder",
-        name_field="name",
-        elements=ELEMENTS,
-        reader=reader,
-        glob_string=GLOB_STR,
-        generator=False,
-    )
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
 
@@ -209,6 +200,7 @@ def main(argv):
         "method": {"value": METHODS},
         # "": {"field": ""}
     }
+
     property_map = {
         "potential-energy": [
             {
@@ -224,23 +216,52 @@ def main(argv):
             }
         ],
     }
-    ids = list(
-        client.insert_data(
-            configurations,
-            property_map=property_map,
-            generator=False,
-            verbose=True,
-        )
+    configurations = load_data(
+        file_path=DATASET_FP,
+        file_format="folder",
+        name_field="name",
+        elements=ELEMENTS,
+        reader=reader,
+        glob_string=GLOB_STR,
+        generator=False,
     )
+    batch_size = 10000
+    n_batches = len(configurations//batch_size)
+    leftover = len(configurations) % batch_size
+    ids = []
+    for batch in range(n_batches):
+        ids.extend(list(
+            client.insert_data(
+                configurations[batch*batch_size:(batch + 1 * batch_size)],
+                property_map=property_map,
+                generator=False,
+                verbose=True,
+            )
+        ))
+    if leftover:
+        ids.extend(list(
+            client.insert_data(
+                configurations[n_batches*batch_size:],
+                property_map=property_map,
+                generator=False,
+                verbose=True,
+            )
+        ))
 
     all_co_ids, all_do_ids = list(zip(*ids))
     descriptions = {
-        "train_is2re": "Training configurations for initial structure to relaxed total energy task",
-        "train_s2ef": "Training configurations for structure to total energy and forces task",
-        "val_id_is2re": "Validation configurations for initial structure to relaxed total energy task",
-        "val_id_s2ef": "Validation configurations for structure to total energy and forces task",
-        "val_ood_is2re": "Unseen test configurations for initial structure to relaxed total energy task",
-        "val_ood_s2ef": "Unseen test configurations for structure to total energy and forces task",
+        "train_is2re": "Training configurations for initial structure to relaxed total"
+        "energy task",
+        "train_s2ef": "Training configurations for structure to total energy and forces"
+        "task",
+        "val_id_is2re": "Validation configurations for initial structure to relaxed "
+        "total energy task",
+        "val_id_s2ef": "Validation configurations for structure to total energy and "
+        "forces task",
+        "val_ood_is2re": "Unseen test configurations for initial structure to relaxed "
+        "total energy task",
+        "val_ood_s2ef": "Unseen test configurations for structure to total energy and "
+        "forces task",
     }
     cs_regexes = []
     for key, val in descriptions.items():

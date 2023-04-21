@@ -146,7 +146,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -222,27 +224,6 @@ def main(argv):
     )
 
     all_co_ids, all_do_ids = list(zip(*ids))
-
-    # name = "C7H10O2"
-    # cs_ids = []
-    # co_ids = client.get_data(
-    #     "configurations",
-    #     fields="hash",
-    #     query={"hash": {"$in": all_co_ids}},
-    #     ravel=True,
-    # ).tolist()
-
-    # print(
-    #     "Configuration set", "({name}):".rjust(22), f"{len(co_ids)}".rjust(7)
-    # )
-
-    # cs_id = client.insert_configuration_set(
-    #     co_ids,
-    #     description=f"All configurations from {name} dataset",
-    #     name=name,
-    # )
-
-    # cs_ids.append(cs_id)
 
     client.insert_dataset(
         # cs_ids,

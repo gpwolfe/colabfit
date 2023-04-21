@@ -331,60 +331,37 @@ def main(argv):
     )
 
     all_co_ids, all_do_ids = list(zip(*ids))
-    cs_regexes = [
-        [
-            f"{DATASET}-DCGAT-1",
-            "dcgat_1_*",
-            f"All configurations from {DATASET} dataset",
-        ],
-        [
-            f"{DATASET}-DCGAT-2",
-            "dcgat_2_*",
-            f"All configurations from {DATASET} dataset",
-        ],
-        [
-            f"{DATASET}-DCGAT-3",
-            "dcgat_3_*",
-            f"All configurations from {DATASET} dataset",
-        ],
-    ]
 
-    cs_ids = []
-    for i, (name, regex, desc) in enumerate(cs_regexes):
-        cs_id = client.query_and_insert_configuration_set(
-            co_hashes=all_co_ids,
-            name=name,
-            description=desc,
-            query={"names": {"$regex": regex}},
+    # Consistently getting a process kill, probably OOM error. Splitting here
+    # into three separate datasets
+    configurations = load_data(
+        file_path=DATASET_FP,
+        file_format="folder",
+        name_field="name",
+        elements=ELEMENTS,
+        reader=reader,
+        glob_string="dcgat_1*.json",
+        generator=False,
+    )
+    ids = list(
+        client.insert_data(
+            configurations,
+            property_map=property_map,
+            generator=False,
+            verbose=True,
         )
+    )
 
-        cs_ids.append(cs_id)
-    # for i, (name, regex, desc) in enumerate(cs_regexes):
-    #     co_ids = client.get_data(
-    #         "configurations",
-    #         fields="hash",
-    #         query={
-    #             "hash": {"$in": all_co_ids},
-    #             "names": {"$regex": regex},
-    #         },
-    #         ravel=True,
-    #     ).tolist()
-
-    #     print(
-    #         f"Configuration set {i}",
-    #         f"({name}):".rjust(22),
-    #         f"{len(co_ids)}".rjust(7),
-    #     )
-    #     if len(co_ids) > 0:
-    #         cs_id = client.insert_configuration_set(
-    #             co_ids, description=desc, name=name
-    #         )
-
-    #         cs_ids.append(cs_id)
-    #     else:
-    #         pass
-
-    client.insert_dataset(
+    all_co_ids, all_do_ids = list(zip(*ids))
+    cs_ids = []
+    cs_id = client.query_and_insert_configuration_set(
+        co_hashes=all_co_ids,
+        name="DCGAT-1",
+        description=f"DCGAT-1 configurations from DCGAT dataset",
+        query={"names": {"$regex": "dcgat_1_*"}},
+    )
+    cs_ids.append(cs_id)
+    ds_id = client.insert_dataset(
         do_hashes=all_do_ids,
         name=DATASET,
         authors=AUTHORS,
@@ -393,6 +370,56 @@ def main(argv):
         verbose=True,
         cs_ids=cs_ids,
     )
+    # These are just the remaining name/regex/description for the last 2 config sets
+    cs_regexes = [
+        [
+            "DCGAT-2",
+            "dcgat_2_*",
+            f"DCGAT-2 configurations from {DATASET} dataset",
+        ],
+        [
+            "DCGAT-3",
+            "dcgat_3_*",
+            f"DCGAT-3 configurations from {DATASET} dataset",
+        ],
+    ]
+    for i, (name, regex, desc) in enumerate(cs_regexes):
+        configurations = load_data(
+            file_path=DATASET_FP,
+            file_format="folder",
+            name_field="name",
+            elements=ELEMENTS,
+            reader=reader,
+            glob_string=f"{regex}.json",
+            generator=False,
+        )
+        ids = list(
+            client.insert_data(
+                configurations,
+                property_map=property_map,
+                generator=False,
+                verbose=True,
+            )
+        )
+
+        all_co_ids, all_do_ids = list(zip(*ids))
+        cs_ids = []
+
+        cs_id = client.query_and_insert_configuration_set(
+            co_hashes=all_co_ids,
+            name=name,
+            description=desc,
+            query={"names": {"$regex": regex}},
+        )
+
+        cs_ids.append(cs_id)
+
+        ds_id = client.update_dataset(
+            ds_id=ds_id,
+            add_do_ids=all_do_ids,
+            verbose=True,
+            cs_ids=cs_ids,
+        )
 
 
 if __name__ == "__main__":

@@ -100,7 +100,6 @@ def namer(filepath: Path):
 
 
 def read_db(filepath):
-    print(filepath)
     configs = []
     name = namer(filepath)
     if name == "CoB":
@@ -119,17 +118,13 @@ def read_db(filepath):
         forces = decode_reshape(struct[6])
         if len(struct) > 7:
             pbc = [int(a_type) for a_type in np.frombuffer(struct[7])]
-            template_indices = [
-                int(a_type) for a_type in np.frombuffer(struct[8])
-            ]
+            template_indices = [int(a_type) for a_type in np.frombuffer(struct[8])]
             config = AtomicConfiguration(
                 numbers=types, positions=coords, pbc=pbc, cell=cell
             )
         else:
             template_indices = None
-            config = AtomicConfiguration(
-                numbers=types, positions=coords, cell=cell
-            )
+            config = AtomicConfiguration(numbers=types, positions=coords, cell=cell)
         config.info["energy"] = energy
         config.info["forces"] = forces
         config.info["ctime"] = ctime
