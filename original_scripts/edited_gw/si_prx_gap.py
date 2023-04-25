@@ -89,7 +89,7 @@ def main(argv):
 
     images = list(
         load_data(
-            file_path="/colabfit/data/data/gap_si/gp_iter6_sparse9k.xml.xyz",
+            file_path=DATASET_FP,
             file_format="xyz",
             name_field="config_type",
             elements=["Si"],

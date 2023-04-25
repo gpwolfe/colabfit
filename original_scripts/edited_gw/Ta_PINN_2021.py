@@ -106,7 +106,7 @@ def main(argv):
 
     configurations = list(
         load_data(
-            file_path="/colabfit/data/data/mishin/",
+            file_path=DATASET_FP,
             file_format="folder",
             name_field="_name",
             elements=["Ta"],
@@ -142,23 +142,6 @@ def main(argv):
     )
 
     all_co_ids, all_pr_ids = list(zip(*ids))
-
-    # This dataset was found to have 4 configurations that had more than one property
-    # pointing to them. In all cases, this was due to a difference in computed energies
-    # on the order of 1e-4 or smaller.
-
-    # for co_doc in client.configurations.find(
-    #     {"hash": {"$hash": all_co_ids}, "relationships.properties.1":
-    #      {"$exists": True}}
-    # ):
-    #     print(co_doc["names"])
-    #     for pr_doc in client.properties.find(
-    #         {
-    #             "hash": {"$in": all_pr_ids},
-    #             "relationships.configurations": co_doc["hash"],
-    #         }
-    #     ):
-    #         print("\t", pr_doc["energy-forces-stress"]["energy"])
 
     cs_regexes = {
         "bcc.small.strain": "BCC structures with small homogeneous strains",
