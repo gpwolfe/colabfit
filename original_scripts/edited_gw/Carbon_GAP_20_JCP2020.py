@@ -20,6 +20,7 @@ DATASET_FP = Path(
 )
 DATASET = "Carbon_GAP_JCP2020"
 
+
 LINKS = [
     "https://aip.scitation.org/doi/10.1063/5.0005084",
     "https://www.repository.cam.ac.uk/handle/1810/307452",
@@ -39,6 +40,10 @@ DS_DESC = (
     "but at a significantly reduced cost. The final potential is fitted to reference "
     "data computed using the optB88-vdW density functional theory (DFT) functional."
 )
+
+
+def tform(c):
+    c.info["per-atom"] = False
 
 
 def main(argv):
@@ -129,9 +134,6 @@ def main(argv):
             }
         ],
     }
-
-    def tform(c):
-        c.info["per-atom"] = False
 
     ids = list(
         client.insert_data(

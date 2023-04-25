@@ -8,13 +8,16 @@ import numpy as np
 
 from colabfit.tools.database import MongoDatabase, load_data
 
-DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/data/acclab_helsinki")
+DATASET_FP = Path(
+    "/persistent/colabfit_raw_data/colabfit_data/data/"
+    "acclab_helsinki/V/training-data/db_V.xyz"
+)
 DATASET = "V_PRM2019"
 
 
 LINKS = [
     "https://doi.org/10.1103/PhysRevMaterials.4.093802",
-    "https://gitlab.com/acclab/gap-data/-/tree/master/Mo",
+    "https://gitlab.com/acclab/gap-data/-/tree/master",
 ]
 AUTHORS = [
     "J. Byggmästar",
@@ -30,6 +33,15 @@ DS_DESC = (
     "configurations to the correct lattice spacing and adding in gamma "
     "surface configurations."
 )
+
+
+def tform(c):
+    c.info["per-atom"] = False
+
+    if "virial" in c.info:
+        c.info["virial"] = (
+            c.info["virial"] / np.abs(np.linalg.det(np.array(c.cell)))
+        ) * -160.21766208
 
 
 def main(argv):
@@ -95,14 +107,6 @@ def main(argv):
             }
         ],
     }
-
-    def tform(c):
-        c.info["per-atom"] = False
-
-        if "virial" in c.info:
-            c.info["virial"] = (
-                c.info["virial"] / np.abs(np.linalg.det(np.array(c.cell)))
-            ) * -160.21766208
 
     ids = list(
         client.insert_data(

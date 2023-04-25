@@ -43,6 +43,10 @@ DS_DESC = (
 )
 
 
+def tform(c):
+    c.info["per-atom"] = False
+
+
 def reader_PtNi(p):
     atoms = []
     db = connect(p)
@@ -136,6 +140,7 @@ def main(argv):
         "free-energy": [
             {
                 "energy": {"field": "free_energy", "units": "eV"},
+                "per-atom": {"field": "per-atom", "units": None},
                 "_metadata": {
                     "software": {"value": "VASP"},
                     "method": {"value": "DFT-rPBE"},
@@ -144,9 +149,6 @@ def main(argv):
             }
         ],
     }
-
-    def tform(c):
-        c.info["per-atom"] = False
 
     ids = list(
         client.insert_data(

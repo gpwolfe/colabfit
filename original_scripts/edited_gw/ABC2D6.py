@@ -3,13 +3,16 @@
 from argparse import ArgumentParser
 from ase import Atoms
 from colabfit.tools.database import MongoDatabase, load_data
+import json
 from tqdm import tqdm
 from pathlib import Path
 import pickle
 import sys
 
-DATASET_FP = Path("/large_data/new_raw_datasets/ABC2D6-16/abc2d6-16/")
-SCRIPT_FP = Path("/home/ubuntu/calc_notebooks/*.json")
+DATASET_FP = Path(
+    "/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets/ABC2D6-16/abc2d6-16/"
+)
+SCRIPT_FP = Path().cwd()
 DATASET_NAME = "ABC2D6-16_PRL2018"
 AUTHORS = [
     "F. Faber",
@@ -217,9 +220,12 @@ def main(argv):
         generator=False,
     )
 
-    pds = SCRIPT_FP.glob("*.json")
-    for pd in pds:
-        client.insert_property_definition(pd)
+    pdef_fps = SCRIPT_FP.glob("*.json")
+    for fp in pdef_fps:
+        with open(fp, "r") as f:
+            pdef = json.load(f)
+
+            client.insert_property_definition(pdef)
 
     # TODO actually formation energy
     property_map = {

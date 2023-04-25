@@ -32,6 +32,15 @@ DS_DESC = (
 )
 
 
+def tform(c):
+    c.info["per-atom"] = False
+
+    if "virial" in c.info:
+        c.info["virial"] = (
+            c.info["virial"] / np.abs(np.linalg.det(np.array(c.cell)))
+        ) * -160.21766208
+
+
 def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
@@ -95,14 +104,6 @@ def main(argv):
             }
         ],
     }
-
-    def tform(c):
-        c.info["per-atom"] = False
-
-        if "virial" in c.info:
-            c.info["virial"] = (
-                c.info["virial"] / np.abs(np.linalg.det(np.array(c.cell)))
-            ) * -160.21766208
 
     ids = list(
         client.insert_data(

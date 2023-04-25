@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 
 from colabfit.tools.database import MongoDatabase, load_data
-from ase.io import read
+from ase.atoms import Atoms
 
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets")
@@ -35,15 +35,36 @@ DS_DESC = (
 )
 
 
+def tform(c):
+    c.info["per-atom"] = False
+
+
 # sGDML->checkout README
-def reader_sGDML(p):
-    s = str(p).split("/")
-    atoms = read(p, index=":", forces=True)
-    for i, a in enumerate(atoms):
-        a.info["energy"] = float(list(a.info.keys())[0])
+def reader_sGDML(filepath):
+    with open(filepath, "r") as f:
+        configs = []
+        lines = f.readlines()
+        while len(lines) > 0:
+            symbols = []
+            positions = []
+            forces = []
+            natoms = int(lines.pop(0))
+            energy = float(lines.pop(0))
+            for _ in range(natoms):
+                line = lines.pop(0)
+                symbol = line.split()[0]
+                positions.append([float(p) for p in line.split()[1:4]])
+                forces.append([float(f) for f in line.split()[4:]])
+                symbol = symbol.lower().capitalize()
+                symbols.append(symbol)
+            config = Atoms(symbols=symbols, positions=positions)
+            config.info["energy"] = energy
+            config.info["forces"] = forces
+            configs.append(config)
+    for i, a in enumerate(configs):
         a.info["per-atom"] = False
-        a.info["_name"] = "%s_%s" % (s[-1].split(".")[0], i)
-    return atoms
+        a.info["_name"] = f"{filepath.stem}_{i}"
+    return configs
 
 
 def main(argv):
@@ -100,9 +121,6 @@ def main(argv):
             }
         ],
     }
-
-    def tform(c):
-        c.info["per-atom"] = False
 
     ids = list(
         client.insert_data(

@@ -42,6 +42,10 @@ REFERENCE_ENERGIES = {
 }
 
 
+def tform(c):
+    c.info["per-atom"] = False
+
+
 def get_molecular_reference_energy(atomic_numbers):
     molecular_reference_energy = 0
     for atomic_number in atomic_numbers:
@@ -207,9 +211,6 @@ def main(argv):
             }
         ],
     }
-
-    def tform(c):
-        c.info["per-atom"] = False
 
     ids = list(
         client.insert_data(

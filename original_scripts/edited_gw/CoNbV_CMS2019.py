@@ -5,14 +5,6 @@ from pathlib import Path
 import sys
 
 from colabfit.tools.database import MongoDatabase, load_data
-from colabfit.tools.configuration import AtomicConfiguration
-
-client = MongoDatabase(
-    "colabfit-12-11-22",
-    configuration_type=AtomicConfiguration,
-    nprocs=1,
-    drop_database=False,
-)
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/data/")
 DATASET = "CoNbV_CMS2019"
@@ -36,6 +28,10 @@ DS_DESC = (
     "hcp, etc.) with 8 or fewer atoms in the unit cell and different "
     "concentrations of Co, Nb, and V."
 )
+
+
+def tform(c):
+    c.info["per-atom"] = False
 
 
 def main(argv):
@@ -101,9 +97,6 @@ def main(argv):
             }
         ],
     }
-
-    def tform(c):
-        c.info["per-atom"] = False
 
     ids = list(
         client.insert_data(

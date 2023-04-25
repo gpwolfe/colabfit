@@ -152,7 +152,7 @@ def main(argv):
         ],
     }
 
-    def tform(c):
+    for c in configurations:
         c.info["per-atom"] = False
         if "vasp_virial" in c.info:
             # Stress/Virial will almost always be listed as 9 numbers.
@@ -164,7 +164,7 @@ def main(argv):
             configurations,
             property_map=property_map,
             generator=False,
-            transform=tform,
+            # transform=tform,
             verbose=True,
         )
     )

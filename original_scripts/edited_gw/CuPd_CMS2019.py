@@ -34,6 +34,10 @@ DS_DESC = (
 name = "CuPd_CMS2019"
 
 
+def tform(c):
+    c.info["per-atom"] = False
+
+
 def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
@@ -92,9 +96,6 @@ def main(argv):
             }
         ],
     }
-
-    def tform(c):
-        c.info["per-atom"] = False
 
     ids = list(
         client.insert_data(

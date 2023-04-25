@@ -9,8 +9,8 @@ import ase
 
 
 DATASET_FP = Path(
-    "/persistent/colabfit_data/new_raw_datasets"
-    "/C_allotropes_MingjianEllad/carbon_energies_forces"
+    "/persistent/colabfit_raw_data/colabfit_data/"
+    "new_raw_datasets/C_allotropes_MingjianEllad/carbon_energies_forces/"
 )
 DATASET = "C_npj2020"
 
@@ -28,6 +28,10 @@ DS_DESC = (
     "Vienna Ab initio Simulation Package (VASP). The energies and forces"
     "are stored in the extended XYZ format. One file for each configuration."
 )
+
+
+def tform(c):
+    c.info["per-atom"] = False
 
 
 def reader(file_path):
@@ -116,9 +120,6 @@ def main(argv):
             }
         ],
     }
-
-    def tform(c):
-        c.info["per-atom"] = False
 
     ids = list(
         client.insert_data(

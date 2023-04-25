@@ -63,7 +63,7 @@ def main(argv):
         "potential-energy": [
             {
                 "energy": {"field": "nomad_total_energy", "units": "eV"},
-                "per-atom": {"field": "per-atom", "units": None},
+                "per-atom": {"value": False, "units": None},
                 "_metadata": {
                     "software": {"field": "nomad_program_name"},
                     "method": {"field": "nomad_electronic_structure_method"},
@@ -74,6 +74,7 @@ def main(argv):
         "free-energy": [
             {
                 "energy": {"field": "nomad_free_energy", "units": "eV"},
+                "per-atom": {"value": False, "units": None},
                 "_metadata": {
                     "software": {"field": "nomad_program_name"},
                     "method": {"field": "nomad_electronic_structure_method"},
@@ -83,15 +84,11 @@ def main(argv):
         ],
     }
 
-    def tform(c):
-        c.info["per-atom"] = False
-
     ids = list(
         client.insert_data(
             configurations,
             property_map=property_map,
             generator=False,
-            transform=tform,
             verbose=True,
         )
     )

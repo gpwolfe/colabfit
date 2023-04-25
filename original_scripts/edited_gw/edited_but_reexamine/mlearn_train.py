@@ -253,7 +253,7 @@ def main(argv):
                 )
 
                 cs_id = client.insert_configuration_set(
-                    co_ids, description=desc, name=cs_names[i]
+                    co_ids, description=desc, name=f"{elem}_{cs_names[i]}"
                 )
 
                 cs_ids[elem].append(cs_id)

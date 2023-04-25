@@ -71,8 +71,7 @@ def main(argv):
     client.insert_property_definition(atomic_forces_pd)
     # Loads data, specify reader function if not "usual" file format
     configurations = load_data(
-        file_path=DATASET_FP
-        / "BOTNet-datasets-main/dataset_acac/isolated_atoms.xyz",
+        file_path=DATASET_FP / "BOTNet-datasets-main/dataset_acac/isolated_atoms.xyz",
         file_format="extxyz",
         name_field=None,
         elements=[
@@ -85,8 +84,7 @@ def main(argv):
         generator=False,
     )
     configurations += load_data(
-        file_path=DATASET_FP
-        / "BOTNet-datasets-main/dataset_acac/test_H_transfer.xyz",
+        file_path=DATASET_FP / "BOTNet-datasets-main/dataset_acac/test_H_transfer.xyz",
         file_format="xyz",
         name_field=None,
         elements=ELEMENTS,
@@ -95,8 +93,7 @@ def main(argv):
         generator=False,
     )
     configurations += load_data(
-        file_path=DATASET_FP
-        / "BOTNet-datasets-main/dataset_acac/test_MD_300K.xyz",
+        file_path=DATASET_FP / "BOTNet-datasets-main/dataset_acac/test_MD_300K.xyz",
         file_format="xyz",
         name_field=None,
         elements=ELEMENTS,
@@ -105,8 +102,7 @@ def main(argv):
         generator=False,
     )
     configurations += load_data(
-        file_path=DATASET_FP
-        / "BOTNet-datasets-main/dataset_acac/test_MD_600K.xyz",
+        file_path=DATASET_FP / "BOTNet-datasets-main/dataset_acac/test_MD_600K.xyz",
         file_format="xyz",
         name_field=None,
         elements=ELEMENTS,
@@ -115,8 +111,7 @@ def main(argv):
         generator=False,
     )
     configurations += load_data(
-        file_path=DATASET_FP
-        / "BOTNet-datasets-main/dataset_acac/test_dihedral.xyz",
+        file_path=DATASET_FP / "BOTNet-datasets-main/dataset_acac/test_dihedral.xyz",
         file_format="xyz",
         name_field=None,
         elements=[
@@ -129,8 +124,7 @@ def main(argv):
         generator=False,
     )
     configurations += load_data(
-        file_path=DATASET_FP
-        / "BOTNet-datasets-main/dataset_acac/train_300K.xyz",
+        file_path=DATASET_FP / "BOTNet-datasets-main/dataset_acac/train_300K.xyz",
         file_format="xyz",
         name_field=None,
         elements=ELEMENTS,
@@ -139,8 +133,7 @@ def main(argv):
         generator=False,
     )
     configurations += load_data(
-        file_path=DATASET_FP
-        / "BOTNet-datasets-main/dataset_acac/train_600K.xyz",
+        file_path=DATASET_FP / "BOTNet-datasets-main/dataset_acac/train_600K.xyz",
         file_format="xyz",
         name_field=None,
         elements=ELEMENTS,
@@ -184,7 +177,8 @@ def main(argv):
             }
         ],
     }
-
+    # for c in configurations:
+    #     c.info["per-atom"] = False
     ids = list(
         client.insert_data(
             configurations,
@@ -214,10 +208,8 @@ def main(argv):
         " K xTB MD",
         "Dihedral_scan": "Dihedral scan about one of the C-C bonds of the"
         " conjugated system",
-        "train_300K_MD": "500 decorrelated geometries sampled from 300 K xTB"
-        " MD run",
-        "train_600K_MD": "500 decorrelated geometries sampled from 600 K xTB"
-        " MD run",
+        "train_300K_MD": "500 decorrelated geometries sampled from 300 K xTB" " MD run",
+        "train_600K_MD": "500 decorrelated geometries sampled from 600 K xTB" " MD run",
     }
 
     cs_names = [

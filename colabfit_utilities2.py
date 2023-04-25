@@ -11,6 +11,22 @@ def read_npz(filepath):
             data[key] = f[key]
     return data
 
+
+###########################################################################
+# When adapting the scripts to edit from Eric, generally can use this block
+# instead of the old configuration set loading block
+    cs_ids = []
+
+    for i, (regex, desc) in enumerate(cs_regexes.items()):
+        cs_id = client.query_and_insert_configuration_set(
+            co_hashes=all_co_ids,
+            name=cs_names[i],
+            description=desc,
+            query={"names": {"$regex": regex}},
+        )
+        cs_ids.append(cs_id)
+
+
 ###########################################################################
 ## A workaround for datasets that have too many configurations for computer memory
 ## to hold all at once, as long as there are multiple files scattered through

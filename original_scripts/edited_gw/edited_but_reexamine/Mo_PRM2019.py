@@ -8,7 +8,10 @@ import numpy as np
 
 from colabfit.tools.database import MongoDatabase, load_data
 
-DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/data/acclab_helsinki")
+DATASET_FP = Path(
+    "/persistent/colabfit_raw_data/colabfit_data/data/"
+    "acclab_helsinki/Mo/training-data/db_Mo.xyz"
+)
 DATASET = "Mo_PRM2019"
 
 
@@ -30,6 +33,15 @@ DS_DESC = (
     "configurations to the correct lattice spacing and adding in gamma "
     "surface configurations."
 )
+
+
+def tform(c):
+    c.info["per-atom"] = False
+
+    if "virial" in c.info:
+        c.info["virial"] = (
+            c.info["virial"] / np.abs(np.linalg.det(np.array(c.cell)))
+        ) * -160.21766208
 
 
 def main(argv):
@@ -95,14 +107,6 @@ def main(argv):
             }
         ],
     }
-
-    def tform(c):
-        c.info["per-atom"] = False
-
-        if "virial" in c.info:
-            c.info["virial"] = (
-                c.info["virial"] / np.abs(np.linalg.det(np.array(c.cell)))
-            ) * -160.21766208
 
     ids = list(
         client.insert_data(

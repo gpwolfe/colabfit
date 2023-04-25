@@ -67,7 +67,7 @@ def main(argv):
     )
 
     configurations += load_data(
-        file_path="/colabfit/data/data/gubaev/AlNiTi/train_2nd_stage.cfg",
+        file_path=DATASET_FP / "gubaev/AlNiTi/train_2nd_stage.cfg",
         file_format="cfg",
         name_field=None,
         elements=["Al", "Ni", "Ti"],
@@ -104,7 +104,7 @@ def main(argv):
         ],
     }
 
-    def tform(c):
+    for c in configurations:
         c.info["per-atom"] = False
 
     ids = list(
@@ -112,7 +112,6 @@ def main(argv):
             configurations,
             property_map=property_map,
             generator=False,
-            transform=tform,
             verbose=True,
         )
     )

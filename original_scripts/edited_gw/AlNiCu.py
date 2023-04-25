@@ -148,7 +148,7 @@ def main(argv):
         ],
     }
 
-    def tform(c):
+    for c in configurations:
         if "nomad_potential_energy" in c.info:
             c.info["per-atom"] = False
 
@@ -157,7 +157,6 @@ def main(argv):
             configurations,
             property_map=property_map,
             generator=False,
-            transform=tform,
             verbose=True,
         )
     )
