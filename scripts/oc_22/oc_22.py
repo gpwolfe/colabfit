@@ -22,14 +22,19 @@ File notes
 """
 from argparse import ArgumentParser
 from ase.io import read
+from colabfit import ATOMS_NAME_FIELD, ATOMS_LABELS_FIELD
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.converters import BaseConverter
+from colabfit.tools.database import MongoDatabase
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
 )
 from pathlib import Path
 import sys
+from tqdm import tqdm
+
+BATCH_SIZE = 100
 
 DATASET_FP = Path("oc22_trajectories")
 DATASET = "OC22"
@@ -37,7 +42,8 @@ DATASET = "OC22"
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
 LINKS = [
-    "https://github.com/Open-Catalyst-Project/ocp/blob/main/DATASET.md#open-catalyst-2022-oc22",
+    "https://github.com/Open-Catalyst-Project/ocp/blob/main/DATASET.md#"
+    "open-catalyst-2022-oc22",
     "https://opencatalystproject.org/",
     "https://doi.org/10.48550/arXiv.2206.08917",
 ]
@@ -60,9 +66,11 @@ AUTHORS = [
     "Zachary Ulissi",
     "C. Lawrence Zitnick",
 ]
-DS_DESC = "A database of training trajectories for predicting catalytic\
- reactions on oxide surfaces. OC22 is meant to complement OC20, which did not\
- contain oxide surfaces."
+DS_DESC = (
+    "A database of training trajectories for predicting catalytic"
+    "reactions on oxide surfaces. OC22 is meant to complement OC20, which did not"
+    "contain oxide surfaces."
+)
 ELEMENTS = {
     "Ag",
     "Al",
@@ -194,7 +202,8 @@ def main(argv):
     )
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
-
+    name_field = "name"
+    labels_field = "labels"
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
@@ -216,37 +225,63 @@ def main(argv):
             }
         ],
     }
-    configurations = load_data(
-        file_path=DATASET_FP,
-        file_format="folder",
-        name_field="name",
-        elements=ELEMENTS,
-        reader=reader,
-        glob_string=GLOB_STR,
-        generator=False,
-    )
-    batch_size = 10000
-    n_batches = len(configurations//batch_size)
-    leftover = len(configurations) % batch_size
+    ai = 0
     ids = []
-    for batch in range(n_batches):
-        ids.extend(list(
-            client.insert_data(
-                configurations[batch*batch_size:(batch + 1 * batch_size)],
-                property_map=property_map,
-                generator=False,
-                verbose=True,
-            )
-        ))
+    fps = list(DATASET_FP.rglob(GLOB_STR))
+    n_batches = len(fps) // BATCH_SIZE
+    leftover = len(fps) % BATCH_SIZE
+    indices = [((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(n_batches)]
     if leftover:
-        ids.extend(list(
-            client.insert_data(
-                configurations[n_batches*batch_size:],
-                property_map=property_map,
-                generator=False,
-                verbose=True,
+        indices.append((BATCH_SIZE * n_batches, len(fps)))
+    for batch in indices:
+        configurations = []
+        beg, end = batch
+        for fi, fpath in tqdm(enumerate(fps[beg:end])):
+            new = reader(fpath)
+
+            for atoms in tqdm(
+                new,
+                desc="Loading file {}/{}".format(fi + 1, BATCH_SIZE),
+            ):
+                a_elems = set(atoms.get_chemical_symbols())
+                if not a_elems.issubset(ELEMENTS):
+                    raise RuntimeError(
+                        "Image {} elements {} is not a subset of {}.".format(
+                            ai, a_elems, ELEMENTS
+                        )
+                    )
+                else:
+                    if name_field in atoms.info:
+                        name = atoms.info[name_field]
+                        # del atoms.info[name_field]
+                        atoms.info["ATOMS_NAME_FIELD"] = name
+                    else:
+                        raise RuntimeError(
+                            f"Field {name_field} not in atoms.info for index "
+                            f"{ai}. Set `name_field=None` "
+                            "to use `default_name`."
+                        )
+
+                if labels_field not in atoms.info:
+                    atoms.info[ATOMS_LABELS_FIELD] = set()
+                else:
+                    atoms.info[ATOMS_LABELS_FIELD] = set(
+                        # [_.strip() for _ in atoms.info[labels_field].split(',')]
+                        atoms.info[labels_field]
+                    )
+                ai += 1
+                configurations.append(atoms)
+
+        ids.extend(
+            list(
+                client.insert_data(
+                    configurations,
+                    property_map=property_map,
+                    generator=False,
+                    verbose=True,
+                )
             )
-        ))
+        )
 
     all_co_ids, all_do_ids = list(zip(*ids))
     descriptions = {
@@ -288,6 +323,93 @@ def main(argv):
         description=DS_DESC,
         verbose=True,
     )
+
+
+class BatchFolderConverter(BaseConverter):
+    def __init__(self, reader, batch_size):
+        self.reader = reader
+        self.batch_size = batch_size
+
+    def _load(
+        self,
+        file_path,
+        name_field,
+        elements,
+        default_name,
+        labels_field,
+        verbose,
+        glob_string,
+        **kwargs,
+    ):
+        """
+        Arguments are the same as for other converters, but with the following
+        changes:
+            file_path (str):
+                The path to the parent directory containing the data files.
+            glob_string (str):
+                A string to use with `Path(file_path).rglob(glob_string)` to
+                generate a list of files to be passed to `self.reader`
+        All additional kwargs will be passed to the reader function as
+        :code:`self.reader(..., **kwargs)`
+        """
+
+        ai = 0
+        files = list(Path(file_path).rglob(glob_string))
+        n_batches = len(files) // self.batch_size
+        leftover = len(files) % self.batch_size
+        indices = [
+            ((b * self.batch_size, (b + 1) * self.batch_size)) for b in range(n_batches)
+        ]
+        if leftover:
+            indices.append((self.batch_size * n_batches, len(files)))
+        nf = len(files)
+        for batch in indices:
+            beg, end = batch
+            for fi, fpath in tqdm(enumerate(files[beg:end])):
+                new = self.reader(fpath, **kwargs)
+
+                # if not isinstance(new, list):
+                #     new = [new]
+
+                for atoms in tqdm(
+                    new,
+                    desc="Loading file {}/{}".format(fi + 1, nf),
+                    disable=not verbose,
+                ):
+                    a_elems = set(atoms.get_chemical_symbols())
+                    if not a_elems.issubset(elements):
+                        raise RuntimeError(
+                            "Image {} elements {} is not a subset of {}.".format(
+                                ai, a_elems, elements
+                            )
+                        )
+
+                    if name_field is None:
+                        if ATOMS_NAME_FIELD not in atoms.info:
+                            atoms.info[ATOMS_NAME_FIELD] = f"{default_name}_{ai}"
+                    else:
+                        if name_field in atoms.info:
+                            name = atoms.info[name_field]
+                            # del atoms.info[name_field]
+                            atoms.info[ATOMS_NAME_FIELD] = name
+                        else:
+                            raise RuntimeError(
+                                f"Field {name_field} not in atoms.info for index "
+                                f"{ai}. Set `name_field=None` "
+                                "to use `default_name`."
+                            )
+
+                    if labels_field not in atoms.info:
+                        atoms.info[ATOMS_LABELS_FIELD] = set()
+                    else:
+                        atoms.info[ATOMS_LABELS_FIELD] = set(
+                            # [_.strip() for _ in atoms.info[labels_field].split(',')]
+                            atoms.info[labels_field]
+                        )
+
+                    yield AtomicConfiguration.from_ase(atoms)
+                    # images.append(Configuration.from_ase(atoms))
+                    ai += 1
 
 
 if __name__ == "__main__":

@@ -6,8 +6,6 @@ import sys
 
 
 def main(db_ip, db_name, nprocs):
-    # To limit scripts ingested, use for-loop line below instead.
-    # for script in list((Path().cwd() / "scripts").rglob("*.py"))[10:]:
     cwd = Path.cwd()
     for script in sorted(list((cwd / "edited_gpw").rglob("*.py"))):
         print(script, flush=True)
