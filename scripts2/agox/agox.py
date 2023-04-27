@@ -11,6 +11,8 @@ Run: $ python3 <script_name>.py -i (or --ip) <database_ip>
 
 Properties
 ----------
+potential energy
+atomic forces
 
 Other properties added to metadata
 ----------------------------------
@@ -26,6 +28,7 @@ sqlite database files contain generated data from AGOX software
 from argparse import ArgumentParser
 from ase.io import read
 from ase.calculators.calculator import PropertyNotImplementedError
+from colabfit import ATOMS_LABELS_FIELD, ATOMS_NAME_FIELD
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import MongoDatabase, load_data
 from colabfit.tools.property_definitions import (
@@ -37,6 +40,9 @@ from pathlib import Path
 import re
 import sqlite3
 import sys
+from tqdm import tqdm
+
+BATCH_SIZE = 10
 
 DATASET_FP = Path().cwd()
 DATASET = "AGOX"
@@ -110,7 +116,7 @@ def read_db(filepath):
     cur = con.execute("SELECT * FROM structures")
     for struct in cur.fetchall():
         index = struct[0]
-        ctime = struct[1]
+        # ctime = struct[1]
         coords = decode_reshape(struct[2])
         energy = struct[3]
         types = [int(a_type) for a_type in np.frombuffer(struct[4])]
@@ -118,18 +124,18 @@ def read_db(filepath):
         forces = decode_reshape(struct[6])
         if len(struct) > 7:
             pbc = [int(a_type) for a_type in np.frombuffer(struct[7])]
-            template_indices = [int(a_type) for a_type in np.frombuffer(struct[8])]
+            # template_indices = [int(a_type) for a_type in np.frombuffer(struct[8])]
             config = AtomicConfiguration(
                 numbers=types, positions=coords, pbc=pbc, cell=cell
             )
         else:
-            template_indices = None
+            # template_indices = None
             config = AtomicConfiguration(numbers=types, positions=coords, cell=cell)
         config.info["energy"] = energy
         config.info["forces"] = forces
-        config.info["ctime"] = ctime
-        if template_indices:
-            config.info["template_indices"] = template_indices
+        # config.info["ctime"] = ctime
+        # if template_indices:
+        #     config.info["template_indices"] = template_indices
         config.info["software"] = software
         config.info["name"] = f"{name}_{index}"
         configs.append(config)
@@ -181,8 +187,8 @@ def main(argv):
     metadata = {
         "software": {"field": "software"},
         "method": {"value": METHODS},
-        "ctime": {"field": "ctime"},
-        "template_indices": {"field": "template_indices"},
+        # "ctime": {"field": "ctime"},
+        # "template_indices": {"field": "template_indices"},
     }
     property_map = {
         "potential-energy": [
@@ -200,43 +206,83 @@ def main(argv):
         ],
     }
 
-    globs = list(set([db.parent for db in DATASET_FP.rglob(GLOB_STR)]))
-    configurations = load_data(
-        file_path=globs[0],
-        file_format="folder",
-        name_field="name",
-        elements=ELEMENTS,
-        reader=read_db,
-        glob_string=GLOB_STR,
-        generator=False,
-    )
-    ids = list(
-        client.insert_data(
-            configurations,
-            property_map=property_map,
-            generator=False,
-            verbose=True,
-        )
-    )
-    for gl in globs:
-        configurations = load_data(
-            file_path=gl,
-            file_format="folder",
-            name_field="name",
-            elements=ELEMENTS,
-            reader=read_db,
-            glob_string=GLOB_STR,
-            generator=False,
-        )
+    name_field = "name"
+    labels_field = "labels"
+    ai = 0
+    ids = []
+    fps = list(DATASET_FP.rglob(GLOB_STR))
+    n_batches = len(fps) // BATCH_SIZE
+    leftover = len(fps) % BATCH_SIZE
+    indices = [((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(n_batches)]
+    if leftover:
+        indices.append((BATCH_SIZE * n_batches, len(fps)))
+    for batch in tqdm(indices):
+        configurations = []
+        beg, end = batch
+        for fi, fpath in enumerate(fps[beg:end]):
+            new = read_db(fpath)
+
+            for atoms in new:
+                a_elems = set(atoms.get_chemical_symbols())
+                if not a_elems.issubset(ELEMENTS):
+                    raise RuntimeError(
+                        "Image {} elements {} is not a subset of {}.".format(
+                            ai, a_elems, ELEMENTS
+                        )
+                    )
+                else:
+                    if name_field in atoms.info:
+                        name = []
+                        name.append(atoms.info[name_field])
+                        atoms.info[ATOMS_NAME_FIELD] = name
+                    else:
+                        raise RuntimeError(
+                            f"Field {name_field} not in atoms.info for index "
+                            f"{ai}. Set `name_field=None` "
+                            "to use `default_name`."
+                        )
+
+                if labels_field not in atoms.info:
+                    atoms.info[ATOMS_LABELS_FIELD] = set()
+                else:
+                    atoms.info[ATOMS_LABELS_FIELD] = set(atoms.info[labels_field])
+                ai += 1
+                configurations.append(atoms)
 
         ids.extend(
-            client.insert_data(
-                configurations,
-                property_map=property_map,
-                generator=False,
-                verbose=True,
+            list(
+                client.insert_data(
+                    configurations,
+                    co_md_map={},
+                    property_map=property_map,
+                    generator=False,
+                    verbose=False,
+                )
             )
         )
+
+    # ids = list()
+    # globs = list(set([db.parent for db in DATASET_FP.rglob(GLOB_STR)]))
+
+    # for gl in globs:
+    #     configurations = load_data(
+    #         file_path=gl,
+    #         file_format="folder",
+    #         name_field="name",
+    #         elements=ELEMENTS,
+    #         reader=read_db,
+    #         glob_string=GLOB_STR,
+    #         generator=False,
+    #     )
+
+    #     ids.extend(
+    #         client.insert_data(
+    #             configurations,
+    #             property_map=property_map,
+    #             generator=False,
+    #             verbose=True,
+    #         )
+    #     )
     configurations = load_data(
         file_path=DATASET_FP,
         file_format="folder",
@@ -253,7 +299,7 @@ def main(argv):
                 configurations,
                 property_map=property_map,
                 generator=False,
-                verbose=True,
+                verbose=False,
             )
         )
     )
@@ -265,7 +311,9 @@ def main(argv):
             [
                 f"{DATASET}_{name}_generated",
                 f"{name}_generated",
-                f"Configurations of {name} from {DATASET} dataset generated by AGOX ML-assisted parallel tempering basin hopping (PT-BH) structure optimation algorithm",
+                f"Configurations of {name} from {DATASET} dataset generated by AGOX "
+                "ML-assisted parallel tempering basin hopping (PT-BH) structure "
+                "optimation algorithm",
             ]
         )
     for name in ["Ru4N3C4_graphene", "C5NH5"]:
@@ -296,7 +344,7 @@ def main(argv):
         links=LINKS,
         description=DS_DESC,
         verbose=True,
-        # cs_ids=cs_ids,
+        cs_ids=cs_ids,
     )
 
 
