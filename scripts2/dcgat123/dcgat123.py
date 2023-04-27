@@ -25,7 +25,8 @@ Dataset size is too large to run on local machine--insufficient memory
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit import ATOMS_LABELS_FIELD, ATOMS_NAME_FIELD
+from colabfit.tools.database import MongoDatabase
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     cauchy_stress_pd,
@@ -34,6 +35,9 @@ from colabfit.tools.property_definitions import (
 import json
 from pathlib import Path
 import sys
+from tqdm import tqdm
+
+BATCH_SIZE = 1
 
 DATASET_FP = Path("data")
 DATASET = "DCGAT"
@@ -247,15 +251,6 @@ def main(argv):
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
     )
 
-    configurations = load_data(
-        file_path=DATASET_FP,
-        file_format="folder",
-        name_field="name",
-        elements=ELEMENTS,
-        reader=reader,
-        glob_string=GLOB_STR,
-        generator=False,
-    )
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(cauchy_stress_pd)
@@ -263,42 +258,41 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        # "": {"field": ""}
     }
 
-    keys_used = [
-        k
-        for k in [
-            "occu",
-            "abc",
-            "magmom",
-            "charge",
-            "elements",
-            "correction",
-            "energy_adjustments",
-            "mat_id",
-            "prototype_id",
-            "spg",
-            "energy_total",
-            "total_mag",
-            "band_gap_ind",
-            "band_gap_dir",
-            "dos_ef",
-            "energy_corrected",
-            "e_above_hull",
-            "e_form",
-            "e_phase_separation",
-            "decompositio",
-            "lattice_a",
-            "lattice_b",
-            "lattice_c",
-            "lattice_alpha",
-            "lattice_beta",
-            "lattice_gamma",
-            "lattice_volume",
-        ]
-    ]
-    metadata.update({k: {"field": k} for k in keys_used})
+    # keys_used = [
+    #     k
+    #     for k in [
+    #         "occu",
+    #         "abc",
+    #         "magmom",
+    #         "charge",
+    #         "elements",
+    #         "correction",
+    #         "energy_adjustments",
+    #         "mat_id",
+    #         "prototype_id",
+    #         "spg",
+    #         "energy_total",
+    #         "total_mag",
+    #         "band_gap_ind",
+    #         "band_gap_dir",
+    #         "dos_ef",
+    #         "energy_corrected",
+    #         "e_above_hull",
+    #         "e_form",
+    #         "e_phase_separation",
+    #         "decompositio",
+    #         "lattice_a",
+    #         "lattice_b",
+    #         "lattice_c",
+    #         "lattice_alpha",
+    #         "lattice_beta",
+    #         "lattice_gamma",
+    #         "lattice_volume",
+    #     ]
+    # ]
+    # metadata.update({k: {"field": k} for k in keys_used})
     property_map = {
         "potential-energy": [
             {
@@ -321,90 +315,82 @@ def main(argv):
             }
         ],
     }
-    ids = list(
-        client.insert_data(
-            configurations,
-            property_map=property_map,
-            generator=False,
-            verbose=True,
+
+    name_field = "name"
+    labels_field = "labels"
+    ai = 0
+    ids = []
+    fps = list(DATASET_FP.rglob(GLOB_STR))
+    n_batches = len(fps) // BATCH_SIZE
+    leftover = len(fps) % BATCH_SIZE
+    indices = [((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(n_batches)]
+    if leftover:
+        indices.append((BATCH_SIZE * n_batches, len(fps)))
+    for batch in tqdm(indices):
+        configurations = []
+        beg, end = batch
+        for fi, fpath in enumerate(fps[beg:end]):
+            new = reader(fpath)
+
+            for atoms in new:
+                a_elems = set(atoms.get_chemical_symbols())
+                if not a_elems.issubset(ELEMENTS):
+                    raise RuntimeError(
+                        "Image {} elements {} is not a subset of {}.".format(
+                            ai, a_elems, ELEMENTS
+                        )
+                    )
+                else:
+                    if name_field in atoms.info:
+                        name = []
+                        name.append(atoms.info[name_field])
+                        atoms.info[ATOMS_NAME_FIELD] = name
+                    else:
+                        raise RuntimeError(
+                            f"Field {name_field} not in atoms.info for index "
+                            f"{ai}. Set `name_field=None` "
+                            "to use `default_name`."
+                        )
+
+                if labels_field not in atoms.info:
+                    atoms.info[ATOMS_LABELS_FIELD] = set()
+                else:
+                    atoms.info[ATOMS_LABELS_FIELD] = set(atoms.info[labels_field])
+                ai += 1
+                configurations.append(atoms)
+
+        ids.extend(
+            list(
+                client.insert_data(
+                    configurations,
+                    property_map=property_map,
+                    generator=False,
+                    verbose=True,
+                )
+            )
         )
-    )
 
     all_co_ids, all_do_ids = list(zip(*ids))
 
-    # Consistently getting a process kill, probably OOM error. Splitting here
-    # into three separate datasets
-    configurations = load_data(
-        file_path=DATASET_FP,
-        file_format="folder",
-        name_field="name",
-        elements=ELEMENTS,
-        reader=reader,
-        glob_string="dcgat_1*.json",
-        generator=False,
-    )
-    ids = list(
-        client.insert_data(
-            configurations,
-            property_map=property_map,
-            generator=False,
-            verbose=True,
-        )
-    )
-
-    all_co_ids, all_do_ids = list(zip(*ids))
-    cs_ids = []
-    cs_id = client.query_and_insert_configuration_set(
-        co_hashes=all_co_ids,
-        name="DCGAT-1",
-        description=f"DCGAT-1 configurations from DCGAT dataset",
-        query={"names": {"$regex": "dcgat_1_*"}},
-    )
-    cs_ids.append(cs_id)
-    ds_id = client.insert_dataset(
-        do_hashes=all_do_ids,
-        name=DATASET,
-        authors=AUTHORS,
-        links=LINKS,
-        description=DS_DESC,
-        verbose=True,
-        cs_ids=cs_ids,
-    )
-    # These are just the remaining name/regex/description for the last 2 config sets
     cs_regexes = [
         [
+            "DCGAT-1",
+            "dcgat_1_",
+            f"DCGAT-2 configurations from {DATASET} dataset",
+        ],
+        [
             "DCGAT-2",
-            "dcgat_2_*",
+            "dcgat_2_",
             f"DCGAT-2 configurations from {DATASET} dataset",
         ],
         [
             "DCGAT-3",
-            "dcgat_3_*",
+            "dcgat_3_",
             f"DCGAT-3 configurations from {DATASET} dataset",
         ],
     ]
+    cs_ids = []
     for i, (name, regex, desc) in enumerate(cs_regexes):
-        configurations = load_data(
-            file_path=DATASET_FP,
-            file_format="folder",
-            name_field="name",
-            elements=ELEMENTS,
-            reader=reader,
-            glob_string=f"{regex}.json",
-            generator=False,
-        )
-        ids = list(
-            client.insert_data(
-                configurations,
-                property_map=property_map,
-                generator=False,
-                verbose=True,
-            )
-        )
-
-        all_co_ids, all_do_ids = list(zip(*ids))
-        cs_ids = []
-
         cs_id = client.query_and_insert_configuration_set(
             co_hashes=all_co_ids,
             name=name,
@@ -414,9 +400,12 @@ def main(argv):
 
         cs_ids.append(cs_id)
 
-        ds_id = client.update_dataset(
-            ds_id=ds_id,
-            add_do_ids=all_do_ids,
+        client.insert_dataset(
+            do_hashes=all_do_ids,
+            name=DATASET,
+            authors=AUTHORS,
+            links=LINKS,
+            description=DS_DESC,
             verbose=True,
             cs_ids=cs_ids,
         )
