@@ -62,15 +62,15 @@ def reader(filepath):
 
     else:
         energy = data.get("energy", data["molecule"].get("energy"))
-    dipole = data.get("dipole_moment")
-    polar = data.get("polarizability")
+    # dipole = data.get("dipole_moment")
+    # polar = data.get("polarizability")
     sites = data["molecule"]["sites"]
     positions = [site["xyz"] for site in sites]
     elements = [site["species"][0]["element"] for site in sites]
     atoms = AtomicConfiguration(symbols=elements, positions=positions)
     atoms.info["energy"] = energy
-    atoms.info["dipole_moment"] = dipole
-    atoms.info["polarizability"] = polar
+    # atoms.info["dipole_moment"] = dipole
+    # atoms.info["polarizability"] = polar
     atoms.info["basis"] = basis
     atoms.info["method"] = f"DFT-{func}"
     atoms.info["name"] = name
@@ -116,8 +116,8 @@ def main(argv):
         "software": {"value": SOFTWARE},
         "method": {"field": "method"},
         "basis-set": {"field": "basis"},
-        "polarizability": {"field": "polarizability"},
-        "dipole-moment": {"field": "dipole_moment"},
+        # "polarizability": {"field": "polarizability"},
+        # "dipole-moment": {"field": "dipole_moment"},
     }
     property_map = {
         "potential-energy": [
