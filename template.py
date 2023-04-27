@@ -47,7 +47,6 @@ RE = re.compile(r"")
 
 
 def reader(filepath):
-
     return atoms
 
 
@@ -142,31 +141,6 @@ def main(argv):
         )
 
         cs_ids.append(cs_id)
-
-    # for i, (name, regex, desc) in enumerate(cs_regexes):
-    #     co_ids = client.get_data(
-    #         "configurations",
-    #         fields="hash",
-    #         query={
-    #             "hash": {"$in": all_co_ids},
-    #             "names": {"$regex": regex},
-    #         },
-    #         ravel=True,
-    #     ).tolist()
-
-    #     print(
-    #         f"Configuration set {i}",
-    #         f"({name}):".rjust(22),
-    #         f"{len(co_ids)}".rjust(7),
-    #     )
-    #     if len(co_ids) > 0:
-    #         cs_id = client.insert_configuration_set(
-    #             co_ids, description=desc, name=name
-    #         )
-
-    #         cs_ids.append(cs_id)
-    #     else:
-    #         pass
 
     client.insert_dataset(
         do_hashes=all_do_ids,
