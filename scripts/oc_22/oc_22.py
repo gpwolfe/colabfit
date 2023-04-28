@@ -30,6 +30,7 @@ from colabfit.tools.property_definitions import (
     potential_energy_pd,
 )
 from pathlib import Path
+import pickle
 import sys
 from tqdm import tqdm
 
@@ -157,9 +158,25 @@ with open("oc22_trajectories/trajectories/oc22/val_ood_s2ef_t.txt", "r") as f:
     for key in keys:
         train_val[key.strip()] = "val_ood_s2ef"
 
+OC_PICKLE = Path("oc22_metadata.pkl")
+with open(OC_PICKLE, "rb") as f:
+    oc_meta = pickle.load(f)
+
+CONFIG_META = dict()
+for sid, vals in oc_meta.items():
+    if vals.get("traj_id"):
+        CONFIG_META[vals["traj_id"]] = {
+            "lmdb-system-id": sid,
+            "miller-index": vals["miller_index"],
+            "bulk-symbols": vals["bulk_symbols"],
+            "slab-sid": vals.get("slab_sid"),
+            "nads": vals["nads"],
+            "ads-symbols": vals.get("ads_symbols"),
+        }
+
 
 def reader(filepath):
-    name = filepath.stem
+    traj_id = filepath.stem
     key = filepath.name
     configs = []
     ase_configs = read(filepath, index=":")
@@ -172,7 +189,9 @@ def reader(filepath):
         )
         config.info["energy"] = ase_config.get_potential_energy()
         config.info["forces"] = ase_config.get_forces()
-        config.info["name"] = f"{train_val[key]}__{name}__{i}"
+        config.info["name"] = f"{train_val[key]}__{traj_id}__{i}"
+        config.info["traj_id"] = traj_id
+        config.info["config_meta"] = CONFIG_META[traj_id]
         configs.append(config)
 
     return configs
@@ -269,7 +288,7 @@ def main(argv):
             list(
                 client.insert_data(
                     configurations,
-                    co_md_map={},
+                    co_md_map={"lmdb_metadata": {"field": "config_meta"}},
                     property_map=property_map,
                     generator=False,
                     verbose=False,

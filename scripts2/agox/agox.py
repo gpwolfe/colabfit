@@ -261,28 +261,6 @@ def main(argv):
             )
         )
 
-    # ids = list()
-    # globs = list(set([db.parent for db in DATASET_FP.rglob(GLOB_STR)]))
-
-    # for gl in globs:
-    #     configurations = load_data(
-    #         file_path=gl,
-    #         file_format="folder",
-    #         name_field="name",
-    #         elements=ELEMENTS,
-    #         reader=read_db,
-    #         glob_string=GLOB_STR,
-    #         generator=False,
-    #     )
-
-    #     ids.extend(
-    #         client.insert_data(
-    #             configurations,
-    #             property_map=property_map,
-    #             generator=False,
-    #             verbose=True,
-    #         )
-    #     )
     configurations = load_data(
         file_path=DATASET_FP,
         file_format="folder",

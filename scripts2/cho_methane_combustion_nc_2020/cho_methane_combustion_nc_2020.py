@@ -21,8 +21,9 @@ File notes
 ----------
 """
 from argparse import ArgumentParser
+from colabfit import ATOMS_NAME_FIELD, ATOMS_LABELS_FIELD
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     cauchy_stress_pd,
@@ -31,6 +32,9 @@ from colabfit.tools.property_definitions import (
 import numpy as np
 from pathlib import Path
 import sys
+from tqdm import tqdm
+
+BATCH_SIZE = 2
 
 DATASET_FP = Path().cwd()
 DATASET = "CHO-methane-combustion-NC-2020"
@@ -142,15 +146,6 @@ def main(argv):
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
     )
 
-    configurations = load_data(
-        file_path=DATASET_FP,
-        file_format="folder",
-        name_field="name",
-        elements=ELEMENTS,
-        reader=reader,
-        glob_string=GLOB_STR,
-        generator=False,
-    )
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(cauchy_stress_pd)
@@ -182,14 +177,60 @@ def main(argv):
             }
         ],
     }
-    ids = list(
-        client.insert_data(
-            configurations,
-            property_map=property_map,
-            generator=False,
-            verbose=True,
+
+    name_field = "name"
+    labels_field = "labels"
+    ai = 0
+    ids = []
+    fps = list(DATASET_FP.rglob(GLOB_STR))
+    n_batches = len(fps) // BATCH_SIZE
+    leftover = len(fps) % BATCH_SIZE
+    indices = [((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(n_batches)]
+    if leftover:
+        indices.append((BATCH_SIZE * n_batches, len(fps)))
+    for batch in tqdm(indices):
+        configurations = []
+        beg, end = batch
+        for fi, fpath in enumerate(fps[beg:end]):
+            new = reader(fpath)
+
+            for atoms in new:
+                a_elems = set(atoms.get_chemical_symbols())
+                if not a_elems.issubset(ELEMENTS):
+                    raise RuntimeError(
+                        "Image {} elements {} is not a subset of {}.".format(
+                            ai, a_elems, ELEMENTS
+                        )
+                    )
+                else:
+                    if name_field in atoms.info:
+                        name = []
+                        name.append(atoms.info[name_field])
+                        atoms.info[ATOMS_NAME_FIELD] = name
+                    else:
+                        raise RuntimeError(
+                            f"Field {name_field} not in atoms.info for index "
+                            f"{ai}. Set `name_field=None` "
+                            "to use `default_name`."
+                        )
+
+                if labels_field not in atoms.info:
+                    atoms.info[ATOMS_LABELS_FIELD] = set()
+                else:
+                    atoms.info[ATOMS_LABELS_FIELD] = set(atoms.info[labels_field])
+                ai += 1
+                configurations.append(atoms)
+
+        ids.extend(
+            list(
+                client.insert_data(
+                    configurations,
+                    property_map=property_map,
+                    generator=False,
+                    verbose=False,
+                )
+            )
         )
-    )
 
     all_co_ids, all_do_ids = list(zip(*ids))
 

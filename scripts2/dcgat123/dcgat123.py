@@ -58,10 +58,12 @@ AUTHORS = [
     "Silvana Botti",
     "Miguel A. L. Marques",
 ]
-DS_DESC = "Approximately 2.3 million configurations from 3 datasets curate\
- for the purpose of training a crystal graph attention network machine\
- learning model. Includes structures gathered from the Materials Project and\
- AFLOW databases, among other sources."
+DS_DESC = (
+    "Approximately 2.3 million configurations from 3 datasets curated"
+    "for the purpose of training a crystal graph attention network machine"
+    "learning model. Includes structures gathered from the Materials Project and"
+    "AFLOW databases, among other sources."
+)
 ELEMENTS = [
     "Ac",
     "Ag",
@@ -260,39 +262,39 @@ def main(argv):
         "method": {"value": METHODS},
     }
 
-    # keys_used = [
-    #     k
-    #     for k in [
-    #         "occu",
-    #         "abc",
-    #         "magmom",
-    #         "charge",
-    #         "elements",
-    #         "correction",
-    #         "energy_adjustments",
-    #         "mat_id",
-    #         "prototype_id",
-    #         "spg",
-    #         "energy_total",
-    #         "total_mag",
-    #         "band_gap_ind",
-    #         "band_gap_dir",
-    #         "dos_ef",
-    #         "energy_corrected",
-    #         "e_above_hull",
-    #         "e_form",
-    #         "e_phase_separation",
-    #         "decompositio",
-    #         "lattice_a",
-    #         "lattice_b",
-    #         "lattice_c",
-    #         "lattice_alpha",
-    #         "lattice_beta",
-    #         "lattice_gamma",
-    #         "lattice_volume",
-    #     ]
-    # ]
-    # metadata.update({k: {"field": k} for k in keys_used})
+    keys_used = [
+        k
+        for k in [
+            "occu",
+            "abc",
+            "magmom",
+            "charge",
+            "elements",
+            "correction",
+            "energy_adjustments",
+            "mat_id",
+            "prototype_id",
+            "spg",
+            "energy_total",
+            "total_mag",
+            "band_gap_ind",
+            "band_gap_dir",
+            "dos_ef",
+            "energy_corrected",
+            "e_above_hull",
+            "e_form",
+            "e_phase_separation",
+            "decompositio",
+            "lattice_a",
+            "lattice_b",
+            "lattice_c",
+            "lattice_alpha",
+            "lattice_beta",
+            "lattice_gamma",
+            "lattice_volume",
+        ]
+    ]
+    config_md = {k: {"field": k} for k in keys_used}
     property_map = {
         "potential-energy": [
             {
@@ -364,6 +366,7 @@ def main(argv):
                 client.insert_data(
                     configurations,
                     property_map=property_map,
+                    co_md_map=config_md,
                     generator=False,
                     verbose=True,
                 )
