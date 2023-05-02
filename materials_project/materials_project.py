@@ -142,11 +142,23 @@ def reconstruct_nested(info: dict, superkey: str):
     """
     in_out_car = dict()
     for key, val in info.items():
-        if type(val) == np.ndarray:
-            val = val.tolist()
+        # Some values in header are blank, so ase.io.read returns key1 = "key2=val2"
         if type(val) == str and "=" in val:
+            # print(val)
             key, val = val.split("=")[-2:]
+            if val != "F":
+                try:
+                    val = float(val)
+                except ValueError:
+                    pass
         if superkey in key:
+            # pymongo/MongoDB throws error regarding use of numpy objects:
+            # bson.errors.InvalidDocument: cannot encode object: 100, \
+            # of type: <class 'numpy.int64'>
+            if type(val) == np.ndarray:
+                val = val.tolist()
+            if type(val) == np.int64:
+                val = int(val)
             outkey = key.split("-")
             if len(outkey) == 2:
                 in_out_car[outkey[1]] = val
@@ -170,6 +182,12 @@ def reader(file_path):
             if not any([match in key for match in ["outcar", "incar", "output"]]):
                 if type(val) == str and "=" in val:
                     key, val = val.split("=")[-2:]
+                    print(key, val)
+                    if val != "F":
+                        try:
+                            val = float(val)
+                        except ValueError:
+                            pass
                 info[key] = val
         atoms = AtomicConfiguration(
             numbers=config.numbers,
@@ -184,7 +202,6 @@ def reader(file_path):
 
 def main(ip, db_name, nprocs):
     client = MongoDatabase(db_name, nprocs=nprocs, uri=f"mongodb://{ip}:27017")
-    # Skip if dataset has already been created
     for pd in [
         atomic_forces_pd,
         cauchy_stress_pd,
@@ -195,12 +212,14 @@ def main(ip, db_name, nprocs):
     metadata = {
         "software": {"value": "VASP"},
         "method": {"field": "calc_type"},
-        "material-id": {"field": "material_id"},
-        "internal_energy": {"field": "e_0_energy"},
     }
     # excluded keys are included under other names or in property_map
     exclude = {"calc_type", "e_fr_energy", "forces", "stress", "material_id"}
-    metadata.update({k: {"field": k} for k in KEYS if k not in exclude})
+    co_md_map = {
+        "material-id": {"field": "material_id"},
+        "internal_energy": {"field": "e_0_energy"},
+    }
+    co_md_map.update({k: {"field": k} for k in KEYS if k not in exclude})
     property_map = {
         "free-energy": [
             {
@@ -227,7 +246,7 @@ def main(ip, db_name, nprocs):
     labels_field = "labels"
     ai = 0
     ids = []
-    fps = sorted(list(DATASET_FP.rglob(GLOB_STR)))[:2]
+    fps = sorted(list(DATASET_FP.rglob(GLOB_STR)))[:10]
     n_batches = len(fps) // BATCH_SIZE
     leftover = len(fps) % BATCH_SIZE
     indices = [((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(n_batches)]
@@ -270,6 +289,7 @@ def main(ip, db_name, nprocs):
             list(
                 client.insert_data(
                     configurations,
+                    co_md_map=co_md_map,
                     property_map=property_map,
                     generator=False,
                     verbose=False,
