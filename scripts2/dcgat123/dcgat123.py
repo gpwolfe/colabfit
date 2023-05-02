@@ -281,17 +281,17 @@ def main(argv):
             "band_gap_dir",
             "dos_ef",
             "energy_corrected",
-            "e_above_hull",
-            "e_form",
-            "e_phase_separation",
-            "decompositio",
-            "lattice_a",
-            "lattice_b",
-            "lattice_c",
-            "lattice_alpha",
-            "lattice_beta",
-            "lattice_gamma",
-            "lattice_volume",
+            # "e_above_hull",
+            # "e_form",
+            # "e_phase_separation",
+            # "decomposition",
+            # "lattice_a",
+            # "lattice_b",
+            # "lattice_c",
+            # "lattice_alpha",
+            # "lattice_beta",
+            # "lattice_gamma",
+            # "lattice_volume",
         ]
     ]
     config_md = {k: {"field": k} for k in keys_used}
@@ -368,7 +368,7 @@ def main(argv):
                     property_map=property_map,
                     co_md_map=config_md,
                     generator=False,
-                    verbose=True,
+                    verbose=False,
                 )
             )
         )

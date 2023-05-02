@@ -246,7 +246,7 @@ def main(ip, db_name, nprocs):
     labels_field = "labels"
     ai = 0
     ids = []
-    fps = sorted(list(DATASET_FP.rglob(GLOB_STR)))[:10]
+    fps = sorted(list(DATASET_FP.rglob(GLOB_STR)))
     n_batches = len(fps) // BATCH_SIZE
     leftover = len(fps) % BATCH_SIZE
     indices = [((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(n_batches)]
