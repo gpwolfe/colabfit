@@ -11,9 +11,11 @@ from colabfit.tools.property_definitions import (
 import numpy as np
 from pathlib import Path
 import sys
+from datetime import datetime
 from tqdm import tqdm
 
 BATCH_SIZE = 1
+START_IX = 370  # for testing, in case of errors causing script stop
 
 DATASET_FP = Path("mat_proj_xyz_files2")
 DATASET = "Materials Project"
@@ -246,7 +248,7 @@ def main(ip, db_name, nprocs):
     labels_field = "labels"
     ai = 0
     ids = []
-    fps = sorted(list(DATASET_FP.rglob(GLOB_STR)))
+    fps = sorted(list(DATASET_FP.rglob(GLOB_STR)))[START_IX:]
     n_batches = len(fps) // BATCH_SIZE
     leftover = len(fps) % BATCH_SIZE
     indices = [((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(n_batches)]
@@ -255,35 +257,40 @@ def main(ip, db_name, nprocs):
     for batch in tqdm(indices):
         configurations = []
         beg, end = batch
-        for fi, fpath in enumerate(fps[beg:end]):
-            new = reader(fpath)
+        for fpath in fps[beg:end]:
 
-            for atoms in new:
-                a_elems = set(atoms.get_chemical_symbols())
-                if not a_elems.issubset(ELEMENTS):
-                    raise RuntimeError(
-                        "Image {} elements {} is not a subset of {}.".format(
-                            ai, a_elems, ELEMENTS
-                        )
-                    )
-                else:
-                    if name_field in atoms.info:
-                        name = []
-                        name.append(atoms.info[name_field])
-                        atoms.info[ATOMS_NAME_FIELD] = name
-                    else:
+            try:
+                new = reader(fpath)
+
+                for atoms in new:
+                    a_elems = set(atoms.get_chemical_symbols())
+                    if not a_elems.issubset(ELEMENTS):
                         raise RuntimeError(
-                            f"Field {name_field} not in atoms.info for index "
-                            f"{ai}. Set `name_field=None` "
-                            "to use `default_name`."
+                            "Image {} elements {} is not a subset of {}.".format(
+                                ai, a_elems, ELEMENTS
+                            )
                         )
+                    else:
+                        if name_field in atoms.info:
+                            name = []
+                            name.append(atoms.info[name_field])
+                            atoms.info[ATOMS_NAME_FIELD] = name
+                        else:
+                            raise RuntimeError(
+                                f"Field {name_field} not in atoms.info for index "
+                                f"{ai}. Set `name_field=None` "
+                                "to use `default_name`."
+                            )
 
-                if labels_field not in atoms.info:
-                    atoms.info[ATOMS_LABELS_FIELD] = set()
-                else:
-                    atoms.info[ATOMS_LABELS_FIELD] = set(atoms.info[labels_field])
-                ai += 1
-                configurations.append(atoms)
+                    if labels_field not in atoms.info:
+                        atoms.info[ATOMS_LABELS_FIELD] = set()
+                    else:
+                        atoms.info[ATOMS_LABELS_FIELD] = set(atoms.info[labels_field])
+                    ai += 1
+                    configurations.append(atoms)
+            except Exception as e:
+                with open("ingest_mp_error_files.log", "a") as f:
+                    f.write(f"{fpath}\t{datetime.strftime(datetime.now(), '%d-%b-%Y')}\t{e}\n")
 
         ids.extend(
             list(
@@ -348,25 +355,3 @@ if __name__ == "__main__":
     nprocs = args.nprocs
     db_name = args.db_name
     main(ip, db_name, nprocs)
-
-    # files = sorted(list(DATASET_FP.glob("*.xyz")))
-    # print(files)
-    # # Import by batch, with first batch returning dataset-id
-    # n_batches = len(files) // batch_size
-    # batch_1 = files[:batch_size]
-    # dataset_id = main(ip, db_name, nprocs, batch_1, None, None)
-
-    # for n in range(1, n_batches):
-    #     batch_n = files[batch_size * n : batch_size * (n + 1)]
-    #     dataset_id = main(
-    #         ip,
-    #         db_name,
-    #         nprocs,
-    #         batch_n,
-    #         dataset_id=dataset_id,
-    #     )
-    #     print(f"Dataset: {dataset_id}")
-
-    # if len(files) % batch_size and len(files) > batch_size:
-    #     batch_n = files[batch_size * n_batches :]
-    #     dataset_id = main(ip, db_name, nprocs, batch_n, dataset_id)

@@ -167,19 +167,19 @@ def reader(filepath):
     for i, entry in enumerate(data["entries"]):
         cell = entry["structure"]["lattice"]["matrix"]
         elements = []
-        occu = []
-        abc = []
+        # occu = []
+        # abc = []
         positions = []
-        magmom = []
-        charge = []
+        # magmom = []
+        # charge = []
         forces = []
         for site in entry["structure"]["sites"]:
             elements.append(site["species"][0]["element"])
-            occu.append(site["species"][0]["occu"])
-            abc.append(site["abc"])
+            # occu.append(site["species"][0]["occu"])
+            # abc.append(site["abc"])
             positions.append(site["xyz"])
-            magmom.append(site["properties"]["magmom"])
-            charge.append(site["properties"]["charge"])
+            # magmom.append(site["properties"]["magmom"])
+            # charge.append(site["properties"]["charge"])
             forces.append(site["properties"]["forces"])
 
         config = AtomicConfiguration(
@@ -187,44 +187,45 @@ def reader(filepath):
             cell=cell,
             symbols=elements,
         )
-        config.info["occu"] = occu
-        config.info["abc"] = abc
-        config.info["magmom"] = magmom
-        config.info["charge"] = charge
+        # config.info["occu"] = occu
+        # config.info["abc"] = abc
+        # config.info["magmom"] = magmom
+        # config.info["charge"] = charge
         config.info["forces"] = forces
         config.info["elements"] = elements
 
         config.info["energy"] = entry["energy"]
         config.info["stress"] = [list(x) for x in (entry["data"]["stress"])]
-        config.info["correction"] = entry["correction"]
-        config.info["energy_adjustments"] = [
-            x["value"] for x in entry["energy_adjustments"]
-        ]
-        config.info["mat_id"] = entry["data"]["mat_id"]
+        # config.info["correction"] = entry["correction"]
+        # config.info["energy_adjustments"] = [
+        #     x["value"] for x in entry["energy_adjustments"]
+        # ]
+        mat_id = entry["data"]["mat_id"]
+        config.info["mat_id"] = mat_id
 
         config.info["prototype_id"] = entry["data"]["prototype_id"]
-        config.info["spg"] = entry["data"]["spg"]
+        # config.info["spg"] = entry["data"]["spg"]
 
-        config.info["energy_total"] = entry["data"]["energy_total"]
-        config.info["total_mag"] = entry["data"]["total_mag"]
-        config.info["band_gap_ind"] = entry["data"]["band_gap_ind"]
-        config.info["band_gap_dir"] = entry["data"]["band_gap_dir"]
-        config.info["dos_ef"] = entry["data"]["dos_ef"]
-        config.info["energy_corrected"] = entry["data"]["energy_corrected"]
-        config.info["e_above_hull"] = entry["data"]["e_above_hull"]
-        config.info["e_form"] = entry["data"]["e_form"]
-        config.info["e_phase_separation"] = entry["data"]["e_phase_separation"]
-        config.info["decomposition"] = entry["data"]["decomposition"]
+        # config.info["energy_total"] = entry["data"]["energy_total"]
+        # config.info["total_mag"] = entry["data"]["total_mag"]
+        # config.info["band_gap_ind"] = entry["data"]["band_gap_ind"]
+        # config.info["band_gap_dir"] = entry["data"]["band_gap_dir"]
+        # config.info["dos_ef"] = entry["data"]["dos_ef"]
+        # config.info["energy_corrected"] = entry["data"]["energy_corrected"]
+        # config.info["e_above_hull"] = entry["data"]["e_above_hull"]
+        # config.info["e_form"] = entry["data"]["e_form"]
+        # config.info["e_phase_separation"] = entry["data"]["e_phase_separation"]
+        # config.info["decomposition"] = entry["data"]["decomposition"]
 
-        config.info["charge"] = entry["structure"]["charge"]
+        # config.info["charge"] = entry["structure"]["charge"]
 
-        config.info["lattice_a"] = entry["structure"]["lattice"]["a"]
-        config.info["lattice_b"] = entry["structure"]["lattice"]["b"]
-        config.info["lattice_c"] = entry["structure"]["lattice"]["c"]
-        config.info["lattice_alpha"] = entry["structure"]["lattice"]["alpha"]
-        config.info["lattice_beta"] = entry["structure"]["lattice"]["beta"]
-        config.info["lattice_gamma"] = entry["structure"]["lattice"]["gamma"]
-        config.info["lattice_volume"] = entry["structure"]["lattice"]["volume"]
+        # config.info["lattice_a"] = entry["structure"]["lattice"]["a"]
+        # config.info["lattice_b"] = entry["structure"]["lattice"]["b"]
+        # config.info["lattice_c"] = entry["structure"]["lattice"]["c"]
+        # config.info["lattice_alpha"] = entry["structure"]["lattice"]["alpha"]
+        # config.info["lattice_beta"] = entry["structure"]["lattice"]["beta"]
+        # config.info["lattice_gamma"] = entry["structure"]["lattice"]["gamma"]
+        # config.info["lattice_volume"] = entry["structure"]["lattice"]["volume"]
         config.info["name"] = f"{name}_{i}"
 
         configs.append(config)
@@ -265,22 +266,22 @@ def main(argv):
     keys_used = [
         k
         for k in [
-            "occu",
-            "abc",
-            "magmom",
-            "charge",
-            "elements",
-            "correction",
-            "energy_adjustments",
+            # "occu",
+            # "abc",
+            # "magmom",
+            # "charge",
+            # "elements",
+            # "correction",
+            # "energy_adjustments",
             "mat_id",
             "prototype_id",
-            "spg",
-            "energy_total",
-            "total_mag",
-            "band_gap_ind",
-            "band_gap_dir",
-            "dos_ef",
-            "energy_corrected",
+            # "spg",
+            # "energy_total",
+            # "total_mag",
+            # "band_gap_ind",
+            # "band_gap_dir",
+            # "dos_ef",
+            # "energy_corrected",
             # "e_above_hull",
             # "e_form",
             # "e_phase_separation",
