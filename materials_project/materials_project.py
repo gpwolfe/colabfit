@@ -290,7 +290,10 @@ def main(ip, db_name, nprocs):
                     configurations.append(atoms)
             except Exception as e:
                 with open("ingest_mp_error_files.log", "a") as f:
-                    f.write(f"{fpath}\t{datetime.strftime(datetime.now(), '%d-%b-%Y')}\t{e}\n")
+                    f.write(
+                        f"{fpath}\t{datetime.strftime(datetime.now(), '%d-%b-%Y')}"
+                        f"\t{e}\n"
+                        )
 
         ids.extend(
             list(
