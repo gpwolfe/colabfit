@@ -172,6 +172,8 @@ def main(argv):
     metadata = {
         "software": {"value": "MOPAC, Gaussian 09"},
         "method": {"value": "G4MP2"},
+    }
+    co_md_map = {
         "homo-energy": {"field": "homo", "units": "Ha"},
         "lumo-energy": {"field": "lumo", "units": "Ha"},
         "homo-lumo-gap": {"field": "gap", "units": "Ha"},
@@ -217,6 +219,7 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
+            co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -235,9 +238,12 @@ def main(argv):
             "Matthias Rupp",
             "O. Anatole von Lilienfeld",
         ],
-        links=["https://doi.org/10.6084/m9.figshare.c.978904.v5"],
+        links=[
+            "https://doi.org/10.6084/m9.figshare.c.978904.v5",
+            "https://doi.org/10.1038/sdata.2014.22",
+        ],
         description="6095 isomers of C7O2H10. Energetics were calculated"
-        " at the G4MP2 level of theory",
+        " at the G4MP2 level of theory.",
         verbose=True,
     )
 

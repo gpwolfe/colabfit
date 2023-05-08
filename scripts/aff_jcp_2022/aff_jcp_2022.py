@@ -46,6 +46,7 @@ DATASET_FP = Path("AFF-master/dataset/")
 
 DATASET = "AFF_JCP_2022"
 METHODS = "DFT-PBE-TS-vdW"
+BASIS_SET = "6-31G(d,p)"
 SOFTWARE = "Q-Chem"
 LINKS = [
     "https://doi.org/10.1063/5.0088017",
@@ -126,7 +127,7 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        "basis-set": {"value": "6-31G(d,p)"},
+        "basis-set": {"value": BASIS_SET},
     }
     property_map = {
         "potential-energy": [

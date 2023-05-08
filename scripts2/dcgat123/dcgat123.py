@@ -330,7 +330,6 @@ def main(argv):
     if leftover:
         indices.append((BATCH_SIZE * n_batches, len(fps)))
     for batch in tqdm(indices):
-        configurations = []
         beg, end = batch
         for fi, fpath in enumerate(fps[beg:end]):
             new = reader(fpath)
@@ -360,19 +359,28 @@ def main(argv):
                 else:
                     atoms.info[ATOMS_LABELS_FIELD] = set(atoms.info[labels_field])
                 ai += 1
-                configurations.append(atoms)
-
-        ids.extend(
-            list(
-                client.insert_data(
-                    configurations,
-                    property_map=property_map,
-                    co_md_map=config_md,
-                    generator=False,
-                    verbose=False,
+                # configurations.append(atoms)
+        # insert_batch = 10000
+        # n_i_batches = len(configurations) // insert_batch
+        # leftover = len(configurations) % insert_batch
+        # i_batches = [
+        #     (i * insert_batch, (i+1) * insert_batch) for i in range(n_i_batches)
+        #     ]
+        # if leftover:
+        #     i_batches.append((insert_batch * n_i_batches, len(configurations)))
+        # for batch in i_batches:
+        #     beg, end = batch
+                ids.extend(
+                    list(
+                        client.insert_data(
+                            atoms[beg:end],
+                            property_map=property_map,
+                            co_md_map=config_md,
+                            generator=False,
+                            verbose=False,
+                        )
+                    )
                 )
-            )
-        )
 
     all_co_ids, all_do_ids = list(zip(*ids))
 
