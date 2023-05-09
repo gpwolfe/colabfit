@@ -136,6 +136,8 @@ def main(argv):
         "software": {"value": "ORCA"},
         "method": {"value": "DFT-PBE"},
         "basis_set": {"value": "def2-SVP"},
+    }
+    co_md_map = {
         "MD17-index": {"field": "md17_index"},
     }
     property_map = {
@@ -156,6 +158,7 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
+            co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
             verbose=True,

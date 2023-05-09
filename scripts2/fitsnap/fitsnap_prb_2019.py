@@ -124,6 +124,8 @@ def main(argv):
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
         # "charges": {"field": "charges"},
+    }
+    co_md_map = {
         "spins": {"field": "spins"},
     }
     property_map = {
@@ -150,6 +152,7 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
+            co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -187,9 +190,7 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
         else:

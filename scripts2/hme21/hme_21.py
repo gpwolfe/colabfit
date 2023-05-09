@@ -64,11 +64,13 @@ AUTHORS = [
     "Nontawat Charoenphakdee",
     "Takeshi Ibuka",
 ]
-DS_DESC = "Approximately 25,000 configurations, including 37 elements, used in\
- the training of a universal NNP called PreFerential Potential (PFP). The\
- dataset specifically contains disordered and unstable structures, and\
- structures that include irregular substitutions, as well as varied\
- temperature and density."
+DS_DESC = (
+    "Approximately 25,000 configurations, including 37 elements, used in "
+    "the training of a universal NNP called PreFerential Potential (PFP). The "
+    "dataset specifically contains disordered and unstable structures, and "
+    "structures that include irregular substitutions, as well as varied "
+    "temperature and density."
+)
 ELEMENTS = [
     "H",
     "Li",
@@ -223,9 +225,7 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
         else:

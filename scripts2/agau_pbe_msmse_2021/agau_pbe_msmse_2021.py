@@ -48,10 +48,10 @@ AUTHORS = [
     "Ben Xu",
     "Han Wang",
 ]
-DS_DESC = "Approximately 50,000 configurations of Au, Ag and AuAg\
- used as part of a \
- training dataset for a DP-GEN-based ML model for a Ag-Au nanoalloy \
- potential."
+DS_DESC = (
+    "Approximately 50,000 configurations of Au, Ag and AuAg used as part of a "
+    "training dataset for a DP-GEN-based ML model for a Ag-Au nanoalloy potential."
+)
 ELEMENTS = ["Au", "Ag"]
 GLOB_STR = "box.npy"
 
@@ -146,7 +146,6 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        # "": {"field": ""}
     }
     property_map = {
         "potential-energy": [
@@ -218,9 +217,7 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
         else:

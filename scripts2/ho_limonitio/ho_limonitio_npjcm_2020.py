@@ -45,10 +45,12 @@ AUTHORS = [
     "Alexander Urban",
     "Nongnuch Artrith",
 ]
-DS_DESC = "Approximately 6,900 configurations of bulk water, water clusters\
- and Li8Mo2Ni7Ti7O32 used in the training of an ANN, whereby total energy\
- is extrapolated by a Taylor expansion as a means of reducing computational\
- costs."
+DS_DESC = (
+    "Approximately 6,900 configurations of bulk water, water clusters "
+    "and Li8Mo2Ni7Ti7O32 used in the training of an ANN, whereby total energy "
+    "is extrapolated by a Taylor expansion as a means of reducing computational "
+    "costs."
+)
 ELEMENTS = ["H", "O", "Li", "Mo", "Ni", "Ti"]
 GLOB_STR = "*.xsf"
 
@@ -190,9 +192,7 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
         else:

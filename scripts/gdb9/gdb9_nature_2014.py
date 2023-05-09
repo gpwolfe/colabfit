@@ -83,7 +83,6 @@ def xyz_parser(file_path, header_regex):
                 n_atoms = int(line)
                 line_num += 1
             elif line_num == 1:
-
                 for k, v in properties_parser(header_regex, line):
                     if v == "-":
                         pass
@@ -138,7 +137,6 @@ def main(argv):
     client = MongoDatabase(
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
     )
-    # Load configurations
     configurations = load_data(
         file_path=DATASET_FP,
         file_format="folder",
@@ -155,6 +153,8 @@ def main(argv):
         "software": {"value": "MOPAC, Gaussian 09"},
         "method": {"value": "DFT-B3LYP/"},
         "basis-set": {"value": "6-31G(2df,p)"},
+    }
+    co_md_map = {
         "heat-capacity": {
             "field": "heat_capacity",
             "units": "cal/(mol K)",
@@ -198,6 +198,7 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
+            co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -205,29 +206,8 @@ def main(argv):
     )
 
     all_co_ids, all_do_ids = list(zip(*ids))
-    # name = "GDB_9"
-    # cs_ids = []
-    # co_ids = client.get_data(
-    #     "configurations",
-    #     fields="hash",
-    #     query={"hash": {"$in": all_co_ids}},
-    #     ravel=True,
-    # ).tolist()
-
-    # print(
-    #     "Configuration set ", f"({name}):".rjust(22), f"{len(co_ids)}".rjust(7)
-    # )
-
-    # cs_id = client.insert_configuration_set(
-    #     co_ids,
-    #     description="GDB-9 dataset, a subset of GDB-17",
-    #     name=name,
-    # )
-
-    # cs_ids.append(cs_id)
 
     client.insert_dataset(
-        # cs_ids,
         do_hashes=all_do_ids,
         name="GDB_9_nature_2014",
         authors=[

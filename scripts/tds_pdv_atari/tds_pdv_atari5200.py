@@ -151,7 +151,6 @@ def main(argv):
     metadata = {
         "software": {"value": "VASP, LAMMPS"},
         "method": {"value": "DFT"},
-        # "virial": {"field": "virial"},
     }
     property_map = {
         "potential-energy": [
@@ -214,9 +213,7 @@ def main(argv):
         )
 
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
     client.insert_dataset(

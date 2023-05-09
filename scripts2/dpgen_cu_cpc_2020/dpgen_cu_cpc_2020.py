@@ -52,8 +52,10 @@ AUTHORS = [
     "Han Wang",
     "Weinan E",
 ]
-DS_DESC = "Approximately 15,000 configurations of copper used to demonstrate \
- the DP-GEN data generator for PES machine learning models."
+DS_DESC = (
+    "Approximately 15,000 configurations of copper used to demonstrate "
+    "the DP-GEN data generator for PES machine learning models."
+)
 ELEMENTS = ["Cu"]
 GLOB_STR = "box.npy"
 

@@ -48,9 +48,11 @@ AUTHORS = [
     "Ben Xu",
     "Han Wang",
 ]
-DS_DESC = "Approximately 7,600 configurations of Ag used as part of a \
- training dataset for a DP-GEN-based ML model for a Ag-Au nanoalloy \
- potential."
+DS_DESC = (
+    "Approximately 7,600 configurations of Ag used as part of a "
+    "training dataset for a DP-GEN-based ML model for a Ag-Au nanoalloy "
+    "potential."
+)
 ELEMENTS = ["Ag"]
 GLOB_STR = "box.npy"
 
@@ -144,7 +146,6 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        # "": {"field": ""}
     }
     property_map = {
         "potential-energy": [

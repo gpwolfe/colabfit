@@ -75,9 +75,7 @@ def reader(filepath):
     lattice = np.array(lattice)
     lattice.reshape(lattice.shape[0] // 3, 3, 3)
 
-    atoms = AtomicConfiguration(
-        positions=coords, symbols=elements, cell=lattice
-    )
+    atoms = AtomicConfiguration(positions=coords, symbols=elements, cell=lattice)
     atoms.info["force"] = forces
     atoms.info["name"] = filepath.stem
     atoms.info["energy"] = energy

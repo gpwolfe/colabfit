@@ -50,9 +50,10 @@ AUTHORS = [
     "Han Wang",
     "Mohan Chen",
 ]
-DS_DESC = "Approximately 6,500 configurations of Sn, including Sn8, Sn16 and\
- Sn32, used in developing a deep potential that predicts the phase diagram of\
- Sn"
+DS_DESC = (
+    "Approximately 6,500 configurations of Sn, including Sn8, Sn16 and "
+    "Sn32, used in developing a deep potential that predicts the phase diagram of Sn."
+)
 ELEMENTS = ["Sn"]
 GLOB_STR = "box.npy"
 

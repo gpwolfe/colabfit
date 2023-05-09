@@ -49,8 +49,7 @@ LINKS = [
     "https://doi.org/10.1063/5.0080766",
 ]
 AUTHORS = ["Yaolong Zhanga", "Junfan Xia", "Bin Jiang"]
-DS_DESC = "Approximately 9,850 configurations of CO2 with a movable Ni(100)\
- surface."
+DS_DESC = "Approximately 9,850 configurations of CO2 with a movable Ni(100) surface."
 
 
 def reader(filepath):

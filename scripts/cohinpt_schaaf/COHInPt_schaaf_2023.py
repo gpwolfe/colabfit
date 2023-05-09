@@ -68,7 +68,7 @@ def namer(info):
     elif "figure-3" in info:
         return "dopant-configs"
     else:
-        print("Something went wrong in naming.")
+        return None
 
 
 def reader(file_path):
@@ -144,11 +144,6 @@ def main(argv):
 
     all_co_ids, all_do_ids = list(zip(*ids))
     cs_regexes = [
-        # [
-        #     "COHInPt_schaaf_2023",
-        #     ".*",
-        #     "All configurations in the COHInPt_schaaf_2023 set",
-        # ],
         [
             "Pt-doped-training_COHInPt_schaaf_2023",
             "Pt_doped",
@@ -190,9 +185,7 @@ def main(argv):
         )
 
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
     client.insert_dataset(

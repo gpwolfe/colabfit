@@ -53,10 +53,12 @@ AUTHORS = [
     "Jun Cheng",
     "Weinan E",
 ]
-DS_DESC = "Approximately 2,700 configurations of Li10SnP2S12, based on crystal\
- structures from the Materials Project database, material ID mp-696123. One of\
- two LiSnPS datasets from this source. The other uses the PBEsol functional,\
- rather than the PBE functional."
+DS_DESC = (
+    "Approximately 2,700 configurations of Li10SnP2S12, based on crystal "
+    "structures from the Materials Project database, material ID mp-696123. One of "
+    "two LiSnPS datasets from this source. The other uses the PBEsol functional, "
+    "rather than the PBE functional."
+)
 ELEMENTS = ["Li", "Sn", "P", "S"]
 GLOB_STR = "box.npy"
 

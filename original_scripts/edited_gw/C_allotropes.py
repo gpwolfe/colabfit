@@ -21,11 +21,11 @@ LINKS = [
 AUTHORS = ["M. Wen", "E. B. Tadmor"]
 DS_DESC = (
     "The dataset consists of energies and forces for monolayer "
-    "graphene, bilayer graphene, graphite, and diamond in various"
-    "states, including strained static structures and configurations"
-    "drawn from ab initio MD trajectories. A total number of 4788"
-    "configurations was generated from DFT calculations using the"
-    "Vienna Ab initio Simulation Package (VASP). The energies and forces"
+    "graphene, bilayer graphene, graphite, and diamond in various "
+    "states, including strained static structures and configurations "
+    "drawn from ab initio MD trajectories. A total number of 4788 "
+    "configurations was generated from DFT calculations using the "
+    "Vienna Ab initio Simulation Package (VASP). The energies and forces "
     "are stored in the extended XYZ format. One file for each configuration."
 )
 

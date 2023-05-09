@@ -103,6 +103,8 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
+    }
+    co_md_map = {
         "free-energy": {"field": "free_energy"}
         # "": {"field": ""}
     }
@@ -131,6 +133,7 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
+            co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
             verbose=True,

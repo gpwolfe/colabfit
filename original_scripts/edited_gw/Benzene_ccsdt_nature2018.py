@@ -23,9 +23,9 @@ AUTHORS = [
 DS_DESC = (
     "To create the coupled cluster datasets, the data used "
     "for training the models were created by running ab initio MD in the "
-    "NVT ensemble using the Nosé-Hoover thermostat at 500 K during a 200 ps"
-    " simulation with a resolution of 0.5 fs. Energies and forces were"
-    " recalculated using all-electron coupled cluster with single"
+    "NVT ensemble using the Nosé-Hoover thermostat at 500 K during a 200 ps "
+    "simulation with a resolution of 0.5 fs. Energies and forces were "
+    "recalculated using all-electron coupled cluster with single "
     ", double and perturbative triple excitations (CCSD(T)). The Dunning "
     "correlation-consistent basis set cc-pVDZ was used for benzene. All "
     "calculations were performed with the Psi4 software suite."

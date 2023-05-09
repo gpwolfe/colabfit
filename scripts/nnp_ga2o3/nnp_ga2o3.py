@@ -55,10 +55,12 @@ AUTHORS = [
     "Eungkyu Lee",
     "Tengfei Luo",
 ]
-DS_DESC = "9,200 configurations of beta-Ga2O3, including two configuration\
- sets. One contains DFT data for 8400 configurations simulated between\
- temperatures of 50K - 600K. The second contains configurations with 0K\
- simulation temperature."
+DS_DESC = (
+    "9,200 configurations of beta-Ga2O3, including two configuration "
+    "sets. One contains DFT data for 8400 configurations simulated between "
+    "temperatures of 50K - 600K. The second contains configurations with 0K "
+    "simulation temperature."
+)
 ELEMENTS = ["Ga", "O"]
 GLOB_STR = "energy.npy"
 
@@ -97,9 +99,7 @@ def reader(filepath):
     for i, c in enumerate(configs):
         c.info["forces"] = props["forces"][i]
         c.info["energy"] = float(energy[i])
-        c.info[
-            "name"
-        ] = f"NNP-Ga2O3_{filepath.parts[-3]}_{filepath.parts[-2]}_{i}"
+        c.info["name"] = f"NNP-Ga2O3_{filepath.parts[-3]}_{filepath.parts[-2]}_{i}"
     return configs
 
 
@@ -171,12 +171,14 @@ def main(argv):
         [
             f"{DATASET}-with-0K",
             ".*with0K.*",
-            f"All configurations from {DATASET} dataset, including those simulated between temperatures 0K - 600K",
+            f"All configurations from {DATASET} dataset, including those simulated "
+            "between temperatures 0K - 600K",
         ],
         [
             f"{DATASET}-without-0K",
             ".*without0K.*",
-            f"Configurations from {DATASET} dataset simulated between temperatures 50K - 600K",
+            f"Configurations from {DATASET} dataset simulated between temperatures "
+            "50K - 600K",
         ],
     ]
 
@@ -199,9 +201,7 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
         else:

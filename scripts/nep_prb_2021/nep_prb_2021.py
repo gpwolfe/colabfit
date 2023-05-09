@@ -54,11 +54,13 @@ LINKS = [
     "https://doi.org/10.5281/zenodo.5109599",
     "https://doi.org/10.1103/PhysRevB.104.104309",
 ]
-AUTHORS = "Zheyong Fan"
-DS_DESC = """Approximately 7,000 distinct configurations of 2D-silicene,
- silicon, and PbTe. Silicon data used from
- http://dx.doi.org/10.1103/PhysRevX.8.041048. Dataset includes predicted
- force, potential energy and virial values."""
+AUTHORS = ["Zheyong Fan"]
+DS_DESC = (
+    "Approximately 7,000 distinct configurations of 2D-silicene, "
+    "silicon, and PbTe. Silicon data used from "
+    "http://dx.doi.org/10.1103/PhysRevX.8.041048. Dataset includes predicted "
+    "force, potential energy and virial values."
+)
 
 E_UNITS = "eV"
 F_UNITS = "eV/A"
@@ -150,12 +152,7 @@ def read_train(filepath, a_num_dict):
             # as well as training virial and force data that we are
             # not collecting(?)
             elif l_no > num_confs + 2:
-                if any(
-                    [
-                        line.startswith(x)
-                        for x in ["1 ", "0 ", "82 ", "52 ", "14 "]
-                    ]
-                ):
+                if any([line.startswith(x) for x in ["1 ", "0 ", "82 ", "52 ", "14 "]]):
                     match = CONF_RE.match(line)
                     elems.append(a_num_dict[match["type"]])
                     coords.append(
@@ -167,9 +164,7 @@ def read_train(filepath, a_num_dict):
                     )
                     l_no += 1
                 elif len(line.split()) == 9:
-                    cells.append(
-                        [float(x) for x in CELL_RE.match(line).groups()]
-                    )
+                    cells.append([float(x) for x in CELL_RE.match(line).groups()])
                     l_no += 1
                 elif len(line.split()) == 7 or len(line.split()) == 1:
                     all_coords.append(coords)
@@ -202,9 +197,7 @@ def reader(filepath):
     virials = read_virial(parent / "virial.out")
     energy = read_en(filepath)
     for i, coord in enumerate(coords):
-        atom = AtomicConfiguration(
-            positions=coord, numbers=elements[i], cell=cells[i]
-        )
+        atom = AtomicConfiguration(positions=coord, numbers=elements[i], cell=cells[i])
         atom.info["name"] = f"{dir_name}_{i}"
         atom.info["forces"] = forces[i]
         atom.info["virials"] = virials[i]
@@ -253,6 +246,8 @@ def main(argv):
     metadata = {
         "software": {"field": "software"},
         "method": {"field": "methods"},
+    }
+    co_md_map = {
         "virials": {
             "field": "virials",
             "units": "eV/atom",
@@ -277,6 +272,7 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
+            co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -293,7 +289,8 @@ def main(argv):
         [
             f"{DATASET}-Si",
             "Si_*",
-            f"All silicon configurations from {DATASET} dataset (excluding separate silicene set)",
+            f"All silicon configurations from {DATASET} dataset (excluding "
+            "separate silicene set)",
         ],
         [
             f"{DATASET}-Silicene",
@@ -321,9 +318,7 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
         else:

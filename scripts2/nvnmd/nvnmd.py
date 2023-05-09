@@ -53,8 +53,10 @@ AUTHORS = [
     "Junhua Li",
     "Jie Liu",
 ]
-DS_DESC = "Approximately 5,000 configurations of GeTe used in training and\
- testing of a non-von Neumann multiplication-less DNN model."
+DS_DESC = (
+    "Approximately 5,000 configurations of GeTe used in training and "
+    "testing of a non-von Neumann multiplication-less DNN model."
+)
 ELEMENTS = ["Ge", "Te"]
 GLOB_STR = "box.npy"
 
@@ -136,6 +138,8 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
+    }
+    co_md_map = {
         "dipole": {"field": "dipole"},
     }
     property_map = {
@@ -156,6 +160,7 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
+            co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -190,9 +195,7 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
         else:

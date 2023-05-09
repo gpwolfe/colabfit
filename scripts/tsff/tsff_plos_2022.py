@@ -23,7 +23,6 @@ from colabfit.tools.property_definitions import (
     potential_energy_pd,
 )
 from pathlib import Path
-from pymongo.errors import OperationFailure
 import sys
 
 DATASET_FP = Path().cwd()

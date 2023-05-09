@@ -125,9 +125,7 @@ def xyz_parser(file_path, header_regex):
 
 
 def reader_ccsd(file_path):
-    name, n_atoms, elem_coords, properties = xyz_parser(
-        file_path, CCSD_HEADER_RE
-    )
+    name, n_atoms, elem_coords, properties = xyz_parser(file_path, CCSD_HEADER_RE)
     positions = list(zip(elem_coords["x"], elem_coords["y"], elem_coords["z"]))
     atoms = AtomicConfiguration(
         names=[name], symbols=elem_coords["element"], positions=positions
@@ -154,7 +152,7 @@ def reader_b3lyp(file_path):
     return [atoms]
 
 
-def load_data_wrapper(client, reader, glob_string, metadata, energy_map):
+def load_data_wrapper(client, reader, glob_string, metadata, co_md_map, energy_map):
     configurations = load_data(
         # Data can be downloaded here:
         # 'https://archive.materialscloud.org/record/2019.0002/v3'
@@ -169,14 +167,25 @@ def load_data_wrapper(client, reader, glob_string, metadata, energy_map):
     if len(configurations) == 0:
         print(f"Check glob {glob_string}. No configurations found.")
         return [], []
-    ids = list(
-        client.insert_data(
-            configurations,
-            property_map=energy_map,
-            generator=False,
-            verbose=True,
+    if co_md_map:
+        ids = list(
+            client.insert_data(
+                configurations,
+                co_md_map=co_md_map,
+                property_map=energy_map,
+                generator=False,
+                verbose=True,
+            )
         )
-    )
+    else:
+        ids = list(
+            client.insert_data(
+                configurations,
+                property_map=energy_map,
+                generator=False,
+                verbose=True,
+            )
+        )
 
     all_co_ids, all_do_ids = list(zip(*ids))
     return all_co_ids, all_do_ids
@@ -222,6 +231,8 @@ def main(argv):
     b3lyp_metadata = {
         "software": {"value": "Psi4"},
         "method": {"value": "DFT-B3LYP"},
+    }
+    b3lyp_co_md_map = {
         "lumo-energy": {"field": "lumo_energy", "units": "a.u."},
         "homo-energy": {"field": "homo_energy", "units": "a.u."},
     }
@@ -251,6 +262,7 @@ def main(argv):
         reader_ccsd,
         "CCSD_daDZ/*.xyz",
         ccsd_metadata,
+        None,
         ccsd_total_energy_map,
     )
     all_co_ids.update(co_ids)
@@ -260,6 +272,7 @@ def main(argv):
         reader_b3lyp,
         "B3LYP_daTZ/*xyz",
         b3lyp_metadata,
+        b3lyp_co_md_map,
         b3lyp_energy_map,
     )
     all_co_ids.update(co_ids)
@@ -269,6 +282,7 @@ def main(argv):
         reader_b3lyp,
         "B3LYP_daDZ/*.xyz",
         b3lyp_metadata,
+        b3lyp_co_md_map,
         b3lyp_energy_map,
     )
     all_co_ids.update(co_ids)
@@ -278,6 +292,7 @@ def main(argv):
         reader_b3lyp,
         "SCAN0_daDZ/*.xyz",
         scan0_metadata,
+        None,
         b3lyp_energy_map,
     )
     all_co_ids.update(co_ids)
@@ -334,9 +349,7 @@ def main(argv):
         if len(co_ids) == 0:
             pass
         else:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
 

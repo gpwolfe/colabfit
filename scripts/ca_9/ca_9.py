@@ -152,7 +152,6 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        # "": {"field": ""}
     }
     property_map = {
         "potential-energy": [
@@ -189,32 +188,38 @@ def main(argv):
         [
             f"{DATASET}-BB-training",
             "BB_training.*",
-            f"Binning-binning configurations from {DATASET} dataset used for training NNP_BB potential",
+            f"Binning-binning configurations from {DATASET} dataset used for training "
+            "NNP_BB potential",
         ],
         [
             f"{DATASET}-BB-validation",
             "BB_validation.*",
-            f"Binning-binning configurations from {DATASET} dataset used during validation step for NNP_BB potential",
+            f"Binning-binning configurations from {DATASET} dataset used during "
+            "validation step for NNP_BB potential",
         ],
         [
             f"{DATASET}-BR-training",
             "BR_training.*",
-            f"Binning-random configurations from {DATASET} dataset used for training NNP_BR potential",
+            f"Binning-random configurations from {DATASET} dataset used for training "
+            "NNP_BR potential",
         ],
         [
             f"{DATASET}-BR-validation",
             "BR_validation.*",
-            f"Binning-random configurations from {DATASET} dataset used during validation step for NNP_BR potential",
+            f"Binning-random configurations from {DATASET} dataset used during "
+            "validation step for NNP_BR potential",
         ],
         [
             f"{DATASET}-CA_9-training",
             "CA-9_training.*",
-            f"Configurations from {DATASET} dataset used for training NNP_CA-9 potential",
+            f"Configurations from {DATASET} dataset used for training NNP_CA-9 "
+            "potential",
         ],
         [
             f"{DATASET}-CA_9-validation",
             "CA-9_validation.*",
-            f"Configurations from {DATASET} dataset used during validation step for NNP_CA-9 potential",
+            f"Configurations from {DATASET} dataset used during validation step for "
+            "NNP_CA-9 potential",
         ],
         [
             f"{DATASET}-all",
@@ -224,12 +229,14 @@ def main(argv):
         [
             f"{DATASET}-RR-training",
             "RR_training.*",
-            f"Random-random configurations from {DATASET} dataset used for training NNP_RR potential",
+            f"Random-random configurations from {DATASET} dataset used for training "
+            "NNP_RR potential",
         ],
         [
             f"{DATASET}-RR-validation",
             "RR_validation.*",
-            f"Random-random configurations from {DATASET} dataset used during validation step for NNP_RR potential",
+            f"Random-random configurations from {DATASET} dataset used during "
+            "validation step for NNP_RR potential",
         ],
         [
             f"{DATASET}-test",
@@ -257,9 +264,7 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
         else:

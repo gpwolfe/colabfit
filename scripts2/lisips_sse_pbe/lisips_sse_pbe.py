@@ -49,10 +49,12 @@ AUTHORS = [
     "Jun Cheng",
     "Weinan E",
 ]
-DS_DESC = "Approximately 9,100 configurations of Li10SiP2S12, based on crystal\
- structures from the Materials Project database, material ID mp-696129. One of\
- two LiSiPS datasets from this source. The other uses the PBEsol functional,\
- rather than the PBE functional."
+DS_DESC = (
+    "Approximately 9,100 configurations of Li10SiP2S12, based on crystal "
+    "structures from the Materials Project database, material ID mp-696129. One of "
+    "two LiSiPS datasets from this source. The other uses the PBEsol functional, "
+    "rather than the PBE functional."
+)
 ELEMENTS = ["Li", "Si", "P", "S"]
 GLOB_STR = "box.npy"
 

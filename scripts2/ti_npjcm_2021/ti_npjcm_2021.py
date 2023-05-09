@@ -52,7 +52,11 @@ AUTHORS = [
     "David J. Srolovitz",
     "Zhaoxuan Wu",
 ]
-DS_DESC = "Approximately 7,400 configurations of titanium"
+DS_DESC = (
+    "Approximately 7,400 configurations of titanium used for training a deep "
+    "potential using the DeePMD-kit molecular dynamics package and DP-GEN training "
+    "scheme."
+)
 ELEMENTS = ["Ti"]
 GLOB_STR = "box.npy"
 
@@ -194,8 +198,7 @@ def main(argv):
         [
             f"{DATASET}-DP-GEN",
             "dp_gen",
-            f"Configurations from DeePMD DPGEN training step for {DATASET} "
-            f"dataset",
+            f"Configurations from DeePMD DPGEN training step for {DATASET} " f"dataset",
         ],
         [
             f"{DATASET}-specialization",
@@ -225,9 +228,7 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
         else:

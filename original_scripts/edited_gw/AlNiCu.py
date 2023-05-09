@@ -25,18 +25,20 @@ LINKS = [
     "https://github.com/DescriptorZoo/sensitivity-dimensionality-results",
 ]
 
-DESCRIPTION = "This dataset is formed from two parts: single-species "
-"datasets for Al, Ni, and Cu from the NOMAD Encyclopedia and multi-species "
-"datasets that include Al, Ni and Cu from NOMAD Archive. Duplicates have been "
-"removed from NOMAD Encyclopedia data. For the multi-species data, we used "
-"only the last configuration steps for each NOMAD Archive record because the "
-"last configuration typically cooresponds with a fully relaxed configuration. "
-"In our dataset, the NOMAD unique reference access IDs are retained along "
-"with a subset of their meta information that includes whether the supplied "
-"configuration is from a converged calculation as well as the "
-"Density Functional Theory (DFT) code, version, and type of DFT functionals "
-"with the total potential energies. This dataset consists of 39.1% Al, "
-"30.7% Ni, and 30.2% Cu and has 27,987 atomic environments in 3337 structures."
+DESCRIPTION = (
+    "This dataset is formed from two parts: single-species "
+    "datasets for Al, Ni, and Cu from the NOMAD Encyclopedia and multi-species "
+    "datasets that include Al, Ni and Cu from NOMAD Archive. Duplicates have been "
+    "removed from NOMAD Encyclopedia data. For the multi-species data, only "
+    "the last configuration steps for each NOMAD Archive record were used because the "
+    "last configuration typically cooresponds with a fully relaxed configuration. "
+    "In this dataset, the NOMAD unique reference access IDs are retained along "
+    "with a subset of their meta information that includes whether the supplied "
+    "configuration is from a converged calculation as well as the "
+    "Density Functional Theory (DFT) code, version, and type of DFT functionals "
+    "with the total potential energies. This dataset consists of 39.1% Al, "
+    "30.7% Ni, and 30.2% Cu and has 27,987 atomic environments in 3337 structures."
+)
 
 
 def main(argv):

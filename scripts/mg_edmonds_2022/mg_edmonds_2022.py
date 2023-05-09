@@ -52,20 +52,14 @@ def reader(filepath: Path):
         ]
         stress = np.array(f[file_key]["structures"]["chunk_arrays"]["stress"])
         energy = np.array(f[file_key]["structures"]["chunk_arrays"]["energy"])
-        start_index = np.array(
-            f[file_key]["structures"]["chunk_arrays"]["start_index"]
-        )
+        start_index = np.array(f[file_key]["structures"]["chunk_arrays"]["start_index"])
         #   num_atoms = np.array(
         #       f[file_key]["structures"]["chunk_arrays"]["length"]
         #   )
 
         # Need indexing (multiple rows per configuration)
-        forces = np.array(
-            f[file_key]["structures"]["element_arrays"]["forces"]
-        )
-        coords = np.array(
-            f[file_key]["structures"]["element_arrays"]["positions"]
-        )
+        forces = np.array(f[file_key]["structures"]["element_arrays"]["forces"])
+        coords = np.array(f[file_key]["structures"]["element_arrays"]["positions"])
         element = np.array(["Mg" for x in coords])
 
     # Remove first index to avoid blank array
@@ -105,7 +99,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -121,6 +117,8 @@ def main(argv):
     metadata = {
         "software": {"value": "MLIP, VASP"},
         "method": {"value": "DFT"},
+    }
+    co_md_map = {
         "total-energy": {"field": "energy"},
         # this is a stress tensor of size 6, not 9 or 3x3
         "stress": {"field": "stress"},
@@ -137,6 +135,7 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
+            co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -209,9 +208,7 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
 
-        cs_id = client.insert_configuration_set(
-            co_ids, description=desc, name=name
-        )
+        cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
         cs_ids.append(cs_id)
 

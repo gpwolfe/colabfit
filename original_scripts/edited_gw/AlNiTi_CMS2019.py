@@ -25,8 +25,8 @@ DS_DESC = (
     "learning scheme: 1) candidate structures were relaxed by a partially-"
     "trained MTP model, 2) structures for which the MTP had to perform "
     "extrapolation were passed to DFT to be re-computed, 3) the MTP was "
-    "retrained, including the structures that were re-computed with DFT, 4)"
-    " steps 1-3 were repeated until the MTP no longer extrapolated on any of "
+    "retrained, including the structures that were re-computed with DFT, 4) "
+    "steps 1-3 were repeated until the MTP no longer extrapolated on any of "
     "the original candidate structures. The original candidate structures "
     "for this dataset included about 375,000 binary and ternary structures, "
     "enumerating all possible unit cells with different symmetries (BCC, "
@@ -97,6 +97,7 @@ def main(argv):
         "cauchy-stress": [
             {
                 "stress": {"field": "virial", "units": "GPa"},
+                "volume-normalized": {"value": True, "units": None},
                 "_metadata": {
                     "software": {"value": "VASP"},
                 },

@@ -40,7 +40,7 @@ LINKS = [
 AUTHORS = ["Rasha Atwi", "Matthew Bliss", "Maxim Makeev", "Nav Nidhi Rajput"]
 DS_DESC = (
     "DFT-optimized geometries and properties for Li-S electrolytes. These "
-    "make up the Computational Database for Li-S Batteries (ComBat), calculated using"
+    "make up the Computational Database for Li-S Batteries (ComBat), calculated using "
     "Gaussian 16 at the B3LYP/6-31+G* level of theory."
 )
 ELEMENTS = ["H", "S", "C", "O", "F", "Li", "P", "N", "Si"]

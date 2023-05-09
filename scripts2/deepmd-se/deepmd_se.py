@@ -36,7 +36,8 @@ DATASET_FP = Path().cwd()
 DATASET = "DeePMD-SE"
 
 LINKS = [
-    "https://www.aissquare.com/datasets/detail?pageType=datasets&name=deepmd-se-dataset",
+    "https://www.aissquare.com/datasets/detail?"
+    "pageType=datasets&name=deepmd-se-dataset",
     "https://doi.org/10.48550/arXiv.1805.09003",
 ]
 AUTHORS = [
@@ -234,7 +235,8 @@ def main(argv):
         [
             f"{DATASET}-HEA",
             "HEA__*",
-            f"CoCrFeMnNi high entropy alloy (HEA) configurations from {DATASET} dataset",
+            "CoCrFeMnNi high entropy alloy (HEA) configurations from "
+            f"{DATASET} dataset",
         ],
         [
             f"{DATASET}-MoS2-Pt",
@@ -277,9 +279,7 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
         else:

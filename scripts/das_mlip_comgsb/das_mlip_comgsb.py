@@ -52,15 +52,16 @@ AUTHORS = [
     "Jiong Yang",
     "Wenqing Zhang",
 ]
-DS_DESC = "Approximately 850 configurations of CoSb3 and Mg3Sb2 generated\
- using a dual adaptive sampling (DAS) method for use with machine learning\
- of interatomic potentials (MLIP)."
+DS_DESC = (
+    "Approximately 850 configurations of CoSb3 and Mg3Sb2 generated "
+    "using a dual adaptive sampling (DAS) method for use with machine learning "
+    "of interatomic potentials (MLIP)."
+)
 ELEMENTS = ["Mg", "Co", "Sb"]
 GLOB_STR = "training_dataset*Sb*.cfg"
 
 
 def reader(filepath):
-
     mtp_stress_order = ["xx", "yy", "zz", "yz", "xz", "xy"]
     vasp_stress_order = ["xx", "yy", "zz", "xy", "yz", "xz"]
     if "Mg3Sb" in filepath.stem:
@@ -86,10 +87,7 @@ def reader(filepath):
                 energy = float(f.readline().strip())
             elif line.startswith("PlusStress"):
                 virial = [float(x) for x in f.readline().strip().split()]
-                virial = [
-                    virial[mtp_stress_order.index(n)]
-                    for n in vasp_stress_order
-                ]
+                virial = [virial[mtp_stress_order.index(n)] for n in vasp_stress_order]
             elif len(line.strip().split()) == 8:
                 li = line.strip().split()
                 symbols.append(symbol_dict[int(li[1])])
@@ -154,9 +152,8 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        "virial": {"field": "virial"}
-        # "": {"field": ""}
     }
+    co_md_map = {"virial": {"field": "virial"}}
     property_map = {
         "potential-energy": [
             {
@@ -181,6 +178,7 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
+            co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -220,9 +218,7 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
         else:

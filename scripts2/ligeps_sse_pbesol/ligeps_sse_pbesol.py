@@ -38,7 +38,8 @@ DATASET = "LiGePS-SSE-PBEsol"
 SOFTWARE = "VASP, DP-GEN"
 METHODS = "DFT-PBEsol"
 LINKS = [
-    "https://www.aissquare.com/datasets/detail?pageType=datasets&name=LiGePS-SSE-PBEsol",
+    "https://www.aissquare.com/datasets/detail?pageType="
+    "datasets&name=LiGePS-SSE-PBEsol",
     "https://doi.org/10.1063/5.0041849",
 ]
 AUTHORS = [
@@ -49,10 +50,12 @@ AUTHORS = [
     "Jun Cheng",
     "Weinan E",
 ]
-DS_DESC = "Approximately 2,800 configurations of Li10GeP2S12, based on crystal\
- structures from the Materials Project database, material ID mp-696129. One of\
- two LiGePS datasets from this source. The other uses the PBE functional,\
- rather than the PBEsol functional."
+DS_DESC = (
+    "Approximately 2,800 configurations of Li10GeP2S12, based on crystal "
+    "structures from the Materials Project database, material ID mp-696129. One of "
+    "two LiGePS datasets from this source. The other uses the PBE functional, "
+    "rather than the PBEsol functional."
+)
 ELEMENTS = ["Li", "Ge", "P", "S"]
 GLOB_STR = "box.npy"
 

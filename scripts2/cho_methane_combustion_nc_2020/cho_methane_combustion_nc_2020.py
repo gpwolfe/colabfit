@@ -52,8 +52,10 @@ AUTHORS = [
     "Tong Zhu",
     "John Z. H. Zhang",
 ]
-DS_DESC = "Configurations of simulated methane combustion used to develop\
- a potential energy surface neural network using DeePMD."
+DS_DESC = (
+    "Configurations of simulated methane combustion used to develop "
+    "a potential energy surface neural network using DeePMD."
+)
 ELEMENTS = ["C", "H", "O"]
 GLOB_STR = "box.npy"
 

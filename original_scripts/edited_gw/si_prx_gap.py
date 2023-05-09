@@ -21,8 +21,8 @@ LINKS = [
 AUTHORS = ["Albert P. Bartók", "James Kermode", "Noam Bernstein", "Gábor Csányi"]
 DS_DESC = (
     "The original DFT training data for the general-purpose silicon "
-    "interatomic potential described in the associated publication."
-    " The kinds of configuration that we include are chosen using "
+    "interatomic potential described in the associated publication. "
+    "The kinds of configuration that we include are chosen using "
     "intuition and past experience to guide what needs to be included "
     "to obtain good coverage pertaining to a range of properties."
 )
@@ -55,7 +55,7 @@ def tform(img):
         if k in img.info:
             try:
                 img.info[k] = float(img.info[k].split(" ")[0])
-            except:
+            except:  # noqa: E722
                 pass
     # Reshaping shape (9,) stress vector to (3, 3) to match definition
     if "dft-virial" in img.info:
@@ -237,10 +237,12 @@ def main(argv):
         "cauchy-stress": [
             {
                 "stress": {"field": "dft-virial", "units": "GPa"},
+                "volume-normalized": {"value": True, "units": None},
                 "_metadata": dft_settings_map,
             },
             {
                 "stress": {"field": "gap-virial", "units": "GPa"},
+                "volume-normalized": {"value": True, "units": None},
                 "_metadata": {
                     "method": {"value": "gap"},
                 },

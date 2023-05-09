@@ -53,10 +53,12 @@ AUTHORS = [
     "S.M. Foiles",
     "G.J. Tucker",
 ]
-DS_DESC = "363 configurations of Ta used in the training of\
- a Spectral Neighbor Analysis Potential (SNAP) interatomic potential ML\
- model with the goal of modeling the migration of screw dislocations in\
- tantalum metal under shear loading."
+DS_DESC = (
+    "363 configurations of Ta used in the training of "
+    "a Spectral Neighbor Analysis Potential (SNAP) interatomic potential ML "
+    "model with the goal of modeling the migration of screw dislocations in "
+    "tantalum metal under shear loading."
+)
 ELEMENTS = ["Ta"]
 GLOB_STR = "*.json"
 
@@ -173,7 +175,6 @@ def main(argv):
         links=LINKS,
         description=DS_DESC,
         verbose=True,
-        # cs_ids=cs_ids,
     )
 
 

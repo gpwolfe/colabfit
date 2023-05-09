@@ -44,7 +44,8 @@ from pathlib import Path
 import sys
 
 DATASET_FP = Path(
-    "ndsc_tut-master/example_data/hcp_Mg_geomopti_randshear_pm_0.01_product_symm_k0p012.extxyz"
+    "ndsc_tut-master/example_data/"
+    "hcp_Mg_geomopti_randshear_pm_0.01_product_symm_k0p012.extxyz"
 )
 
 
@@ -91,6 +92,8 @@ def main(argv):
     metadata = {
         "software": {"value": "QUIP, ASE"},
         "method": {"value": "GAP"},
+    }
+    co_md_map = {
         "total_energy": {"field": "energy", "unit": "eV"},
         "virial": {"field": "virial"},
     }
@@ -112,6 +115,7 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
+            co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -119,37 +123,7 @@ def main(argv):
     )
 
     all_co_ids, all_do_ids = list(zip(*ids))
-    # cs_regexes = [
-    #     [
-    #         "hcp_Mg_geomopti_randshear_pm_0.01_product_symm_k0p012",
-    #         ".*",
-    #         "All configurations from ndsc_tut dataset (only Mg)",
-    #     ]
-    # ]
-    # cs_ids = []
 
-    # for i, (name, regex, desc) in enumerate(cs_regexes):
-    #     co_ids = client.get_data(
-    #         "configurations",
-    #         fields="hash",
-    #         query={
-    #             "hash": {"$in": all_co_ids},
-    #             "chemical_formula_reduced": {"$regex": regex},
-    #         },
-    #         ravel=True,
-    #     ).tolist()
-
-    #     print(
-    #         f"Configuration set {i}",
-    #         f"({name}):".rjust(22),
-    #         f"{len(co_ids)}".rjust(7),
-    #     )
-
-    #     cs_id = client.insert_configuration_set(
-    #         co_ids, description=desc, name=name
-    #     )
-
-    #     cs_ids.append(cs_id)
     client.insert_dataset(
         do_hashes=all_do_ids,
         name="NDSC_TUT_2022",

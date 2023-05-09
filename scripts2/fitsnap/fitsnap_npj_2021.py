@@ -55,10 +55,12 @@ AUTHORS = [
     "Michael P. Desjarlais",
     "Julien Tranchida",
 ]
-DS_DESC = "About 2,500 configurations of alpha-Fe used in the training and\
- testing of a ML model with the goal of building magneto-elastic\
- machine-learning interatomic potentials for large-scale spin-lattice\
- dynamics simulations."
+DS_DESC = (
+    "About 2,500 configurations of alpha-Fe used in the training and "
+    "testing of a ML model with the goal of building magneto-elastic "
+    "machine-learning interatomic potentials for large-scale spin-lattice "
+    "dynamics simulations."
+)
 ELEMENTS = ["Fe"]
 GLOB_STR = "*.json"
 
@@ -134,6 +136,8 @@ def main(argv):
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
         # "charges": {"field": "charges"},
+    }
+    co_md_map = {
         "spins": {"field": "spins"},
     }
     property_map = {
@@ -160,6 +164,7 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
+            co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
             verbose=True,

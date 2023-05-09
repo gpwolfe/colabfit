@@ -28,7 +28,7 @@ DS_DESC = (
     "NVT ensemble using the Nosé-Hoover thermostat at 500 K during a 200 ps "
     "simulation with a resolution of 0.5 fs. Energies and forces were "
     "recalculated using all-electron coupled cluster with single, "
-    "double and perturbative triple excitations (CCSD(T))."
+    "double and perturbative triple excitations (CCSD(T)). "
     "The Dunning correlation-consistent basis set cc-pVDZ was used for "
     "malonaldehyde. All calculations were performed with the Psi4 software suite."
 )

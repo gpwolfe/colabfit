@@ -29,11 +29,12 @@ LINKS = [
     "https://www.nature.com/articles/s41524-020-00477-2#",
     "https://github.com/msg-byu/agpd",
 ]
-DESCRIPTION = "The dataset consists of energies, forces and virials for"
-" DFT-VASP-generated Ag-Pd systems. The data was used to fit "
-"an active learned dataset which was used to "
-"compare MTP- and SOAP-GAP-generated potentials"
-
+DESCRIPTION = (
+    "The dataset consists of energies, forces and virials for "
+    "DFT-VASP-generated Ag-Pd systems. The data was used to fit "
+    "an active learned dataset which was used to "
+    "compare MTP- and SOAP-GAP-generated potentials."
+)
 ELEMENTS = ["Ag", "Pd"]
 
 

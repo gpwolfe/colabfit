@@ -90,6 +90,7 @@ def main(argv):
         "cauchy-stress": [
             {
                 "stress": {"field": "virial", "units": "GPa"},
+                "volume-normalized": {"value": True, "units": None},
                 "_metadata": {
                     "software": {"value": "VASP"},
                 },

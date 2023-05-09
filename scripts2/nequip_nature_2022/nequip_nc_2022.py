@@ -57,10 +57,12 @@ AUTHORS = [
     "Tess E. Smidt",
     "Boris Kozinsky",
 ]
-DS_DESC = "Approximately 57,000 configurations from the evaluation datasets\
- for NequIP graph neural network model for\
- interatomic potentials. Trajectories have been taken from LIPS, LIPO glass\
- melt-quench simulation, and formate decomposition on Cu datasets. "
+DS_DESC = (
+    "Approximately 57,000 configurations from the evaluation datasets "
+    "for NequIP graph neural network model for "
+    "interatomic potentials. Trajectories have been taken from LIPS, LIPO glass "
+    "melt-quench simulation, and formate decomposition on Cu datasets. "
+)
 ELEMENTS = ["H", "C", "Cu", "Li", "P", "S", "O"]
 GLOB_STR = "*.xyz"
 
@@ -146,17 +148,20 @@ def main(argv):
         [
             f"{DATASET}-LIPS",
             "lips*",
-            f"Lithium Thiophosphate (Li6.75P3S11) configurations from {DATASET} dataset",
+            f"Lithium Thiophosphate (Li6.75P3S11) configurations from {DATASET} "
+            "dataset",
         ],
         [
             f"{DATASET}-LIPO-quench",
             "lipo-quench*",
-            f"Lithium Phosphate amorphous glass (Li4P2O7) configurations from {DATASET} dataset",
+            "Lithium Phosphate amorphous glass (Li4P2O7) configurations from "
+            f"{DATASET} dataset",
         ],
         [
             f"{DATASET}-Cu-formate",
             "fcu*",
-            f"Cu-formate configurations, Cu <110> undergoing dehydrogenation decomposition, from {DATASET} dataset",
+            "Cu-formate configurations, Cu <110> undergoing dehydrogenation "
+            f"decomposition, from {DATASET} dataset",
         ],
     ]
 
@@ -179,9 +184,7 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
         else:

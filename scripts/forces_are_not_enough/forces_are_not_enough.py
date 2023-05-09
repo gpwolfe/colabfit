@@ -69,12 +69,20 @@ LINKS = [
     "https://doi.org/10.48550/arXiv.2210.07237",
     "https://github.com/kyonofx/MDsim/",
 ]
-AUTHORS = (
-    "X. Fu, Z. Wu, W. Wang, T. Xie, S. Keten, R. Gomez-Bombarelli, T. Jaakkola"
+AUTHORS = [
+    "X. Fu",
+    "Z. Wu",
+    "W. Wang",
+    "T. Xie",
+    "S. Keten",
+    "R. Gomez-Bombarelli",
+    "T. Jaakkola",
+]
+DS_DESC = (
+    "Approximately 300,000 benchmarking configurations "
+    "derived partly from the MD-17 and LiPS datasets, partly from "
+    "original simulated water and alanine dipeptide configurations."
 )
-DS_DESC = """Approximately 300,000 benchmarking configurations
- derived partly from the MD-17 and LiPS datasets, partly from
- original simulated water and alanine dipeptide configurations."""
 
 RE = re.compile(r"")
 
@@ -284,9 +292,7 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
         else:

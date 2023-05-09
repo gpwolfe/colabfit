@@ -41,7 +41,7 @@ import sys
 DATASET_FP = Path.cwd()
 DATASET = "cG-SchNet"
 
-SOFTWARE = "ORCA, SchNet"
+SOFTWARE = "ORCA"
 METHODS = "DFT"
 LINKS = [
     "https://doi.org/10.1038/s41467-022-28526-y",
@@ -55,14 +55,16 @@ AUTHORS = [
     "Klaus-Robert Müller",
     "Kristof T. Schütt",
 ]
-DS_DESC = "Configurations from a cG-SchNet trained on a subset of the QM9\
- dataset. Model was trained with the intention of providing molecules with\
- specified functional groups or motifs, relying on sampling of molecular\
- fingerprint data. Relaxation data for the generated molecules is computed\
- using ORCA software. Configuration sets include raw data from\
- cG-SchNet-generated configurations, with models trained on several different\
- types of target data and DFT relaxation data as a separate configuration\
- set. Includes approximately 80,000 configurations."
+DS_DESC = (
+    "Configurations from a cG-SchNet trained on a subset of the QM9"
+    "dataset. Model was trained with the intention of providing molecules with"
+    "specified functional groups or motifs, relying on sampling of molecular"
+    "fingerprint data. Relaxation data for the generated molecules is computed"
+    "using ORCA software. Configuration sets include raw data from"
+    "cG-SchNet-generated configurations, with models trained on several different"
+    "types of target data and DFT relaxation data as a separate configuration"
+    "set. Includes approximately 80,000 configurations."
+)
 ELEMENTS = ["C", "H", "O", "N", "F"]
 GLOB_STR = "*.db"
 
@@ -94,16 +96,12 @@ def reader(filepath):
             "computed_energy_U0_uncompensated"
         )
 
-        info["gap"] = row.data.get(
-            "predicted_gap", row.data.get("computed_gap")
-        )
+        info["gap"] = row.data.get("predicted_gap", row.data.get("computed_gap"))
         info["isotropic-polarizability"] = row.data.get(
             "predicted_isotropic_polarizability",
             row.data.get("computed_isotropic_polarizability"),
         )
-        info["target-tanimoto-similarity"] = row.data.get(
-            "target_tanimoto_similarity"
-        )
+        info["target-tanimoto-similarity"] = row.data.get("target_tanimoto_similarity")
         info["changed"] = row.data.get("changed")
         info["equals"] = row.data.get("equals")
         info["known"] = KNOWN.get(
@@ -136,7 +134,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -152,6 +152,9 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
+    }
+
+    co_md_map = {
         "isotropic-polarizability": {"field": "isotropic-polarizability"},
         "rmsd": {"field": "rmsd"},
         "computed-or-predicted": {"field": "computed-or-predicted"},
@@ -178,9 +181,10 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
+            co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -189,52 +193,69 @@ def main(argv):
         [
             f"{DATASET}-polarizability-predicted",
             "1.*generated.*",
-            f"Configurations from {DATASET} dataset with properties predicted using cG-SchNet model trained on isotropic polarizability data",
+            f"Configurations from {DATASET} dataset with properties predicted using "
+            "cG-SchNet model trained on isotropic polarizability data",
         ],
         [
             f"{DATASET}-polarizability-computed",
             "1.*relaxed.*",
-            f"Configurations from {DATASET} dataset with relaxation properties computed using ORCA, based on cG-Schnet model trained on isotropic polarizability data",
+            f"Configurations from {DATASET} dataset with relaxation properties "
+            "computed using ORCA, based on cG-Schnet model trained on isotropic "
+            "polarizability data",
         ],
         [
             f"{DATASET}-fingerprint-predicted",
             "2.*generated.*",
-            f"Configurations from {DATASET} dataset with properties predicted using cG-SchNet model trained on vector-valued molecular fingerprints",
+            f"Configurations from {DATASET} dataset with properties predicted "
+            "using cG-SchNet model trained on vector-valued molecular fingerprints",
         ],
         [
             f"{DATASET}-fingerprint-computed",
             "2.*relaxed.*",
-            f"Configurations from {DATASET} dataset with relaxation properties computed using ORCA, based on cG-Schnet model trained on vector-valued molecular fingerprints",
+            f"Configurations from {DATASET} dataset with relaxation properties "
+            "computed using ORCA, based on cG-Schnet model trained on vector-valued "
+            "molecular fingerprints",
         ],
         [
             f"{DATASET}-gap-predicted",
             "3.*generated.*",
-            f"Configurations from {DATASET} dataset with properties predicted using cG-SchNet model trained on HOMO-LUMO gap data",
+            f"Configurations from {DATASET} dataset with properties predicted "
+            "using cG-SchNet model trained on HOMO-LUMO gap data",
         ],
         [
             f"{DATASET}-gap-computed",
             "3.*relaxed.*",
-            f"Configurations from {DATASET} dataset with relaxation properties computed using ORCA, based on cG-Schnet model trained on HOMO-LUMO gap data",
+            f"Configurations from {DATASET} dataset with relaxation properties "
+            "computed using ORCA, based on cG-Schnet model trained on HOMO-LUMO "
+            "gap data",
         ],
         [
             f"{DATASET}-composition-relative-energy-predicted",
             "4.*generated.*",
-            f"Configurations from {DATASET} dataset with properties predicted using cG-SchNet model trained on atomic composition and relative atomic energy data",
+            f"Configurations from {DATASET} dataset with properties predicted "
+            "using cG-SchNet model trained on atomic composition and relative atomic "
+            "energy data",
         ],
         [
             f"{DATASET}-composition-relative-energy-computed",
             "4.*relaxed.*",
-            f"Configurations from {DATASET} dataset with relaxation properties computed using ORCA, based on cG-Schnet model trained on atomic composition and relative atomic energy data",
+            f"Configurations from {DATASET} dataset with relaxation properties "
+            "computed using ORCA, based on cG-Schnet model trained on atomic "
+            "composition and relative atomic energy data",
         ],
         [
             f"{DATASET}-gap-relative-energy-predicted",
             "5.*generated.*",
-            f"Configurations from {DATASET} dataset with properties predicted using cG-SchNet model trained on HOMO-LUMO gap and relative atomic energy data",
+            f"Configurations from {DATASET} dataset with properties predicted "
+            "using cG-SchNet model trained on HOMO-LUMO gap and relative atomic "
+            "energy data",
         ],
         [
             f"{DATASET}-gap-computed",
             "5.*relaxed.*",
-            f"Configurations from {DATASET} dataset with relaxation properties computed using ORCA, based on cG-Schnet model trained on HOMO-LUMO gap and relative atomic energy data",
+            f"Configurations from {DATASET} dataset with relaxation properties "
+            "computed using ORCA, based on cG-Schnet model trained on HOMO-LUMO gap "
+            "and relative atomic energy data",
         ],
     ]
 
@@ -257,9 +278,7 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
         else:

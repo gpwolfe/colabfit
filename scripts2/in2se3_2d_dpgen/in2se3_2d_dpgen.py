@@ -49,8 +49,10 @@ AUTHORS = [
     "Jian Liu",
     "Shi Liu",
 ]
-DS_DESC = "Approximately 11,500 configurations of In2Se3, including monolayer\
- (20-atom slab) and bulk (30-atom supercell) models."
+DS_DESC = (
+    "Approximately 11,500 configurations of In2Se3, including monolayer "
+    "(20-atom slab) and bulk (30-atom supercell) models."
+)
 ELEMENTS = ["In", "Se"]
 GLOB_STR = "box.npy"
 

@@ -124,6 +124,7 @@ def main(argv):
         "cauchy-stress": [
             {
                 "stress": {"field": "virial", "units": "bar"},
+                "volume-normalized": {"value": True, "units": None},
                 "_metadata": {
                     "software": {"value": "VASP"},
                     "method": {"value": "DFT-PBE"},

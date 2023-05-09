@@ -60,8 +60,10 @@ LINKS = [
     "https://doi.org/10.1016/j.eml.2022.101929",
 ]
 AUTHORS = "Penghua Ying"
-DS_DESC = "Approximately 275 configurations of training and testing data\
- of monolayer quasi-hexagonal-phase fullerene (qHPF) membrane."
+DS_DESC = (
+    "Approximately 275 configurations of training and testing data "
+    "of monolayer quasi-hexagonal-phase fullerene (qHPF) membrane."
+)
 ELEMENTS = ["C"]
 GLOB_STR = "*.in"
 
@@ -69,12 +71,8 @@ EN_V_RE = re.compile(
     r"^([-\.\de]+)\s([-\.\de]+)\s([-\.\de]+)\s"
     r"([-\.\de]+)\s([-\.\de]+)\s([-\.\de]+)\s([-\.\de]+)$"
 )
-CO_FO_RE = re.compile(
-    r"^(\S)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$"
-)
-LATT_RE = re.compile(
-    r"^(\S+)\s(\S+)\s(\S+)\s(\S+)\s(\S+)\s(\S+)\s(\S+)\s(\S+)\s(\S+)$"
-)
+CO_FO_RE = re.compile(r"^(\S)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$")
+LATT_RE = re.compile(r"^(\S+)\s(\S+)\s(\S+)\s(\S+)\s(\S+)\s(\S+)\s(\S+)\s(\S+)\s(\S+)$")
 
 
 def reader(filepath):
@@ -88,7 +86,6 @@ def reader(filepath):
     cell = []
 
     with open(filepath, "r") as f:
-
         for line in f:
             if counter == 1:
                 num_a = int(line.rstrip())
@@ -166,6 +163,8 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
+    }
+    co_md_map = {
         "virial": {"field": "virial"},
     }
     property_map = {
@@ -186,6 +185,7 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
+            co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -225,9 +225,7 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
         else:

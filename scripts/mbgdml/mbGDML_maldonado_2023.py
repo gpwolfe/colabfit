@@ -31,7 +31,7 @@ md_data = {
     'z': ase_atoms, element numbers
     'R': R,  positions
     'E_potential': E_potential,
-    'E_kinetic': E_kinetic, 
+    'E_kinetic': E_kinetic,
     'F': F, forces in kcal/mol/Angstrom
     'V': Vel, velocity
     'type': 'md',
@@ -157,7 +157,8 @@ def main(argv):
     metadata = {
         "software": {"field": "software"},
         "method": {"field": "method"},
-        # "velocities": {
+    }
+    co_md_map = {
         "velocities": {"field": "V"},
         "velocity-units": {"field": "v_unit"},
         "kinetic_energy": {"field": "E_kinetic"},
@@ -185,6 +186,7 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
+            co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -211,7 +213,8 @@ def main(argv):
         [
             "GFN2",
             "md-gfn2",
-            "Configurations from the mbGDML set predicted using XTB at GFN2 level of theory",
+            "Configurations from the mbGDML set predicted using XTB at GFN2 "
+            "level of theory",
         ],
         [
             "ORCA",
@@ -237,9 +240,7 @@ def main(argv):
         )
 
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
     client.insert_dataset(

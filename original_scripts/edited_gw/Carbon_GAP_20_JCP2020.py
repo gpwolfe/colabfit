@@ -124,6 +124,7 @@ def main(argv):
         "cauchy-stress": [
             {
                 "stress": {"field": "virial", "units": "eV"},
+                "volume-normalized": {"value": True, "units": None},
                 "_metadata": {
                     "method": {"value": "DFT-optB88-vdW"},
                     "kpoint": {"field": "kpoints"},

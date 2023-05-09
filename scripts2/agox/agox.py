@@ -63,11 +63,12 @@ AUTHORS = [
     "Malthe Kjær Bisbo",
     "Bjørk Hammer",
 ]
-DS_DESC = "Dataset with generated configurations and some relaxation\
- trajectories created with AGOX (Atomistic Global Optimization X)\
- software. Most DFT calculations use GPAW code. The exception is the\
- cobalt-doped boron (CoB-) dataset, which uses ORCA code.\
-    "
+DS_DESC = (
+    "Dataset with generated configurations and some relaxation "
+    "trajectories created with AGOX (Atomistic Global Optimization X) "
+    "software. Most DFT calculations use GPAW code. The exception is the "
+    "cobalt-doped boron (CoB-) dataset, which uses ORCA code."
+)
 ELEMENTS = ["C", "H", "O", "N", "Ru", "Pt", "Au", "Ag", "Sn"]
 GLOB_STR = "*.db"
 GLOB_STR2 = "*.traj"

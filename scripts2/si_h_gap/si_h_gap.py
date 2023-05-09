@@ -56,8 +56,10 @@ AUTHORS = [
     "Gábor Csányi",
     "Gergely T. Zimányi",
 ]
-DS_DESC = "656 configurations of hydrogenated liquid and amorphous silicon,\
- divided into reference, training and validation sets. "
+DS_DESC = (
+    "656 configurations of hydrogenated liquid and amorphous silicon, "
+    "divided into reference, training and validation sets."
+)
 ELEMENTS = ["Si", "H"]
 GLOB_STR = "*.xyz"
 
@@ -67,9 +69,7 @@ def reader(filepath):
     for i, atom in enumerate(atoms):
         atom.info["name"] = f"{filepath.stem}_{atom.info['config_type']}_{i}"
         if atom.info.get("dft_virial") is not None:
-            atom.info["stress"] = np.array(
-                atom.info.get("dft_virial")
-            ).reshape(3, 3)
+            atom.info["stress"] = np.array(atom.info.get("dft_virial")).reshape(3, 3)
     return atoms
 
 
@@ -111,6 +111,8 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
+    }
+    co_md_map = {
         "energy-sigma": {"field": "energy_sigma"},
         "virial-sigma": {"field": "virial_sigma"},
         "force-atom-sigma": {"field": "force_atom_sigma"}
@@ -141,6 +143,7 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
+            co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -157,12 +160,14 @@ def main(argv):
         [
             f"{DATASET}-training-alternate",
             ".*alternate.*",
-            f"Training configurations from {DATASET} dataset with alternate regularization parameters",
+            f"Training configurations from {DATASET} dataset with alternate "
+            "regularization parameters",
         ],
         [
             f"{DATASET}-training-paper",
             ".*paper.*",
-            f"Training configurations from {DATASET} dataset with regularization parameters shown in publication",
+            f"Training configurations from {DATASET} dataset with regularization "
+            "parameters shown in publication",
         ],
         [
             f"{DATASET}-validation",
@@ -190,9 +195,7 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
         else:

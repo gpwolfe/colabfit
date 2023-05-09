@@ -45,7 +45,7 @@ def reader(file_path, **kwargs):
 
     try:
         atoms = Atoms(symbols, positions=positions, cell=box, pbc=[1, 1, 1])
-    except Exception as e:
+    except:  # noqa: E722
         symbols = symbols[1:]
         atoms = Atoms(symbols, positions=positions, cell=box, pbc=[1, 1, 1])
 

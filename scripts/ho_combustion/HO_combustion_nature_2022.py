@@ -106,6 +106,9 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
+    }
+
+    co_md_map = {
         "reaction-number": {"field": "reaction-number"},
     }
     property_map = {
@@ -126,6 +129,7 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
+            co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -162,31 +166,6 @@ def main(argv):
         )
 
         cs_ids.append(cs_id)
-
-    # for i, (name, regex, desc) in enumerate(cs_regexes):
-    #     co_ids = client.get_data(
-    #         "configurations",
-    #         fields="hash",
-    #         query={
-    #             "hash": {"$in": all_co_ids},
-    #             "names": {"$regex": regex},
-    #         },
-    #         ravel=True,
-    #     ).tolist()
-
-    #     print(
-    #         f"Configuration set {i}",
-    #         f"({name}):".rjust(22),
-    #         f"{len(co_ids)}".rjust(7),
-    #     )
-    #     if len(co_ids) > 0:
-    #         cs_id = client.insert_configuration_set(
-    #             co_ids, description=desc, name=name
-    #         )
-
-    #         cs_ids.append(cs_id)
-    #     else:
-    #         pass
 
     client.insert_dataset(
         cs_ids=cs_ids,

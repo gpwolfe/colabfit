@@ -56,7 +56,9 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
 
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
@@ -148,9 +150,7 @@ def main(argv):
         if len(co_ids) == 0:
             pass
         else:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
 
@@ -234,9 +234,7 @@ def parse_header_information(lines) -> dict:
             for pos_line in lines[i + 1 : i + 1 + header_info.get("atoms", 0)]:
                 pos = pos_line.split()
                 struc_spec.append(pos[0])
-                prev_positions.append(
-                    (float(pos[1]), float(pos[2]), float(pos[3]))
-                )
+                prev_positions.append((float(pos[1]), float(pos[2]), float(pos[3])))
             header_info["species"] = struc_spec
             header_info["prev_positions"] = np.array(prev_positions)
 
@@ -463,13 +461,9 @@ def parse_snapshot(
     # Current setting for # of lines to skip after Frame marker
     skip = 3
 
-    for count, frame_line in enumerate(
-        lines[(index + skip) : (index + skip + noa)]
-    ):
+    for count, frame_line in enumerate(lines[(index + skip) : (index + skip + noa)]):
         # parse frame line
-        spec, position, force, uncertainty, velocity = parse_frame_line(
-            frame_line
-        )
+        spec, position, force, uncertainty, velocity = parse_frame_line(frame_line)
 
         # update values
         species.append(spec)
@@ -539,7 +533,7 @@ def get_thermostat(thermostat, kw, line):
     if kw in line:
         try:
             value = float(line.split()[-2])  # old style
-        except:
+        except:  # noqa: E722
             value = float(line.split()[-1])  # new style
         if kw in thermostat:
             thermostat[kw].append(value)

@@ -29,15 +29,17 @@ LINKS = [
     "https://arxiv.org/abs/2205.06643",
     "https://github.com/davkovacs/BOTNet-datasets",
 ]
-DESCRIPTION = "Acetylacetone dataset generated from\
- a long molecular dynamics simulation at 300 K using a\
- Langevin thermostat at the semi-empirical GFN2-xTB\
- level of theory. Configurations were sampled at an\
- interval of 1 ps and the resulting set of configurations were recomputed with\
- density functional theory using the PBE\
- exchange-correlation functional with D3 dispersion correction and def2-SVP\
- basis set and VeryTightSCF convergence settings using the ORCA electronic\
- structure package."
+DESCRIPTION = (
+    "Acetylacetone dataset generated from "
+    "a long molecular dynamics simulation at 300 K using a "
+    "Langevin thermostat at the semi-empirical GFN2-xTB "
+    "level of theory. Configurations were sampled at an "
+    "interval of 1 ps and the resulting set of configurations were recomputed with "
+    "density functional theory using the PBE "
+    "exchange-correlation functional with D3 dispersion correction and def2-SVP "
+    "basis set and VeryTightSCF convergence settings using the ORCA electronic "
+    "structure package."
+)
 
 ELEMENTS = ["C", "H", "O"]
 

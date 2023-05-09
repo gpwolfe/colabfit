@@ -191,7 +191,8 @@ def reader(filepath):
         # config.info["abc"] = abc
         # config.info["magmom"] = magmom
         # config.info["charge"] = charge
-        config.info["forces"] = forces
+        if any([any(x) for x in forces]):
+            config.info["forces"] = forces
         config.info["elements"] = elements
 
         config.info["energy"] = entry["energy"]
@@ -333,7 +334,7 @@ def main(argv):
         beg, end = batch
         for fi, fpath in enumerate(fps[beg:end]):
             new = reader(fpath)
-
+            configurations = []
             for atoms in new:
                 a_elems = set(atoms.get_chemical_symbols())
                 if not a_elems.issubset(ELEMENTS):
@@ -358,29 +359,32 @@ def main(argv):
                     atoms.info[ATOMS_LABELS_FIELD] = set()
                 else:
                     atoms.info[ATOMS_LABELS_FIELD] = set(atoms.info[labels_field])
+                configurations.append(atoms)
                 ai += 1
-                # configurations.append(atoms)
-        # insert_batch = 10000
-        # n_i_batches = len(configurations) // insert_batch
-        # leftover = len(configurations) % insert_batch
-        # i_batches = [
-        #     (i * insert_batch, (i+1) * insert_batch) for i in range(n_i_batches)
-        #     ]
-        # if leftover:
-        #     i_batches.append((insert_batch * n_i_batches, len(configurations)))
-        # for batch in i_batches:
-        #     beg, end = batch
-                ids.extend(
-                    list(
-                        client.insert_data(
-                            atoms[beg:end],
-                            property_map=property_map,
-                            co_md_map=config_md,
-                            generator=False,
-                            verbose=False,
+                if len(configurations) % 1000 == 0:
+                    ids.extend(
+                        list(
+                            client.insert_data(
+                                configurations,
+                                property_map=property_map,
+                                co_md_map=config_md,
+                                generator=False,
+                                verbose=False,
+                            )
                         )
                     )
+                    configurations = []
+            ids.extend(
+                list(
+                    client.insert_data(
+                        configurations,
+                        property_map=property_map,
+                        co_md_map=config_md,
+                        generator=False,
+                        verbose=False,
+                    )
                 )
+            )
 
     all_co_ids, all_do_ids = list(zip(*ids))
 

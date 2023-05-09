@@ -123,6 +123,8 @@ def main(argv):
     metadata = {
         "software": {"value": "Amsterdam Modeling Suite"},
         "method": {"value": "revPBE"},
+    }
+    co_md_map = {
         "partial-charge": {"field": "partial_charges"},
         "nuclear-gradients": {"field": "nuclear_gradients"},
     }
@@ -144,6 +146,7 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
+            co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
             verbose=True,

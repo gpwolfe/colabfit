@@ -78,12 +78,14 @@ LINKS = [
     "https://doi.org/10.17632/pjv2yr7pvr.1",
     "https://doi.org/10.1016/j.cpc.2019.04.014",
 ]
-AUTHORS = "Kyuhyun Lee", "Dongsun Yoo", "Wonseok Jeong", "Seungwu Han"
-DS_DESC = "10,000 configurations of SiO2 used as an example for the\
- SIMPLE-NN machine learning model. Dataset includes three types of crystals:\
- quartz, cristobalite and tridymite; amorphous; and liquid phase SiO2.\
- Structures with distortion from compression, monoaxial strain and shear\
- strain were also included in the training set."
+AUTHORS = ["Kyuhyun Lee", "Dongsun Yoo", "Wonseok Jeong", "Seungwu Han"]
+DS_DESC = (
+    "10,000 configurations of SiO2 used as an example for the "
+    "SIMPLE-NN machine learning model. Dataset includes three types of crystals: "
+    "quartz, cristobalite and tridymite; amorphous; and liquid phase SiO2. "
+    "Structures with distortion from compression, monoaxial strain and shear "
+    "strain were also included in the training set."
+)
 ELEMENTS = ["O", "Si"]
 
 
@@ -204,9 +206,7 @@ def get_atomtypes(fname):
             if "TITEL" in line:
                 atomtypes.append(line.split()[3].split("_")[0].split(".")[0])
             elif "POTCAR:" in line:
-                atomtypes_alt.append(
-                    line.split()[2].split("_")[0].split(".")[0]
-                )
+                atomtypes_alt.append(line.split()[2].split("_")[0].split(".")[0])
 
     if len(atomtypes) == 0 and len(atomtypes_alt) > 0:
         # old VASP doesn't echo TITEL, but all versions print out species lines
@@ -255,9 +255,7 @@ def atomtypes_outpot(posfname, numsyms):
             if len(at) == numsyms:
                 return at
 
-    raise ParseError(
-        "Could not determine chemical symbols. Tried files " + str(tried)
-    )
+    raise ParseError("Could not determine chemical symbols. Tried files " + str(tried))
 
 
 def iread_vasp_out(filename, index=-1):
@@ -534,9 +532,7 @@ class SpeciesTypes(SimpleVaspHeaderParser):
         if sym not in atomic_numbers:
             # Check that we have properly parsed the symbol, and we found
             # an element
-            raise ParseError(
-                f"Found an unexpected symbol {sym} in line {line}"
-            )
+            raise ParseError(f"Found an unexpected symbol {sym} in line {line}")
 
         self.species.append(sym)
 
@@ -884,16 +880,10 @@ class ChunkParser(TypeParser, ABC):
         for parser in self.parsers:
             parser.header = self.header
 
-    def _check_parsers(
-        self, parsers: Sequence[VaspChunkPropertyParser]
-    ) -> None:
+    def _check_parsers(self, parsers: Sequence[VaspChunkPropertyParser]) -> None:
         """Check the parsers are of correct type 'VaspChunkPropertyParser'"""
-        if not all(
-            isinstance(parser, VaspChunkPropertyParser) for parser in parsers
-        ):
-            raise TypeError(
-                "All parsers must be of type VaspChunkPropertyParser"
-            )
+        if not all(isinstance(parser, VaspChunkPropertyParser) for parser in parsers):
+            raise TypeError("All parsers must be of type VaspChunkPropertyParser")
 
     @abstractmethod
     def build(self, lines: _CHUNK) -> Atoms:
@@ -901,16 +891,10 @@ class ChunkParser(TypeParser, ABC):
 
 
 class HeaderParser(TypeParser, ABC):
-    def _check_parsers(
-        self, parsers: Sequence[VaspHeaderPropertyParser]
-    ) -> None:
+    def _check_parsers(self, parsers: Sequence[VaspHeaderPropertyParser]) -> None:
         """Check the parsers are of correct type 'VaspHeaderPropertyParser'"""
-        if not all(
-            isinstance(parser, VaspHeaderPropertyParser) for parser in parsers
-        ):
-            raise TypeError(
-                "All parsers must be of type VaspHeaderPropertyParser"
-            )
+        if not all(isinstance(parser, VaspHeaderPropertyParser) for parser in parsers):
+            raise TypeError("All parsers must be of type VaspHeaderPropertyParser")
 
     @abstractmethod
     def build(self, lines: _CHUNK) -> _HEADER:
@@ -946,9 +930,7 @@ class OutcarChunkParser(ChunkParser):
                 atoms_kwargs[prop] = results.pop(prop)
             except KeyError:
                 raise ParseError(
-                    "Did not find required property {} during parse.".format(
-                        prop
-                    )
+                    "Did not find required property {} during parse.".format(prop)
                 )
         atoms = Atoms(**atoms_kwargs)
 
@@ -1037,9 +1019,7 @@ class OutcarHeaderParser(HeaderParser):
         constraint = self._get_constraint()
 
         # Remaining results from the parse goes into the header
-        header = dict(
-            symbols=symbols, natoms=natoms, constraint=constraint, **results
-        )
+        header = dict(symbols=symbols, natoms=natoms, constraint=constraint, **results)
         return header
 
 
@@ -1048,9 +1028,7 @@ class OUTCARChunk(ImageChunk):
     self-contained SCF step, i.e. and image. Also contains the header_data
     """
 
-    def __init__(
-        self, lines: _CHUNK, header: _HEADER, parser: ChunkParser = None
-    ):
+    def __init__(self, lines: _CHUNK, header: _HEADER, parser: ChunkParser = None):
         super().__init__()
         self.lines = lines
         self.header = header
@@ -1067,7 +1045,7 @@ def build_header(fd: TextIO) -> _CHUNK:
     for line in fd:
         lines.append(line)
         if (
-            "-0.384840785 -0.549448925  9.915043234     0.003774966  0.005548756  0.101310856"
+            "-0.384840785 -0.549448925  9.915043234     0.003774966  0.005548756  0.101310856"  # noqa: E501
             in line
         ):
             # Start of SCF cycle
@@ -1154,7 +1132,8 @@ default_header_parsers = DefaultParsersContainer(
 #     Blog
 #     About
 
-# ase/vasp_outcar_parsers.py at 111947e23373218d739252a28fb6284e1e985ee7 · rosswhitfield/ase
+# ase/vasp_outcar_parsers.py at 111947e23373218d739252a28fb6284e1e985ee7 ·
+# rosswhitfield/ase
 
 
 if __name__ == "__main__":

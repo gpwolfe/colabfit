@@ -41,7 +41,7 @@ AUTHORS = ["Rasha Atwi", "Matthew Bliss", "Maxim Makeev", "Nav Nidhi Rajput"]
 DS_DESC = (
     "Example dataset for MISPR (Materials Informatics for Structure-Property "
     "Relationships) materials science simulation software, with DFT-calculated "
-    "configuration properties for three different MISPR workflows: nuclear magnetic"
+    "configuration properties for three different MISPR workflows: nuclear magnetic "
     "resonance (NMR) chemical shifts, electrostatic partial charges (ESP) and bond "
     "dissociation energies (BDE)."
 )

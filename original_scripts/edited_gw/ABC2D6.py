@@ -24,10 +24,12 @@ LINKS = [
     "https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.117.135502",
     "https://arxiv.org/abs/1508.05315" "https://qmml.org/datasets.html",
 ]
-DESCRIPTION = "Dataset used to train a machine learning model to calculate\
- density functional theory-quality formation energies of all ∼2 × 106 pristine\
- ABC2D6 elpasolite crystals that can be made up from main-group elements (up\
- to bismuth)."
+DESCRIPTION = (
+    "Dataset used to train a machine learning model to calculate "
+    "density functional theory-quality formation energies of all ~2 x 106 pristine "
+    "ABC2D6 elpasolite crystals that can be made up from main-group elements (up "
+    "to bismuth)."
+)
 
 ELEMENTS = [
     "H",

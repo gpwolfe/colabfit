@@ -10,7 +10,7 @@ unzip and extract to project folder
 unzip NNIP-FeH-main.zip "**/*.tar*" -d <project_dir>/scripts/nnip
 cat <project_dir>/scripts/nnip/NNIP-FeH-main/DATABASE/database.tar.gz* | tar \
     -zxv -C <project_dir>scripts/nnip/NNIP-FeH-main/DATABASE/
-    
+
 ** THE ABOVE LINE IS REQUIRED TO PROPERLY CONSTRUCT DATABASE **
 ** A NORMAL TAR COMMAND WILL RESULT IN THREE INCOMPLETE DATABASES **
 
@@ -53,14 +53,11 @@ ATOM_RE = re.compile(
     r"(\-?\d+\.\d+)\s+(\w{1,2})\s+0.0+\s+0.0+\s+(\-?\d+\.\d+)"
     r"\s+(\-?\d+\.\d+)\s+(\-?\d+\.\d+)"
 )
-LATT_RE = re.compile(
-    r"lattice\s+(\-?\d+\.\d+)\s+(\-?\d+\.\d+)\s+(\-?\d+\.\d+)"
-)
+LATT_RE = re.compile(r"lattice\s+(\-?\d+\.\d+)\s+(\-?\d+\.\d+)\s+(\-?\d+\.\d+)")
 EN_RE = re.compile(r"energy\s+(\-?\d+\.\d+)")
 
 
 def reader(filepath):
-
     with open(filepath) as f:
         configurations = []
         lattice = []
@@ -77,9 +74,7 @@ def reader(filepath):
             ):
                 pass
             elif line.startswith("lattice"):
-                lattice.append(
-                    [float(x) for x in LATT_RE.match(line).groups()]
-                )
+                lattice.append([float(x) for x in LATT_RE.match(line).groups()])
             elif line.startswith("atom"):
                 ln_match = ATOM_RE.match(line)
                 coords.append([float(x) for x in ln_match.groups()[0:3]])
@@ -208,9 +203,7 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
         else:

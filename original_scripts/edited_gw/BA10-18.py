@@ -30,19 +30,21 @@ AUTHORS = [
     "David W. Wingate",
     "Gus L. W. Hart",
 ]
-DESCRIPTION = "Dataset (DFT-10B) contains structures of the 10 binary alloys\
- AgCu, AlFe, AlMg, AlNi, AlTi, CoNi, CuFe, CuNi, FeV, and NbNi. Each\
- alloy system includes all possible unit cells with 1-8 atoms for\
- face-centered cubic (fcc) and body-centered cubic (bcc) crystal types,\
- and all possible unit cells with 2-8 atoms for the hexagonal close-packed\
- (hcp) crystal type. This results in 631 fcc, 631 bcc, and 333 hcp structures,\
- yielding 1595 x 10 = 15,950 unrelaxed structures in total. Lattice parameters\
- for each crystal structure were set according to Vegard's law. Total energies\
- were computed using DFT with projector-augmented wave (PAW) potentials within\
- the generalized gradient approximation (GGA) of Perdew, Burke, and Ernzerhof\
- (PBE) as implemented in the Vienna Ab Initio Simulation Package (VASP). The\
- k-point meshes for sampling the Brillouin zone were constructed using\
- generalized regular grids."
+DESCRIPTION = (
+    "Dataset (DFT-10B) contains structures of the 10 binary alloys "
+    "AgCu, AlFe, AlMg, AlNi, AlTi, CoNi, CuFe, CuNi, FeV, and NbNi. Each "
+    "alloy system includes all possible unit cells with 1-8 atoms for "
+    "face-centered cubic (fcc) and body-centered cubic (bcc) crystal types, "
+    "and all possible unit cells with 2-8 atoms for the hexagonal close-packed "
+    "(hcp) crystal type. This results in 631 fcc, 631 bcc, and 333 hcp structures, "
+    "yielding 1595 x 10 = 15,950 unrelaxed structures in total. Lattice parameters "
+    "for each crystal structure were set according to Vegard's law. Total energies "
+    "were computed using DFT with projector-augmented wave (PAW) potentials within "
+    "the generalized gradient approximation (GGA) of Perdew, Burke, and Ernzerhof "
+    "(PBE) as implemented in the Vienna Ab Initio Simulation Package (VASP). The "
+    "k-point meshes for sampling the Brillouin zone were constructed using "
+    "generalized regular grids."
+)
 
 
 def tform(c):
