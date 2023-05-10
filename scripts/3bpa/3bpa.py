@@ -110,7 +110,6 @@ def main(argv):
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
         "basis_set": "6-31G(d)",
-        "dihedrals": {"field": "dihedrals"},
     }
     property_map = {
         "potential-energy": [
@@ -127,10 +126,12 @@ def main(argv):
             }
         ],
     }
+    co_md_map = {"dihedrals": {"field": "dihedrals"}}
     ids = list(
         client.insert_data(
             configurations,
             property_map=property_map,
+            co_md_map=co_md_map,
             generator=False,
             verbose=True,
         )
@@ -146,47 +147,56 @@ def main(argv):
         [
             f"{DATASET}-test-300K",
             "test_300K*",
-            f"Test configurations from {DATASET} dataset; MD simulation performed at 300K",
+            f"Test configurations from {DATASET} dataset;"
+            " MD simulation performed at 300K",
         ],
         [
             f"{DATASET}-test-600K",
             "test_600K*",
-            f"Test configurations from {DATASET} dataset; MD simulation performed at 600K",
+            f"Test configurations from {DATASET} dataset; "
+            "MD simulation performed at 600K",
         ],
         [
             f"{DATASET}-test-1200K",
             "test_1200K*",
-            f"Test configurations from {DATASET} dataset; MD simulation performed at 1200K",
+            f"Test configurations from {DATASET} dataset; MD "
+            "simulation performed at 1200K",
         ],
         [
             f"{DATASET}-train-300K",
             "train_300K*",
-            f"Training configurations from {DATASET} dataset; MD simulation performed at 300K",
+            f"Training configurations from {DATASET} dataset; "
+            "MD simulation performed at 300K",
         ],
         [
             f"{DATASET}-train-mixed",
             "train_mixedT*",
-            f"Training configurations from {DATASET} dataset; mixed set with MD simulation performed at 300K, 600K and 1200K",
+            f"Training configurations from {DATASET} dataset; "
+            "mixed set with MD simulation performed at 300K, 600K and 1200K",
         ],
         [
             f"{DATASET}-test-300K",
             "test_300K*",
-            f"Test configurations from {DATASET} dataset; MD simulation performed at 300K",
+            f"Test configurations from {DATASET} dataset; "
+            "MD simulation performed at 300K",
         ],
         [
             f"{DATASET}-test-dih-beta120",
             "test_dih_beta120*",
-            f"Test configurations from {DATASET} dataset; fixed value for dihedral beta in alpha-gamma plane: 120 degrees",
+            f"Test configurations from {DATASET} dataset; "
+            "fixed value for dihedral beta in alpha-gamma plane: 120 degrees",
         ],
         [
             f"{DATASET}-test-dih-beta150",
             "test_dih_beta150*",
-            f"Test configurations from {DATASET} dataset; fixed value for dihedral beta in alpha-gamma plane: 150 degrees",
+            f"Test configurations from {DATASET} dataset; "
+            "fixed value for dihedral beta in alpha-gamma plane: 150 degrees",
         ],
         [
             f"{DATASET}-test-dih-beta180",
             "test_dih_beta180*",
-            f"Test configurations from {DATASET} dataset; fixed value for dihedral beta in alpha-gamma plane: 180 degrees",
+            f"Test configurations from {DATASET} dataset; "
+            "fixed value for dihedral beta in alpha-gamma plane: 180 degrees",
         ],
     ]
 
@@ -209,9 +219,7 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
         else:

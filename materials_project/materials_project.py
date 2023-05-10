@@ -14,10 +14,10 @@ import sys
 from datetime import datetime
 from tqdm import tqdm
 
-BATCH_SIZE = 1
-START_IX = 370  # for testing, in case of errors causing script stop
+BATCH_SIZE = 8
+START_IX = 0  # for testing, in case of errors causing script stop
 
-DATASET_FP = Path("mat_proj_xyz_files2")
+DATASET_FP = Path("mat_proj_xyz_files")
 DATASET = "Materials Project"
 
 AUTHORS = [
@@ -258,7 +258,6 @@ def main(ip, db_name, nprocs):
         configurations = []
         beg, end = batch
         for fpath in fps[beg:end]:
-
             try:
                 new = reader(fpath)
 
@@ -293,7 +292,7 @@ def main(ip, db_name, nprocs):
                     f.write(
                         f"{fpath}\t{datetime.strftime(datetime.now(), '%d-%b-%Y')}"
                         f"\t{e}\n"
-                        )
+                    )
 
         ids.extend(
             list(
