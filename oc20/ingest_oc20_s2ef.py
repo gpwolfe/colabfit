@@ -38,7 +38,6 @@ LINKS = [
     "https://github.com/Open-Catalyst-Project/ocp/blob/"
     "main/DATASET.md#structure-to-energy-and-forces-s2ef-task",
 ]
-DS_DESC = "All configurations from the OC20 S2EF training set"
 DATASETS = {
     "OC20-S2EF-MD": {
         "name": "OC20-S2EF-MD",
@@ -88,7 +87,7 @@ def reader(filepath):
         config.info["ref_energy"] = float(ref_energy)
         config.info["frame"] = frame
         config.info["oc_id"] = oc_id
-        config.info["name"] = f"{filepath.parts[-3]}_file{fp_stem}_{frame}"
+        config.info["name"] = f"{filepath.parts[-3]}_{fp_stem}_{frame}"
 
         configs.append(config)
 
