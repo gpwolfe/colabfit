@@ -29,6 +29,7 @@ from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
 )
+from collections import defaultdict
 from pathlib import Path
 import pickle
 import sys
@@ -131,32 +132,33 @@ ELEMENTS = {
     "Zr",
 }
 GLOB_STR = "*.traj"
-
-train_val = dict()
+TRAIN_IS2RE = []
+train_val = defaultdict(list)
 with open("oc22_trajectories/trajectories/oc22/train_is2re_t.txt", "r") as f:
-    keys = set(f.readlines())
+    keys = set([x.strip().replace(".traj", "") for x in f.readlines()])
+    TRAIN_IS2RE = keys
     for key in keys:
-        train_val[key.strip()] = "train_is2re"
+        train_val[key].append("train_is2re")
 with open("oc22_trajectories/trajectories/oc22/train_s2ef_t.txt", "r") as f:
-    keys = set(f.readlines())
+    keys = set([x.strip().replace(".traj", "") for x in f.readlines()])
     for key in keys:
-        train_val[key.strip()] = "train_s2ef"
+        train_val[key].append("train_s2ef")
 with open("oc22_trajectories/trajectories/oc22/val_id_is2re_t.txt", "r") as f:
-    keys = set(f.readlines())
+    keys = set([x.strip().replace(".traj", "") for x in f.readlines()])
     for key in keys:
-        train_val[key.strip()] = "val_id_is2re"
+        train_val[key].append("val_id_is2re")
 with open("oc22_trajectories/trajectories/oc22/val_id_s2ef_t.txt", "r") as f:
-    keys = set(f.readlines())
+    keys = set([x.strip().replace(".traj", "") for x in f.readlines()])
     for key in keys:
-        train_val[key.strip()] = "val_id_s2ef"
+        train_val[key].append("val_id_s2ef")
 with open("oc22_trajectories/trajectories/oc22/val_ood_is2re_t.txt", "r") as f:
-    keys = set(f.readlines())
+    keys = set([x.strip().replace(".traj", "") for x in f.readlines()])
     for key in keys:
-        train_val[key.strip()] = "val_ood_is2re"
+        train_val[key].append("val_ood_is2re")
 with open("oc22_trajectories/trajectories/oc22/val_ood_s2ef_t.txt", "r") as f:
-    keys = set(f.readlines())
+    keys = set([x.strip().replace(".traj", "") for x in f.readlines()])
     for key in keys:
-        train_val[key.strip()] = "val_ood_s2ef"
+        train_val[key].append("val_ood_s2ef")
 
 OC_PICKLE = Path("oc22_metadata.pkl")
 with open(OC_PICKLE, "rb") as f:
@@ -177,7 +179,6 @@ for sid, vals in oc_meta.items():
 
 def reader(filepath):
     traj_id = filepath.stem
-    key = filepath.name
     configs = []
     ase_configs = read(filepath, index=":")
     for i, ase_config in enumerate(ase_configs):
@@ -189,11 +190,10 @@ def reader(filepath):
         )
         config.info["energy"] = ase_config.get_potential_energy()
         config.info["forces"] = ase_config.get_forces()
-        config.info["name"] = f"{train_val[key]}__{traj_id}__{i}"
+        config.info["name"] = f"{'__'.join(train_val[traj_id])}_{traj_id}__{i}"
         config.info["traj_id"] = traj_id
         config.info["config_meta"] = CONFIG_META[traj_id]
         configs.append(config)
-
     return configs
 
 
@@ -305,7 +305,7 @@ def main(argv):
     }
     cs_regexes = []
     for key, val in descriptions.items():
-        cs_regexes.append([f"{DATASET}_{key}", f"{key}.*", val])
+        cs_regexes.append([f"{DATASET}_{key}", f"{key}", val])
 
     cs_ids = []
 
