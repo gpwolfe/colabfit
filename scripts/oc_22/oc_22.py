@@ -258,24 +258,16 @@ def main(argv):
             new = reader(fpath)
 
             for atoms in new:
-                a_elems = set(atoms.get_chemical_symbols())
-                if not a_elems.issubset(ELEMENTS):
-                    raise RuntimeError(
-                        "Image {} elements {} is not a subset of {}.".format(
-                            ai, a_elems, ELEMENTS
-                        )
-                    )
+                if name_field in atoms.info:
+                    name = []
+                    name.append(atoms.info[name_field])
+                    atoms.info[ATOMS_NAME_FIELD] = name
                 else:
-                    if name_field in atoms.info:
-                        name = []
-                        name.append(atoms.info[name_field])
-                        atoms.info[ATOMS_NAME_FIELD] = name
-                    else:
-                        raise RuntimeError(
-                            f"Field {name_field} not in atoms.info for index "
-                            f"{ai}. Set `name_field=None` "
-                            "to use `default_name`."
-                        )
+                    raise RuntimeError(
+                        f"Field {name_field} not in atoms.info for index "
+                        f"{ai}. Set `name_field=None` "
+                        "to use `default_name`."
+                    )
 
                 if labels_field not in atoms.info:
                     atoms.info[ATOMS_LABELS_FIELD] = set()
@@ -313,7 +305,7 @@ def main(argv):
     }
     cs_regexes = []
     for key, val in descriptions.items():
-        cs_regexes.append([f"{DATASET}_{key}", f"{key}*", val])
+        cs_regexes.append([f"{DATASET}_{key}", f"{key}.*", val])
 
     cs_ids = []
 

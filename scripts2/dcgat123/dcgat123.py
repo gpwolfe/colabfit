@@ -388,43 +388,43 @@ def main(argv):
 
     all_co_ids, all_do_ids = list(zip(*ids))
 
-    cs_regexes = [
-        [
-            "DCGAT-1",
-            "dcgat_1_",
-            f"DCGAT-2 configurations from {DATASET} dataset",
-        ],
-        [
-            "DCGAT-2",
-            "dcgat_2_",
-            f"DCGAT-2 configurations from {DATASET} dataset",
-        ],
-        [
-            "DCGAT-3",
-            "dcgat_3_",
-            f"DCGAT-3 configurations from {DATASET} dataset",
-        ],
-    ]
-    cs_ids = []
-    for i, (name, regex, desc) in enumerate(cs_regexes):
-        cs_id = client.query_and_insert_configuration_set(
-            co_hashes=all_co_ids,
-            name=name,
-            description=desc,
-            query={"names": {"$regex": regex}},
-        )
+    # cs_regexes = [
+    #     [
+    #         "DCGAT-1",
+    #         "dcgat_1_",
+    #         f"DCGAT-2 configurations from {DATASET} dataset",
+    #     ],
+    #     [
+    #         "DCGAT-2",
+    #         "dcgat_2_",
+    #         f"DCGAT-2 configurations from {DATASET} dataset",
+    #     ],
+    #     [
+    #         "DCGAT-3",
+    #         "dcgat_3_",
+    #         f"DCGAT-3 configurations from {DATASET} dataset",
+    #     ],
+    # ]
+    # cs_ids = []
+    # for i, (name, regex, desc) in enumerate(cs_regexes):
+    #     cs_id = client.query_and_insert_configuration_set(
+    #         co_hashes=all_co_ids,
+    #         name=name,
+    #         description=desc,
+    #         query={"names": {"$regex": regex}},
+    #     )
 
-        cs_ids.append(cs_id)
+    #     cs_ids.append(cs_id)
 
-        client.insert_dataset(
-            do_hashes=all_do_ids,
-            name=DATASET,
-            authors=AUTHORS,
-            links=LINKS,
-            description=DS_DESC,
-            verbose=True,
-            cs_ids=cs_ids,
-        )
+    client.insert_dataset(
+        do_hashes=all_do_ids,
+        name=DATASET,
+        authors=AUTHORS,
+        links=LINKS,
+        description=DS_DESC,
+        verbose=True,
+        # cs_ids=cs_ids,
+    )
 
 
 if __name__ == "__main__":
