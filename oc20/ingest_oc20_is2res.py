@@ -192,14 +192,14 @@ def main(argv):
 
         all_co_ids, all_pr_ids = list(zip(*ids))
 
-        client.insert_dataset(
-            do_hashes=all_pr_ids,
-            name=DATASET,
-            authors=AUTHORS,
-            links=LINKS,
-            description=DS_DESC,
-            verbose=True,
-        )
+    client.insert_dataset(
+        do_hashes=all_pr_ids,
+        name=DATASET,
+        authors=AUTHORS,
+        links=LINKS,
+        description=DS_DESC,
+        verbose=True,
+    )
 
 
 if __name__ == "__main__":
