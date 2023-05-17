@@ -104,7 +104,7 @@ def main(argv):
     client.insert_dataset(
         do_hashes=all_do_ids,
         name="HO_pnas_2019",
-        authors=["B. Cheng, E. Engel, J. Behler, C. Dellago, M. Ceriotti"],
+        authors=["B. Cheng", "E. Engel", "J. Behler", "C. Dellago", "M. Ceriotti"],
         links=[
             "https://archive.materialscloud.org/record/2018.0020/v1",
             "https://www.pnas.org/doi/full/10.1073/pnas.1815117116",

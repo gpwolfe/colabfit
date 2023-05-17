@@ -34,11 +34,10 @@ from pathlib import Path
 import sys
 
 DATASET_FP = Path("brass_DFT_data/brass_data")
-print(DATASET_FP.absolute())
 
 
 def read_npz(filepath):
-    print(filepath)
+    # print(filepath)
     data = defaultdict(list)
     with np.load(filepath, allow_pickle=True) as f:
         for key in f.files:

@@ -25,7 +25,7 @@ LINKS = [
 AUTHORS = ["M. A. Cusentino", "M. A. Wood", "A. P. Thompson"]
 DS_DESC = (
     "This data set was used to generate a multi-element "
-    "linear SNAP potential for InP, as published in Cusentino, M.A. et. al, "
+    "linear SNAP potential for InP, as published in Cusentino, M. A. et. al, "
     "J. Chem. Phys. (2020). Intended to produce an interatomic potential for "
     "indium phosphide capable of capturing high-energy defects that result "
     "from radiation damage cascades."

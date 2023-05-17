@@ -25,7 +25,7 @@ None
 File notes
 ----------
 with keys: ['E', 'F', 'R', 'z', 'name', 'theory', 'md5', 'type']
-alkane.npz   aspirin_ccsd-train.npz  
+alkane.npz   aspirin_ccsd-train.npz
 aspirin_new_musen.npz   glucose_alpha.npz   uracil_dft.npz
 with keys: ['E', 'F', 'R', 'z']
 aspirin_rearrange.npz
@@ -53,13 +53,13 @@ LINKS = [
     "https://github.com/UncertaintyQuantification/AFF/tree/master",
 ]
 AUTHORS = (
-    " Hao Li",
+    "Hao Li",
     "Musen Zhou",
     "Jessalyn Sebastian",
     "Jianzhong Wu",
     "Mengyang Gu",
 )
-DS_DESC = """Approximately 145,000 configurations of alkane, 
+DS_DESC = """Approximately 145,000 configurations of alkane, \
 aspirin, alpha-glucose and uracil, partly taken from the \
 MD-17 dataset, used in training an 'Atomic Neural Net' \
 model."""
@@ -76,7 +76,7 @@ def read_npz(filepath):
 def reader(filepath):
     configs = []
     data = read_npz(filepath)
-    # The only file without a name attribute should be "aspirin_rearranged.npz"
+    # The only file without a name attribute should be "aspirin_rearrange.npz"
     name = filepath.stem.split("_")[0]
     if name == "glucose":
         name = "alpha-glucose"
@@ -196,9 +196,7 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
         else:

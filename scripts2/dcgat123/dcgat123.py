@@ -53,10 +53,10 @@ AUTHORS = [
     "Noah Hoffmann",
     "Hai-Chen Wang",
     "Pedro Borlido",
-    "Pedro J. M. A. Carriço",
-    "Tiago F. T. Cerqueira",
+    "Pedro J.M.A. Carriço",
+    "Tiago F.T. Cerqueira",
     "Silvana Botti",
-    "Miguel A. L. Marques",
+    "Miguel A.L. Marques",
 ]
 DS_DESC = (
     "Approximately 2.3 million configurations from 3 datasets curated"

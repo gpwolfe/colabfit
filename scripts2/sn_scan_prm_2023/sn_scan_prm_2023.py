@@ -39,7 +39,7 @@ SOFTWARE = "VASP, DP-GEN"
 METHODS = "DFT-SCAN"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=Sn-SCAN",
-    "https://doi.org/10.48550/arXiv.2209.05059",
+    "https://doi.org/10.1103/PhysRevMaterials.7.053603",
 ]
 AUTHORS = [
     "Tao Chen",

@@ -18,7 +18,7 @@ LINKS = [
     "https://github.com/DescriptorZoo/sensitivity-"
     "dimensionality-results/tree/master/datasets/TiO2",
 ]
-AUTHORS = ["Nongnuch Artritha", "Alexander Urban"]
+AUTHORS = ["Nongnuch Artrith", "Alexander Urban"]
 DS_DESC = (
     "TiO2 dataset that was designed to build atom neural network potentials "
     "(ANN) by Artrith et al. using the AENET package. This dataset includes "

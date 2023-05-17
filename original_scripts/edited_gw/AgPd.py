@@ -23,7 +23,7 @@ AUTHORS = [
     "L. B. Partay",
     "N. Bernstein",
     "G. Csanyi",
-    "G. L. Hart",
+    "G. L. W. Hart",
 ]
 LINKS = [
     "https://www.nature.com/articles/s41524-020-00477-2#",

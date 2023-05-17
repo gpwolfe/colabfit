@@ -48,7 +48,7 @@ LINKS = [
     "https://doi.org/10.1021/acs.jpclett.9b00085",
     "https://doi.org/10.1063/5.0080766",
 ]
-AUTHORS = ["Yaolong Zhanga", "Junfan Xia", "Bin Jiang"]
+AUTHORS = ["Yaolong Zhang", "Junfan Xia", "Bin Jiang"]
 DS_DESC = "Approximately 9,850 configurations of CO2 with a movable Ni(100) surface."
 
 
