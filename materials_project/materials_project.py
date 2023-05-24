@@ -198,6 +198,7 @@ def reader(file_path):
             pbc=config.pbc,
         )
         atoms.info = info
+        atoms.info["forces"] = config.arrays["forces"]
         atom_configs.append(atoms)
     return atom_configs
 
