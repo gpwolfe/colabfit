@@ -1,3 +1,10 @@
+"""
+File notes:
+-------------------
+copy-paste of example header line from xyz files for ingest
+Lattice="5.58828896 -0.0 0.0 0.0 5.78609927 0.0 0.0 0.0 15.33467811" Properties=species:S:1:pos:R:3:forces:R:3 e_fr_energy=-288.44648029 e_wo_entrp=-288.44648029 e_0_energy=0.0 stress="-51.57181753 0.0 0.0 0.0 -37.19938692 0.0 0.0 0.0 -40.7745395" outcar-electrostatic_potential="-39.6083 -39.6083 -39.6083 -39.6083 -39.6083 -39.6083 -39.6083 -39.6083 -48.1737 -48.1737 -48.1737 -48.1737 -72.6278 -72.7764 -72.7764 -72.7764 -72.6703 -72.7764 -72.6278 -72.6703 -72.6703 -72.7764 -72.6278 -72.6278 -72.6703 -72.6278 -72.6278 -72.7764 -72.6278 -72.6703 -72.6703 -72.7764 -72.7764 -72.6703 -72.6703 -72.6278" outcar-efermi=1.9812 outcar-magnetization-tot="0.03 0.03 0.03 0.03 0.03 0.03 0.03 0.03 3.765 3.765 3.765 3.765 0.019 0.031 0.031 0.03 0.003 0.031 0.019 0.003 0.003 0.03 0.019 0.019 0.003 0.019 0.019 0.03 0.019 0.003 0.003 0.03 0.031 0.003 0.003 0.019" outcar-magnetization-d="0.027 0.027 0.027 0.027 0.027 0.027 0.027 0.027 3.719 3.719 3.719 3.719 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0" outcar-magnetization-p="0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.019 0.019 0.019 0.019 0.016 0.025 0.025 0.025 0.003 0.025 0.016 0.003 0.003 0.025 0.016 0.016 0.003 0.016 0.016 0.025 0.016 0.003 0.003 0.025 0.025 0.003 0.003 0.016" outcar-magnetization-s="0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.027 0.027 0.027 0.027 0.003 0.005 0.005 0.005 0.0 0.005 0.003 0.0 0.0 0.005 0.003 0.003 0.0 0.003 0.003 0.005 0.003 0.0 0.0 0.005 0.005 0.0 0.0 0.003" outcar-nelect=288.0000045 outcar-drift="-0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 -0.0 0.0 -0.0 -0.0 -0.0 -0.0 0.0 -0.0 0.0 0.0 0.0 -0.0 0.0 -0.0 0.0 -0.0 -0.0 -0.0 0.0 -0.0 -0.0 0.0 0.0 0.0 -0.0 0.0 0.0 0.0 -0.0 0.0 0.0 0.0 -0.0 0.0 -0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 -0.0 -0.0 0.0 -0.0 0.0 -0.0 -0.0 -0.0 0.0 0.0 0.0 0.0 -0.0 0.0 0.0 -0.0 0.0 0.0 -0.0 0.0 -0.0 -0.0 0.0 0.0 0.0 0.0 -0.0 -0.0 0.0 -0.0 -0.0 0.0 0.0 -0.0 0.0 -0.0 -0.0 0.0 0.0 -0.0 -0.0 -0.0 -0.0 0.0 0.0" outcar-total_magnetization=16.0000007 outcar-ngf="96 100 252" outcar-is_stopped=F outcar-sampling_radii="1.2125 0.95 0.7215" outcar-charge-tot="9.813 9.814 9.813 9.814 9.813 9.814 9.813 9.814 12.354 12.354 12.354 12.354 5.051 5.026 5.026 5.025 5.045 5.026 5.051 5.042 5.042 5.025 5.052 5.051 5.045 5.052 5.051 5.025 5.052 5.045 5.045 5.025 5.026 5.042 5.042 5.052" outcar-charge-d="2.813 2.815 2.813 2.815 2.813 2.815 2.813 2.815 5.943 5.943 5.943 5.943 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0" outcar-charge-p="6.575 6.574 6.575 6.574 6.575 6.574 6.575 6.574 6.209 6.209 6.209 6.209 3.488 3.453 3.453 3.452 3.484 3.453 3.488 3.482 3.482 3.452 3.489 3.488 3.484 3.489 3.488 3.452 3.489 3.484 3.484 3.452 3.453 3.482 3.482 3.489" outcar-charge-s="0.426 0.425 0.426 0.425 0.426 0.425 0.426 0.425 0.203 0.203 0.203 0.203 1.563 1.573 1.573 1.573 1.561 1.573 1.563 1.56 1.56 1.573 1.563 1.563 1.561 1.563 1.563 1.573 1.563 1.561 1.561 1.573 1.573 1.56 1.56 1.563" incar-ISMEAR=-5 incar-LORBIT=11 incar-LDAUTYPE=2 incar-PREC=accurate incar-LWAVE=F incar-ISPIN=2 incar-LDAUJ="0.0 0.0 0.0" incar-LMAXMIX=4 incar-NELM=100 incar-LDAUL="0 2 0" incar-IBRION=2 incar-LDAUU="0.0 5.3 0.0" incar-ALGO=Fast incar-LREAL=Auto incar-ICHARG=1 incar-EDIFF=0.0018 incar-NSW=99 incar-MAGMOM="0.6 0.6 0.6 0.6 0.6 0.6 0.6 0.6 5.0 5.0 5.0 5.0 0.6 0.6 0.6 0.6 0.6 0.6 0.6 0.6 0.6 0.6 0.6 0.6 0.6 0.6 0.6 0.6 0.6 0.6 0.6 0.6 0.6 0.6 0.6 0.6" incar-LDAUPRINT=1 incar-ISIF=3 incar-LDAU=T incar-KPOINT_BSE="-1 0 0 0" incar-POTIM=0.25 incar-ENCUT=520.0 incar-SIGMA=0.05 output-vbm=1.9758 output-epsilon_static= output-efermi=1.98121657 output-epsilon_ionic= output-bandgap=1.9668 output-energy=-305.09556914 output-is_metal=F output-energy_per_atom=-8.474876920555555 output-is_gap_direct=F output-epsilon_static_wolfe= output-direct_gap=2.0345 output-cbm=3.9426 material_id=mp-1180571 task_id=mp-1180571 name=mp-1180571-1-8 calc_type="GGA+U Structure Optimization" pbc="T T T"
+
+"""
 from argparse import ArgumentParser
 from ase.io import read
 from colabfit import ATOMS_LABELS_FIELD, ATOMS_NAME_FIELD
@@ -146,7 +153,6 @@ def reconstruct_nested(info: dict, superkey: str):
     for key, val in info.items():
         # Some values in header are blank, so ase.io.read returns key1 = "key2=val2"
         if type(val) == str and "=" in val:
-            # print(val)
             key, val = val.split("=")[-2:]
             if val != "F":
                 try:
@@ -180,17 +186,24 @@ def reader(file_path):
         info["outcar"] = reconstruct_nested(config.info, "outcar")
         info["output"] = reconstruct_nested(config.info, "output")
         info["incar"] = reconstruct_nested(config.info, "incar")
+        info["magnetization"] = [info["outcar-"]
+        info['charge'] = 
+        info['total-magnetization'] = config.info['outcar-total_magnetization']
+        info['efermi'] = config.info['output-efermi']
+        info['band-gap'] = config.info['output-bandgap']
+        info['is-gap-direct'] = config.info['output-is_gap_direct']
         for key, val in config.info.items():
             if not any([match in key for match in ["outcar", "incar", "output"]]):
                 if type(val) == str and "=" in val:
                     key, val = val.split("=")[-2:]
-                    print(key, val)
+                    # print(key, val)
                     if val != "F":
                         try:
                             val = float(val)
                         except ValueError:
                             pass
                 info[key] = val
+        
         atoms = AtomicConfiguration(
             numbers=config.numbers,
             positions=config.positions,
