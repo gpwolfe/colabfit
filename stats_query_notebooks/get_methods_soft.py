@@ -123,7 +123,7 @@ ds_ids = [
 ]
 methods = defaultdict(int)
 software = defaultdict(int)
-for pi in tqdm(db.property_instances.find().limit(1000)):
+for pi in tqdm(db.property_instances.find()):
     rels = pi.get("relationships")
     pi_type = pi.get("type")
     if rels:
