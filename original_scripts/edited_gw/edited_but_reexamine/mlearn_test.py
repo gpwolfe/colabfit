@@ -3,10 +3,7 @@
 """
 File notes
 ------------
-This script divides the mlearn test dataset into different datasets, rather
-than different configurations sets, based on elements included. Should probably
-reconfigure to use configurations sets and, if necessary, the new query-upload
-function
+
 """
 from argparse import ArgumentParser
 import glob
@@ -264,7 +261,7 @@ def main(argv):
 
                 count += len(co_ids)
 
-    for elem, e_cs_ids in cs_ids.items():
+    for elem, e_cs_ids in cs_ids[elem].items():
         client.insert_dataset(
             cs_ids=e_cs_ids,
             do_hashes=all_pr_ids,
