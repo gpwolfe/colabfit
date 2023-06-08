@@ -7,7 +7,7 @@ ds_id = "DS_2wiwpg3oyupj_0"
 while True:
     dos = db.data_objects.find(
         {"relationships.datasets": [ds_id]}, {"colabfit-id": 1}
-    ).limit(500)
+    ).limit(100000)
     do_ids = list(do["colabfit-id"] for do in dos)
     print(len(do_ids))
     if len(do_ids) == 0:
