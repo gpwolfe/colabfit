@@ -1,0 +1,334 @@
+task_id = MP identifying key for data
+calcs_reversed = main key we have accessed 
+
+we are currently importing data from
+calcs_reversed > output > ionic steps [e_fr_energy, e_wo_entrp, e_0_energy, forces, stress]
+task_id
+task_id [material_id, calc_type]
+
+large data collections are in:
+calcs_reversed > output > ionic_steps
+calcs_reversed > output > ionic_steps > electronic_steps
+
+
+
+    
+                         request
+                            |
+                ---------------------------------------(...)
+                |                                  |
+         calcs_reversed                         task_id
+                |                                  |
+            list(dict)                         -----------
+                |                              |          |
+    --------------------------            material_id   calc_type
+    |               |        |   
+ vasp_version    output    input           
+    |               |        |
+ str, '5.4.1'       |       dict (see below)
+                    |
+    ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    |           |           |        |       |         |               |                |                          |            |                   |           |                |           |        |                                                  
+ionic_steps   efermi    bandgap     cbm     vbm   is_gap_direct   epsilon_static    epsilon_static_wolfe    epsilon_ionic   structure           energy  energy_per_atom     is_metal    direct_gap  outcar     
+    |           |           |        |       |         |               |                |                          |            |                   |           |                |           |        |
+  list        float       float     None    None     bool             list             list                       list     pymatgen structure     float         float           bool        float   dict(see below)
+    |                                                                                                                           |
+    |                                                                                           -----------json/dict format obtainable-----------------------------
+   dict                                                                                         |           |       |  |   |   |     |     |      |      |        |
+    |                                                                                         charge    lattice   pbc  a   b   c   alpha  beta  gamma  volume   sites
+    ----------------------------------------------------------------                                                                                              |  
+    |             |         |        |            |                 |                                                                                        list(pymatgen Site)
+e_fr_energy  e_0_energy  forces   stress   electronic_steps     structure                           /                                                              |
+    |             |         |        |            |                 |                              /                                     ------json/dict format obtainable----------------
+  float         float    2D-list  2D-list        list            pymatgen structure (see right and above--->>)                            |             |          |             |       |
+                                                  |                                                                                   species         abc       lattice        pbc    properties(empty dict)
+                                                 dict                                                                                     |             |          |             | 
+                                                  |                                                                                  ---------    list(float)   list(list)    list(bool)
+    ----(*) indicates element only present in first and last dict in list-------------------------------------------                 |       |
+    |       |           |       |           |       |          |            |     |         |           |           |              element  occu
+alphaZ*  ewald*   hartreedc*   XCdc*    pawpsdc* pawaedc* eentropy*    bandstr* atom*    e_fr_energy e_wo_energy e_0_energy           |       |
+                    \\           |           //                                                                                      str     int
+                        (all floats)
+
+
+
+
+calcs_reversed > output > outcar
+                            |
+                           dict
+                            |
+    ------------------------------------------------------------------------------------------------------------------------------------------
+    |               |             |              |                 |        |          |             |                   |                    |
+  efermi    magnetization      charge    total_magnetization   nelect  is_stopped   drift           ngf             sampling_radii    electrostatic_potential
+    |               |             |              |                 |        |          |             |                   |                    |
+  float        list(dict)     list(dict)       float             float    bool    list(float)    list(3 int)        list(float)          list(float)
+                    |               |
+---magnetization and charge share these keys--
+        |       |       |        |
+        s       p       d       tot
+        |
+        all values are single float
+
+
+
+
+calcs_reversed > input(dict)
+                    |
+    ----------------------------------------------------------------------------------------------------
+    |               |          |            |             |           |                 |               |
+  incar         kpoints     potcar    potcar_spec   potcar_type   parameters      lattice_rec       structure
+    |              |           |            |             |           |                 |               |
+ISTART          to_json   1D list(str)   list(dict)   list(str)   (example below)   pymatgen Lattice   pymatgen structure (see above)
+PREC               |                        |                                           |
+ALGO            comment                   titel (sic)                              -----------
+ISPIN           nkpoints                  hash                                     |          |
+ICHARG          generation_style                                                matrix       pbc
+NELM            kpoints (2D list)                                               2D-list    tuple(bool)
+IBRION          usershift (1D list)
+EDIFF           kpts_weights
+NSW             coord_type
+ISIF            labels
+ENCUT           tet_number
+MAGMOM          tet_weight
+LREAL           tet_connections
+ISMEAR
+SIGMA
+LWAVE
+LORBIT
+KPOINT_BSE
+
+
+
+example of calcs_reversed > input > parameters
+{'SYSTEM': 'unknown system',
+ 'LCOMPAT': False,
+ 'PREC': 'accura',
+ 'ENMAX': 520.0,
+ 'ENAUG': 392.427,
+ 'EDIFF': 0.0002,
+ 'IALGO': 68,
+ 'IWAVPR': 11,
+ 'NBANDS': 40,
+ 'NELECT': 48.0,
+ 'TURBO': 0,
+ 'IRESTART': 0,
+ 'NREBOOT': 0,
+ 'NMIN': 0,
+ 'EREF': 0.0,
+ 'ISMEAR': -5,
+ 'SIGMA': 0.05,
+ 'KSPACING': 0.5,
+ 'KGAMMA': True,
+ 'LREAL': True,
+ 'ROPT': [-0.00025],
+ 'LMAXPAW': -100,
+ 'LMAXMIX': 2,
+ 'NLSPLINE': False,
+ 'ISTART': 0,
+ 'ICHARG': 1,
+ 'INIWAV': 1,
+ 'ISPIN': 2,
+ 'LNONCOLLINEAR': False,
+ 'MAGMOM': [5.0, 5.0, 5.0, 5.0],
+ 'NUPDOWN': -1.0,
+ 'LSORBIT': False,
+ 'SAXIS': [0.0, 0.0, 1.0],
+ 'LSPIRAL': False,
+ 'QSPIRAL': [0.0, 0.0, 0.0],
+ 'LZEROZ': False,
+ 'LASPH': False,
+ 'LMETAGGA': False,
+ 'NELM': 100,
+ 'NELMDL': 0,
+ 'NELMIN': 2,
+ 'ENINI': 520.0,
+ 'LDIAG': True,
+ 'LSUBROT': False,
+ 'WEIMIN': 0.001,
+ 'EBREAK': 1.25e-06,
+ 'DEPER': 0.3,
+ 'NRMM': 4,
+ 'TIME': 0.4,
+ 'AMIX': 0.4,
+ 'BMIX': 1.0,
+ 'AMIN': 0.1,
+ 'AMIX_MAG': 1.6,
+ 'BMIX_MAG': 1.0,
+ 'IMIX': 4,
+ 'MIXFIRST': False,
+ 'MAXMIX': -45,
+ 'WC': 100.0,
+ 'INIMIX': 1,
+ 'MIXPRE': 1,
+ 'MREMOVE': 5,
+ 'LDIPOL': False,
+ 'LMONO': False,
+ 'IDIPOL': 0,
+ 'EPSILON': 1.0,
+ 'DIPOL': [-100.0, -100.0, -100.0],
+ 'EFIELD': 0.0,
+ 'NGX': 24,
+ 'NGY': 24,
+ 'NGZ': 70,
+ 'NGXF': 48,
+ 'NGYF': 48,
+ 'NGZF': 140,
+ 'ADDGRID': False,
+ 'NSW': 99,
+ 'IBRION': 2,
+ 'ISIF': 3,
+ 'PSTRESS': 0.0,
+ 'EDIFFG': 0.002,
+ 'NFREE': 1,
+ 'POTIM': 0.5,
+ 'SMASS': -3.0,
+ 'SCALEE': 1.0,
+ 'TEBEG': 0.0001,
+ 'TEEND': 0.0001,
+ 'NBLOCK': 1,
+ 'KBLOCK': 99,
+ 'NPACO': 256,
+ 'APACO': 16.0,
+ 'ISYM': 2,
+ 'SYMPREC': 1e-05,
+ 'LORBIT': False,
+ 'RWIGS': [-1.0],
+ 'NEDOS': 301,
+ 'EMIN': 10.0,
+ 'EMAX': -10.0,
+ 'EFERMI': 0.0,
+ 'NWRITE': 2,
+ 'LWAVE': False,
+ 'LCHARG': True,
+ 'LPARD': False,
+ 'LVTOT': False,
+ 'LVHAR': False,
+ 'LELF': False,
+ 'LOPTICS': False,
+ 'STM': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+ 'NPAR': 4,
+ 'NSIM': 4,
+ 'NBLK': -1,
+ 'LPLANE': True,
+ 'LSCALAPACK': False,
+ 'LSCAAWARE': False,
+ 'LSCALU': False,
+ 'LASYNC': False,
+ 'LORBITALREAL': False,
+ 'IDIOT': 3,
+ 'LMUSIC': False,
+ 'POMASS': [95.94],
+ 'DARWINR': [0.0],
+ 'DARWINV': [1.0],
+ 'LCORR': True,
+ 'GGA_COMPAT': True,
+ 'LBERRY': False,
+ 'ICORELEVEL': 0,
+ 'LDAU': False,
+ 'I_CONSTRAINED_M': 0,
+ 'GGA': '--',
+ 'VOSKOWN': 0,
+ 'LHFCALC': False,
+ 'PRECFOCK': '',
+ 'LSYMGRAD': False,
+ 'LHFONE': False,
+ 'LRHFCALC': False,
+ 'LTHOMAS': False,
+ 'LMODELHF': False,
+ 'ENCUT4O': -1.0,
+ 'EXXOEP': 0,
+ 'FOURORBIT': 0,
+ 'AEXX': 0.0,
+ 'HFALPHA': 0.0,
+ 'MCALPHA': 0.0,
+ 'ALDAX': 1.0,
+ 'AGGAX': 1.0,
+ 'ALDAC': 1.0,
+ 'AGGAC': 1.0,
+ 'NKREDX': 1,
+ 'NKREDY': 1,
+ 'NKREDZ': 1,
+ 'SHIFTRED': False,
+ 'ODDONLY': False,
+ 'EVENONLY': False,
+ 'LMAXFOCK': 0,
+ 'NMAXFOCKAE': 0,
+ 'LFOCKAEDFT': False,
+ 'HFSCREEN': 0.0,
+ 'HFSCREENC': 0.0,
+ 'NBANDSGWLOW': 0,
+ 'LUSE_VDW': False,
+ 'Zab_VDW': -0.8491,
+ 'PARAM1': 0.1234,
+ 'PARAM2': 1.0,
+ 'PARAM3': 0.0,
+ 'MODEL_GW': 0,
+ 'MODEL_EPS0': 9.69807335,
+ 'MODEL_ALPHA': 1.0,
+ 'LEPSILON': False,
+ 'LRPA': False,
+ 'LNABLA': False,
+ 'LVEL': False,
+ 'KINTER': 0,
+ 'CSHIFT': 0.1,
+ 'OMEGAMAX': -1.0,
+ 'DEG_THRESHOLD': 0.002,
+ 'NUCIND': False,
+ 'MAGPOS': [0.0, 0.0, 0.0],
+ 'LNICSALL': True,
+ 'ORBITALMAG': False,
+ 'LMAGBLOCH': False,
+ 'LCHIMAG': False,
+ 'LGAUGE': True,
+ 'MAGATOM': 0,
+ 'MAGDIPOL': [0.0, 0.0, 0.0],
+ 'AVECCONST': [0.0, 0.0, 0.0],
+ 'LADDER': False,
+ 'LFXC': False,
+ 'LHARTREE': True,
+ 'IBSE': 0,
+ 'KPOINT': [-1, 0, 0, 0],
+ 'LTCTE': False,
+ 'LTETE': False,
+ 'LTRIPLET': False,
+ 'LFXCEPS': False,
+ 'LFXHEG': False,
+ 'NATURALO': 0,
+ 'L2ORDER': False,
+ 'LUSEW': False,
+ 'ENCUTGW': -2.0,
+ 'ENCUTGWSOFT': -2.0,
+ 'ENCUTLF': -1.0,
+ 'LMAXMP2': -1,
+ 'SCISSOR': 0.0,
+ 'NOMEGA': 0,
+ 'NOMEGAR': 0,
+ 'NBANDSGW': -1,
+ 'NBANDSO': -1,
+ 'NBANDSV': -1,
+ 'NELMHF': 1,
+ 'DIM': 3,
+ 'ANTIRES': 0,
+ 'OMEGAMIN': -30.0,
+ 'OMEGATL': -200.0,
+ 'OMEGAGRID': 0,
+ 'SELFENERGY': False,
+ 'LSPECTRAL': False,
+ 'LSPECTRALGW': False,
+ 'LSINGLES': False,
+ 'LFERMIGW': False,
+ 'ODDONLYGW': False,
+ 'EVENONLYGW': False,
+ 'NKREDLFX': 1,
+ 'NKREDLFY': 1,
+ 'NKREDLFZ': 1,
+ 'MAXMEM': 1800,
+ 'TELESCOPE': 0,
+ 'TAUPAR': 1,
+ 'OMEGAPAR': -1,
+ 'LAMBDA': 1.0,
+ 'OFIELD_KAPPA': 0.0,
+ 'OFIELD_K': [0.0, 0.0, 0.0],
+ 'OFIELD_Q6_NEAR': 0.0,
+ 'OFIELD_Q6_FAR': 0.0,
+ 'OFIELD_A': 0.0}
