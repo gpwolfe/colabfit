@@ -4,6 +4,51 @@ from collections import defaultdict
 import numpy as np
 from pathlib import Path
 
+
+###########################################################################
+# A cheap version of a property instance filter as a generator
+# The old filter_on_property function from colabfit.tools.database.MongoDatabase
+# no longer works, since it relied on bidirectional pointers from dataset to property
+# instances, and so on.
+# This would replace the function in the forementioned class, or can be called with
+# client = MongoDatabase(...)
+# filter_on_properties(self=client, ...)
+
+
+def filter_on_properties(self, ds_id, query=None):
+    """
+    Returns a generator of property instances from given dataset that match query
+
+    Aggregator function performs, in order:
+    $match on data objects that point to given dataset id (colabfit-id)
+    $lookup of property instances that point to those data object ids
+    $match based on property query: such as {"type": "free-energy"}
+
+    """
+    agg_pipe = self.data_objects.aggregate(
+        [
+            {"$match": {"relationships.datasets": ds_id}},
+            {
+                "$lookup": {
+                    "from": "property_instances",
+                    "foreignField": "relationships.data_objects",
+                    "localField": "colabfit-id",
+                    "as": "pi_data",
+                }
+            },
+            {"$unwind": "$pi_data"},
+            {"$match": {f"pi_data.{field}": val for field, val in query.items()}},
+            {"$project": {"_id": 0, "pi_data": "$pi_data"}},
+        ]
+    )
+    for datapoint in agg_pipe:
+        yield datapoint["pi_data"]
+
+
+###########################################################################
+# Function for reading numpy npz files
+
+
 def read_npz(filepath):
     data = defaultdict(list)
     with np.load(filepath, allow_pickle=True) as f:
@@ -13,8 +58,11 @@ def read_npz(filepath):
 
 
 ###########################################################################
-# When adapting the scripts to edit from Eric, generally can use this block
+# When adapting the scripts to edit from Eric/Alexander, generally can use this block
 # instead of the old configuration set loading block
+
+
+def just_for_the_linter(regex, client, all_co_ids, cs_names, cs_regexes):
     cs_ids = []
 
     for i, (regex, desc) in enumerate(cs_regexes.items()):
@@ -28,54 +76,56 @@ def read_npz(filepath):
 
 
 ###########################################################################
-## A workaround for datasets that have too many configurations for computer memory
-## to hold all at once, as long as there are multiple files scattered through
-## sufficient directories to divide the task
+# A workaround for datasets that have too many configurations for computer memory
+# to hold all at once, as long as there are multiple files scattered through
+# sufficient directories to divide the task
 
-globs = list(set([db.parent for db in DATASET_FP.rglob(GLOB_STR)]))
-configurations = load_data(
-    file_path=globs[0],
-    file_format="folder",
-    name_field="name",
-    elements=ELEMENTS,
-    reader=reader,
-    glob_string=GLOB_STR,
-    generator=False,
-)
-ids = list(
-    client.insert_data(
-        configurations,
-        property_map=property_map,
-        generator=False,
-        verbose=True,
-    )
-)
-for gl in globs:
-    configurations = load_data(
-        file_path=gl,
-        file_format="folder",
-        name_field="name",
-        elements=ELEMENTS,
-        reader=reader,
-        glob_string=GLOB_STR,
-        generator=False,
-    )
+# globs = list(set([db.parent for db in DATASET_FP.rglob(GLOB_STR)]))
+# configurations = load_data(
+#     file_path=globs[0],
+#     file_format="folder",
+#     name_field="name",
+#     elements=ELEMENTS,
+#     reader=reader,
+#     glob_string=GLOB_STR,
+#     generator=False,
+# )
+# ids = list(
+#     client.insert_data(
+#         configurations,
+#         property_map=property_map,
+#         generator=False,
+#         verbose=True,
+#     )
+# )
+# for gl in globs:
+#     configurations = load_data(
+#         file_path=gl,
+#         file_format="folder",
+#         name_field="name",
+#         elements=ELEMENTS,
+#         reader=reader,
+#         glob_string=GLOB_STR,
+#         generator=False,
+#     )
 
-    ids.extend(
-        client.insert_data(
-            configurations,
-            property_map=property_map,
-            generator=False,
-            verbose=True,
-        )
-    )
+#     ids.extend(
+#         client.insert_data(
+#             configurations,
+#             property_map=property_map,
+#             generator=False,
+#             verbose=True,
+#         )
+#     )
 
 ###########################################################################
 
-# For assembling data in npy format scattered into a single category 
+# For assembling data in npy format scattered into a single category
 # with a type.raw file in parent directory
 # This is the format associated with DeePMD models/datasets
 ELEM_KEY = {1: "H", 2: "O"}
+
+
 def assemble_props(filepath: Path):
     props = {}
     prop_paths = list(filepath.parent.glob("*.npy"))
@@ -111,6 +161,7 @@ def assemble_props(filepath: Path):
 
 # Above used with below:
 
+
 def reader(filepath):
     props = assemble_props(filepath)
     print(filepath)
@@ -133,8 +184,9 @@ def reader(filepath):
 
 ###########################################################################
 
+
 def assemble_npy_properties(filepath: Path):
-    prop_path = filepath.parent.glob('*.npy')
+    prop_path = filepath.parent.glob("*.npy")
     props = {}
     for p in prop_path:
         key = p.stem
@@ -167,10 +219,11 @@ def basic_npz_reader(file):
             )
     return atoms
 
+
 ###########################################################################
 
-def read_np(filepath: str, props: dict):
 
+def read_np(filepath: str, props: dict):
     """
     filepath: path to parent directory of numpy files
     props: dictionary containing keys equal to the keys outlined below and
@@ -212,93 +265,70 @@ def read_np(filepath: str, props: dict):
         )
     return atoms
 
+
 ###########################################################################
 
-def assemble_np(fp_dict, props: dict):
-    """
-    fp_dict: dictionary with filepaths as keys and the target property
-        (as defined by the keys in props below) as value
-    props: dictionary containing keys equal to the keys outlined below and
-        values equal to the equivalent numpy keys given by <filename>.files
-    props = {
-        'name': <name>,
-        'coords': <key of coordinates>,
-        'energy': <key of potential energy>,
-        'forces': <key of forces>,
-        'cell': <key of cell/lattice>,
-        'pbc': <PBC True or False (set by user)>,
-        'numbers': <key for atomic numbers>,
-        'elements': <key for atomic elements
-    }
-    """
-    file_props = {}
 
-    for fp, val in fp_dict.items():
-        data = np.load(fp)
-        # in case the file only contains, for instance, a single float value
-        if not props.get(val):
-            file_props[val] = data
-        else:
-            file_props[val] = data[props[val]]
-    return file_props
+# def assemble_np(fp_dict, props: dict):
+#     """
+#     fp_dict: dictionary with filepaths as keys and the target property
+#         (as defined by the keys in props below) as value
+#     props: dictionary containing keys equal to the keys outlined below and
+#         values equal to the equivalent numpy keys given by <filename>.files
+#     props = {
+#         'name': <name>,
+#         'coords': <key of coordinates>,
+#         'energy': <key of potential energy>,
+#         'forces': <key of forces>,
+#         'cell': <key of cell/lattice>,
+#         'pbc': <PBC True or False (set by user)>,
+#         'numbers': <key for atomic numbers>,
+#         'elements': <key for atomic elements
+#     }
+#     """
+#     file_props = {}
 
-def insert_configuration_set(client, names, res, descs):
-
+#     for fp, val in fp_dict.items():
+#         data = np.load(fp)
+#         # in case the file only contains, for instance, a single float value
+#         if not props.get(val):
+#             file_props[val] = data
+#         else:
+#             file_props[val] = data[props[val]]
+#     return file_props
 
 
-cs_regexes = [
-    [
-        "All_H2/Pt(III)",
-        "*",
-        "All configurations from H/Pt(III)",
-    ],
-    [
-        "H2_H2/Pt(III)",
-        "H2*",
-        "H2 configurations from H/Pt(III)",
-    ],
-    [
-        "Pt-bulk_H2/Pt(III)",
-        "Pt-bulk*",
-        "Pt-bulk configurations from H/Pt(III)",
-    ],
-    [
-        "Pt-surface_H2/Pt(III)",
-        "Pt-surface*",
-        "Pt-surface configurations from H/Pt(III)",
-    ],
-    [
-        "PtH_H2/Pt(III)",
-        "PtH*",
-        "PtH configurations from H/Pt(III)",
-    ],
-]
+# cs_regexes = [
+#     [
+#         "H2_H2/Pt(III)",
+#         "H2*",
+#         "H2 configurations from H/Pt(III)",
+#     ],
+# ]
 
-cs_ids = []
+# cs_ids = []
 
-for i, (name, regex, desc) in enumerate(cs_regexes):
-    try:
-        co_ids = client.get_data(
-            "configurations",
-            fields="hash",
-            query={"hash": {"$in": all_co_ids}, "names": {"$regex": regex}},
-            ravel=True,
-        ).tolist()
-    except OperationFailure:
-        print(f"No match for regex: {regex}")
-        continue
+# for i, (name, regex, desc) in enumerate(cs_regexes):
+#     try:
+#         co_ids = client.get_data(
+#             "configurations",
+#             fields="hash",
+#             query={"hash": {"$in": all_co_ids}, "names": {"$regex": regex}},
+#             ravel=True,
+#         ).tolist()
+#     except OperationFailure:
+#         print(f"No match for regex: {regex}")
+#         continue
 
-    print(
-        f"Configuration set {i}",
-        f"({name}):".rjust(25),
-        f"{len(co_ids)}".rjust(7),
-    )
+#     print(
+#         f"Configuration set {i}",
+#         f"({name}):".rjust(25),
+#         f"{len(co_ids)}".rjust(7),
+#     )
 
-    if len(co_ids) == 0:
-        pass
-    else:    
-        cs_id    = client.insert_configuration_set(
-            co_ids, description=desc, name=name
-        )
+#     if len(co_ids) == 0:
+#         pass
+#     else:
+#         cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
-        cs_ids.append(cs_id)
+#         cs_ids.append(cs_id)
