@@ -1,14 +1,17 @@
-from bson.objectid import ObjectId
+# from bson.objectid import ObjectId
 from collections import defaultdict
-from datetime import datetime
+
+# from datetime import datetime
 from pymongo import MongoClient
 from tqdm import tqdm
 
 
-client = MongoClient("mongodb://10.0.52.71:27017/")
-db = client["colabfit-2023-5-16"]
-# client = MongoClient("mongodb://localhost:27017/")
-# db = client["mp"]
+# client = MongoClient("mongodb://localhost:5000/")
+# db = client["colabfit-2023-5-16"]
+
+# Local testing
+client = MongoClient("mongodb://localhost:27017/")
+db = client["mp"]
 
 
 def get_soft_meth(
@@ -18,40 +21,46 @@ def get_soft_meth(
 ):
     piped = db.property_instances.aggregate(
         [
-            {"$sort": {"_id": 1}},
-            {"$match": {"_id": {"$gt": last}, "type": typ}},
+            {"$sort": {"hash": 1}},
+            # Include only PI objects after the last object from previous batch
+            {"$match": {"hash": {"$gt": last}, "type": typ}},
             {"$limit": batch_size},
+            # Split on each MD-id and join MDs and DOs
             {"$unwind": "$relationships.metadata"},
             {
                 "$lookup": {
                     "from": "metadata",
                     "localField": "relationships.metadata",
                     "foreignField": "colabfit-id",
-                    "as": "do_data",
+                    "as": "md_data",
                 }
             },
             {
                 "$lookup": {
                     "from": "data_objects",
-                    "localField": "do_data.colabfit-id",
+                    "localField": "relationships.data_objects",
                     "foreignField": "colabfit-id",
                     "as": "data_object",
                 }
             },
+            # Match only returned docs that don't point to OC20
             {
                 "$match": {
-                    "data_object.relationships.datasets": {"$ne": ["DS_ifdjgm9le1fd_0"]}
+                    # "data_object.relationships.datasets": {"$ne": "DS_ifdjgm9le1fd_0"}
+                    "data_object.relationships.datasets": {"$ne": "DS_6b94omk25jdj_0"}
                 }
             },
+            # Regroup objects based on original hash (PI hash)
             {
                 "$group": {
-                    "_id": "$_id",
+                    "_id": "$hash",
                     "md_ids": {"$push": "$relationships.metadata"},
                     "do_ids": {"$push": "$relationships.data_objects"},
-                    "method": {"$push": "$do_data.method.source-value"},
-                    "software": {"$push": "$do_data.software.source-value"},
+                    "method": {"$push": "$md_data.method.source-value"},
+                    "software": {"$push": "$md_data.software.source-value"},
                 }
             },
+            # _id should be hash at this point
             {
                 "$project": {
                     "_id": "$_id",
@@ -61,6 +70,7 @@ def get_soft_meth(
                     "software": "$software",
                 }
             },
+            {"$sort": {"_id": 1}},
         ]
     )
     return piped
@@ -68,7 +78,9 @@ def get_soft_meth(
 
 def update_ms(ms_data, soft_dict, meth_dict):
     last_id = None
+    counter = 0
     for data in ms_data:
+        counter += 1
         last_id = data.get("_id")
         if last_id is None:
             return last_id
@@ -77,6 +89,8 @@ def update_ms(ms_data, soft_dict, meth_dict):
         do_len = data["do_ids"]
         md_len = data["md_ids"]
         # If the number of md-ids == num of do-ids
+        if do_len > 1:
+            print("greater than 1")
         if do_len == md_len:
             if len(meth) == 0:
                 meth_dict["None"] += do_len
@@ -101,21 +115,22 @@ def update_ms(ms_data, soft_dict, meth_dict):
         else:
             soft_dict["unequal_do_md"] += 1
             meth_dict["unequal_do_md"] += 1
-
+    print(counter)
     return last_id
 
 
 def main(typ):
     n_pis = db.property_instances.estimated_document_count()
-    b_size = 100000
+    b_size = 1000
     n_batches = n_pis // b_size
     if n_batches < 1:
         n_batches = 1
     methods = defaultdict(int)
     software = defaultdict(int)
 
-    dt = datetime(2010, 1, 1)
-    last = ObjectId.from_datetime(dt)
+    # dt = datetime(2010, 1, 1)
+    # last = ObjectId.from_datetime(dt)
+    last = "0"
 
     for batch in tqdm(range(n_batches)):
         data = get_soft_meth(b_size, last, typ)
@@ -124,22 +139,22 @@ def main(typ):
         if last is None:
             break
 
-    with open(f"software2_no_oc_{typ}.txt", "a") as f:
+    with open(f"software_test_no_oc_{typ}.txt", "a") as f:
         f.write(str(software))
         print(software)
-    with open(f"methods2_no_oc_{typ}.txt", "a") as f:
+    with open(f"methods_test_no_oc_{typ}.txt", "a") as f:
         f.write(str(methods))
         print(methods)
 
 
 if __name__ == "__main__":
     for typ in [
-        #"potential-energy",
-        #"atomic-forces",
+        "potential-energy",
+        "atomic-forces",
         "free-energy",
-        "formation-energy",
-        "band-gap",
-        "cauchy-stress",
-        "atomization-energy",
+        # "formation-energy",
+        # "band-gap",
+        # "cauchy-stress",
+        # "atomization-energy",
     ]:
         main(typ)

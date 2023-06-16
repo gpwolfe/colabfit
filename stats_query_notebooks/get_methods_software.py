@@ -100,7 +100,6 @@ def main(typ):
     remain = n_pis % b_size
     for batch in tqdm(range(n_batches)):
         skip = batch * b_size
-        print(skip)
         data = get_soft_meth(b_size, skip, typ)
         update_ms(data, software, methods)
 
