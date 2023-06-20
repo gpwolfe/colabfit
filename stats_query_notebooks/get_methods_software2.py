@@ -21,9 +21,10 @@ def get_soft_meth(
 ):
     piped = db.property_instances.aggregate(
         [
+            {"$match": {"type": typ}},
             {"$sort": {"hash": 1}},
             # Include only PI objects after the last object from previous batch
-            {"$match": {"hash": {"$gt": last}, "type": typ}},
+            {"$match": {"hash": {"$gt": last}}},
             {"$limit": batch_size},
             # Split on each MD-id and join MDs and DOs
             {"$unwind": "$relationships.metadata"},
@@ -46,8 +47,8 @@ def get_soft_meth(
             # Match only returned docs that don't point to OC20
             {
                 "$match": {
-                    # "data_object.relationships.datasets": {"$ne": "DS_ifdjgm9le1fd_0"}
-                    "data_object.relationships.datasets": {"$ne": "DS_6b94omk25jdj_0"}
+                    "data_object.relationships.datasets": {"$ne": "DS_ifdjgm9le1fd_0"}
+                    # "data_object.relationships.datasets": {"$ne": "DS_6b94omk25jdj_0"}
                 }
             },
             # Regroup objects based on original hash (PI hash)
@@ -70,27 +71,27 @@ def get_soft_meth(
                     "software": "$software",
                 }
             },
-            {"$sort": {"_id": 1}},
+            # {"$sort": {"_id": 1}},
         ]
     )
     return piped
 
 
 def update_ms(ms_data, soft_dict, meth_dict):
-    last_id = None
-    counter = 0
+    hashes = []
     for data in ms_data:
-        counter += 1
-        last_id = data.get("_id")
-        if last_id is None:
-            return last_id
+        id = data.get("_id")
+        # print(id)
+        # if id is None:
+        #     return None
+        # else:
+        hashes.append(id)
         meth = data["method"][0]
         soft = data["software"][0]
         do_len = data["do_ids"]
         md_len = data["md_ids"]
         # If the number of md-ids == num of do-ids
-        if do_len > 1:
-            print("greater than 1")
+
         if do_len == md_len:
             if len(meth) == 0:
                 meth_dict["None"] += do_len
@@ -115,8 +116,9 @@ def update_ms(ms_data, soft_dict, meth_dict):
         else:
             soft_dict["unequal_do_md"] += 1
             meth_dict["unequal_do_md"] += 1
-    print(counter)
-    return last_id
+    if len(hashes) == 0:
+        return None
+    return max(hashes)
 
 
 def main(typ):
@@ -135,7 +137,7 @@ def main(typ):
     for batch in tqdm(range(n_batches)):
         data = get_soft_meth(b_size, last, typ)
         last = update_ms(data, software, methods)
-        print(last)
+        # print(last)
         if last is None:
             break
 
@@ -157,4 +159,5 @@ if __name__ == "__main__":
         # "cauchy-stress",
         # "atomization-energy",
     ]:
+        print(typ)
         main(typ)
