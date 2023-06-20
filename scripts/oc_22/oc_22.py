@@ -46,7 +46,7 @@ LINKS = [
     "https://github.com/Open-Catalyst-Project/ocp/blob/main/DATASET.md#"
     "open-catalyst-2022-oc22",
     "https://opencatalystproject.org/",
-    "https://doi.org/10.48550/arXiv.2206.08917",
+    "https://doi.org/10.1021/acscatal.2c05426",
 ]
 AUTHORS = [
     "Richard Tran",

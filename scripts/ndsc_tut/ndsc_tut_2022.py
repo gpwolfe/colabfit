@@ -95,7 +95,7 @@ def main(argv):
     }
     co_md_map = {
         "total_energy": {"field": "energy", "unit": "eV"},
-        "virial": {"field": "virial"},
+        # "virial": {"field": "virial"},
     }
     property_map = {
         "atomic-forces": [

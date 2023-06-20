@@ -115,9 +115,7 @@ def convert(calc, task_id):
             a.info.update(incar)
             a.info.update(output_info)
 
-            a.arrays["forces"] = np.array(
-                calc[j]["output"]["ionic_steps"][i]["forces"]
-            )
+            a.arrays["forces"] = np.array(calc[j]["output"]["ionic_steps"][i]["forces"])
 
             a.info["material_id"] = D[task_id]["material_id"]
             a.info["task_id"] = task_id

@@ -326,9 +326,7 @@ def main(ip, db_name, nprocs):
         do_hashes=all_do_ids,
         name=DATASET,
         authors=AUTHORS,
-        links=[
-            "https://materialsproject.org/",
-        ],
+        links=["https://materialsproject.org/", "https://doi.org/10.1063/1.4812323"],
         description=DS_DESC,
         verbose=True,
     )

@@ -222,7 +222,7 @@ def main(argv):
         name="TdS-PdV_Atari5200",
         authors=["Pandu Wisesa", "Christopher M. Andolina", "Wissam A. Saidi"],
         links=[
-            "https://doi.org/10.5281/zenodo.7278341"
+            "https://doi.org/10.5281/zenodo.7278341",
             "https://github.com/saidigroup/Metal-Oxide-Dataset/tree/v1.0",
             "https://doi.org/10.1021/acs.jpclett.2c03445",
         ],
