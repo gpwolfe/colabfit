@@ -48,12 +48,12 @@ def get_soft_meth(
         if len(mds) == len(dos):
             for i, do in enumerate(dos):
                 meth = mds[i].get("method", {}).get("source-value")
-                if meth == None or len(meth) == 0:
+                if meth is None or len(meth) == 0:
                     methods["None"] += 1
                 else:
                     methods[meth] += 1
                 soft = mds[i].get("software", {}).get("source-value")
-                if soft == None or len(soft) == 0:
+                if soft is None or len(soft) == 0:
                     software["None"] += 1
                 else:
                     software[soft] += 1
@@ -64,12 +64,12 @@ def get_soft_meth(
         elif len(mds) == 1 and len(dos) > 1:
             for i, do in enumerate(dos):
                 meth = mds[0].get("method", {}).get("source-value")
-                if meth == None or len(meth) == 0:
+                if meth is None or len(meth) == 0:
                     methods["None"] += 1
                 else:
                     methods[meth] += 1
                 soft = mds[0].get("software", {}).get("source-value")
-                if soft == None or len(soft) == 0:
+                if soft is None or len(soft) == 0:
                     software["None"] += 1
                 else:
                     software[soft] += 1
@@ -102,7 +102,7 @@ def main(typ):
         last, methods, software, oc_methods, oc_software = get_soft_meth(
             10000, last, typ, methods, software, oc_methods, oc_software
         )
-        if last == None:
+        if last is None:
             break
 
     with open(f"methods_w_oc_{typ}_find.txt", "w") as f:
