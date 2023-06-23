@@ -100,7 +100,7 @@ def main(typ):
 
     for batch in tqdm(range(n_batches)):
         last, methods, software, oc_methods, oc_software = get_soft_meth(
-            10000, last, typ, methods, software, oc_methods, oc_software
+            b_size, last, typ, methods, software, oc_methods, oc_software
         )
         if last is None:
             break
