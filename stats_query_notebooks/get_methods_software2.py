@@ -6,7 +6,7 @@ from pymongo import MongoClient
 from tqdm import tqdm
 
 
-# client = MongoClient("mongodb://localhost:5000/")
+# client = MongoClient("mongodb://10.0.52.71:27017/")
 # db = client["colabfit-2023-5-16"]
 
 # Local testing
