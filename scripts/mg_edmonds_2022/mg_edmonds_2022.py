@@ -215,7 +215,7 @@ def main(argv):
     client.insert_dataset(
         cs_ids=cs_ids,
         do_hashes=all_do_ids,
-        name="MG_edmonds_2022",
+        name="Mg_edmonds_2022",
         authors=["Marvin Poul"],
         links=[
             "https://github.com/eisenforschung/magnesium-mtp-training-data",

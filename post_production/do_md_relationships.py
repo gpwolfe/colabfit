@@ -42,7 +42,7 @@ def get_pi_do_md(ds_id):
 def get_pi_data(ds_id):
     name = db.datasets.find_one({"colabfit-id": ds_id}, {"name": 1})
     name = name["name"]
-    print(name)
+    print("Starting", name)
     pis = get_pi_do_md(ds_id)
     mds_over_one = sum([len(val[1]) > 1 for k, val in pis.items()])
     unequal_md_do = sum(
@@ -54,6 +54,7 @@ def get_pi_data(ds_id):
         f.write(f"mds_over_one, {mds_over_one}\n")
         f.write(f"unequal_md_do, {unequal_md_do}\n")
         f.writelines([f"{key}, {val}\n" for key, val in pis.items()])
+    print("Finished: ", name)
     return pis
 
 

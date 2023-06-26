@@ -59,7 +59,7 @@ SOFT_METH = {
         "software": "Molpro",
         "method": "RCCSD(T)/cc-pVTZ,",
     },
-    "Ethanol": {"software": "MSA", "method": "DFT(B3LYP)"},
+    "Ethanol": {"software": "MSA", "method": "DFT-B3LYP"},
     "Formic_acid_dimer": {
         "software": "MULTIMODE",
         "method": "CCSD(T)-F12a/haTZ",

@@ -36,7 +36,7 @@ DATASET_FP = Path().cwd()
 DATASET = "AgAu-nanoalloy-MSMSE-2021"
 
 SOFTWARE = "VASP, DP-GEN"
-METHODS = "DFT-PBE-D3)"
+METHODS = "DFT-PBE-D3"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=AgAu-nanoalloy",
     "https://doi.org/10.48550/arXiv.2108.06232",
