@@ -23,11 +23,11 @@ LINKS = [
     "https://github.com/FitSNAP/FitSNAP/tree/master/examples/Ta_Linear_JCP2014",
 ]
 AUTHORS = [
-    "A. P. Thompson",
-    "L. P. Swiler",
-    "C. R. Trott",
-    "S. M. Foiles",
-    "G. J. Tucker",
+    "Aidan P. Thompson",
+    "Laura P. Swiler",
+    "Christian R. Trott",
+    "Stephen M. Foiles",
+    "Garritt J. Tucker",
 ]
 DS_DESC = (
     "This data set was originally used to generate a "

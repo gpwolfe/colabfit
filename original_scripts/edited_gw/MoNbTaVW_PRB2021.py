@@ -82,6 +82,7 @@ def main(argv):
                 "per-atom": {"field": "per-atom", "units": None},
                 "_metadata": {
                     "software": {"value": "VASP"},
+                    "method": {"value": "GAP"},
                 },
             }
         ],
@@ -90,6 +91,7 @@ def main(argv):
                 "forces": {"field": "force", "units": "eV/Ang"},
                 "_metadata": {
                     "software": {"value": "VASP"},
+                    "method": {"value": "GAP"},
                 },
             }
         ],
@@ -99,6 +101,7 @@ def main(argv):
                 "volume-normalized": {"value": True, "units": None},
                 "_metadata": {
                     "software": {"value": "VASP"},
+                    "method": {"value": "GAP"},
                 },
             }
         ],

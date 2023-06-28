@@ -151,7 +151,7 @@ def main(argv):
                 "per-atom": {"field": "per-atom", "units": None},
                 "_metadata": {
                     "software": {"value": "ORCA 5.0"},
-                    "method": {"value": "DFT-PBE+D3"},
+                    "method": {"value": "DFT-PBE-D3"},
                     "basis-type": {"def2-SVP"},
                     # TODO need to change this to the readme data for acac
                     # TODO Orca 5.0, density functional theory, PBE exchange
@@ -167,7 +167,7 @@ def main(argv):
                 "forces": {"field": "forces", "units": "eV/Ang"},
                 "_metadata": {
                     "software": {"value": "ORCA 5.0"},
-                    "method": {"value": "DFT-PBE+D3"},
+                    "method": {"value": "DFT-PBE-D3"},
                     "basis-type": {"def2-SVP"},
                     # Orca 5, density functional theory, PBE exchange
                     # correlation functional, def2-SVP basis set,

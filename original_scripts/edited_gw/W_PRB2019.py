@@ -17,12 +17,7 @@ LINKS = [
     "https://doi.org/10.1103/PhysRevB.100.144105",
     "https://gitlab.com/acclab/gap-data/-/tree/master/W/2019-05-24",
 ]
-AUTHORS = [
-    "J. Byggmästar",
-    "A. Hamedani",
-    "K. Nordlund",
-    "F. Djurabekova",
-]
+AUTHORS = ["Jesper Byggmästar", "Ali Hamedani", "Kai Nordlund", "Flyura Djurabekova"]
 DS_DESC = (
     "This dataset was originally designed to fit a GAP "
     "potential with a specific focus on properties relevant for simulations "

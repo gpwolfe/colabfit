@@ -37,7 +37,7 @@ import sys
 DATASET_FP = Path().cwd()
 DATASET = "Ti-NPJCM-2021"
 
-SOFTWARE = "VASP, LAMMPS"
+SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=Ti",

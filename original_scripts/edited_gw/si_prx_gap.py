@@ -244,7 +244,7 @@ def main(argv):
                 "stress": {"field": "gap-virial", "units": "GPa"},
                 "volume-normalized": {"value": True, "units": None},
                 "_metadata": {
-                    "method": {"value": "gap"},
+                    "method": {"value": "GAP"},
                 },
             },
         ],

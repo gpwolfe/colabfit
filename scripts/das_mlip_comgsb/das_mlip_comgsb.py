@@ -41,7 +41,7 @@ import sys
 DATASET_FP = Path("").cwd()
 DATASET = "DAS_ML-IP_CoSb_MgSb"
 
-SOFTWARE = "VASP, LAMMPS"
+SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
 LINKS = ["https://doi.org/10.1103/PhysRevB.104.094310"]
 AUTHORS = [

@@ -22,7 +22,8 @@ LINKS = [
     "https://doi.org/10.1021/acs.jpca.0c02450",
     "https://github.com/FitSNAP/FitSNAP/tree/master/examples/InP_JPCA2020",
 ]
-AUTHORS = ["M. A. Cusentino", "M. A. Wood", "A. P. Thompson"]
+AUTHORS = ["Mary Alice Cusentino", "Mitchell A. Wood", "Aidan P. Thompson"]
+
 DS_DESC = (
     "This data set was used to generate a multi-element "
     "linear SNAP potential for InP, as published in Cusentino, M. A. et. al, "

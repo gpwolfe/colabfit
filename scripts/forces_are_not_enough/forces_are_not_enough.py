@@ -70,13 +70,13 @@ LINKS = [
     "https://github.com/kyonofx/MDsim/",
 ]
 AUTHORS = [
-    "X. Fu",
-    "Z. Wu",
-    "W. Wang",
-    "T. Xie",
-    "S. Keten",
-    "R. Gomez-Bombarelli",
-    "T. Jaakkola",
+    "Xiang Fu",
+    "Zhenghao Wu",
+    "Wujie Wang",
+    "Tian Xie",
+    "Sinan Keten",
+    "Rafael Gomez-Bombarelli",
+    "Tommi Jaakkola",
 ]
 DS_DESC = (
     "Approximately 300,000 benchmarking configurations "

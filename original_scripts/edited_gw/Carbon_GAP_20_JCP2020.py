@@ -101,6 +101,7 @@ def main(argv):
                 "energy": {"field": "energy", "units": "eV"},
                 "per-atom": {"field": "per-atom", "units": None},
                 "_metadata": {
+                    "software": {"value": "VASP"},
                     "method": {"value": "DFT-optB88-vdW"},
                     "kpoint": {"field": "kpoints"},
                     # 'k-points-density':{'field':'kpoints_density'},
@@ -113,6 +114,7 @@ def main(argv):
             {
                 "forces": {"field": "force", "units": "eV/Ang"},
                 "_metadata": {
+                    "software": {"value": "VASP"},
                     "method": {"value": "DFT/optB88-vdW"},
                     "kpoint": {"field": "kpoints"},
                     # 'k-points-density':{'field':'kpoints_density'},
@@ -126,6 +128,7 @@ def main(argv):
                 "stress": {"field": "virial", "units": "eV"},
                 "volume-normalized": {"value": True, "units": None},
                 "_metadata": {
+                    "software": {"value": "VASP"},
                     "method": {"value": "DFT-optB88-vdW"},
                     "kpoint": {"field": "kpoints"},
                     # 'k-points-density':{'field':'kpoints_density'},

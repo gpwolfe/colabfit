@@ -52,13 +52,13 @@ LINKS = [
     "https://doi.org/10.1063/5.0088017",
     "https://github.com/UncertaintyQuantification/AFF/tree/master",
 ]
-AUTHORS = (
+AUTHORS = [
     "Hao Li",
     "Musen Zhou",
     "Jessalyn Sebastian",
     "Jianzhong Wu",
     "Mengyang Gu",
-)
+]
 DS_DESC = """Approximately 145,000 configurations of alkane, \
 aspirin, alpha-glucose and uracil, partly taken from the \
 MD-17 dataset, used in training an 'Atomic Neural Net' \

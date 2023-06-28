@@ -46,7 +46,8 @@ LINKS = [
     "https://github.com/FitSNAP",
     "https://doi.org/10.1021/acs.jpca.0c02450",
 ]
-AUTHORS = ["M. A. Cusentino", "M. A. Wood", "A.P. Thompson"]
+
+AUTHORS = ["Mary Alice Cusentino", "Mitchell A. Wood", "Aidan P. Thompson"]
 DS_DESC = (
     "Approximately 1,800 configurations of InP used in training of "
     "Spectral Neighbor Analysis Potential (SNAP) interatomic potential ML model."

@@ -95,8 +95,8 @@ def main(argv):
     client.insert_property_definition(atomic_forces_pd)
 
     metadata = {
-        "software": {"value": "ORCA, SchNOrb"},
-        "method": {"value": "PBE"},
+        "software": {"value": "ORCA"},
+        "method": {"value": "PBE"},  # SchNOrb
         "basis-set": {"value": "def2-SVP"},
     }
     property_map = {

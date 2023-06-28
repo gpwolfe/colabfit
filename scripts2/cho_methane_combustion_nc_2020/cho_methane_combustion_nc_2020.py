@@ -39,7 +39,7 @@ BATCH_SIZE = 2
 DATASET_FP = Path().cwd()
 DATASET = "CHO-methane-combustion-NC-2020"
 
-SOFTWARE = "LAMMPS, Material Studio, Gaussian 16"
+SOFTWARE = "Gaussian 16"
 METHODS = "NVT-QM-MN15"
 LINKS = [
     "https://doi.org/10.6084/m9.figshare.12973055.v3",

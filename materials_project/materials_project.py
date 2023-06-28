@@ -28,17 +28,17 @@ DATASET_FP = Path("mat_proj_xyz_files")
 DATASET = "Materials Project"
 
 AUTHORS = [
-    "A. Jain",
-    "S.P. Ong",
-    "G. Hautier",
-    "W. Chen",
-    "W.D. Richards",
-    "S. Dacek",
-    "S. Cholia",
-    "D. Gunter",
-    "D. Skinner",
-    "G. Ceder",
-    "K.A. Persson",
+    "Anubhav Jain",
+    "Shyue Ping Ong",
+    "Geoffroy Hautier",
+    "Wei Chen",
+    "William Davidson Richards",
+    "Stephen Dacek",
+    "Shreyas Cholia",
+    "Dan Gunter",
+    "David Skinner",
+    "Gerbrand Ceder",
+    "Kristin A. Persson",
 ]
 DS_DESC = (
     "Configurations from the Materials Project database:"

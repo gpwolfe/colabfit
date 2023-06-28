@@ -47,11 +47,11 @@ LINKS = [
     "https://doi.org/10.1016/j.jcp.2014.12.018",
 ]
 AUTHORS = [
-    "A.P. Thompson",
-    "L.P. Swiler",
-    "C.R. Trott",
-    "S.M. Foiles",
-    "G.J. Tucker",
+    "Aidan P. Thompson",
+    "Laura P. Swiler",
+    "Christian R. Trott",
+    "Stephen M. Foiles",
+    "Garritt J. Tucker",
 ]
 DS_DESC = (
     "363 configurations of Ta used in the training of "

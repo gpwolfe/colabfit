@@ -149,7 +149,7 @@ def main(argv):
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(cauchy_stress_pd)
     metadata = {
-        "software": {"value": "VASP, LAMMPS"},
+        "software": {"value": "VASP"},
         "method": {"value": "DFT"},
     }
     property_map = {

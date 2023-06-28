@@ -170,7 +170,7 @@ def main(argv):
 
     # Define properties
     metadata = {
-        "software": {"value": "MOPAC, Gaussian 09"},
+        "software": {"value": "Gaussian 09"},
         "method": {"value": "G4MP2"},
     }
     co_md_map = {

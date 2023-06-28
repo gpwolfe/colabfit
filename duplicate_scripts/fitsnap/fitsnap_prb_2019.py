@@ -44,7 +44,13 @@ LINKS = [
     "https://github.com/FitSNAP",
     "https://doi.org/10.1103/PhysRevB.99.184305",
 ]
-AUTHORS = ["M. A. Wood", "M. A. Cusentino", "B. D. Wirth", "A. P. Thompson"]
+
+AUTHORS = [
+    "Mitchell A. Wood",
+    "Mary Alice Cusentino",
+    "Brian D. Wirth",
+    "Aidan P. Thompson",
+]
 DS_DESC = "About 25,000 configurations of tungsten and beryllium used in\
  the training of a SNAP interatomic potential machine learning model with the\
  goal of modeling the interactions of Be and W in fusion reactor plasma-facing\

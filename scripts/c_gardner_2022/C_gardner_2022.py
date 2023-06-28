@@ -54,8 +54,8 @@ LINKS = [
     "https://github.com/jla-gardner/carbon-data",
     "https://doi.org/10.48550/arXiv.2211.16443",
 ]
-METHODS = "DFT"
-SOFTWARE = "LAMMPS, ASE"
+METHODS = "C-GAP-17"
+SOFTWARE = "LAMMPS"
 DESCRIPTION = "Approximately 115,000 configurations of carbon with 200 \
 atoms, with simulated melt, quench, reheat, then annealing \
 at the noted temperature. Includes a variety of carbon \
