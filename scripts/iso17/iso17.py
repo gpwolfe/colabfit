@@ -130,7 +130,10 @@ def main(argv):
         links=[
             "http://quantum-machine.org/datasets/",
             "https://doi.org/10.1038/s41467-019-12875-2",
-            "https://proceedings.neurips.cc/paper/2017/hash/303ed4c69846ab36c2904d3ba8573050-Abstract.html",
+            "https://doi.org/10.1038/ncomms13890",
+            "https://doi.org/10.1038/sdata.2014.22",
+            "https://proceedings.neurips.cc/paper/2017/hash/"
+            "303ed4c69846ab36c2904d3ba8573050-Abstract.html",
         ],
         description="129 molecules of composition C7O2H10 from the QM9 dataset"
         " with 5000 conformational geometries apiece. Molecular dynamics data"

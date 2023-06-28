@@ -21,7 +21,7 @@ AUTHORS = [
     "Alexandre Tkatchenko",
 ]
 LINKS = [
-    "https://www.nature.com/articles/s41467-018-06169-2",
+    "https://doi.org/10.1038/s41467-018-06169-2",
     "http://sgdml.org/",
 ]
 DESCRIPTION = (

@@ -11,7 +11,7 @@ DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets")
 DATASET = "Benzene_ccsdt_NC2018"
 
 LINKS = [
-    "https://www.nature.com/articles/s41467-018-06169-2",
+    "https://doi.org/10.1038/s41467-018-06169-2",
     "http://sgdml.org/",
 ]
 AUTHORS = [

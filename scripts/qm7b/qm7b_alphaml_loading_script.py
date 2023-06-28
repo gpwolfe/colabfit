@@ -369,6 +369,7 @@ def main(argv):
         links=[
             "https://doi.org/10.24435/materialscloud:2019.0002/v3",
             "https://doi.org/10.1038/s41597-019-0157-8",
+            "http://doi.org/10.1073/pnas.1816132116",
         ],
         description="Energy, computed with LR-CCSD, "
         "hybrid DFT (B3LYP & SCAN0) for 7211 molecules in QM7b and 52 "

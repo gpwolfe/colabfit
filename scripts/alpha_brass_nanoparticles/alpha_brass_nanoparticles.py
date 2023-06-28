@@ -234,6 +234,7 @@ def main(argv):
             "Jörg Behler",
         ],
         links=[
+            "https://doi.org/10.1021/acs.jpcc.1c02314",
             "http://doi.org/10.1021/acs.jpcc.0c00559",
             "https://doi.org/10.24435/materialscloud:94-aq",
         ],

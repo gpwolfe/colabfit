@@ -80,11 +80,11 @@ DATASET_FP = Path("mbgdml-h2o-meoh-mecn-md/")
 soft_meth = namedtuple("soft_meth", ["method", "software"])
 # The [-3]rd element of the Path(filepath).parts == key below
 method_soft_dict = {
-    "gfn2": soft_meth("GFN2-xTB", "XTB"),
+    "gfn2": soft_meth("GFN2-xTB", "ORCA"),
     "orca": soft_meth("MP2", "ORCA"),
-    "schnet": soft_meth("MBE", "SchNet"),
-    "gap": soft_meth("MBE", "GAP"),
-    "gdml": soft_meth("MBE", "mbGDML"),
+    "schnet": soft_meth("SchNet", "ORCA"),
+    "gap": soft_meth("GAP", "ORCA"),
+    "gdml": soft_meth("mbGDML", "ORCA"),
 }
 
 

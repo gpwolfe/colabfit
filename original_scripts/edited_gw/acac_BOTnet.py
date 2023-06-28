@@ -15,18 +15,18 @@ DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets/BOTNet")
 SCRIPT_FP = Path("")
 DATASET_NAME = "BOTnetACAC_arXiv2022"
 AUTHORS = [
-    "I. Batatia",
-    "S. Batzner",
-    "D. P. Kovacs",
-    "A. Musaelian",
-    "G. N. C. Simm",
-    "R. Drautz",
-    "C. Ortner",
-    "B. Kozinsky",
-    "G. Csanyi",
+    "Ilyes Batatia",
+    "Simon Batzner",
+    "Dávid Péter Kovács",
+    "Albert Musaelian",
+    "Gregor N. C. Simm",
+    "Ralf Drautz",
+    "Christoph Ortner",
+    "Boris Kozinsky",
+    "Gábor Csányi",
 ]
 LINKS = [
-    "https://arxiv.org/abs/2205.06643",
+    "https://doi.org/10.48550/arXiv.2205.06643",
     "https://github.com/davkovacs/BOTNet-datasets",
 ]
 DESCRIPTION = (

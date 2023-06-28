@@ -39,7 +39,7 @@ import sys
 DATASET_FP = Path().cwd()
 DATASET = "LiSnPS-SSE-PBE"
 
-SOFTWARE = "VASP, DP-GEN"
+SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=LiSnPS-SSE-PBE",

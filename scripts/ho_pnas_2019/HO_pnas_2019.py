@@ -72,7 +72,7 @@ def main(argv):
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
     metadata = {
-        "software": {"value": "LAMMPS, i-PI"},
+        "software": {"value": "CPK2"},
         "method": {"value": "DFT-revPBE0-D3"},
     }
     property_map = {
@@ -104,10 +104,16 @@ def main(argv):
     client.insert_dataset(
         do_hashes=all_do_ids,
         name="HO_pnas_2019",
-        authors=["B. Cheng", "E. Engel", "J. Behler", "C. Dellago", "M. Ceriotti"],
+        authors=[
+            "Bingqing Cheng",
+            "Edgar A. Engel",
+            "Jörg Behler",
+            "Christoph Dellago",
+            "Michele Ceriotti",
+        ],
         links=[
             "https://archive.materialscloud.org/record/2018.0020/v1",
-            "https://www.pnas.org/doi/full/10.1073/pnas.1815117116",
+            "https://doi.org/10.1073/pnas.1815117116",
         ],
         description="1590 configurations of H2O/water "
         "with total energy and forces calculated using "

@@ -150,7 +150,7 @@ def main(argv):
     for pd in pds:
         client.insert_property_definition(pd)
     metadata = {
-        "software": {"value": "MOPAC, Gaussian 09"},
+        "software": {"value": "Gaussian 09"},
         "method": {"value": "DFT-B3LYP"},
         "basis-set": {"value": "6-31G(2df,p)"},
     }

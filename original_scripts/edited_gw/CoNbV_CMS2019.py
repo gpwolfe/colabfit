@@ -10,11 +10,16 @@ DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/data/")
 DATASET = "CoNbV_CMS2019"
 
 LINKS = [
-    "https://www.sciencedirect.com/science/article/pii/S0927025618306372?via%3Dihub",
+    "https://doi.org/10.1016/j.commatsci.2018.09.031",
     "https://gitlab.com/kgubaev/accelerating-high-throughput-searches-for-new-alloys"
     "-with-active-learning-data",
 ]
-AUTHORS = ["K. Gubaev", "E. V. Podryabinkin", "G. L. W. Hart", "A. V. Shapeev"]
+AUTHORS = [
+    "Konstantin Gubaev",
+    "Evgeny V. Podryabinkin",
+    "Gus L.W. Hart",
+    "Alexander V. Shapeev",
+]
 DS_DESC = (
     "This dataset was generated using the following active "
     "learning scheme: 1) candidate structures were relaxed by a partially-"

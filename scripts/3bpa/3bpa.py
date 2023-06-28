@@ -42,7 +42,7 @@ DATASET_FP = Path().cwd()
 DATASET = "3BPA"
 
 SOFTWARE = "ORCA"
-METHODS = "DFT-(omega)B97X"
+METHODS = "DFT-ωB97X"
 LINKS = ["https://doi.org/10.1021/acs.jctc.1c00647"]
 AUTHORS = [
     "Dávid Péter Kovács",

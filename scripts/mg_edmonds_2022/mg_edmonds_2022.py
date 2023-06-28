@@ -115,7 +115,7 @@ def main(argv):
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(cauchy_stress_pd)
     metadata = {
-        "software": {"value": "MLIP, VASP"},
+        "software": {"value": "VASP"},
         "method": {"value": "DFT"},
     }
     co_md_map = {
@@ -221,6 +221,7 @@ def main(argv):
             "https://github.com/eisenforschung/magnesium-mtp-training-data",
             "https://doi.org/10.17617/3.A3MB7Z",
             "https://arxiv.org/abs/2207.04009",
+            "https://doi.org/10.1103/PhysRevB.107.104103",
         ],
         description="16748 configurations of magnesium with gathered energy, "
         "stress and forces at the DFT level of theory.",

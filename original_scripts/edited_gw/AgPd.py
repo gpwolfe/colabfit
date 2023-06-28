@@ -17,16 +17,16 @@ from colabfit.tools.property_definitions import (
 DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets")
 DATASET_NAME = "AgPd_npj2021"
 AUTHORS = [
-    "C. W. Rosenbrock",
-    "K. Gubaev",
-    "A. V. Shapeev",
-    "L. B. Partay",
-    "N. Bernstein",
-    "G. Csanyi",
-    "G. L. W. Hart",
+    "Conrad W. Rosenbrock",
+    "Konstantin Gubaev",
+    "Alexander V. Shapeev",
+    "Livia B. Pártay",
+    "Noam Bernstein",
+    "Gábor Csányi",
+    "Gus L. W. Hart",
 ]
 LINKS = [
-    "https://www.nature.com/articles/s41524-020-00477-2#",
+    "https://doi.org/10.1038/s41524-020-00477-2",
     "https://github.com/msg-byu/agpd",
 ]
 DESCRIPTION = (

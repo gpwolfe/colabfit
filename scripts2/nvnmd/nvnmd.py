@@ -38,8 +38,8 @@ import sys
 DATASET_FP = Path("nvnmd-master/examples/data/GeTe")
 DATASET = "NVNMD-GeTe"
 
-SOFTWARE = "DeePMD"
-METHODS = "NVT"
+SOFTWARE = "FHI-aims"
+METHODS = "DeepMD"
 LINKS = [
     "https://github.com/LiuGroupHNU/nvnmd",
     "https://doi.org/10.1038/s41524-022-00773-z",

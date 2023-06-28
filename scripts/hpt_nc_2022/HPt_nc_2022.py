@@ -73,7 +73,7 @@ def main(argv):
         generator=False,
     )
 
-    metadata = {"software": {"value": "LAMMPS"}, "method": {"value": "DFT"}}
+    metadata = {"software": {"value": "VASP"}, "method": {"value": "DFT-PBE"}}
 
     property_map = {
         "potential-energy": [

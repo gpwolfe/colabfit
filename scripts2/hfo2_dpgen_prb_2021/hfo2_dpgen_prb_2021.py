@@ -35,7 +35,7 @@ import sys
 DATASET_FP = Path().cwd()
 DATASET = "HfO2-DPGEN-PRB-2021"
 
-SOFTWARE = "VASP, DP-GEN"
+SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=HfO2-dpgen",

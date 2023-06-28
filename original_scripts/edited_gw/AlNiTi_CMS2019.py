@@ -15,10 +15,10 @@ LINKS = [
     "-searches-for-new-alloys-with-active-learning-data",
 ]
 AUTHORS = [
-    "K. Gubaev",
-    "E. V. Podryabinkin",
-    "G. L. W. Hart",
-    "A. V. Shapeev",
+    "Konstantin Gubaev",
+    "Evgeny V. Podryabinkin",
+    "Gus L.W. Hart",
+    "Alexander V. Shapeev",
 ]
 DS_DESC = (
     "This dataset was generated using the following active "

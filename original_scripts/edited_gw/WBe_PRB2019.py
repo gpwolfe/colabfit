@@ -23,7 +23,12 @@ LINKS = [
     "https://doi.org/10.1103/PhysRevB.99.184305",
     "https://github.com/FitSNAP/FitSNAP/tree/master/examples/WBe_PRB2019",
 ]
-AUTHORS = ["M. A. Wood", "M. A. Cusentino", "B. D. Wirth", "A. P. Thompson"]
+AUTHORS = [
+    "Mitchell A. Wood",
+    "Mary Alice Cusentino",
+    "Brian D. Wirth",
+    "Aidan P. Thompson",
+]
 DS_DESC = (
     "This data set was originally used to generate a "
     "multi-component linear SNAP potential for tungsten and beryllium as "

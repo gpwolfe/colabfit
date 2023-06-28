@@ -46,6 +46,7 @@ METHODS = "DFT-PBE"
 LINKS = [
     "https://github.com/zhangylch/REANN",
     "https://doi.org/10.1021/acs.jpclett.9b00085",
+    "https://doi.org/10.1103/PhysRevLett.127.156002"
     "https://doi.org/10.1063/5.0080766",
 ]
 AUTHORS = ["Yaolong Zhang", "Junfan Xia", "Bin Jiang"]

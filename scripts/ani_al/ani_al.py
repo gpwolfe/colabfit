@@ -137,17 +137,18 @@ def main(argv):
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
 
-    metadata = {
-        "software": {"value": SOFTWARE},
-        "method": {"value": METHODS}
-    }
+    metadata = {"software": {"value": SOFTWARE}, "method": {"value": METHODS}}
     co_md_map = {"fermi": {"field": "fermi"}}
     property_map = {
         "potential-energy": [
             {
                 "energy": {"field": "energy", "units": "eV"},
-                "per-atom": {"value": False, "units": None},
-                "_metadata": metadata,
+                "per-atom": {"field": "per-atom", "units": None},
+                "_metadata": {
+                    "software": {"value": "Quantum ESPRESSO"},
+                    "method": {"value": "DFT-PBE"},
+                    "kpoint": {"value": "3x3x3 grid"},
+                },
             }
         ],
         "atomic-forces": [
@@ -200,9 +201,7 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
             cs_ids.append(cs_id)
         else:
@@ -250,9 +249,7 @@ class anidataloader(object):
                         if type(dataset) is np.ndarray:
                             if dataset.size != 0:
                                 if type(dataset[0]) is np.bytes_:
-                                    dataset = [
-                                        a.decode("ascii") for a in dataset
-                                    ]
+                                    dataset = [a.decode("ascii") for a in dataset]
 
                         data.update({k: dataset})
 

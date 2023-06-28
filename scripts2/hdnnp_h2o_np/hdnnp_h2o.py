@@ -34,13 +34,13 @@ import sys
 DATASET_FP = Path("training-data_H2O")
 DATASET = "HDNNP-H2O"
 
-SOFTWARE = "LAMMPS"
+SOFTWARE = "FHI-aims"
 LINKS = [
     "https://doi.org/10.5281/zenodo.2634097",
     "https://doi.org/10.1103/PhysRevLett.98.146401",
     "https://doi.org/10.1073/pnas.1602375113",
 ]
-AUTHORS = ["Tobias Morawietz", "Joerg Behler"]
+AUTHORS = ["Tobias Morawietz", "Jörg Behler"]
 DS_DESC = "Approximately 28,000 configurations split into 4 datasets, each\
  using a different functional, used in the training of a high-dimensional\
  neural network potential (HDNNP). "

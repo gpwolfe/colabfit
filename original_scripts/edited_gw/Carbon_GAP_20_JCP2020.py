@@ -22,7 +22,7 @@ DATASET = "Carbon_GAP_JCP2020"
 
 
 LINKS = [
-    "https://aip.scitation.org/doi/10.1063/5.0005084",
+    "https://doi.org/10.1063/5.0005084",
     "https://www.repository.cam.ac.uk/handle/1810/307452",
 ]
 AUTHORS = [

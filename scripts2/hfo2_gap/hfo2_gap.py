@@ -34,7 +34,7 @@ from pathlib import Path
 import sys
 
 DATASET_FP = Path("data")
-DATASET = "HfO2"
+DATASET = "HfO2_NPJ_2020"
 
 SOFTWARE = "VASP"
 METHODS = "NVT-PBE"

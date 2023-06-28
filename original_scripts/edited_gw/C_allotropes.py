@@ -18,7 +18,7 @@ LINKS = [
     "https://doi.org/10.1038/s41524-020-00390-8",
     "https://doi.org/10.6084/m9.figshare.12649811.v1",
 ]
-AUTHORS = ["M. Wen", "E. B. Tadmor"]
+AUTHORS = ["Mingjian Wen", "Ellad B. Tadmor"]
 DS_DESC = (
     "The dataset consists of energies and forces for monolayer "
     "graphene, bilayer graphene, graphite, and diamond in various "

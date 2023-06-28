@@ -20,9 +20,9 @@ LINKS = [
     "https://doi.org/10.23729/1b845398-5291-4447-b417-1345acdd2eae",
 ]
 AUTHORS = [
-    "J. Byggmästar",
-    "K. Nordlund",
-    "F. Djurabekova",
+    "Jesper Byggmästar",
+    "Kai Nordlund",
+    "Flyura Djurabekova",
 ]
 DS_DESC = (
     "This dataset was originally designed to fit a GAP "

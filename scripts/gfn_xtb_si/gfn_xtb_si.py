@@ -92,7 +92,7 @@ def main(argv):
     client.insert_property_definition(potential_energy_pd)
 
     metadata = {
-        "software": {"value": "Amsterdam Modeling Suite"},
+        "software": {"value": "ADF"},
         "method": {"value": "revPBE"},
     }
     co_md_map = {

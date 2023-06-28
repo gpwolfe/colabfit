@@ -46,7 +46,6 @@ METHODS = "DFT"
 LINKS = [
     "https://doi.org/10.1038/s41467-022-28526-y",
     "https://github.com/atomistic-machine-learning/cG-SchNet/",
-    "https://www.nature.com/articles/s41467-022-28526-y",
 ]
 AUTHORS = [
     "Niklas W.A. Gebauer",

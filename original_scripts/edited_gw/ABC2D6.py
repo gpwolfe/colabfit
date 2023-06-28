@@ -15,14 +15,13 @@ DATASET_FP = Path(
 SCRIPT_FP = Path().cwd()
 DATASET_NAME = "ABC2D6-16_PRL2018"
 AUTHORS = [
-    "F. Faber",
-    "A. Lindmaa",
-    "O. A. v. Lilienfeld",
-    "R. Armiento",
+    "Felix Faber",
+    "Alexander Lindmaa",
+    "O. Anatole von Lilienfeld",
+    "Rickard Armiento",
 ]
 LINKS = [
-    "https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.117.135502",
-    "https://arxiv.org/abs/1508.05315",
+    "https://doi.org/10.1103/PhysRevLett.117.135502",
     "https://qmml.org/datasets.html",
 ]
 DESCRIPTION = (

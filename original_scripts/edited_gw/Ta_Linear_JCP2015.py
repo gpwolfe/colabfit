@@ -19,7 +19,7 @@ DATASET_FP = Path(
 
 
 LINKS = [
-    "https://www.sciencedirect.com/science/article/pii/S0021999114008353",
+    "https://doi.org/10.1016/j.jcp.2014.12.018",
     "https://github.com/FitSNAP/FitSNAP/tree/master/examples/Ta_Linear_JCP2014",
 ]
 AUTHORS = [

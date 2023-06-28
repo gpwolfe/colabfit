@@ -50,7 +50,7 @@ AUTHORS = [
     "Liqun Cao",
     "Mingyuan Xu",
     "Tong Zhu",
-    "John Z. H. Zhang",
+    "John Z.H. Zhang",
 ]
 DS_DESC = (
     "Configurations of simulated methane combustion used to develop "

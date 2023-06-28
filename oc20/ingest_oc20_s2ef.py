@@ -34,7 +34,7 @@ AUTHORS = [
     "Zachary Ulissi",
 ]
 LINKS = [
-    "https://arxiv.org/abs/2010.09990",
+    "https://doi.org/10.1021/acscatal.0c04525",
     "https://github.com/Open-Catalyst-Project/ocp/blob/"
     "main/DATASET.md#structure-to-energy-and-forces-s2ef-task",
 ]

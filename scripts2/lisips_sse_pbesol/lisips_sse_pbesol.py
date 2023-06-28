@@ -35,7 +35,7 @@ import sys
 DATASET_FP = Path().cwd()
 DATASET = "LiSiPS-SSE-PBEsol"
 
-SOFTWARE = "VASP, DP-GEN"
+SOFTWARE = "VASP"
 METHODS = "DFT-PBEsol"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType="

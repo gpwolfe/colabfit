@@ -19,9 +19,13 @@ from colabfit.tools.property_definitions import (
 DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets")
 
 DATASET_NAME = "AlNiCu_AIP2020"
-AUTHORS = ["B. Onat", "C. Ortner", "J. R. Kermode"]
+AUTHORS = [
+    "Berk Onat",
+    "Christoph Ortner",
+    "James R. Kermode",
+]
 LINKS = [
-    "https://aip.scitation.org/doi/10.1063/5.0016005",
+    "https://doi.org/10.1063/5.0016005",
     "https://github.com/DescriptorZoo/sensitivity-dimensionality-results",
 ]
 

@@ -20,9 +20,9 @@ LINKS = [
     "https://gitlab.com/acclab/gap-data/-/tree/master",
 ]
 AUTHORS = [
-    "J. Byggmästar",
-    "K. Nordlund",
-    "F. Djurabekova",
+    "Jesper Byggmästar",
+    "Kai Nordlund",
+    "Flyura Djurabekova",
 ]
 DS_DESC = (
     "This dataset was designed to enable machine-learning "

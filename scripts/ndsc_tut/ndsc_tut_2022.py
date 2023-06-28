@@ -90,8 +90,8 @@ def main(argv):
     client.insert_property_definition(cauchy_stress_pd)
 
     metadata = {
-        "software": {"value": "QUIP, ASE"},
-        "method": {"value": "GAP"},
+        "software": {"value": "CASTEP"},
+        "method": {"value": "DFT"},
     }
     co_md_map = {
         "total_energy": {"field": "energy", "unit": "eV"},
@@ -130,11 +130,10 @@ def main(argv):
         authors=["Connor Allen", "Albert P. Bartok"],
         links=[
             "https://github.com/ConnorSA/ndsc_tut",
-            "https://arxiv.org/pdf/2207.11828.pdf",
+            "https://doi.org/10.48550/arXiv.2207.11828",
         ],
-        description="500 configurations of Mg2 predicted using a model "
-        "fitted on Al, W, Mg and Si. Software used includes "
-        "QUIP with GAP plugin and Atomic Simulation Environment.",
+        description="500 configurations of Mg2 for MD prediction using a model "
+        "fitted on Al, W, Mg and Si.",
         verbose=True,
     )
 

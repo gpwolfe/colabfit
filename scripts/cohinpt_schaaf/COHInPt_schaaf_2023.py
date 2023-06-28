@@ -53,7 +53,7 @@ import sys
 
 DATASET_FP = Path().cwd()
 METHOD = "DFT"
-SOFTWARE = "QuantumEspresso, CatKit"
+SOFTWARE = "QuantumEspresso"
 
 
 def namer(info):
@@ -201,7 +201,7 @@ def main(argv):
         ],
         links=[
             "https://github.com/LarsSchaaf/reaction-barriers-mlffs",
-            "https://arxiv.org/pdf/2301.09931",
+            "https://doi.org/10.48550/arXiv.2301.09931",
         ],
         description="Training and simulation data from machine learning"
         " force field model applied to steps of the hydrogenation of carbon"

@@ -89,14 +89,14 @@ RE = re.compile(r"")
 ELEM_KEY = {
     "ala": (("H", "C", "N", "O"), "AMBER-03", "GROMACS"),
     "lips": (("Li", "P", "S"), "PBE", "VASP"),
-    "aspirin": (("H", "C", "O"), "AIMD-PBE-vdW-TS", "i-PI"),
-    "benzene": (("H", "C"), "AIMD-PBE-vdW-TS", "i-PI"),
-    "ethanol": (("H", "C", "O"), "AIMD-PBE-vdW-TS", "i-PI"),
-    "malonaldehyde": (("H", "C", "O"), "AIMD-PBE-vdW-TS", "i-PI"),
-    "naphthalene": (("H", "C"), "AIMD-PBE-vdW-TS", "i-PI"),
-    "salicylic_acid": (("H", "C", "O"), "AIMD-PBE-vdW-TS", "i-PI"),
-    "toluene": (("H", "C"), "AIMD-PBE-vdW-TS", "i-PI"),
-    "uracil": (("H", "C", "N", "O"), "AIMD-PBE-vdW-TS", "i-PI"),
+    "aspirin": (("H", "C", "O"), "PBE-vdW-TS", "i-PI"),
+    "benzene": (("H", "C"), "PBE-vdW-TS", "i-PI"),
+    "ethanol": (("H", "C", "O"), "PBE-vdW-TS", "i-PI"),
+    "malonaldehyde": (("H", "C", "O"), "PBE-vdW-TS", "i-PI"),
+    "naphthalene": (("H", "C"), "PBE-vdW-TS", "i-PI"),
+    "salicylic_acid": (("H", "C", "O"), "PBE-vdW-TS", "i-PI"),
+    "toluene": (("H", "C"), "PBE-vdW-TS", "i-PI"),
+    "uracil": (("H", "C", "N", "O"), "PBE-vdW-TS", "i-PI"),
     "water": (("H", "O"), "NPT-PME-SHAKE", "DLPOLY"),
 }
 

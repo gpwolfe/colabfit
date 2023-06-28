@@ -42,7 +42,7 @@ import sys
 DATASET_FP = Path().cwd()
 DATASET = "Cu_FHIaims_NPJCM_2021"
 
-SOFTWARE = "FHI–aims"
+SOFTWARE = "FHI-aims"
 METHODS = "DFT-PBE"
 LINKS = [
     "https://doi.org/10.5281/zenodo.4734035",
@@ -79,13 +79,9 @@ def row_to_ase_atoms(row):
             symbols=symbols, scaled_positions=coordinates, cell=cell, pbc=pbc
         )
     elif row["COORDINATES_TYPE"] == "absolute":
-        atoms = AtomicConfiguration(
-            symbols=symbols, positions=coordinates, pbc=pbc
-        )
+        atoms = AtomicConfiguration(symbols=symbols, positions=coordinates, pbc=pbc)
     else:
-        raise ValueError(
-            "Unrecognized COORDINATES_TYPE:" + row["COORDINATES_TYPE"]
-        )
+        raise ValueError("Unrecognized COORDINATES_TYPE:" + row["COORDINATES_TYPE"])
     atoms.info["energy"] = row["energy_corrected"]
     atoms.info["forces"] = row["forces"]
     atoms.info["energy_uncorrected"] = row["energy"]

@@ -121,7 +121,7 @@ def main(argv):
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(cauchy_stress_pd)
     metadata = {
-        "software": {"value": "Amsterdam Modeling Suite"},
+        "software": {"value": "BAND"},
         "method": {"value": "revPBE"},
     }
     co_md_map = {

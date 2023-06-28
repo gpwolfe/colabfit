@@ -174,9 +174,7 @@ def main(argv):
         )
 
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(
-                co_ids, description=desc, name=name
-            )
+            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
             cs_ids.append(cs_id)
 
     client.insert_dataset(
@@ -184,11 +182,11 @@ def main(argv):
         do_hashes=all_do_ids,
         name="QM_hamiltonian_nature_2019",
         authors=[
-            "K. T. Schütt",
-            "M. Gastegger",
-            "A. Tkatchenko",
-            "K.-R. Müller",
-            "R. J. Maurer",
+            "Kristof T. Schütt",
+            "Michael Gastegger",
+            "Alexandre Tkatchenko",
+            "Klaus-Robert Müller",
+            "Reinhard J. Maurer",
         ],
         links=[
             "http://quantum-machine.org/datasets/",
