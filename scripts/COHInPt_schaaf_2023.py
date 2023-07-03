@@ -147,12 +147,12 @@ def main(argv):
     all_co_ids, all_do_ids = list(zip(*ids))
     cs_regexes = [
         [
-            "Pt-doped-training_COHInPt_schaaf_2023",
+            "Pt-doped-training",
             "Pt_doped",
             "Pt-doped training data from COHInPt_schaaf_2023 set",
         ],
         [
-            "Undoped-training_COHInPt_schaaf_2023",
+            "Undoped-training",
             "undoped",
             "Non-Pt-doped training data from COHInPt_schaaf_2023 set",
         ],
