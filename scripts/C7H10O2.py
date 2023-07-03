@@ -229,7 +229,6 @@ def main(argv):
     all_co_ids, all_do_ids = list(zip(*ids))
 
     client.insert_dataset(
-        # cs_ids,
         do_hashes=all_do_ids,
         name=DATASET,
         authors=[

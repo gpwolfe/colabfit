@@ -223,11 +223,11 @@ def main(argv):
             f"Configurations from {DATASET} dataset used during validation step for "
             "NNP_CA-9 potential",
         ],
-        [
-            f"{DATASET}-all",
-            "CA-9__.*",
-            f"Complete configuration set from {DATASET} dataset",
-        ],
+        # [
+        #     f"{DATASET}-all",
+        #     "CA-9__.*",
+        #     f"Complete configuration set from {DATASET} dataset",
+        # ],
         [
             f"{DATASET}-RR-training",
             "RR_training.*",

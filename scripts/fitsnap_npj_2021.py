@@ -138,7 +138,6 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        # "charges": {"field": "charges"},
     }
     co_md_map = {
         "spins": {"field": "spins"},
@@ -183,7 +182,6 @@ def main(argv):
         links=LINKS,
         description=DS_DESC,
         verbose=True,
-        # cs_ids=cs_ids,
     )
 
 

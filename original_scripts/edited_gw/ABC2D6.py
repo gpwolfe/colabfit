@@ -229,18 +229,14 @@ def main(argv):
 
             client.insert_property_definition(pdef)
 
-    # TODO actually formation energy
     property_map = {
         "formation-energy": [
             {
                 "energy": {"field": "formation_energy", "units": "eV"},
                 "per-atom": {"field": "per-atom", "units": None},
-                # For metadata want: software, method (DFT-XC Functional)
-                # basis information, more generic parameters
                 "_metadata": {
-                    "software": {"value": "VASP"},  # ex. VASP
-                    "method": {"value": "DFT-PBE"},  # ex. PBE-MBD
-                    # Kmesh 3x3x3 energy i
+                    "software": {"value": "VASP"},
+                    "method": {"value": "DFT-PBE"},
                 },
             }
         ]
