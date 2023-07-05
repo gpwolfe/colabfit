@@ -57,8 +57,8 @@ AUTHORS = [
     "Jie Liu",
 ]
 DS_DESC = (
-    "Approximately 5,000 configurations of GeTe used in training and "
-    "testing of a non-von Neumann multiplication-less DNN model."
+    "Approximately 5,000 configurations of GeTe used in training of a "
+    "non-von Neumann multiplication-less DNN model."
 )
 ELEMENTS = ["Ge", "Te"]
 GLOB_STR = "box.npy"
@@ -171,38 +171,38 @@ def main(argv):
     )
 
     all_co_ids, all_do_ids = list(zip(*ids))
-    cs_regexes = [
-        [
-            f"{DATASET}_train",
-            ".*train.*",
-            f"Training configurations from {DATASET} dataset",
-        ]
-    ]
+    # cs_regexes = [
+    #     [
+    #         f"{DATASET}_train",
+    #         ".*train.*",
+    #         f"Training configurations from {DATASET} dataset",
+    #     ]
+    # ]
 
-    cs_ids = []
+    # cs_ids = []
 
-    for i, (name, regex, desc) in enumerate(cs_regexes):
-        co_ids = client.get_data(
-            "configurations",
-            fields="hash",
-            query={
-                "hash": {"$in": all_co_ids},
-                "names": {"$regex": regex},
-            },
-            ravel=True,
-        ).tolist()
+    # for i, (name, regex, desc) in enumerate(cs_regexes):
+    #     co_ids = client.get_data(
+    #         "configurations",
+    #         fields="hash",
+    #         query={
+    #             "hash": {"$in": all_co_ids},
+    #             "names": {"$regex": regex},
+    #         },
+    #         ravel=True,
+    #     ).tolist()
 
-        print(
-            f"Configuration set {i}",
-            f"({name}):".rjust(22),
-            f"{len(co_ids)}".rjust(7),
-        )
-        if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
+    #     print(
+    #         f"Configuration set {i}",
+    #         f"({name}):".rjust(22),
+    #         f"{len(co_ids)}".rjust(7),
+    #     )
+    #     if len(co_ids) > 0:
+    #         cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
-            cs_ids.append(cs_id)
-        else:
-            pass
+    #         cs_ids.append(cs_id)
+    #     else:
+    #         pass
 
     client.insert_dataset(
         do_hashes=all_do_ids,

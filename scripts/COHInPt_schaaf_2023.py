@@ -55,7 +55,7 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/cohinpt_schaaf"
 )
 METHOD = "DFT"
-SOFTWARE = "QuantumEspresso"
+SOFTWARE = "Quantum ESPRESSO"
 
 
 def namer(info):
@@ -145,18 +145,7 @@ def main(argv):
     )
 
     all_co_ids, all_do_ids = list(zip(*ids))
-    cs_regexes = [
-        [
-            "Pt-doped-training",
-            "Pt_doped",
-            "Pt-doped training data from COHInPt_schaaf_2023 set",
-        ],
-        [
-            "Undoped-training",
-            "undoped",
-            "Non-Pt-doped training data from COHInPt_schaaf_2023 set",
-        ],
-    ]
+    cs_regexes = []
 
     for name in names:
         cs_regexes.append(

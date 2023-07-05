@@ -157,24 +157,24 @@ def main(argv):
     cs_regexes = [
         [
             f"{DATASET}-reference",
-            "reference.*",
+            "reference",
             f"Reference configurations from {DATASET} dataset",
         ],
         [
             f"{DATASET}-training-alternate",
-            ".*alternate.*",
+            "alternate",
             f"Training configurations from {DATASET} dataset with alternate "
             "regularization parameters",
         ],
         [
             f"{DATASET}-training-paper",
-            ".*paper.*",
+            "paper",
             f"Training configurations from {DATASET} dataset with regularization "
             "parameters shown in publication",
         ],
         [
             f"{DATASET}-validation",
-            "validation.*",
+            "validation",
             f"Validation configurations from {DATASET} dataset",
         ],
     ]

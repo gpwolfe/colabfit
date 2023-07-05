@@ -175,12 +175,6 @@ def main(argv):
             "mixed set with MD simulation performed at 300K, 600K and 1200K",
         ],
         [
-            f"{DATASET}-test-300K",
-            "test_300K*",
-            f"Test configurations from {DATASET} dataset; "
-            "MD simulation performed at 300K",
-        ],
-        [
             f"{DATASET}-test-dih-beta120",
             "test_dih_beta120*",
             f"Test configurations from {DATASET} dataset; "
