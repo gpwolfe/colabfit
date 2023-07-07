@@ -19,6 +19,7 @@ None
 
 File notes
 ----------
+splitting into datasets based on file - train, test, val
 
 """
 from argparse import ArgumentParser
@@ -32,6 +33,7 @@ from pathlib import Path
 import sys
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/hme21")
+# DATASET_FP = Path("data/hme")  # remove
 DATASET = "HME21"
 
 SOFTWARE = "VASP"
@@ -144,19 +146,8 @@ def main(argv):
     client = MongoDatabase(
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
     )
-
-    configurations = load_data(
-        file_path=DATASET_FP,
-        file_format="folder",
-        name_field="name",
-        elements=ELEMENTS,
-        reader=reader,
-        glob_string=GLOB_STR,
-        generator=False,
-    )
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
-
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
@@ -178,68 +169,47 @@ def main(argv):
             }
         ],
     }
-    ids = list(
-        client.insert_data(
-            configurations,
-            property_map=property_map,
+
+    f_names = [x.name for x in DATASET_FP.rglob(GLOB_STR)]
+    file_dict = dict()
+    for fn in f_names:
+        if "train" in fn:
+            file_dict[fn] = f"{DATASET_FP}-train"
+        elif "test" in fn:
+            file_dict[fn] = f"{DATASET_FP}-test"
+        elif "val" in fn:
+            file_dict[fn] = f"{DATASET_FP}-validation"
+    for fn in f_names:
+        configurations = load_data(
+            file_path=DATASET_FP,
+            file_format="folder",
+            name_field="name",
+            elements=ELEMENTS,
+            reader=reader,
+            glob_string=fn,
             generator=False,
+        )
+
+        ids = list(
+            client.insert_data(
+                configurations,
+                property_map=property_map,
+                generator=False,
+                verbose=True,
+            )
+        )
+
+        all_co_ids, all_do_ids = list(zip(*ids))
+
+        client.insert_dataset(
+            do_hashes=all_do_ids,
+            name=DATASET,
+            authors=AUTHORS,
+            links=LINKS,
+            description=DS_DESC,
             verbose=True,
+            # cs_ids=cs_ids,
         )
-    )
-
-    all_co_ids, all_do_ids = list(zip(*ids))
-    cs_regexes = [
-        [
-            f"{DATASET}_test",
-            ".*test.*",
-            f"Test configurations from {DATASET} dataset",
-        ],
-        [
-            f"{DATASET}_train",
-            ".*train.*",
-            f"Training configurations from {DATASET} dataset",
-        ],
-        [
-            f"{DATASET}_validate",
-            ".*val.*",
-            f"Validation configurations from {DATASET} dataset",
-        ],
-    ]
-
-    cs_ids = []
-
-    for i, (name, regex, desc) in enumerate(cs_regexes):
-        co_ids = client.get_data(
-            "configurations",
-            fields="hash",
-            query={
-                "hash": {"$in": all_co_ids},
-                "names": {"$regex": regex},
-            },
-            ravel=True,
-        ).tolist()
-
-        print(
-            f"Configuration set {i}",
-            f"({name}):".rjust(22),
-            f"{len(co_ids)}".rjust(7),
-        )
-        if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
-
-            cs_ids.append(cs_id)
-        else:
-            pass
-
-    client.insert_dataset(
-        do_hashes=all_do_ids,
-        name=DATASET,
-        authors=AUTHORS,
-        links=LINKS,
-        description=DS_DESC,
-        verbose=True,
-        cs_ids=cs_ids,
-    )
 
 
 REF_E = {
