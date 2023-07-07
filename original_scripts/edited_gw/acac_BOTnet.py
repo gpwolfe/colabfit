@@ -195,11 +195,6 @@ def main(argv):
 
     # matches to data CO "name" field
     cs_regexes = {
-        # .*, is there a way to check all names,
-        # maybe with that python stuff eric was talking about. plan:
-        # finish this without csregexes->try to upload->
-        # see if grabbed cs regexes show up so i can just take the names from
-        # there
         "isolated": "Energies of the isolated atoms evalauted at the "
         "reference DFT settings",
         "H_transfer": "NEB path of proton transfer reaction between the two"
