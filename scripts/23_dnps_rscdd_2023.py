@@ -18,6 +18,13 @@ Other properties added to metadata
 
 File notes
 ----------
+the file for coordinates at:
+23-Single-Element-DNPs-main/Training_Data/Zn/iter0/T225/T225_2/hxNPwQaO0Pg_2-2v8T_6JeSoclea/elastic/B222_dist03_0/set.000
+is empty, so these will have to be ignored. I left the files in place but renamed the .npy files to .npy_bad, which
+will be ignored by the globbing function.
+
+Some of the files don't get grouped properly by iteration upon untar, so these 
+are grouped manually
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
@@ -40,10 +47,13 @@ LINKS = [
 ]
 AUTHORS = ["Christopher M. Andolina", "Wissam A. Saidi"]
 DS_DESC = (
-    "Minimalist, curated sets of DFT-calculated properties for many "
+    "One of 23 minimalist, curated sets of DFT-calculated properties for "
     "individual elements for the purpose of providing input to machine learning of "
     "atomic potentials. Each element set contains on average ~4000 structures with "
-    "27 atoms per structure."
+    "27 atoms per structure. Configuration metadata includes Materials Project ID "
+    "where available, as well as temperatures at which MD trajectories were calculated."
+    "These temperatures correspond to the melting temperature (MT) and 0.25*MT for "
+    "elements with MT < 2000K, and MT, 0.6*MT and 0.25*MT for elements with MT > 2000K."
 )
 ELEMENTS = [
     "Ag",
@@ -61,14 +71,14 @@ ELEMENTS = [
     "Ni",
     "Os",
     "Pb",
-    # "Pd",
-    # "Pt",
-    # "Re",
-    # "Sb",
-    # "Sr",
-    # "Ti",
-    # "Zn",
-    # "Zr",
+    "Pd",
+    "Pt",
+    "Re",
+    "Sb",
+    "Sr",
+    "Ti",
+    "Zn",
+    "Zr",
 ]
 GLOB_STR = "box.npy"
 METHODS = "DFT-PBE"
@@ -93,10 +103,16 @@ def assemble_props(filepath: Path, element: str):
     return props
 
 
-def reader(filepath: Path, element: str):
+def reader(filepath: Path):
+    for elem in ELEMENTS:
+        if elem in filepath.parts:
+            element = elem
+            break
     start_part = filepath.parts.index(element)
     name_parts = filepath.parts[start_part:-2]
     name = "_".join(name_parts)
+    mp_id = None
+    temp = None
     for part in name_parts:
         if part.isdigit():
             temp = int(part)
@@ -118,7 +134,8 @@ def reader(filepath: Path, element: str):
             c.info["virial"] = virial[i]
         # if energy is not None:
         c.info["energy"] = float(energy[i])
-        c.info["mp_id"] = mp_id
+        if mp_id is not None:
+            c.info["mp_id"] = mp_id
         c.info["name"] = f"{name}_{i}"
         if temp is not None:
             c.info["temp"] = temp
@@ -147,53 +164,74 @@ def main(argv):
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
     )
 
-    configurations = load_data(
-        file_path=DATASET_FP,
-        file_format="folder",
-        name_field="name",
-        elements=ELEMENTS,
-        reader=reader,
-        glob_string=GLOB_STR,
-        generator=False,
-    )
-    client.insert_property_definition(atomic_forces_pd)
-    client.insert_property_definition(potential_energy_pd)
-    client.insert_property_definition(cauchy_stress_pd)
-
-    metadata = {
-        "software": {"value": SOFTWARE},
-        "method": {"value": METHODS},
-        # "": {"field": ""}
-    }
-    property_map = {
-        "potential-energy": [
-            {
-                "energy": {"field": "energy", "units": "eV"},
-                "per-atom": {"value": False, "units": None},
-                "_metadata": metadata,
-            }
-        ],
-        "atomic-forces": [
-            {
-                "forces": {"field": "forces", "units": "eV/A"},
-                "_metadata": metadata,
-            }
-        ],
-        "cauchy-stress": [
-            {
-                "stress": {"field": "virial", "units": "eV"},
-                "volume-normalized": {"value": True, "units": None},
-                "_metadata": metadata,
-            }
-        ],
-    }
-    ids = list(
-        client.insert_data(
-            configurations,
-            property_map=property_map,
+    for element in ELEMENTS:
+        elem_fp = next(DATASET_FP.glob(element))
+        configurations = load_data(
+            file_path=elem_fp,
+            file_format="folder",
+            name_field="name",
+            elements={element},
+            reader=reader,
+            glob_string=GLOB_STR,
             generator=False,
-            verbose=True,
         )
-    )
+        client.insert_property_definition(atomic_forces_pd)
+        client.insert_property_definition(potential_energy_pd)
+        client.insert_property_definition(cauchy_stress_pd)
 
-    all_co_ids, all_do_ids = list(zip(*ids))
+        metadata = {
+            "software": {"value": SOFTWARE},
+            "method": {"value": METHODS},
+            # "": {"field": ""}
+        }
+        co_md_map = {
+            "materials-project-id": {"field": "mp_id"},
+            "temperature": {"field": "temp"},
+        }
+        property_map = {
+            "potential-energy": [
+                {
+                    "energy": {"field": "energy", "units": "eV"},
+                    "per-atom": {"value": False, "units": None},
+                    "_metadata": metadata,
+                }
+            ],
+            "atomic-forces": [
+                {
+                    "forces": {"field": "forces", "units": "eV/A"},
+                    "_metadata": metadata,
+                }
+            ],
+            "cauchy-stress": [
+                {
+                    "stress": {"field": "virial", "units": "eV"},
+                    "volume-normalized": {"value": True, "units": None},
+                    "_metadata": metadata,
+                }
+            ],
+        }
+        ids = list(
+            client.insert_data(
+                configurations,
+                property_map=property_map,
+                co_md_map=co_md_map,
+                generator=False,
+                verbose=False,
+            )
+        )
+
+        all_co_ids, all_do_ids = list(zip(*ids))
+
+        client.insert_dataset(
+            do_hashes=all_do_ids,
+            name=f"{DATASET}-{element}",
+            authors=AUTHORS,
+            links=LINKS,
+            description=f"Configurations of {element} from Andolina & Saidi, 2023. {DS_DESC}",
+            verbose=True,
+            # cs_ids=cs_ids,
+        )
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

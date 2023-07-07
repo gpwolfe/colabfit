@@ -39,6 +39,7 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/nvnmd/"
     "nvnmd-master/examples/data/GeTe"
 )
+DATASET_FP = Path("data/nvnmd-master")  # remove
 DATASET = "NVNMD-GeTe"
 
 SOFTWARE = "FHI-aims"

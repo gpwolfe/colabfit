@@ -44,6 +44,7 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data"
     "/si_h_gap/Si-H-GAP-main/structural_data"
 )
+# DATASET_FP = Path("data/sihgap")  # remove
 DATASET = "Si-H-GAP"
 
 SOFTWARE = "Quantum ESPRESSO"

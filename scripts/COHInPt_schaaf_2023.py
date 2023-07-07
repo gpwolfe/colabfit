@@ -54,6 +54,7 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/cohinpt_schaaf"
 )
+# DATASET_FP = Path("data/reaction-barriers-mlffs-main") # remove
 METHOD = "DFT"
 SOFTWARE = "Quantum ESPRESSO"
 

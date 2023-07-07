@@ -34,6 +34,7 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/ho_limonitio"
 )
+# DATASET_FP = Path("data/limoniti")  # remove
 DATASET = "HO-LiMoNiTi-NPJCM-2020"
 
 SOFTWARE = "VASP"
@@ -141,7 +142,7 @@ def main(argv):
             configurations,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -206,7 +207,7 @@ def main(argv):
         authors=AUTHORS,
         links=LINKS,
         description=DS_DESC,
-        verbose=True,
+        verbose=False,
         cs_ids=cs_ids,
     )
 

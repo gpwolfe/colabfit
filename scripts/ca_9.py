@@ -75,6 +75,7 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/ca_9/ca_9_data"
 )
+# DATASET_FP = Path("data/CA-9") # remove
 DATASET = "CA-9"
 
 SOFTWARE = "VASP"
