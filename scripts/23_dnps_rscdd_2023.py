@@ -20,10 +20,11 @@ File notes
 ----------
 the file for coordinates at:
 23-Single-Element-DNPs-main/Training_Data/Zn/iter0/T225/T225_2/hxNPwQaO0Pg_2-2v8T_6JeSoclea/elastic/B222_dist03_0/set.000
-is empty, so these will have to be ignored. I left the files in place but renamed the .npy files to .npy_bad, which
+is empty, so these will have to be ignored. I left the files in place but renamed the
+.npy files to .npy_bad, which
 will be ignored by the globbing function.
 
-Some of the files don't get grouped properly by iteration upon untar, so these 
+Some of the files don't get grouped properly by iteration upon untar, so these
 are grouped manually
 """
 from argparse import ArgumentParser
@@ -227,7 +228,9 @@ def main(argv):
             name=f"{DATASET}-{element}",
             authors=AUTHORS,
             links=LINKS,
-            description=f"Configurations of {element} from Andolina & Saidi, 2023. {DS_DESC}",
+            description=(
+                f"Configurations of {element} from Andolina & Saidi, 2023. {DS_DESC}"
+            ),
             verbose=True,
             # cs_ids=cs_ids,
         )

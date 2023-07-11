@@ -3,13 +3,14 @@
 from argparse import ArgumentParser
 from pathlib import Path
 import sys
-
-
 from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.property_definitions import potential_energy_pd, atomic_forces_pd
 from ase.atoms import Atoms
 
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets/sGDML")
+# DATASET_FP = Path().cwd().parents[1] / "scripts/data/malonaldehyde_ccsd_t"  # remove
+
 DATASET = "Malonaldehyde_ccsdt_NC2018"
 
 LINKS = [
@@ -87,31 +88,8 @@ def main(argv):
     client = MongoDatabase(
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
     )
-
-    configurations = load_data(
-        file_path=DATASET_FP,
-        file_format="folder",
-        name_field="_name",
-        elements=["O", "H", "C"],
-        reader=reader_sGDML,
-        glob_string="malonaldehyde_ccsd_t-test.xyz",
-        default_name="malonaldehyde_ccsd_t-test",
-        verbose=True,
-        generator=False,
-    )
-
-    configurations += load_data(
-        file_path=DATASET_FP,
-        file_format="folder",
-        name_field="_name",
-        elements=["O", "H", "C"],
-        reader=reader_sGDML,
-        glob_string="malonaldehyde_ccsd_t-train.xyz",
-        default_name="malonaldehyde_ccsd_t-train",
-        verbose=True,
-        generator=False,
-    )
-
+    client.insert_property_definition(potential_energy_pd)
+    client.insert_property_definition(atomic_forces_pd)
     property_map = {
         "potential-energy": [
             {
@@ -136,46 +114,62 @@ def main(argv):
         ],
     }
 
-    ids = list(
-        client.insert_data(
-            configurations,
-            property_map=property_map,
+    for train_test in ["train", "test"]:
+        configurations = load_data(
+            file_path=DATASET_FP,
+            file_format="folder",
+            name_field="_name",
+            elements=["O", "H", "C"],
+            reader=reader_sGDML,
+            glob_string=f"malonaldehyde_ccsd_t-{train_test}.xyz",
+            default_name=f"malonaldehyde_ccsd_t-{train_test}",
+            verbose=True,
             generator=False,
-            transform=tform,
+        )
+
+        ids = list(
+            client.insert_data(
+                configurations,
+                property_map=property_map,
+                generator=False,
+                transform=tform,
+                verbose=True,
+            )
+        )
+
+        all_co_ids, all_pr_ids = list(zip(*ids))
+
+        # cs_regexes = {
+        #     "train": "Configurations used in training",
+        #     "test": "Configurations used for testing",
+        # }
+
+        # cs_names = ["train", "test"]
+
+        # cs_ids = []
+
+        # for i, (regex, desc) in enumerate(cs_regexes.items()):
+        #     cs_id = client.query_and_insert_configuration_set(
+        #         co_hashes=all_co_ids,
+        #         name=cs_names[i],
+        #         description=desc,
+        #         query={"names": {"$regex": regex}},
+        #     )
+        #     cs_ids.append(cs_id)
+
+        client.insert_dataset(
+            # cs_ids=cs_ids,
+            do_hashes=all_pr_ids,
+            name=f"{DATASET}-{train_test}",
+            authors=AUTHORS,
+            links=LINKS,
+            description=(
+                f"The {train_test} set of a train/test pair from the "
+                f"malonaldehyde dataset from sGDML. {DS_DESC}"
+            ),
+            resync=True,
             verbose=True,
         )
-    )
-
-    all_co_ids, all_pr_ids = list(zip(*ids))
-
-    cs_regexes = {
-        "train": "Configurations used in training",
-        "test": "Configurations used for testing",
-    }
-
-    cs_names = ["train", "test"]
-
-    cs_ids = []
-
-    for i, (regex, desc) in enumerate(cs_regexes.items()):
-        cs_id = client.query_and_insert_configuration_set(
-            co_hashes=all_co_ids,
-            name=cs_names[i],
-            description=desc,
-            query={"names": {"$regex": regex}},
-        )
-        cs_ids.append(cs_id)
-
-    client.insert_dataset(
-        cs_ids=cs_ids,
-        do_hashes=all_pr_ids,
-        name=DATASET,
-        authors=AUTHORS,
-        links=LINKS,
-        description=DS_DESC,
-        resync=True,
-        verbose=True,
-    )
 
 
 if __name__ == "__main__":

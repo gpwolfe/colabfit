@@ -57,6 +57,7 @@ import h5py
 import os
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/ani_al")
+# DATASET_FP = Path("data/Al-data")  # remove
 DATASET = "ANI-Al_NC2021"
 
 SOFTWARE = "Quantum ESPRESSO"
@@ -78,11 +79,7 @@ AUTHORS = [
     "Saryu Fensin",
     "Kipton Barros",
 ]
-DS_DESC = "Approximately 2800 configurations from a training dataset and \
-2800 from a test dataset of aluminum in crystal and melt phases, used for \
-training and testing the ANI neural network model."
 ELEMENTS = ["Al"]
-GLOB_STR = "*.h5"
 
 
 def reader(filepath):
@@ -124,16 +121,6 @@ def main(argv):
     client = MongoDatabase(
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
     )
-
-    configurations = load_data(
-        file_path=DATASET_FP,
-        file_format="folder",
-        name_field="name",
-        elements=ELEMENTS,
-        reader=reader,
-        glob_string=GLOB_STR,
-        generator=False,
-    )
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
 
@@ -158,64 +145,81 @@ def main(argv):
             }
         ],
     }
-    ids = list(
-        client.insert_data(
-            configurations,
-            co_md_map=co_md_map,
-            property_map=property_map,
+
+    for glob_ds in [("data-*.h5", "train"), ("testset*.h5", "test")]:
+        configurations = load_data(
+            file_path=DATASET_FP,
+            file_format="folder",
+            name_field="name",
+            elements=ELEMENTS,
+            reader=reader,
+            glob_string=glob_ds[0],
             generator=False,
+        )
+
+        ids = list(
+            client.insert_data(
+                configurations,
+                co_md_map=co_md_map,
+                property_map=property_map,
+                generator=False,
+                verbose=True,
+            )
+        )
+
+        all_co_ids, all_do_ids = list(zip(*ids))
+        # cs_regexes = [
+        #     [
+        #         f"{DATASET}-train",
+        #         "data*",
+        #         f"Training set from {DATASET} dataset",
+        #     ],
+        #     [
+        #         f"{DATASET}-test",
+        #         "testset*",
+        #         f"Test set from {DATASET} dataset",
+        #     ],
+        # ]
+
+        # cs_ids = []
+
+        # for i, (name, regex, desc) in enumerate(cs_regexes):
+        #     co_ids = client.get_data(
+        #         "configurations",
+        #         fields="hash",
+        #         query={
+        #             "hash": {"$in": all_co_ids},
+        #             "names": {"$regex": regex},
+        #         },
+        #         ravel=True,
+        #     ).tolist()
+
+        #     print(
+        #         f"Configuration set {i}",
+        #         f"({name}):".rjust(22),
+        #         f"{len(co_ids)}".rjust(7),
+        #     )
+        #     if len(co_ids) > 0:
+        #         cs_id = client.insert_configuration_set(co_ids, description=desc,
+        #                                                 name=name)
+
+        #         cs_ids.append(cs_id)
+        #     else:
+        #         pass
+
+        client.insert_dataset(
+            # cs_ids=cs_ids,
+            do_hashes=all_do_ids,
+            name=f"{DATASET}-{glob_ds[1]}",
+            authors=AUTHORS,
+            links=LINKS,
+            description=(
+                f"Approximately 2800 configurations from a {glob_ds[1]} dataset–one of "
+                "a pair of train/test datasets of aluminum in crystal and melt "
+                "phases, used for training and testing an ANI neural network model."
+            ),
             verbose=True,
         )
-    )
-
-    all_co_ids, all_do_ids = list(zip(*ids))
-    cs_regexes = [
-        [
-            f"{DATASET}-train",
-            "data*",
-            f"Training set from {DATASET} dataset",
-        ],
-        [
-            f"{DATASET}-test",
-            "testset*",
-            f"Test set from {DATASET} dataset",
-        ],
-    ]
-
-    cs_ids = []
-
-    for i, (name, regex, desc) in enumerate(cs_regexes):
-        co_ids = client.get_data(
-            "configurations",
-            fields="hash",
-            query={
-                "hash": {"$in": all_co_ids},
-                "names": {"$regex": regex},
-            },
-            ravel=True,
-        ).tolist()
-
-        print(
-            f"Configuration set {i}",
-            f"({name}):".rjust(22),
-            f"{len(co_ids)}".rjust(7),
-        )
-        if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
-
-            cs_ids.append(cs_id)
-        else:
-            pass
-
-    client.insert_dataset(
-        cs_ids=cs_ids,
-        do_hashes=all_do_ids,
-        name=DATASET,
-        authors=AUTHORS,
-        links=LINKS,
-        description=DS_DESC,
-        verbose=True,
-    )
 
 
 # Below lines taken from pyanitools.py. Sourced with dataset from:

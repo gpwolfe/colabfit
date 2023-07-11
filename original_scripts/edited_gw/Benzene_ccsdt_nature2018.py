@@ -8,7 +8,7 @@ from colabfit.tools.database import MongoDatabase, load_data
 from ase.atoms import Atoms
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets/sGDML")
-DATASET_FP = Path().cwd().parents[1] / "scripts/data/benzene_ccsd_t"  # remove
+# DATASET_FP = Path().cwd().parents[1] / "scripts/data/benzene_ccsd_t"  # remove
 DATASET = "Benzene_ccsdt_NC2018"
 
 LINKS = [
@@ -160,7 +160,10 @@ def main(argv):
             name=f"{DATASET}-{train_test}",
             authors=AUTHORS,
             links=LINKS,
-            description=f"The {train_test} set of a train/test pair. {DS_DESC}",
+            description=(
+                f"The {train_test} set of a train/test pair from the benzene "
+                f"dataset from sGDML. {DS_DESC}"
+            ),
             resync=True,
             verbose=True,
         )

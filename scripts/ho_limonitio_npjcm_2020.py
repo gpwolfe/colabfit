@@ -48,12 +48,6 @@ AUTHORS = [
     "Alexander Urban",
     "Nongnuch Artrith",
 ]
-DS_DESC = (
-    "Approximately 6,900 configurations of bulk water, water clusters "
-    "and Li8Mo2Ni7Ti7O32 used in the training of an ANN, whereby total energy "
-    "is extrapolated by a Taylor expansion as a means of reducing computational "
-    "costs."
-)
 ELEMENTS = ["H", "O", "Li", "Mo", "Ni", "Ti"]
 GLOB_STR = "*.xsf"
 
@@ -104,16 +98,6 @@ def main(argv):
     client = MongoDatabase(
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
     )
-
-    configurations = load_data(
-        file_path=DATASET_FP,
-        file_format="folder",
-        name_field="name",
-        elements=ELEMENTS,
-        reader=reader,
-        glob_string=GLOB_STR,
-        generator=False,
-    )
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
 
@@ -137,79 +121,102 @@ def main(argv):
             }
         ],
     }
-    ids = list(
-        client.insert_data(
-            configurations,
-            property_map=property_map,
-            generator=False,
-            verbose=False,
-        )
-    )
-
-    all_co_ids, all_do_ids = list(zip(*ids))
-
-    cs_regexes = [
+    glob_dss = [
         [
             f"{DATASET}-LiMoNiTi-train",
             "LMNTO-SCAN-train-data",
-            f"Training configurations of Li8Mo2Ni7Ti7O32 from {DATASET} dataset",
+            f"Training configurations of Li8Mo2Ni7Ti7O32 from {DATASET} used in the "
+            "training of an ANN, whereby total energy is extrapolated "
+            "by a Taylor expansion as a means of reducing computational costs.",
         ],
         [
             f"{DATASET}-LiMoNiTi-validation",
             "LMNTO-SCAN-validation-data",
-            f"Validation configurations of Li8Mo2Ni7Ti7O32 from {DATASET} dataset",
+            f"Validation configurations of Li8Mo2Ni7Ti7O32 from {DATASET} used in the "
+            "training of an ANN, whereby total energy is extrapolated by a Taylor "
+            "expansion as a means of reducing computational costs.",
         ],
         [
             f"{DATASET}-bulk-water-train-test",
             "liquid-64water-AIMD-RPBE-D3-train-test-data",
-            f"Training and testing configurations of bulk water from {DATASET} dataset",
+            f"Training and testing configurations of bulk water from {DATASET} used in "
+            "the training of an ANN, whereby total energy is extrapolated by a Taylor "
+            "expansion as a means of reducing computational costs.",
         ],
         [
             f"{DATASET}-bulk-water-validation",
             "liquid-64water-AIMD-RPBE-D3-validation-data",
-            f"Validation configurations of bulk water from {DATASET} dataset",
+            f"Validation configurations of bulk water from {DATASET} used in the "
+            "training of an ANN, whereby total energy is extrapolated by a Taylor "
+            "expansion as a means of reducing computational costs.",
         ],
         [
             f"{DATASET}-water-clusters",
             "water-clusters-BLYP-D3",
-            f"Configurations of water clusters from {DATASET} dataset",
+            f"Configurations of water clusters from {DATASET} used in the training of "
+            "an ANN, whereby total energy is extrapolated by a Taylor expansion as a "
+            "means of reducing computational costs.",
         ],
     ]
-
-    cs_ids = []
-
-    for i, (name, regex, desc) in enumerate(cs_regexes):
-        co_ids = client.get_data(
-            "configurations",
-            fields="hash",
-            query={
-                "hash": {"$in": all_co_ids},
-                "names": {"$regex": regex},
-            },
-            ravel=True,
-        ).tolist()
-
-        print(
-            f"Configuration set {i}",
-            f"({name}):".rjust(22),
-            f"{len(co_ids)}".rjust(7),
+    for glob_ds in glob_dss:
+        configurations = load_data(
+            file_path=DATASET_FP / glob_ds[1],
+            file_format="folder",
+            name_field="name",
+            elements=ELEMENTS,
+            reader=reader,
+            glob_string=GLOB_STR,
+            generator=False,
         )
-        if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
-            cs_ids.append(cs_id)
-        else:
-            pass
+        ids = list(
+            client.insert_data(
+                configurations,
+                property_map=property_map,
+                generator=False,
+                verbose=False,
+            )
+        )
 
-    client.insert_dataset(
-        do_hashes=all_do_ids,
-        name=DATASET,
-        authors=AUTHORS,
-        links=LINKS,
-        description=DS_DESC,
-        verbose=False,
-        cs_ids=cs_ids,
-    )
+        all_co_ids, all_do_ids = list(zip(*ids))
+
+        # dataset name, dataset directory, dataset description
+
+        # cs_ids = []
+
+        # for i, (name, regex, desc) in enumerate(cs_regexes):
+        #     co_ids = client.get_data(
+        #         "configurations",
+        #         fields="hash",
+        #         query={
+        #             "hash": {"$in": all_co_ids},
+        #             "names": {"$regex": regex},
+        #         },
+        #         ravel=True,
+        #     ).tolist()
+
+        #     print(
+        #         f"Configuration set {i}",
+        #         f"({name}):".rjust(22),
+        #         f"{len(co_ids)}".rjust(7),
+        #     )
+        #     if len(co_ids) > 0:
+        #         cs_id = client.insert_configuration_set(co_ids, description=desc,
+        #                                                 name=name)
+
+        #         cs_ids.append(cs_id)
+        #     else:
+        #         pass
+
+        client.insert_dataset(
+            do_hashes=all_do_ids,
+            name=glob_ds[0],
+            authors=AUTHORS,
+            links=LINKS,
+            description=glob_ds[2],
+            verbose=False,
+            # cs_ids=cs_ids,
+        )
 
 
 if __name__ == "__main__":

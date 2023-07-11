@@ -44,7 +44,7 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data"
     "/si_h_gap/Si-H-GAP-main/structural_data"
 )
-# DATASET_FP = Path("data/sihgap")  # remove
+# DATASET_FP = Path("data/si_h_gap")  # remove
 DATASET = "Si-H-GAP"
 
 SOFTWARE = "Quantum ESPRESSO"
@@ -60,12 +60,7 @@ AUTHORS = [
     "Gábor Csányi",
     "Gergely T. Zimányi",
 ]
-DS_DESC = (
-    "656 configurations of hydrogenated liquid and amorphous silicon, "
-    "divided into reference, training and validation sets."
-)
 ELEMENTS = ["Si", "H"]
-GLOB_STR = "*.xyz"
 
 
 def reader(filepath):
@@ -97,16 +92,6 @@ def main(argv):
     args = parser.parse_args(argv)
     client = MongoDatabase(
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
-    )
-
-    configurations = load_data(
-        file_path=DATASET_FP,
-        file_format="folder",
-        name_field="name",
-        elements=ELEMENTS,
-        reader=reader,
-        glob_string=GLOB_STR,
-        generator=False,
     )
     client.insert_property_definition(cauchy_stress_pd)
     client.insert_property_definition(potential_energy_pd)
@@ -144,76 +129,120 @@ def main(argv):
             }
         ],
     }
-    ids = list(
-        client.insert_data(
-            configurations,
-            co_md_map=co_md_map,
-            property_map=property_map,
+    glob_dss = [
+        (
+            "reference_structures.xyz",
+            "reference",
+            "A reference set of configurations of hydrogenated liquid and "
+            "amorphous silicon from the datasets for Si-H-GAP. These configurations "
+            "were used to evaluate training on a GAP model.",
+        ),
+        (
+            "training_structures_alternate_parameterization.xyz",
+            "training-alternate",
+            "A set of alternate training configurations of hydrogenated liquid and "
+            "amorphous silicon, from the datasets for Si-H-GAP. These configurations "
+            "differ in the values of associated properties (stress, energy, virial) "
+            "from the training structures included in the corresponding publication. ",
+        ),
+        (
+            "training_structures_paper_parameterization.xyz",
+            "training-publication",
+            "A set of training configurations of hydrogenated liquid and "
+            "amorphous silicon from the datasets for Si-H-GAP, used for "
+            "the corresponding publication",
+        ),
+        (
+            "validation_structures.xyz",
+            "validation",
+            "A set of validation configurations of hydrogenated liquid and "
+            "amorphous silicon from the datasets for Si-H-GAP. These configurations "
+            "served to augment the reference set as a final benchmark for NEP model "
+            "performance.",
+        ),
+    ]
+    for glob_ds in glob_dss:
+        configurations = load_data(
+            file_path=DATASET_FP,
+            file_format="folder",
+            name_field="name",
+            elements=ELEMENTS,
+            reader=reader,
+            glob_string=glob_ds[0],
             generator=False,
+        )
+
+        ids = list(
+            client.insert_data(
+                configurations,
+                co_md_map=co_md_map,
+                property_map=property_map,
+                generator=False,
+                verbose=True,
+            )
+        )
+
+        all_co_ids, all_do_ids = list(zip(*ids))
+        # cs_regexes = [
+        #     [
+        #         f"{DATASET}-reference",
+        #         "reference",
+        #         f"Reference configurations from {DATASET} dataset",
+        #     ],
+        #     [
+        #         f"{DATASET}-training-alternate",
+        #         "alternate",
+        #         f"Training configurations from {DATASET} dataset with alternate "
+        #         "regularization parameters",
+        #     ],
+        #     [
+        #         f"{DATASET}-training-paper",
+        #         "paper",
+        #         f"Training configurations from {DATASET} dataset with regularization "
+        #         "parameters shown in publication",
+        #     ],
+        #     [
+        #         f"{DATASET}-validation",
+        #         "validation",
+        #         f"Validation configurations from {DATASET} dataset",
+        #     ],
+        # ]
+
+        # cs_ids = []
+
+        # for i, (name, regex, desc) in enumerate(cs_regexes):
+        #     co_ids = client.get_data(
+        #         "configurations",
+        #         fields="hash",
+        #         query={
+        #             "hash": {"$in": all_co_ids},
+        #             "names": {"$regex": regex},
+        #         },
+        #         ravel=True,
+        #     ).tolist()
+
+        #     print(
+        #         f"Configuration set {i}",
+        #         f"({name}):".rjust(22),
+        #         f"{len(co_ids)}".rjust(7),
+        #     )
+        #     if len(co_ids) > 0:
+        #         cs_id = client.insert_configuration_set(co_ids, description=desc,
+        #                                                 name=name)
+
+        #         cs_ids.append(cs_id)
+        #     else:
+        #         pass
+
+        client.insert_dataset(
+            # cs_ids=cs_ids,
+            do_hashes=all_do_ids,
+            name=f"{DATASET}-{glob_ds[1]}",
+            authors=AUTHORS,
+            links=LINKS,
+            description=glob_ds[2],
             verbose=True,
         )
-    )
-
-    all_co_ids, all_do_ids = list(zip(*ids))
-    cs_regexes = [
-        [
-            f"{DATASET}-reference",
-            "reference",
-            f"Reference configurations from {DATASET} dataset",
-        ],
-        [
-            f"{DATASET}-training-alternate",
-            "alternate",
-            f"Training configurations from {DATASET} dataset with alternate "
-            "regularization parameters",
-        ],
-        [
-            f"{DATASET}-training-paper",
-            "paper",
-            f"Training configurations from {DATASET} dataset with regularization "
-            "parameters shown in publication",
-        ],
-        [
-            f"{DATASET}-validation",
-            "validation",
-            f"Validation configurations from {DATASET} dataset",
-        ],
-    ]
-
-    cs_ids = []
-
-    for i, (name, regex, desc) in enumerate(cs_regexes):
-        co_ids = client.get_data(
-            "configurations",
-            fields="hash",
-            query={
-                "hash": {"$in": all_co_ids},
-                "names": {"$regex": regex},
-            },
-            ravel=True,
-        ).tolist()
-
-        print(
-            f"Configuration set {i}",
-            f"({name}):".rjust(22),
-            f"{len(co_ids)}".rjust(7),
-        )
-        if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
-
-            cs_ids.append(cs_id)
-        else:
-            pass
-
-    client.insert_dataset(
-        cs_ids=cs_ids,
-        do_hashes=all_do_ids,
-        name=DATASET,
-        authors=AUTHORS,
-        links=LINKS,
-        description=DS_DESC,
-        verbose=True,
-    )
 
 
 if __name__ == "__main__":
