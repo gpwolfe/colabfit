@@ -75,7 +75,7 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/ca_9/ca_9_data"
 )
-# DATASET_FP = Path("data/CA-9") # remove
+DATASET_FP = Path("data/CA-9")  # remove
 DATASET = "CA-9"
 
 SOFTWARE = "VASP"
@@ -92,11 +92,12 @@ AUTHORS = [
     "J. Andreas Larsson",
     "Yoshiyuki Miyamoto",
 ]
-DS_DESC = "Approximately 50,000 configurations of carbon with curated subsets\
- chosen to test the effects of intentionally choosing dissimilar\
- configurations when training neural network potentials"
+DS_DESC = (
+    "CA-9 consists of configurations of carbon with curated subsets "
+    "chosen to test the effects of intentionally choosing dissimilar "
+    "configurations when training neural network potentials"
+)
 ELEMENTS = ["C"]
-GLOB_STR = "*.db"
 
 
 def reader(filename):
@@ -138,16 +139,6 @@ def main(argv):
     client = MongoDatabase(
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
     )
-
-    configurations = load_data(
-        file_path=DATASET_FP,
-        file_format="folder",
-        name_field="name",
-        elements=ELEMENTS,
-        reader=reader,
-        glob_string=GLOB_STR,
-        generator=False,
-    )
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(cauchy_stress_pd)
@@ -155,6 +146,7 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
+        "ecut": {"value": "520 eV"},
     }
     property_map = {
         "potential-energy": [
@@ -177,52 +169,55 @@ def main(argv):
             }
         ],
     }
-    ids = list(
-        client.insert_data(
-            configurations,
-            property_map=property_map,
-            generator=False,
-            verbose=True,
-        )
-    )
-
-    all_co_ids, all_do_ids = list(zip(*ids))
-    cs_regexes = [
-        [
-            f"{DATASET}-BB-training",
-            "BB_training.*",
-            f"Binning-binning configurations from {DATASET} dataset used for training "
-            "NNP_BB potential",
-        ],
-        [
-            f"{DATASET}-BB-validation",
-            "BB_validation.*",
-            f"Binning-binning configurations from {DATASET} dataset used during "
-            "validation step for NNP_BB potential",
-        ],
+    # name, glob string, description
+    glob_dss = [
         [
             f"{DATASET}-BR-training",
-            "BR_training.*",
+            "BR_training.db",
             f"Binning-random configurations from {DATASET} dataset used for training "
-            "NNP_BR potential",
+            f"NNP_BR potential. {DS_DESC}",
         ],
         [
             f"{DATASET}-BR-validation",
-            "BR_validation.*",
+            "BR_validation.db",
             f"Binning-random configurations from {DATASET} dataset used during "
-            "validation step for NNP_BR potential",
+            f"validation step for NNP_BR potential. {DS_DESC}",
+        ],
+        [
+            f"{DATASET}-BB-training",
+            "BB_training.db",
+            f"Binning-binning configurations from {DATASET} dataset used for training "
+            f"NNP_BB potential. {DS_DESC}",
+        ],
+        [
+            f"{DATASET}-BB-validation",
+            "BB_validation.db",
+            f"Binning-binning configurations from {DATASET} dataset used during "
+            f"validation step for NNP_BB potential. {DS_DESC}",
+        ],
+        [
+            f"{DATASET}-RR-validation",
+            "RR_validation.db",
+            f"Random-random configurations from {DATASET} dataset used during "
+            f"validation step for NNP_RR potential. {DS_DESC}",
+        ],
+        [
+            f"{DATASET}-RR-training",
+            "RR_training.db",
+            f"Random-random configurations from {DATASET} dataset used for training "
+            f"NNP_RR potential. {DS_DESC}",
         ],
         [
             f"{DATASET}-CA_9-training",
-            "CA-9_training.*",
+            "CA-9_training.db",
             f"Configurations from {DATASET} dataset used for training NNP_CA-9 "
-            "potential",
+            f"potential. {DS_DESC}",
         ],
         [
             f"{DATASET}-CA_9-validation",
-            "CA-9_validation.*",
+            "CA-9_validation.db",
             f"Configurations from {DATASET} dataset used during validation step for "
-            "NNP_CA-9 potential",
+            f"NNP_CA-9 potential. {DS_DESC}",
         ],
         # [
         #     f"{DATASET}-all",
@@ -230,58 +225,69 @@ def main(argv):
         #     f"Complete configuration set from {DATASET} dataset",
         # ],
         [
-            f"{DATASET}-RR-training",
-            "RR_training.*",
-            f"Random-random configurations from {DATASET} dataset used for training "
-            "NNP_RR potential",
-        ],
-        [
-            f"{DATASET}-RR-validation",
-            "RR_validation.*",
-            f"Random-random configurations from {DATASET} dataset used during "
-            "validation step for NNP_RR potential",
-        ],
-        [
             f"{DATASET}-test",
-            "test_images.*",
-            f"Test configurations from {DATASET} dataset used to evaluate trained NNPs",
+            "test_images.db",
+            f"Test configurations from {DATASET} dataset used to evaluate trained NNPs."
+            f"{DS_DESC}",
         ],
     ]
-
-    cs_ids = []
-
-    for i, (name, regex, desc) in enumerate(cs_regexes):
-        co_ids = client.get_data(
-            "configurations",
-            fields="hash",
-            query={
-                "hash": {"$in": all_co_ids},
-                "names": {"$regex": regex},
-            },
-            ravel=True,
-        ).tolist()
-
-        print(
-            f"Configuration set {i}",
-            f"({name}):".rjust(22),
-            f"{len(co_ids)}".rjust(7),
+    for ds_name, glob_str, description in glob_dss:
+        print(ds_name)
+        configurations = load_data(
+            file_path=DATASET_FP,
+            file_format="folder",
+            name_field="name",
+            elements=ELEMENTS,
+            reader=reader,
+            glob_string=glob_str,
+            generator=False,
         )
-        if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
-            cs_ids.append(cs_id)
-        else:
-            pass
+        ids = list(
+            client.insert_data(
+                configurations,
+                property_map=property_map,
+                generator=False,
+                verbose=False,
+            )
+        )
 
-    client.insert_dataset(
-        cs_ids=cs_ids,
-        do_hashes=all_do_ids,
-        name=DATASET,
-        authors=AUTHORS,
-        links=LINKS,
-        description=DS_DESC,
-        verbose=True,
-    )
+        all_co_ids, all_do_ids = list(zip(*ids))
+
+        # cs_ids = []
+
+        # for i, (name, regex, desc) in enumerate(cs_regexes):
+        #     co_ids = client.get_data(
+        #         "configurations",
+        #         fields="hash",
+        #         query={
+        #             "hash": {"$in": all_co_ids},
+        #             "names": {"$regex": regex},
+        #         },
+        #         ravel=True,
+        #     ).tolist()
+
+        #     print(
+        #         f"Configuration set {i}",
+        #         f"({name}):".rjust(22),
+        #         f"{len(co_ids)}".rjust(7),
+        #     )
+        #     if len(co_ids) > 0:
+        #         cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
+
+        #         cs_ids.append(cs_id)
+        #     else:
+        #         pass
+
+        client.insert_dataset(
+            # cs_ids=cs_ids,
+            do_hashes=all_do_ids,
+            name=ds_name,
+            authors=AUTHORS,
+            links=LINKS,
+            description=description,
+            verbose=False,
+        )
 
 
 if __name__ == "__main__":
