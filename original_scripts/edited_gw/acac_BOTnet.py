@@ -15,7 +15,7 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/new_raw_datasets/"
     "BOTNet/BOTNet-datasets-main/dataset_acac"
 )
-DATASET_FP = Path().cwd().parents[1] / "scripts/data/dataset_acac"  # remove
+# DATASET_FP = Path().cwd().parents[1] / "scripts/data/dataset_acac"  # remove
 DATASET_NAME = "BOTnetACAC_arXiv2022"
 AUTHORS = [
     "Ilyes Batatia",
