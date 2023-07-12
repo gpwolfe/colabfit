@@ -44,7 +44,7 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data"
     "/si_h_gap/Si-H-GAP-main/structural_data"
 )
-# DATASET_FP = Path("data/si_h_gap")  # remove
+DATASET_FP = Path("data/si_h_gap")  # remove
 DATASET = "Si-H-GAP"
 
 SOFTWARE = "Quantum ESPRESSO"
@@ -69,6 +69,23 @@ def reader(filepath):
         atom.info["name"] = f"{filepath.stem}_{atom.info['config_type']}_{i}"
         if atom.info.get("dft_virial") is not None:
             atom.info["stress"] = np.array(atom.info.get("dft_virial")).reshape(3, 3)
+    return atoms
+
+
+def train_reader(fp_paper):
+    fp_alt = next(
+        DATASET_FP.rglob("training_structures_alternate_parameterization.xyz")
+    )
+    atoms = read(fp_paper, index=":", format="extxyz")
+    alts = read(fp_alt, index=":", format="extxyz")
+    sigmas = [config.info["virial_sigma"] for config in alts]
+    for i, atom in enumerate(atoms):
+        atom.info["name"] = f"training_structures_{atom.info['config_type']}_{i}"
+        atom.info["virial_sigma_paper"] = atom.info.pop("virial_sigma", None)
+        atom.info["virial_sigma_alternate"] = sigmas[i]
+        if atom.info.get("dft_virial") is not None:
+            atom.info["stress"] = np.array(atom.info.get("dft_virial")).reshape(3, 3)
+
     return atoms
 
 
@@ -104,7 +121,9 @@ def main(argv):
     co_md_map = {
         "energy-sigma": {"field": "energy_sigma"},
         "virial-sigma": {"field": "virial_sigma"},
-        "force-atom-sigma": {"field": "force_atom_sigma"}
+        "force-atom-sigma": {"field": "force_atom_sigma"},
+        "virial-sigma-paper": {"field": "virial_sigma_paper"},
+        "virial-sigma-alternate": {"field": "virial_sigma_alternate"}
         # "": {"field": ""}
     }
     property_map = {
@@ -138,19 +157,13 @@ def main(argv):
             "were used to evaluate training on a GAP model.",
         ),
         (
-            "training_structures_alternate_parameterization.xyz",
-            "training-alternate",
-            "A set of alternate training configurations of hydrogenated liquid and "
-            "amorphous silicon, from the datasets for Si-H-GAP. These configurations "
-            "differ in the values of associated properties (stress, energy, virial) "
-            "from the training structures included in the corresponding publication. ",
-        ),
-        (
             "training_structures_paper_parameterization.xyz",
-            "training-publication",
+            "training",
             "A set of training configurations of hydrogenated liquid and "
-            "amorphous silicon from the datasets for Si-H-GAP, used for "
-            "the corresponding publication",
+            "amorphous silicon from the datasets for Si-H-GAP. Includes virial sigmas "
+            "used for configurations used in the corresponding publication "
+            "(virial-sigma-paper) as well as an alternate configuration defined "
+            "by doubled virial sigma prefactors (from 0.025 to 0.05).",
         ),
         (
             "validation_structures.xyz",
@@ -162,15 +175,26 @@ def main(argv):
         ),
     ]
     for glob_ds in glob_dss:
-        configurations = load_data(
-            file_path=DATASET_FP,
-            file_format="folder",
-            name_field="name",
-            elements=ELEMENTS,
-            reader=reader,
-            glob_string=glob_ds[0],
-            generator=False,
-        )
+        if "training" in glob_ds[1]:
+            configurations = load_data(
+                file_path=DATASET_FP,
+                file_format="folder",
+                name_field="name",
+                elements=ELEMENTS,
+                reader=train_reader,
+                glob_string=glob_ds[0],
+                generator=False,
+            )
+        else:
+            configurations = load_data(
+                file_path=DATASET_FP,
+                file_format="folder",
+                name_field="name",
+                elements=ELEMENTS,
+                reader=reader,
+                glob_string=glob_ds[0],
+                generator=False,
+            )
 
         ids = list(
             client.insert_data(
