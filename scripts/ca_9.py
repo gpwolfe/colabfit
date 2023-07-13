@@ -75,7 +75,7 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/ca_9/ca_9_data"
 )
-DATASET_FP = Path("data/CA-9")  # remove
+# DATASET_FP = Path("data/CA-9")  # remove
 DATASET = "CA-9"
 
 SOFTWARE = "VASP"
@@ -273,7 +273,8 @@ def main(argv):
         #         f"{len(co_ids)}".rjust(7),
         #     )
         #     if len(co_ids) > 0:
-        #         cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
+        #         cs_id = client.insert_configuration_set(co_ids, description=desc,
+        #                                                 name=name)
 
         #         cs_ids.append(cs_id)
         #     else:

@@ -53,7 +53,7 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/nep_qhpf/data"
 )
-DATASET_FP = Path("data/nep_qhpf")
+# DATASET_FP = Path("data/nep_qhpf")
 DATASET = "NEP-qHPF"
 
 SOFTWARE = "VASP"

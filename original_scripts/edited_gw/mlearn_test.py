@@ -261,7 +261,7 @@ def main(argv):
 
                 count += len(co_ids)
 
-    for elem, e_cs_ids in cs_ids[elem].items():
+    for elem, e_cs_ids in cs_ids.items():
         client.insert_dataset(
             cs_ids=e_cs_ids,
             do_hashes=all_pr_ids,

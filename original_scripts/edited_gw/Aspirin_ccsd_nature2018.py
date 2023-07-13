@@ -12,7 +12,7 @@ from colabfit.tools.property_definitions import (
 from ase.atoms import Atoms
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets/sGDML")
-# DATASET_FP = Path().cwd().parents[1] / "scripts/data/aspirin_ccsd"  # remove
+DATASET_FP = Path().cwd().parents[1] / "data/aspirin_ccsd"  # remove
 
 DATASET_NAME = "Aspirin_ccsd_NC2018"
 AUTHORS = [
