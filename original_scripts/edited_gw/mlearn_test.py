@@ -274,8 +274,8 @@ def main(argv):
                 "were chosen to span a variety of chemistries (main group "
                 "metal, transition metal, and semiconductor), crystal "
                 "structures (bcc, fcc, and diamond) and bonding types "
-                "(metallic and covalent). This dataset comprises only the {} "
-                "configurations".format(elem)
+                f"(metallic and covalent). This dataset comprises only the {elem} "
+                "configurations"
             ),
             verbose=True,
         )
