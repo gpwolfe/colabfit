@@ -6,8 +6,6 @@ File notes
 
 """
 from argparse import ArgumentParser
-import glob
-import itertools
 import json
 from pathlib import Path
 import sys
@@ -19,12 +17,15 @@ from pymatgen.io.ase import AseAtomsAdaptor
 
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import MongoDatabase, load_data
-
+from colabfit.tools.property_definitions import (
+    potential_energy_pd,
+    cauchy_stress_pd,
+    atomic_forces_pd,
+)
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/data/mlearn")
 LINKS = [
     "https://doi.org/10.1021/acs.jpca.9b08723",
-    "https://doi.org/10.48550/arXiv.1906.08888",
     "https://github.com/materialsvirtuallab/mlearn",
 ]
 AUTHORS = [
@@ -123,32 +124,6 @@ def main(argv):
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
     )
 
-    pds = glob.glob("/home/ubuntu/calc_notebooks/*.json")
-    for pd in pds:
-        client.insert_property_definition(pd)
-
-    images = list(
-        load_data(
-            file_path=DATASET_FP,
-            file_format="folder",
-            name_field="_name",
-            elements=[
-                "Cu",
-                "Ge",
-                "Li",
-                "Mo",
-                "Ni",
-                "Si",
-            ],
-            default_name="mlearn",  # default name with `name_field` not found
-            reader=reader,
-            glob_string="*test.json",
-            verbose=True,
-        )
-    )
-
-    set(itertools.chain.from_iterable([a.info["_labels"] for a in images]))
-
     # TODO
     property_map = {
         "potential-energy": [
@@ -194,11 +169,6 @@ def main(argv):
             }
         ],
     }
-
-    ids = client.insert_data(images, property_map=property_map, verbose=True)
-
-    all_co_ids, all_pr_ids = list(zip(*ids))
-
     configuration_set_regexes = {
         "Ground|relaxed": "Ground state structure",
         "Vacancy": "NVT AIMD simulations of the bulk supercells with "
@@ -221,18 +191,39 @@ def main(argv):
         "The supercells used are the 3 x 3 x 3, 3 x 3 x 3, and "
         "2 x 2 x 2 of the conventional bcc, fcc, and diamond unit cells, respectively",
     }
+    client.insert_property_definition(potential_energy_pd)
+    client.insert_property_definition(atomic_forces_pd)
+    client.insert_property_definition(cauchy_stress_pd)
+    elements = [
+        "Cu",
+        "Ge",
+        "Li",
+        "Mo",
+        "Ni",
+        "Si",
+    ]
 
-    images[1]
+    for elem in elements:
+        images = list(
+            load_data(
+                file_path=DATASET_FP / elem,
+                file_format="folder",
+                name_field="_name",
+                elements=[f"{elem}"],
+                default_name="mlearn",
+                reader=reader,
+                glob_string="test.json",
+                verbose=False,
+            )
+        )
+        ids = client.insert_data(images, property_map=property_map, verbose=False)
 
-    images[1].info
+        all_co_ids, all_pr_ids = list(zip(*ids))
 
-    cs_ids = {k: [] for k in ["Cu", "Ge", "Li", "Mo", "Ni", "Si"]}
-    cs_names = ["ground", "vacancy", "AIMD_NVT", "surface", "strain"]
-    # TODO
-    co_ids_recheck = []
-    for elem in cs_ids.keys():
+        cs_ids = []
+        cs_names = ["ground", "vacancy", "AIMD_NVT", "surface", "strain"]
+        # TODO
         print(elem)
-        count = 0
         for i, (regex, desc) in enumerate(configuration_set_regexes.items()):
             co_ids = client.get_data(
                 "configurations",
@@ -245,8 +236,6 @@ def main(argv):
             ).tolist()
 
             if co_ids:
-                co_ids_recheck += co_ids
-
                 print(
                     f"\tConfiguration set {i}",
                     f"({regex}):".rjust(22),
@@ -257,13 +246,10 @@ def main(argv):
                     co_ids, description=desc, name=f"{elem}_{cs_names[i]}"
                 )
 
-                cs_ids[elem].append(cs_id)
+                cs_ids.append(cs_id)
 
-                count += len(co_ids)
-
-    for elem, e_cs_ids in cs_ids.items():
         client.insert_dataset(
-            cs_ids=e_cs_ids,
+            cs_ids=cs_ids,
             do_hashes=all_pr_ids,
             name="mlearn_" + elem + "_test",
             authors=AUTHORS,
@@ -277,7 +263,7 @@ def main(argv):
                 f"(metallic and covalent). This dataset comprises only the {elem} "
                 "configurations"
             ),
-            verbose=True,
+            verbose=False,
         )
 
 
