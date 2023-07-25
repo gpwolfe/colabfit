@@ -12,7 +12,7 @@ import sys
 
 
 DATASET_FP = Path("/large_data/new_raw_datasets_2.0/nenci2021/nenci2021/xyzfiles/")
-DATASET_FP = Path("data/nenci2021/test_xyz")  # remove
+DATASET_FP = Path("data/nenci2021/xyzfiles")  # remove
 
 DS_NAME = "NENCI-2021"
 AUTHORS = [
@@ -30,7 +30,8 @@ DS_DESC = (
     "NENCI-2021 is a database of approximately 8000 benchmark Non-Equilibirum "
     "Non-Covalent Interaction (NENCI) energies performed on molecular dimers;"
     "intermolecular complexes of biological and chemical relevance with a "
-    "particular emphasis on close intermolecular contacts."
+    "particular emphasis on close intermolecular contacts. Based on dimers"
+    "from the S101 database."
 )
 PROPS = [
     "dimer_charge",
@@ -64,6 +65,7 @@ def nenci_props_parser(string):
 
 
 def reader(file_path):
+    print(file_path.name)
     with open(file_path, "r") as f:
         atom = next(read_xyz(f, properties_parser=nenci_props_parser))
     atom.info["name"] = file_path.stem
@@ -84,6 +86,9 @@ co_md = {
     "SAPT2+/aDZ-induction": {"field": "sapt_induction"},
     "SAPT2+/aDZ-dispersion": {"field": "sapt_dispersion"},
 }
+CS_COMBOS = set()
+for f in DATASET_FP.glob("*.xyz"):
+    CS_COMBOS.add(tuple(f.stem.split("_")[1].split("-")))
 
 
 def main(argv):
@@ -115,7 +120,7 @@ def main(argv):
         file_path=DATASET_FP,
         file_format="folder",
         name_field="name",
-        elements=["C", "H", "N", "O", "F", "Cl", "Br", "S", "P"],
+        elements=None,
         reader=reader,
         glob_string="*.xyz",
         verbose=True,
@@ -157,28 +162,29 @@ def main(argv):
             verbose=True,
         )
     )
+    print(ids)
 
     all_co_ids, all_pr_ids = list(zip(*ids))
+    cs_info = []
+    for mon_a, mon_b in CS_COMBOS:
+        # name, regex, desciption
+        cs_info.append(
+            (
+                f"{mon_a.lower()}-{mon_b.lower()}",
+                f"Dimers containing {mon_a.lower()} as monomer A and {mon_b.lower()} as monomer B",
+                f"{mon_a}-{mon_b}",
+            )
+        )
 
-    cs_info = [
-        {"name": "Water-Water", "description": "Dimers containing only water"},
-        {"name": "Water-MeOH", "description": "Dimers containing "},
-        {"name": "MeCl-MeNH2", "description": "Dimers containing "},
-        {"name": "Water-Peptide", "description": "Dimers containing "},
-        {"name": "MeOH-MeOH", "description": "Dimers containing"},
-        {"name": "MeOH-MeNH2", "description": "Dimers containing "},
-        {"name": "MeOh-Peptide", "description": "Dimers containing"},
-        {"name": "MeOH-Water", "description": "Dimers containing "},
-    ]
     cs_ids = []
 
-    for i in cs_info:
+    for name, desc, reg in cs_info:
         cs_id = client.query_and_insert_configuration_set(
             co_hashes=all_co_ids,
             ds_id=ds_id,
-            query={"names": {"$regex": i["name"] + "_*"}},
-            name=i["name"],
-            description=i["description"],
+            query={"names": {"$regex": reg}},
+            name=name,
+            description=desc,
         )
 
         cs_ids.append(cs_id)
