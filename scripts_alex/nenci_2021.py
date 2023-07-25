@@ -77,8 +77,8 @@ co_md = {
     "monomer_a_multiplicity": {"field": "monomer_a_multiplicity"},
     "momomer_b_charge": {"field": "momomer_b_charge"},
     "monomer_b_multiplicity": {"field": "monomer_b_multiplicity"},
-    "natoms_monomer_a": {"field": "natoms_monomer_a"},
-    "natoms_monomer_b": {"field": "natoms_monomer_b"},
+    "num_atoms_monomer_a": {"field": "natoms_monomer_a"},
+    "num_atoms_monomer_b": {"field": "natoms_monomer_b"},
     "SAPT2+/aDZ-electrostatics": {"field": "sapt_electrostatics"},
     "SAPT2+/aDZ-exchange": {"field": "sapt_exchange"},
     "SAPT2+/aDZ-induction": {"field": "sapt_induction"},
@@ -168,7 +168,7 @@ def main(argv):
         {"name": "MeOH-MeOH", "description": "Dimers containing"},
         {"name": "MeOH-MeNH2", "description": "Dimers containing "},
         {"name": "MeOh-Peptide", "description": "Dimers containing"},
-        {"name": "MeCl-MeCl", "description": "Dimers containing "},
+        {"name": "MeOH-Water", "description": "Dimers containing "},
     ]
     cs_ids = []
 
