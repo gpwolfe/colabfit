@@ -31,7 +31,7 @@ from colabfit.tools.property_definitions import (
 )
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/data/mlearn")
-DATASET_FP = Path.cwd().parents[1] / "data/mlearn/mlearn-master/data"
+# DATASET_FP = Path.cwd().parents[1] / "data/mlearn/mlearn-master/data"
 LINKS = [
     "https://doi.org/10.1021/acs.jpca.9b08723",
     "https://github.com/materialsvirtuallab/mlearn",
