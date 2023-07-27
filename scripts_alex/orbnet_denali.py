@@ -1,7 +1,7 @@
 """
 File notes
 ----------
-After checking, Entos Qcore appears to be the software used
+Entos Qcore appears to be the software used
 
 denali_labels file line format:
 sample_id,subset (hash in file name),mol_id, test_set,test_set_plus,prelim_1, \
