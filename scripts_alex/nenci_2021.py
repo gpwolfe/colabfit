@@ -1,5 +1,26 @@
 """
-Dimer charge, Dimer multiplicity, Momomer A charge, Monomer A multiplicity, Momomer B charge, Monomer B multiplicity, # of atoms in Monomer A, # of atoms in Monomer B, CCSD(T)/CBS,   CCSD(T)/haTZ,   MP2/haTZ,   MP2/CBS,   MP2/aTZ,   MP2/aQZ,   HF/haTZ,   HF/aTZ,   HF/aQZ,   SAPT2+/aDZ Tot,   SAPT2+/aDZ Elst,   SAPT2+/aDZ Exch,   SAPT2+/aDZ Ind,   SAPT2+/aDZ Disp
+authors: Gregory Wolfe, Alexander Tao
+
+XYZ header
+----------
+Dimer charge, Dimer multiplicity, Momomer A charge, Monomer A multiplicity,
+Momomer B charge, Monomer B multiplicity, # of atoms in Monomer A,
+# of atoms in Monomer B, CCSD(T)/CBS,   CCSD(T)/haTZ,   MP2/haTZ,   MP2/CBS,
+MP2/aTZ,   MP2/aQZ,   HF/haTZ,   HF/aTZ,   HF/aQZ,   SAPT2+/aDZ Tot,
+SAPT2+/aDZ Elst,   SAPT2+/aDZ Exch,   SAPT2+/aDZ Ind,   SAPT2+/aDZ Disp
+
+File notes
+----------
+All potential energy values for a variety of methods and basis sets are included in the
+header of each XYZ file.
+
+Other property values included in configuration metadata:
+SAPT2+ elements (besides total value, which is included in potential energy values)
+Monomer charges for monomer A and B seperately
+Monomer multiplicity for monomer A and B seperately
+Dimer charge
+Dimer multiplicity
+Number of atoms in each monomer
 """
 
 from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
@@ -11,8 +32,10 @@ from pathlib import Path
 import sys
 
 
-DATASET_FP = Path("/large_data/new_raw_datasets_2.0/nenci2021/nenci2021/xyzfiles/")
-DATASET_FP = Path("data/nenci2021/xyzfiles")  # remove
+DATASET_FP = Path(
+    " /persistent/colabfit_raw_data/new_raw_datasets_2.0/nenci2021/nenci2021/xyzfiles/"
+)
+# DATASET_FP = Path("data/nenci2021/xyzfiles")  # remove
 
 DS_NAME = "NENCI-2021"
 AUTHORS = [
@@ -36,26 +59,39 @@ DS_DESC = (
 PROPS = [
     "dimer_charge",
     "dimer_multiplicity",
-    "momomer_a_charge",
+    "monomer_a_charge",
     "monomer_a_multiplicity",
-    "momomer_b_charge",
+    "monomer_b_charge",
     "monomer_b_multiplicity",
     "natoms_monomer_a",
     "natoms_monomer_b",
-    "CCSD(T)/CBS",
+    "CCSD(T)/CBS",  # CBS
     "CCSD(T)/haTZ",  # heavy-aug-cc-pVTZ
     "MP2/haTZ",  # heavy-aug-cc-pVTZ
     "MP2/CBS",
-    "MP2/aTZ",  #  aug-cc-pVTZ
-    "MP2/aQZ",  #  aug-cc-pVQZ
+    "MP2/aTZ",  # aug-cc-pVTZ
+    "MP2/aQZ",  # aug-cc-pVQZ
     "HF/haTZ",  # heavy-aug-cc-pVTZ
-    "HF/aTZ",  #  aug-cc-pVTZ
-    "HF/aQZ",  #  aug-cc-pVQZ
-    "sapt_total",  #  aug-cc-pVDZ
+    "HF/aTZ",  # aug-cc-pVTZ
+    "HF/aQZ",  # aug-cc-pVQZ
+    "SAPT2+",  # aug-cc-pVDZ
     "sapt_electrostatics",
     "sapt_exchange",
     "sapt_induction",
     "sapt_dispersion",
+]
+# field, method, basis set
+field_meth_bas = [
+    ("CCSD(T)/CBS", "CCSD(T)", "CBS"),
+    ("CCSD(T)/haTZ", "CCSD(T)", "heavy-aug-cc-pVTZ"),
+    ("MP2/haTZ", "MP2", "heavy-aug-cc-pVTZ"),
+    ("MP2/CBS", "MP2", "CBS"),
+    ("MP2/aTZ", "MP2", "aug-cc-pVTZ"),
+    ("MP2/aQZ", "MP2", "aug-cc-pVQZ"),
+    ("HF/haTZ", "HF", "heavy-aug-cc-pVTZ"),
+    ("HF/aTZ", "HF", "aug-cc-pVTZ"),
+    ("HF/aQZ", "HF", "aug-cc-pVQZ"),
+    ("SAPT2+", "SAPT2+", "aug-cc-pVDZ"),
 ]
 
 
@@ -65,7 +101,6 @@ def nenci_props_parser(string):
 
 
 def reader(file_path):
-    print(file_path.name)
     with open(file_path, "r") as f:
         atom = next(read_xyz(f, properties_parser=nenci_props_parser))
     atom.info["name"] = file_path.stem
@@ -75,9 +110,9 @@ def reader(file_path):
 co_md = {
     "dimer-charge": {"field": "dimer_charge"},
     "dimer-multiplicity": {"field": "dimer_multiplicity"},
-    "momomer_a_charge": {"field": "momomer_a_charge"},
+    "monomer_a_charge": {"field": "momomer_a_charge"},
     "monomer_a_multiplicity": {"field": "monomer_a_multiplicity"},
-    "momomer_b_charge": {"field": "momomer_b_charge"},
+    "monomer_b_charge": {"field": "momomer_b_charge"},
     "monomer_b_multiplicity": {"field": "monomer_b_multiplicity"},
     "num_atoms_monomer_a": {"field": "natoms_monomer_a"},
     "num_atoms_monomer_b": {"field": "natoms_monomer_b"},
@@ -123,33 +158,23 @@ def main(argv):
         elements=None,
         reader=reader,
         glob_string="*.xyz",
-        verbose=True,
+        verbose=False,
         generator=False,
     )
 
     property_map = {
         "potential-energy": [
             {
-                "energy": {"field": "CCSD(T)/CBS", "units": "kcal/mol"},
+                "energy": {"field": fmb[0], "units": "kcal/mol"},
                 "per-atom": {"value": False, "units": None},
                 "_metadata": {
                     "software": {"value": "Psi4"},
-                    "method": {"value": "CCSD(T)"},
-                    "basis-set": {"value": "CBS"},
+                    "method": {"value": fmb[1]},
+                    "basis-set": {"value": fmb[2]},
                 },
             }
-        ],
-        "potential-energy": [
-            {
-                "energy": {"field": "sapt_total", "units": "kcal/mol"},
-                "per-atom": {"value": False, "units": None},
-                "_metadata": {
-                    "software": {"value": "Psi4"},
-                    "method": {"value": "SAPT2+"},
-                    "basis-set": {"value": "aug-cc-pVDZ"},
-                },
-            }
-        ],
+            for fmb in field_meth_bas
+        ]
     }
 
     ids = list(
@@ -159,10 +184,9 @@ def main(argv):
             ds_id=ds_id,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
-    print(ids)
 
     all_co_ids, all_pr_ids = list(zip(*ids))
     cs_info = []
@@ -170,8 +194,8 @@ def main(argv):
         # name, regex, desciption
         cs_info.append(
             (
-                f"{mon_a.lower()}-{mon_b.lower()}",
-                f"Dimers containing {mon_a.lower()} as monomer A and {mon_b.lower()} as monomer B",
+                f"{mon_a}-{mon_b}",
+                f"Dimers containing {mon_a} as monomer A " f"and {mon_b} as monomer B",
                 f"{mon_a}-{mon_b}",
             )
         )
