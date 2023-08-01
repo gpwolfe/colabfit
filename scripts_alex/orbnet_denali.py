@@ -21,8 +21,8 @@ import sys
 from tqdm import tqdm
 
 
-DATASET_FP = Path("/large_data/new_raw_datasets_2.0/OrbNet_Denali/")
-DATASET_FP = Path("data/orbnet")  # remove
+DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/OrbNet_Denali")
+# DATASET_FP = Path("data/orbnet")  # remove
 DS_NAME = "Orbnet-Denali"
 LINKS = [
     "https://doi.org/10.1063/5.0061990",
