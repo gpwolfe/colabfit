@@ -20,8 +20,8 @@ from pathlib import Path
 import sys
 from tqdm import tqdm
 
-
-DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/OrbNet_Denali")
+DATASET_FP = Path("/vast/gw2338/orbnet/")
+# DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/OrbNet_Denali")
 # DATASET_FP = Path("data/orbnet")  # remove
 DS_NAME = "Orbnet-Denali"
 LINKS = [
@@ -50,7 +50,8 @@ DS_DESC = (
 
 
 def reader_OrbNet(fp):
-    df = pd.read_csv(fp, index_col=0)
+    df = pd.read_csv(fp)
+    df = df.iloc[:,1:]
     structures = []
     for row in tqdm(df.itertuples()):
         f = DATASET_FP / "xyz_files" / row.mol_id / f"{row.sample_id}.xyz"
@@ -87,7 +88,7 @@ def main(argv):
     args = parser.parse_args(argv)
 
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:5000"
     )
     client.insert_property_definition(potential_energy_pd)
     ds_id = generate_ds_id()

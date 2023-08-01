@@ -22,7 +22,7 @@ LINKS = [
     "https://doi.org/10.5281/zenodo.7032333",
 ]
 DATASET_FP = Path("/large_data/new_raw_datasets_2.0/WS22_database")
-DATASET_FP = Path("data/w22")
+DATASET_FP = Path("data/ws22")
 DS_DESC = (
     "The WS22 database combines Wigner sampling with geometry interpolation to generate"
     " 1.18 million molecular geometries equally distributed into 10 independent "
@@ -46,8 +46,8 @@ def reader_ws22(p):
     hl = a["HL"]
     d = a["DP"]
     # q=a['nuclear_charges']
-    # for i in range(r.shape[0]):
-    for i in range(20000):
+    for i in range(r.shape[0]):
+    # for i in range(20000):
         # n=na[i]
         # atom = Atoms(numbers=z[i, :], positions=r[i, :n, :])
         atom = Atoms(numbers=z, positions=r[i])
@@ -99,15 +99,16 @@ def tform(c):
 
 
 name_glob_desc = [
-    ("WS22-alanine", "alanine", "Configurations of alanine from WS22. "),
-    ("WS22-dmabn", "dmabn", "Configurations of dmabn from WS22. "),
-    ("WS22-nitrophenol", "nitrophenol", "Configurations of nitrophenol from WS22. "),
-    ("WS22-o-hbdi", "o-hbdi", "Configurations of o-hbdi from WS22. "),
-    ("WS22-sma", "sma", "Configurations of sma from WS22. "),
-    ("WS22-thymine", "thymine", "Configurations of o-hbdi from WS22. "),
-    ("WS22-toluene", "toluene", "Configurations of toluene from WS22. "),
-    ("WS22-urea", "urea", "Configurations of urea from WS22. "),
-    ("WS22-urocanic", "urocanic", "Configurations of urocanic from WS22. "),
+    ("WS22-acrolein", "acrolein", "Configurations of acrolein from WS22."),
+    ("WS22-alanine", "alanine", "Configurations of alanine from WS22."),
+    ("WS22-dmabn", "dmabn", "Configurations of dmabn from WS22."),
+    ("WS22-nitrophenol", "nitrophenol", "Configurations of nitrophenol from WS22."),
+    ("WS22-o-hbdi", "o-hbdi", "Configurations of o-hbdi from WS22."),
+    ("WS22-sma", "sma", "Configurations of sma from WS22."),
+    ("WS22-thymine", "thymine", "Configurations of o-hbdi from WS22."),
+    ("WS22-toluene", "toluene", "Configurations of toluene from WS22."),
+    ("WS22-urea", "urea", "Configurations of urea from WS22."),
+    ("WS22-urocanic", "urocanic", "Configurations of urocanic from WS22."),
 ]
 
 
@@ -139,7 +140,7 @@ def main(argv):
     configurations = load_data(
         file_path=DATASET_FP,
         file_format="folder",
-        name_field=None,
+        name_field="name",
         elements=["C", "N", "O", "H"],
         # default_name=f"ws22_{glob}",
         reader=reader_ws22,
