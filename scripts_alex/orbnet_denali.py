@@ -51,7 +51,7 @@ DS_DESC = (
 
 def reader_OrbNet(fp):
     df = pd.read_csv(fp)
-    df = df.iloc[:,1:]
+    df = df.iloc[:, 1:]
     structures = []
     for row in tqdm(df.itertuples()):
         f = DATASET_FP / "xyz_files" / row.mol_id / f"{row.sample_id}.xyz"

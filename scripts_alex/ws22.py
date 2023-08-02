@@ -2,6 +2,19 @@
 Get proper author names
 check file names and configuration types/names
 check for config-md
+     Z    |      (n_atoms, )     |                   Atomic numbers of nuclei                   |                                                |  # noqa: E501
+|    R    | (120000, n_atoms, 3) |                     Cartesian coordinates                    |                  Angstrom [A]                  |  # noqa: E501
+|    E    |      (120000, 1)     |                       Potential energy                       |         kilocalories per mol [kcal/mol]        |  # noqa: E501
+|    F    | (120000, n_atoms, 3) |                         Atomic forces                        | kilocalories per mol per Angstrom [kcal/mol/A] |  # noqa: E501
+|    Q    | (120000, n_atoms, 1) |                       Mulliken charges                       |              elementary charge [e]             |  # noqa: E501
+|    P    |      (120000, 6)     |                   Isotropic polarizability                   |               Bohr cubed [Bohr^3]              |  # noqa: E501
+|    DP   |      (120000, 3)     |                     Dipole moment vectors                    |                   Debye [D]                    |  # noqa: E501
+|    QP   |    (120000, 3, 3)    |                   Quadrupole moment matrix                   |               Debye-Angstrom [DA]              |  # noqa: E501
+|    RC   |      (120000, 3)     |                     Rotational constants                     |                 gigahertz [GHz]                |  # noqa: E501
+|    HL   |      (120000, 2)     |                    HOMO and LUMO energies                    |                electronvolt [eV]               |  # noqa: E501
+|    R2   |      (120000, 1)     |                   Electronic spatial extent                  |              Bohr squared [Bohr^2]             |  # noqa: E501
+|   CONF  |      (120000, 1)     |              String identifier of conformations              |                                                |  # noqa: E501
+
 
 """
 
@@ -21,8 +34,8 @@ LINKS = [
     "https://doi.org/10.1038/s41597-023-01998-3",
     "https://doi.org/10.5281/zenodo.7032333",
 ]
-DATASET_FP = Path("/large_data/new_raw_datasets_2.0/WS22_database")
-DATASET_FP = Path("data/ws22")
+DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/WS22_database")
+# DATASET_FP = Path("data/ws22")  # remove
 DS_DESC = (
     "The WS22 database combines Wigner sampling with geometry interpolation to generate"
     " 1.18 million molecular geometries equally distributed into 10 independent "
@@ -38,32 +51,54 @@ DS_DESC = (
 def reader_ws22(p):
     atoms = []
     a = np.load(p)
-    # na=a['N']
-    z = a["Z"]
-    e = a["E"]
-    r = a["R"]
-    f = a["F"]
-    hl = a["HL"]
-    d = a["DP"]
+
+    z = a["Z"]  # atomic numbers
+    r = a["R"]  # coordinates
+    e = a["E"]  # potential energy
+    f = a["F"]  # forces
+    mulliken = a["Q"]  # mulliken charges
+    iso_pol = a["P"]  # isotropic polarizability
+    dip_mom = a["DP"]  # dipole-moment vectors
+    quad_mom = a["QP"]  # quadrupole moment matrix
+    rot_const = a["RC"]  # rotational constants
+    he = [x[0] for x in a["HL"]]  # homo-energy
+    le = [x[1] for x in a["HL"]]  # lumo-energy
+    elec_extent = a["R2"]  # electronic spatial extent
+    conf = a["CONF"]  # conformation identifier string
+
     # q=a['nuclear_charges']
     for i in range(r.shape[0]):
-    # for i in range(20000):
-        # n=na[i]
-        # atom = Atoms(numbers=z[i, :], positions=r[i, :n, :])
+        # for i in range(2000):  # for local testing purposes
         atom = Atoms(numbers=z, positions=r[i])
-        # atom.info['energy']=e[i]
+        atom.info["name"] = f"{p.stem}_i"
         atom.info["energy"] = float(e[i])
         atom.arrays["forces"] = f[i]
-        atom.info["dipole_moment"] = d[i]
-        atom.info["homolumo"] = hl[i]
-        atom.info["name"] = p.stem
-        # atom.info['charge']=float(q[i])
-        # print(atom.info['charge'])
+
+        atom.info["mulliken"] = mulliken[i]
+        atom.info["iso_pol"] = iso_pol[i]
+        atom.info["dip_mom"] = dip_mom[i]
+        atom.info["quad_mom"] = quad_mom[i]
+        atom.info["rot_const"] = rot_const[i]
+        atom.info["homo_energy"] = he[i]
+        atom.info["lumo_energy"] = le[i]
+        atom.info["elec_extent"] = elec_extent[i]
+        atom.info["conf"] = conf[i]
+
         atoms.append(atom)
-        # print(type (atom.info['charge']))
     return atoms
 
 
+co_md = {
+    "mulliken-charges": {"field": "mulliken", "units": "e"},
+    "isotropic-polarizability": {"field": "iso_pol", "units": "Bohr^3"},
+    "dipole-moment": {"field": "dip_mom", "units": "Debye"},
+    "quadrupole-moment": {"field": "quad_mom", "units": "Debye-Angstrom"},
+    "rotational-constants": {"field": "rot_const", "units": "GHz"},
+    "homo-energy": {"field": "he", "units": "eV"},
+    "lumo-energy": {"field": "le", "units": "eV"},
+    "electronic-spatial-extent": {"field": "elec_extent", "units": "Bohr^2"},
+    "conformation-identifier": {"field": "conf"},
+}
 property_map = {
     "potential-energy": [
         {
@@ -86,11 +121,6 @@ property_map = {
             },
         }
     ],
-}
-
-co_md = {
-    "homo-lumo": {"field": "homolumo"},
-    "dipole-moment": {"field": "dipole_moment"},
 }
 
 
