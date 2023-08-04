@@ -35,8 +35,7 @@ AUTHORS = [
 ]
 LINKS = [
     "https://doi.org/10.1021/acscatal.0c04525",
-    "https://github.com/Open-Catalyst-Project/ocp/blob/"
-    "main/DATASET.md#structure-to-energy-and-forces-s2ef-task",
+    "https://github.com/Open-Catalyst-Project/ocp/blob/main/DATASET.md",
 ]
 DATASETS = {
     "OC20-S2EF-MD": {
@@ -45,17 +44,17 @@ DATASETS = {
         "desc": "Training configurations for which short, "
         "high-temperature ab initio MD trajectories were gathered",
     },
-    "OC20-S2EF-Rattled": {
-        "name": "OC20-S2EF-Rattled",
-        "fp": Path("s2ef_rattled/uc"),
-        "desc": "A subset of training configurations in which "
-        "the atomic positions have been randomly perturbed.",
-    },
-    "OC20-S2EF-Train-All": {
-        "name": "OC20-S2EF-Train-All",
-        "fp": Path("s2ef_train_all/uc"),
-        "desc": "All configurations from the OC20 S2EF training set.",
-    },
+    # "OC20-S2EF-Rattled": {
+    #     "name": "OC20-S2EF-Rattled",
+    #     "fp": Path("s2ef_rattled/uc"),
+    #     "desc": "A subset of training configurations in which "
+    #     "the atomic positions have been randomly perturbed.",
+    # },
+    # "OC20-S2EF-Train-All": {
+    #     "name": "OC20-S2EF-Train-All",
+    #     "fp": Path("s2ef_train_all/uc"),
+    #     "desc": "All configurations from the OC20 S2EF training set.",
+    # },
 }
 
 GLOB_STR = "*.extxyz"

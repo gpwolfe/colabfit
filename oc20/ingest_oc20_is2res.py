@@ -35,8 +35,7 @@ AUTHORS = [
 ]
 LINKS = [
     "https://arxiv.org/abs/2010.09990",
-    "https://github.com/Open-Catalyst-Project/ocp/blob/"
-    "main/DATASET.md#structure-to-energy-and-forces-s2ef-task",
+    "https://github.com/Open-Catalyst-Project/ocp/blob/main/DATASET.md",
 ]
 DS_DESC = "All configurations from the OC20 IS2RES training set"
 DATASET = "OC20-IS2RES"
