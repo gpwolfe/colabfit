@@ -24,12 +24,12 @@ from argparse import ArgumentParser
 from ase.io import read
 from colabfit import ATOMS_NAME_FIELD, ATOMS_LABELS_FIELD
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase
+from colabfit.tools.database import MongoDatabase, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
 )
-from collections import defaultdict
+
 from pathlib import Path
 import pickle
 import sys
@@ -37,7 +37,10 @@ from tqdm import tqdm
 
 BATCH_SIZE = 100
 
-DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts_large/oc_22/")
+DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts_large/oc_22/")  # HSRN
+# DATASET_FP = Path("/scratch/work/martiniani/for_gregory/oc22/oc22")  # Greene
+# DATASET_FP = Path("data/oc22/")  # remove
+TXT_FP = DATASET_FP / "oc22_trajectories/trajectories/oc22/"
 DATASET = "OC22"
 
 SOFTWARE = "VASP"
@@ -68,109 +71,12 @@ AUTHORS = [
     "C. Lawrence Zitnick",
 ]
 DS_DESC = (
-    "A database of training trajectories for predicting catalytic"
-    "reactions on oxide surfaces. OC22 is meant to complement OC20, which did not"
+    "Open Catalyst 2022 (OC22) is a database of training trajectories for predicting "
+    "catalytic reactions on oxide surfaces meant to complement OC20, which did not "
     "contain oxide surfaces."
 )
-ELEMENTS = {
-    "Ag",
-    "Al",
-    "As",
-    "Au",
-    "Ba",
-    "Be",
-    "Bi",
-    "C",
-    "Ca",
-    "Cd",
-    "Ce",
-    "Co",
-    "Cr",
-    "Cs",
-    "Cu",
-    "Fe",
-    "Ga",
-    "Ge",
-    "H",
-    "Hf",
-    "Hg",
-    "In",
-    "Ir",
-    "K",
-    "Li",
-    "Lu",
-    "Mg",
-    "Mn",
-    "Mo",
-    "N",
-    "Na",
-    "Nb",
-    "Ni",
-    "O",
-    "Os",
-    "Pb",
-    "Pd",
-    "Pt",
-    "Rb",
-    "Re",
-    "Rh",
-    "Ru",
-    "Sb",
-    "Sc",
-    "Se",
-    "Si",
-    "Sn",
-    "Sr",
-    "Ta",
-    "Te",
-    "Ti",
-    "Tl",
-    "V",
-    "W",
-    "Y",
-    "Zn",
-    "Zr",
-}
-GLOB_STR = "*.traj"
-TRAIN_IS2RE = []
-train_val = defaultdict(list)
-with open(
-    DATASET_FP / "oc22_trajectories/trajectories/oc22/train_is2re_t.txt", "r"
-) as f:
-    keys = set([x.strip().replace(".traj", "") for x in f.readlines()])
-    TRAIN_IS2RE = keys
-    for key in keys:
-        train_val[key].append("train_is2re")
-with open(
-    DATASET_FP / "oc22_trajectories/trajectories/oc22/train_s2ef_t.txt", "r"
-) as f:
-    keys = set([x.strip().replace(".traj", "") for x in f.readlines()])
-    for key in keys:
-        train_val[key].append("train_s2ef")
-with open(
-    DATASET_FP / "oc22_trajectories/trajectories/oc22/val_id_is2re_t.txt", "r"
-) as f:
-    keys = set([x.strip().replace(".traj", "") for x in f.readlines()])
-    for key in keys:
-        train_val[key].append("val_id_is2re")
-with open(
-    DATASET_FP / "oc22_trajectories/trajectories/oc22/val_id_s2ef_t.txt", "r"
-) as f:
-    keys = set([x.strip().replace(".traj", "") for x in f.readlines()])
-    for key in keys:
-        train_val[key].append("val_id_s2ef")
-with open(
-    DATASET_FP / "oc22_trajectories/trajectories/oc22/val_ood_is2re_t.txt", "r"
-) as f:
-    keys = set([x.strip().replace(".traj", "") for x in f.readlines()])
-    for key in keys:
-        train_val[key].append("val_ood_is2re")
-with open(
-    DATASET_FP / "oc22_trajectories/trajectories/oc22/val_ood_s2ef_t.txt", "r"
-) as f:
-    keys = set([x.strip().replace(".traj", "") for x in f.readlines()])
-    for key in keys:
-        train_val[key].append("val_ood_s2ef")
+ELEMENTS = None
+
 
 OC_PICKLE = Path(DATASET_FP / "oc22_metadata.pkl")
 with open(OC_PICKLE, "rb") as f:
@@ -178,8 +84,9 @@ with open(OC_PICKLE, "rb") as f:
 
 CONFIG_META = dict()
 for sid, vals in oc_meta.items():
-    if vals.get("traj_id"):
-        CONFIG_META[vals["traj_id"]] = {
+    traj_id = vals.get("traj_id")
+    if traj_id is not None:
+        CONFIG_META[traj_id] = {
             "lmdb-system-id": sid,
             "miller-index": vals["miller_index"],
             "bulk-symbols": vals["bulk_symbols"],
@@ -187,6 +94,82 @@ for sid, vals in oc_meta.items():
             "nads": vals["nads"],
             "ads-symbols": vals.get("ads_symbols"),
         }
+co_md = {
+    "lmdb-system-id": {"field": "lmdb-system-id"},
+    "miller-index": {"field": "miller_index"},
+    "bulk-symbols": {"field": "bulk_symbols"},
+    "slab-sid": {"field": "slab_sid"},
+    "num-adsorbates": {"field": "nads"},
+    "adsorbate-symbols": {"field": "ads_symbols"},
+    "traj-id": {"field": "traj_id"},
+}
+
+ds_name_path_desc = (
+    (
+        "OC22-IS2RE-Train",
+        "is2re_train",
+        "train_is2re_t.txt",
+        "Training configurations for the initial structure to relaxed total energy "
+        "(IS2RE) task of OC22. ",
+    ),
+    (
+        "OC22-S2EF-Train",
+        "s2ef_train",
+        "train_s2ef_t.txt",
+        "Training configurations for the structure to total energy and forces task "
+        "(S2EF) of OC22. ",
+    ),
+    (
+        "OC22-IS2RE-Validation-in-domain",
+        "is2re_val",
+        "val_id_is2re_t.txt",
+        "In-domain validation configurations for the initial structure to relaxed "
+        "total energy (IS2RE) task of OC22. ",
+    ),
+    (
+        "OC22-S2EF-Validation-in-domain",
+        "s2ef_val_id",
+        "val_id_s2ef_t.txt",
+        "In-domain validation configurations for the structure to total energy and "
+        "forces (S2EF) task of OC22. ",
+    ),
+    (
+        "OC22-IS2RE-Validation-out-of-domain",
+        "is2re_val_ood",
+        "val_ood_is2re_t.txt",
+        "Out-of-domain validation configurations for the initial structure to "
+        "relaxed total energy (IS2RE) task of OC22. ",
+    ),
+    (
+        "OC22-S2EF-Validation-out-of-domain",
+        "s2ef_val_ood",
+        "val_ood_s2ef_t.txt",
+        "Out-of-domain validation configurations for the structure to total energy "
+        "and forces (S2EF) task of OC22. ",
+    ),
+)
+
+
+metadata = {
+    "software": {"value": SOFTWARE},
+    "method": {"value": METHODS},
+}
+
+property_map = {
+    "potential-energy": [
+        {
+            "energy": {"field": "energy", "units": "eV"},
+            "per-atom": {"value": False, "units": None},
+            "_metadata": metadata,
+        }
+    ],
+    "atomic-forces": [
+        {
+            "forces": {"field": "forces", "units": "eV/A"},
+            "_metadata": metadata,
+        }
+    ],
+}
 
 
 def reader(filepath):
@@ -202,14 +185,15 @@ def reader(filepath):
         )
         config.info["energy"] = ase_config.get_potential_energy()
         config.info["forces"] = ase_config.get_forces()
-        config.info["name"] = f"{'__'.join(train_val[traj_id])}_{traj_id}__{i}"
         config.info["traj_id"] = traj_id
-        config.info["config_meta"] = CONFIG_META[traj_id]
+        if CONFIG_META.get(traj_id) is not None:
+            config.info.update(CONFIG_META[traj_id])
         configs.append(config)
     return configs
 
 
-def main(argv):
+def main(argv, dataset):
+    ds_name, co_name, path, desc = dataset
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     parser.add_argument(
@@ -232,33 +216,16 @@ def main(argv):
     )
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
+    ds_id = generate_ds_id()
 
-    metadata = {
-        "software": {"value": SOFTWARE},
-        "method": {"value": METHODS},
-    }
-
-    property_map = {
-        "potential-energy": [
-            {
-                "energy": {"field": "energy", "units": "eV"},
-                "per-atom": {"value": False, "units": None},
-                "_metadata": metadata,
-            }
-        ],
-        "atomic-forces": [
-            {
-                "forces": {"field": "forces", "units": "eV/A"},
-                "_metadata": metadata,
-            }
-        ],
-    }
-    name_field = "name"
+    with open(TXT_FP / path, "r") as f:
+        keys = set([x.strip() for x in f.readlines()])
+    fps = [next(DATASET_FP.rglob(key)) for key in keys]
     labels_field = "labels"
     ai = 0
     ids = []
-    fps = list(DATASET_FP.rglob(GLOB_STR))
     n_batches = len(fps) // BATCH_SIZE
+    # n_batches = 2  # for local testing
     leftover = len(fps) % BATCH_SIZE
     indices = [((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(n_batches)]
     if leftover:
@@ -269,17 +236,10 @@ def main(argv):
         for fi, fpath in enumerate(fps[beg:end]):
             new = reader(fpath)
 
-            for atoms in new:
-                if name_field in atoms.info:
-                    name = []
-                    name.append(atoms.info[name_field])
-                    atoms.info[ATOMS_NAME_FIELD] = name
-                else:
-                    raise RuntimeError(
-                        f"Field {name_field} not in atoms.info for index "
-                        f"{ai}. Set `name_field=None` "
-                        "to use `default_name`."
-                    )
+            for i, atoms in enumerate(new):
+                name = []
+                name.append(f"{co_name}_{i}")
+                atoms.info[ATOMS_NAME_FIELD] = name
 
                 if labels_field not in atoms.info:
                     atoms.info[ATOMS_LABELS_FIELD] = set()
@@ -292,7 +252,8 @@ def main(argv):
             list(
                 client.insert_data(
                     configurations,
-                    co_md_map={"lmdb_metadata": {"field": "config_meta"}},
+                    ds_id=ds_id,
+                    co_md_map=co_md,
                     property_map=property_map,
                     generator=False,
                     verbose=False,
@@ -301,46 +262,19 @@ def main(argv):
         )
 
     all_co_ids, all_do_ids = list(zip(*ids))
-    descriptions = {
-        "train_is2re": "Training configurations for initial structure to relaxed total"
-        "energy task",
-        "train_s2ef": "Training configurations for structure to total energy and forces"
-        "task",
-        "val_id_is2re": "Validation configurations for initial structure to relaxed "
-        "total energy task",
-        "val_id_s2ef": "Validation configurations for structure to total energy and "
-        "forces task",
-        "val_ood_is2re": "Unseen test configurations for initial structure to relaxed "
-        "total energy task",
-        "val_ood_s2ef": "Unseen test configurations for structure to total energy and "
-        "forces task",
-    }
-    cs_regexes = []
-    for key, val in descriptions.items():
-        cs_regexes.append([f"{DATASET}_{key}", f"{key}", val])
-
-    cs_ids = []
-
-    for i, (name, regex, desc) in enumerate(cs_regexes):
-        cs_id = client.query_and_insert_configuration_set(
-            co_hashes=all_co_ids,
-            name=name,
-            description=desc,
-            query={"names": {"$regex": regex}},
-        )
-
-        cs_ids.append(cs_id)
 
     client.insert_dataset(
-        cs_ids=cs_ids,
+        # cs_ids=cs_ids,
+        ds_id=ds_id,
         do_hashes=all_do_ids,
-        name=DATASET,
+        name=ds_name,
         authors=AUTHORS,
         links=LINKS,
-        description=DS_DESC,
+        description=f"{desc}{DS_DESC}",
         verbose=True,
     )
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    for dataset in ds_name_path_desc:
+        main(sys.argv[1:], dataset)
