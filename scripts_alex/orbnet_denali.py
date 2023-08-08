@@ -17,7 +17,9 @@ from argparse import ArgumentParser
 import pandas as pd
 from ase.io import read
 from pathlib import Path
+import subprocess
 import sys
+from time import time
 from tqdm import tqdm
 
 DATASET_FP = Path("/vast/gw2338/orbnet/")
@@ -51,7 +53,7 @@ DS_DESC = (
 
 def reader_OrbNet(fp):
     df = pd.read_csv(fp)
-    df = df.iloc[:, 1:]
+    df = df.iloc[:1000, 1:]  # remove row limit
     structures = []
     for row in tqdm(df.itertuples()):
         f = DATASET_FP / "xyz_files" / row.mol_id / f"{row.sample_id}.xyz"
@@ -87,12 +89,6 @@ def main(argv):
     )
     args = parser.parse_args(argv)
 
-    client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:5000"
-    )
-    client.insert_property_definition(potential_energy_pd)
-    ds_id = generate_ds_id()
-
     configurations = load_data(
         file_path=DATASET_FP,
         file_format="folder",
@@ -121,7 +117,18 @@ def main(argv):
         "xtb1-energy": {"field": "xtb1_energy"},
         "charge": {"field": "charge"},
     }
-
+    sub_result = subprocess.run(
+        "kubectl port-forward svc/mongo 5000:27017 &",
+        shell=True,
+        capture_output=True,
+        text=True,
+    )
+    print(f"kubectl result: {sub_result}")
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:5000"
+    )
+    client.insert_property_definition(potential_energy_pd)
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
@@ -149,4 +156,6 @@ def main(argv):
 
 
 if __name__ == "__main__":
+    begin = time()
     main(sys.argv[1:])
+    print(f"Total time (sec): {time() - begin}")
