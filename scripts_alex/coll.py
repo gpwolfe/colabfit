@@ -59,7 +59,7 @@ property_map = {
             "energy": {"field": "energy", "units": "eV"},
             "per-atom": {"field": "per-atom", "units": None},
             "_metadata": {
-                "software": {"value": "VASP"},
+                "software": {"value": "ORCA"},
                 "method": {"value": "DFT"},
                 "basis-set": {"value": "def2-TZVP"},
             },
@@ -69,7 +69,7 @@ property_map = {
         {
             "energy": {"field": "atomization_energy", "units": "eV"},
             "_metadata": {
-                "software": {"value": "VASP"},
+                "software": {"value": "ORCA"},
                 "method": {"value": "DFT"},
                 "basis-set": {"value": "def2-TZVP"},
             },
@@ -115,13 +115,6 @@ def main(argv):
             verbose=False,
             generator=False,
         )
-
-        """
-        cs_list = set()
-        for c in configurations:
-            cs_list.add(*c.info['_name'])
-        print(cs_list)
-        """
 
         client.insert_property_definition(potential_energy_pd)
 

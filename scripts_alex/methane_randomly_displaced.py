@@ -14,12 +14,12 @@ from colabfit.tools.property_definitions import potential_energy_pd, atomic_forc
 
 DATASET_FP = Path("/large_data/new_raw_datasets_2.0/methane/methane.extxyz")
 DATASET_FP = Path("data/methane/methane.extxyz")
-DS_NAME = "methane"
+DS_NAME = "Randomly-displaced_methane"
 DS_DESC = (
-    "This dataset provides a large number (7,732,488) configurations for a simple CH4 "
-    "composition, that are generated in an almost completely unbiased fashion."
+    "This dataset provides a large number (7,732,488) of configurations for a simple "
+    "CH4 composition that are generated in an almost completely unbiased fashion."
     "This dataset is ideal to benchmark structural representations and regression "
-    "algorithms, verifying whether they allow reaching arbitrary accuracy in the data "
+    "algorithms, verifying whether they allow reaching arbitrary accuracy in a data-"
     "rich regime."
 )
 LINKS = [
@@ -37,19 +37,18 @@ AUTHORS = [
 property_map = {
     "potential-energy": [
         {
-            "energy": {"field": "energy", "units": "Hartrees"},
+            "energy": {"field": "energy", "units": "Ha"},
             "per-atom": {"field": "per-atom", "units": None},
             "_metadata": {
                 "software": {"value": "psi4"},
                 "method": {"value": "DFT-PBE"},
                 "basis": {"value": "cc-pvdz"},
-                # 'ecut':{'value':'700 eV for GPAW, 900 eV for VASP'},
             },
         }
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "forces", "units": "Hartrees/Bohr"},
+            "forces": {"field": "forces", "units": "Ha/Bohr"},
             "_metadata": {
                 "software": {"value": "psi4"},
                 "method": {"value": "DFT/PBE"},
@@ -89,7 +88,7 @@ def main(argv):
     ds_id = generate_ds_id()
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
-    # Loads data, specify reader function if not "usual" file format
+
     configurations = load_data(
         file_path=DATASET_FP,
         file_format="extxyz",
@@ -113,41 +112,7 @@ def main(argv):
 
     all_co_ids, all_pr_ids = list(zip(*ids))
 
-    # matches to data CO "name" field
-    # cs_regexes = {
-    #    '.*':
-    #        'Silica datasets.
-    # }
-    """
-    cs_names=['all']
-    for i in cs_list:
-        cs_regexes[i]='Configurations with the %s structure.' %i
-        cs_names.append(i)
-    """
-    # print (cs_regexes)
-
-    # cs_ids = []
-
-    # for i, (regex, desc) in enumerate(cs_regexes.items()):
-    #     co_ids = client.get_data(
-    #         "configurations",
-    #         fields="hash",
-    #         query={"hash": {"$in": all_co_ids}, "names": {"$regex": regex}},
-    #         ravel=True,
-    #     ).tolist()
-
-    #     print(
-    #       f"Configuration set {i}", f"({regex}):".rjust(22), f"{len(co_ids)}".rjust(7)
-    #     )
-
-    #     cs_id = client.insert_configuration_set(
-    #         co_ids, description=desc, name=cs_names[i]
-    #     )
-
-    #     cs_ids.append(cs_id)
-
     client.insert_dataset(
-        # cs_ids=cs_ids,
         ds_id=ds_id,
         do_hashes=all_pr_ids,
         name=DS_NAME,
