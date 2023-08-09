@@ -1,13 +1,31 @@
+"""
+author: gpwolfe
+
+File notes
+----------
+There are several different files and file types
+trajectories appear to be contained in extxyz.xz compressed files in
+the subdir is2res_train_trajectories
+There is some data in the form of a matching filestem-id followed by a float in
+a file called 'system.txt'. This appears to be close to the potential energy values
+in the corresponding extxyz.xz file.
+Files with different "random123456" ids are contained in the subdir uc
+These are plain extxyz files
+There is a set of metadata for the latter contained in the file 'oc20_data_mapping.pkl'
+
+"""
+
 from argparse import ArgumentParser
 from ase.io import read
 from colabfit import ATOMS_LABELS_FIELD, ATOMS_NAME_FIELD
 from colabfit.tools.converters import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase
+from colabfit.tools.database import MongoDatabase, generate_ds_id
 from colabfit.tools.property_definitions import (
     potential_energy_pd,
     atomic_forces_pd,
     free_energy_pd,
 )
+import numpy as np
 from pathlib import Path
 import sys
 from tqdm import tqdm
@@ -37,30 +55,94 @@ LINKS = [
     "https://arxiv.org/abs/2010.09990",
     "https://github.com/Open-Catalyst-Project/ocp/blob/main/DATASET.md",
 ]
-DS_DESC = "All configurations from the OC20 IS2RES training set"
+DS_DESC = (
+    "Configurations for the initial structure to relaxed energy "
+    "(IS2RE) and initial structure to relaxed structure (IS2RS) tasks of "
+    'Open Catalyst 2020 (OC20). Dataset corresponds to the "All IS2RE/S training '
+    '(~466k trajectories)" data split under the "Relaxation Trajectories" '
+    "section of the Open Catalyst Project GitHub page."
+)
 DATASET = "OC20-IS2RES"
 DATASET_FP = Path("is2res_train_trajectories")
+PKL_FP = DATASET_FP / "oc20_data_mapping.pkl"
 GLOB_STR = "*.extxyz"
 
+ID_META_MAP = np.load(PKL_FP, allow_pickle=True)
 
-def reader(filepath, ref_e_dict):
+with open(DATASET_FP / "system.txt", "r") as f:
+    ref_text = [x.strip().split(",") for x in f.readlines()]
+    REF_E_DICT = {k: float(v) for k, v in ref_text}
+
+property_map = {
+    "potential-energy": [
+        {
+            "energy": {"field": "energy", "units": "eV"},
+            "per-atom": {"value": False, "units": None},
+            "reference-energy": {"field": "ref_energy", "units": "eV"},
+            "_metadata": {
+                "software": {"value": "VASP"},
+                "method": {"value": "DFT-PBE"},
+            },
+        }
+    ],
+    "atomic-forces": [
+        {
+            "forces": {"field": "forces", "units": "eV/Ang"},
+            "_metadata": {
+                "software": {"value": "VASP"},
+                "method": {"value": "DFT-PBE"},
+                "reference_energy": {"field": "ref_energy"},
+            },
+        }
+    ],
+    "free-energy": [
+        {
+            "energy": {"field": "free_energy", "units": "eV"},
+            "per-atom": {"value": False, "units": None},
+            "reference-energy": {"field": "ref_energy", "units": "eV"},
+            "_metadata": {
+                "software": {"value": "VASP"},
+                "method": {"value": "DFT-PBE"},
+            },
+        }
+    ],
+}
+co_md_map = {
+    "bulk_id": {"field": "bulk_id"},
+    "bulk_mpid": {"field": "bulk_mpid"},
+    "ads_id": {"field": "ads_id"},
+    "bulk_symbols": {"field": "bulk_symbols"},
+    "ads_symbols": {"field": "ads_symbols"},
+    "miller_index": {"field": "miller_index"},
+    "shift": {"field": "shift"},
+    "adsorption_site": {"field": "adsorption_site"},
+    "oc_class": {"field": "class"},
+    "oc_anomaly": {"field": "anomaly"},
+    "frame": {"field": "frame"},
+    "oc-id": {"field": "oc_id"},
+}
+
+
+def reader(filepath):
     fp_stem = filepath.stem
     configs = []
     ase_configs = read(filepath, index=":")
 
     for i, ase_config in enumerate(ase_configs):
-        config = AtomicConfiguration(
-            positions=ase_config.positions,
-            numbers=ase_config.numbers,
-            pbc=ase_config.pbc,
-            cell=ase_config.cell,
-        )
+        config = AtomicConfiguration().from_ase(ase_config)
+        # positions=ase_config.positions,
+        # numbers=ase_config.numbers,
+        # pbc=ase_config.pbc,
+        # cell=ase_config.cell,
+        # )
         config.info = ase_config.info
         config.info["forces"] = ase_config.arrays["forces"]
-        config.info["ref_energy"] = ref_e_dict[fp_stem]
-        config.info["oc_id"] = fp_stem
+        config.info["ref_energy"] = REF_E_DICT[fp_stem]
+        config.info["system_id"] = fp_stem
         config.info["name"] = f"{filepath.parts[-3]}_{fp_stem}_{i}"
-
+        id_meta = ID_META_MAP.get(fp_stem)
+        if id_meta:
+            config.info.update(id_meta)
         configs.append(config)
 
     return configs
@@ -87,61 +169,11 @@ def main(argv):
     client = MongoDatabase(
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
     )
+    ds_id = generate_ds_id()
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(free_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
-    property_map = {
-        "potential-energy": [
-            {
-                "energy": {"field": "energy", "units": "eV"},
-                "per-atom": {"value": False, "units": None},
-                "reference-energy": {"field": "ref_energy", "units": "eV"},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-PBE"},
-                },
-            }
-        ],
-        "atomic-forces": [
-            {
-                "forces": {"field": "forces", "units": "eV/Ang"},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-PBE"},
-                    "reference_energy": {"field": "ref_energy"},
-                },
-            }
-        ],
-        "free-energy": [
-            {
-                "energy": {"field": "free_energy", "units": "eV"},
-                "per-atom": {"value": False, "units": None},
-                "reference-energy": {"field": "ref_energy", "units": "eV"},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-PBE"},
-                },
-            }
-        ],
-    }
-    co_md_map = {
-        "bulk_id": {"field": "bulk_id"},
-        "ads_id": {"field": "ads_id"},
-        "bulk_symbols": {"field": "bulk_symbols"},
-        "ads_symbols": {"field": "ads_symbols"},
-        "miller_index": {"field": "miller_index"},
-        "shift": {"field": "shift"},
-        "adsorption_site": {"field": "adsorption_site"},
-        "oc_class": {"field": "class"},
-        "oc_anomaly": {"field": "anomaly"},
-        "frame": {"field": "frame"},
-        "oc-id": {"field": "oc_id"},
-    }
 
-    # bulk_id = f.split("/")[-1]
-    with open(DATASET_FP / "system.txt", "r") as f:
-        ref_text = [x.strip().split(",") for x in f.readlines()]
-        ref_e_dict = {k: float(v) for k, v in ref_text}
     name_field = "name"
     labels_field = "labels"
     ai = 0
@@ -152,11 +184,13 @@ def main(argv):
     indices = [((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(n_batches)]
     if leftover:
         indices.append((BATCH_SIZE * n_batches, len(fps)))
+    if len(fps) < BATCH_SIZE:
+        indices = [(0, len(fps) + 1)]
     for batch in tqdm(indices):
         configurations = []
         beg, end = batch
         for fi, fpath in enumerate(fps[beg:end]):
-            new = reader(fpath, ref_e_dict)
+            new = reader(fpath)
 
             for atoms in new:
                 if name_field in atoms.info:
@@ -181,6 +215,7 @@ def main(argv):
             list(
                 client.insert_data(
                     configurations,
+                    ds_id=ds_id,
                     co_md_map=co_md_map,
                     property_map=property_map,
                     generator=False,
@@ -193,6 +228,7 @@ def main(argv):
 
     client.insert_dataset(
         do_hashes=all_pr_ids,
+        ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,
