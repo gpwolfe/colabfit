@@ -184,8 +184,6 @@ def main(argv):
     indices = [((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(n_batches)]
     if leftover:
         indices.append((BATCH_SIZE * n_batches, len(fps)))
-    if len(fps) < BATCH_SIZE:
-        indices = [(0, len(fps) + 1)]
     for batch in tqdm(indices):
         configurations = []
         beg, end = batch
