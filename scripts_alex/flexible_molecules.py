@@ -7,13 +7,12 @@ Fix ds description
 """
 
 from argparse import ArgumentParser
+from ase.io import read
 from pathlib import Path
 import sys
 
 from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import potential_energy_pd, free_energy_pd
-from colabfit.tools.property_settings import PropertySettings
-from colabfit.tools.configuration import AtomicConfiguration
 
 DATASET_FP = Path("")
 DS_NAME = "flexible_molecules_JCP2021"
@@ -27,6 +26,9 @@ AUTHORS = [
     "Alexandre Tkatchenko",
 ]
 DS_DESC = (
+    "Configurations of azobenzene featuring a cis to trans thermal inversion"
+    "through three channels: inversion, rotation, and rotation assisted by inversion; "
+    "and configurations of glycine as a simpler comparison molecule. "
     "All calculations were performed in FHI-aims software using the "
     "Perdew-Burke-Ernzerhof (PBE) exchange-correlation functional with tight settings "
     "and the Tkatchenko-Scheffler (TS) method to account for van der Waals (vdW) "
@@ -36,6 +38,11 @@ DS_DESC = (
 
 def tform(c):
     c.info["per-atom"] = False
+
+
+def reader(fp):
+    name = fp.stem
+    """ use ase.io.read but make sure it parses forces"""
 
 
 def main(argv):
@@ -149,7 +156,7 @@ def main(argv):
             "description": "Configurations with Azobenzene inversion structure",
         },
         {
-            "name": "Azobenzene_rotation_and_inversiont",
+            "name": "Azobenzene_rotation_and_inversion",
             "description": "Configurations with Azobenzene rotation and inversion "
             "structure",
         },
