@@ -32,7 +32,7 @@ from pathlib import Path
 import sys
 from tqdm import tqdm
 
-BATCH_SIZE = 100
+BATCH_SIZE = 512
 
 AUTHORS = [
     "Lowik Chanussot",

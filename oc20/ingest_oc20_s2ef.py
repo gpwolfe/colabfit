@@ -14,7 +14,7 @@ from pathlib import Path
 import sys
 from tqdm import tqdm
 
-BATCH_SIZE = 10
+BATCH_SIZE = 512
 
 AUTHORS = [
     "Lowik Chanussot",
@@ -52,18 +52,23 @@ LINKS = [
 DATASETS = {
     "OC20-S2EF-MD": {
         "fp": Path("s2ef_md/uc"),
-        "desc": "Training configurations from Open Catalyst 2020 (OC20) for which "
-        "short, high-temperature ab initio MD trajectories were gathered.",
+        "desc": "A subset of training configurations from the Open Catalyst 2020 "
+        "(OC20) Structure to Energy and Forces (S2EF) task for which short, "
+        "high-temperature ab initio MD trajectories were gathered. Corresponds to the "
+        '"MD data" split from the OC20 GitHub site',
     },
     "OC20-S2EF-Rattled": {
         "fp": Path("s2ef_rattled/uc"),
-        "desc": "A subset of training configurations "
-        "in which the atomic positions have been randomly perturbed.",
+        "desc": "A subset of training configurations from the Open Catalyst 2020 "
+        "(OC20) Structure to Energy and Forces (S2EF) task in which the atomic "
+        'positions have been randomly perturbed, corresponding to the "Rattled data" '
+        "split from the OC20 GitHub site.",
     },
     "OC20-S2EF-Train-All": {
         "fp": Path("s2ef_train_all/uc"),
-        "desc": "All configurations from the Open Catalyst 2020 (OC20) S2EF training "
-        "set.",
+        "desc": "All configurations from the Open Catalyst 2020 (OC20) Structure to "
+        'Energy and Forces (S2EF) training set, corresponding to the "Train/all" split '
+        "from the OC20 GitHub site.",
     },
 }
 
