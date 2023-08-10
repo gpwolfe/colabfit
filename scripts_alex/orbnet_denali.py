@@ -117,13 +117,7 @@ def main(argv):
         "xtb1-energy": {"field": "xtb1_energy"},
         "charge": {"field": "charge"},
     }
-    sub_result = subprocess.run(
-        "kubectl port-forward svc/mongo 5000:27017 &",
-        shell=True,
-        capture_output=True,
-        text=True,
-    )
-    print(f"kubectl result: {sub_result}")
+    subprocess.run("kubectl port-forward svc/mongo 5000:27017 &", shell=True)
     client = MongoDatabase(
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:5000"
     )
