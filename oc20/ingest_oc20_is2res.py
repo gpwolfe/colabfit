@@ -25,12 +25,14 @@ from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     free_energy_pd,
 )
+import itertools
+import multiprocessing
 import numpy as np
 from pathlib import Path
 import sys
 from tqdm import tqdm
 
-BATCH_SIZE = 10
+BATCH_SIZE = 100
 
 AUTHORS = [
     "Lowik Chanussot",
@@ -66,6 +68,8 @@ DATASET = "OC20-IS2RES"
 DATASET_FP = Path("is2res_train_trajectories")
 PKL_FP = DATASET_FP / "oc20_data_mapping.pkl"
 GLOB_STR = "*.extxyz"
+NAME_FIELD = "name"
+LABELS_FIELD = "labels"
 
 ID_META_MAP = np.load(PKL_FP, allow_pickle=True)
 
@@ -148,6 +152,75 @@ def reader(filepath):
     return configs
 
 
+def read_for_pool(filepath):
+    configurations = []
+    new = reader(filepath)
+    for i, atoms in enumerate(new):
+        if NAME_FIELD in atoms.info:
+            atoms.info[ATOMS_NAME_FIELD] = [atoms.info[NAME_FIELD]]
+        else:
+            raise RuntimeError(
+                f"Field {NAME_FIELD} not in atoms.info for index "
+                f"{i} in {filepath}. Set `name_field=None` "
+                "to use `default_name`."
+            )
+
+        if LABELS_FIELD not in atoms.info:
+            atoms.info[ATOMS_LABELS_FIELD] = set()
+        else:
+            atoms.info[ATOMS_LABELS_FIELD] = set(atoms.info[LABELS_FIELD])
+        configurations.append(atoms)
+
+    return configurations
+
+
+def get_configs(filepaths, client, co_md_map, property_map, ds_id, nprocs):
+    pool = multiprocessing.Pool(nprocs)
+
+    configurations = list(
+        itertools.chain.from_iterable(pool.map(read_for_pool, filepaths))
+    )
+
+    ids = list(
+        client.insert_data(
+            configurations,
+            ds_id=ds_id,
+            co_md_map=co_md_map,
+            property_map=property_map,
+            generator=False,
+            verbose=False,
+        )
+    )
+    return ids
+
+
+def upload_configs(client, co_md_map, property_map, ds_id, nprocs):
+    ids = []
+    fps = list(DATASET_FP.rglob(GLOB_STR))
+    n_batches = len(fps) // BATCH_SIZE
+    leftover = len(fps) % BATCH_SIZE
+    indices = [((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(n_batches)]
+    if leftover:
+        indices.append((BATCH_SIZE * n_batches, len(fps)))
+    for batch in tqdm(indices):
+        beg, end = batch
+        filepaths = fps[beg:end]
+        ids.extend(
+            get_configs(
+                filepaths,
+                client=client,
+                co_md_map=co_md_map,
+                property_map=property_map,
+                ds_id=ds_id,
+                nprocs=nprocs,
+            )
+        )
+
+    all_co_ids, all_do_ids = list(zip(*ids))
+
+    return all_do_ids
+
+
 def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
@@ -166,66 +239,25 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
+    nprocs = args.nprocs
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=nprocs, uri=f"mongodb://{args.ip}:27017"
     )
     ds_id = generate_ds_id()
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(free_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
 
-    name_field = "name"
-    labels_field = "labels"
-    ai = 0
-    ids = []
-    fps = list(DATASET_FP.rglob(GLOB_STR))
-    n_batches = len(fps) // BATCH_SIZE
-    leftover = len(fps) % BATCH_SIZE
-    indices = [((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(n_batches)]
-    if leftover:
-        indices.append((BATCH_SIZE * n_batches, len(fps)))
-    for batch in tqdm(indices):
-        configurations = []
-        beg, end = batch
-        for fi, fpath in enumerate(fps[beg:end]):
-            new = reader(fpath)
-
-            for atoms in new:
-                if name_field in atoms.info:
-                    name = []
-                    name.append(atoms.info[name_field])
-                    atoms.info[ATOMS_NAME_FIELD] = name
-                else:
-                    raise RuntimeError(
-                        f"Field {name_field} not in atoms.info for index "
-                        f"{ai}. Set `name_field=None` "
-                        "to use `default_name`."
-                    )
-
-                if labels_field not in atoms.info:
-                    atoms.info[ATOMS_LABELS_FIELD] = set()
-                else:
-                    atoms.info[ATOMS_LABELS_FIELD] = set(atoms.info[labels_field])
-                ai += 1
-                configurations.append(atoms)
-
-        ids.extend(
-            list(
-                client.insert_data(
-                    configurations,
-                    ds_id=ds_id,
-                    co_md_map=co_md_map,
-                    property_map=property_map,
-                    generator=False,
-                    verbose=False,
-                )
-            )
-        )
-
-        all_co_ids, all_pr_ids = list(zip(*ids))
+    do_hashes = upload_configs(
+        client=client,
+        co_md_map=co_md_map,
+        property_map=property_map,
+        ds_id=ds_id,
+        nprocs=nprocs,
+    )
 
     client.insert_dataset(
-        do_hashes=all_pr_ids,
+        do_hashes=do_hashes,
         ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
