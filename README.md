@@ -1,5 +1,5 @@
 # colabfit
-Files related to the colabfit project, including scripts for ingesting data.
+Files related to the ColabFit project, including scripts for ingesting data.
 
 * `scripts` contains scripts that have been ingested into at least one of the ColabFit test databases.  
 * `scripts_13_7_2023` contains in-progress scripts and those which have not yet been ingested into the ColabFit database.  
