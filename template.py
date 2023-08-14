@@ -1,13 +1,8 @@
 """
-author:gpwolfe
+author:
 
 Data can be downloaded from:
 
-Download link:
-
-Change database name as appropriate
-
-Run: $ python3 <script_name>.py -i (or --ip) <database_ip>
 
 Properties
 ----------
@@ -20,34 +15,90 @@ File notes
 
 """
 from argparse import ArgumentParser
-from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from ase.io import read
+
+# from colabfit.tools.configuration import AtomicConfiguration
+from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     # cauchy_stress_pd,
     potential_energy_pd,
 )
-import numpy as np
 from pathlib import Path
-import re
 import sys
 
 DATASET_FP = Path("").cwd()
-DATASET = ""
+DATASET_NAME = ""
 
 SOFTWARE = ""
 METHODS = ""
 LINKS = ["", ""]
 AUTHORS = [""]
-DS_DESC = ""
+DATASET_DESC = ""
 ELEMENTS = [""]
 GLOB_STR = ".*"
 
-RE = re.compile(r"")
+# Assign additional relevant property instance metadata, such as basis set used
+PI_METADATA = {
+    "software": {"value": SOFTWARE},
+    "method": {"value": METHODS},
+    # "basis-set": {"field": "basis_set"}
+}
+
+# Define dynamic 'field' -> value relationships or static 'value' -> value relationships
+# for your properties here. Any "field" value should be contained in your PI_METADATA
+# In this example, the custom reader function should return ase.Atoms objects with
+# atoms.info['energy'] and atoms.info['forces'] or atoms.arrays['forces'] values.
+
+PROPERTY_MAP = {
+    "potential-energy": [
+        {
+            "energy": {"field": "energy", "units": "eV"},
+            "per-atom": {"value": False, "units": None},
+            "_metadata": PI_METADATA,
+        }
+    ],
+    "atomic-forces": [
+        {
+            "forces": {"field": "forces", "units": "eV/A"},
+            "_metadata": PI_METADATA,
+        },
+    ],
+    # "cauchy-stress": [
+    #     {
+    #         "stress": {"field": "stress", "units": "eV"},
+    #         "volume-normalized": {"value": True, "units": None},
+    #         "_metadata": metadata,
+    #     }
+    # ],
+}
+
+# Define any configuration-specific metadata here.
+CO_METADATA = {
+    "enthalpy": {"field": "h", "units": "Ha"},
+    "zpve": {"field": "zpve", "units": "Ha"},
+}
 
 
-def reader(filepath):
-    return atoms
+def reader(filepath: Path):
+    """
+    If using a customer reader function, define here.
+
+    Reader function should accept only one argument--a Path() object--and return
+    either a list or generator of AtomicConfiguration objects or ase.Atoms objects.
+    Examples of custom reader functions can be found in the finished scripts
+    directories.
+
+    Below is a minimal example using ase.io.read to parse e.g., an extxyz file.
+    If the extxyz header contains the fields defined in PROPERTY_MAP and CO_METADATA
+    above (i.e., 'energy' and 'forces'; and 'h' and 'zpve', respectively), these fields
+    will be used in the data ingestion process to create property-instance -> PI-medata
+    relationships and configuration -> CO-metadata relationships.
+    """
+    configs = read(filepath, index=":")
+    for i, config in enumerate(configs):
+        config.info["name"] = f"{filepath.stem}_{i}"
+    return configs
 
 
 def main(argv):
@@ -72,6 +123,8 @@ def main(argv):
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
     )
 
+    ds_id = generate_ds_id()
+
     configurations = load_data(
         file_path=DATASET_FP,
         file_format="folder",
@@ -85,48 +138,27 @@ def main(argv):
     client.insert_property_definition(potential_energy_pd)
     # client.insert_property_definition(cauchy_stress_pd)
 
-    metadata = {
-        "software": {"value": SOFTWARE},
-        "method": {"value": METHODS},
-        # "": {"field": ""}
-    }
-    property_map = {
-        "potential-energy": [
-            {
-                "energy": {"field": "energy", "units": "eV"},
-                "per-atom": {"value": False, "units": None},
-                "_metadata": metadata,
-            }
-        ],
-        "atomic-forces": [
-            {
-                "forces": {"field": "forces", "units": "eV/A"},
-                "_metadata": metadata,
-            },
-        ],
-        # "cauchy-stress": [
-        #     {
-        #         "stress": {"field": "stress", "units": "eV"},
-        #         "volume-normalized": {"value": True, "units": None},
-        #         "_metadata": metadata,
-        #     }
-        # ],
-    }
     ids = list(
         client.insert_data(
-            configurations,
-            property_map=property_map,
+            configurations=configurations,
+            ds_id=ds_id,
+            property_map=PROPERTY_MAP,
             generator=False,
             verbose=True,
         )
     )
 
     all_co_ids, all_do_ids = list(zip(*ids))
+
+    # If no obvious divisions between configurations exist (i.e., different methods or
+    # materials), remove the following lines through 'cs_ids.append(...)' and from
+    # 'insert_dataset(...) function remove 'cs_ids=cs_ids' argument.
+
     cs_regexes = [
         [
-            f"{DATASET}",
-            ".*",
-            f"All configurations from {DATASET} dataset",
+            f"{DATASET_NAME}_aluminum",
+            "aluminum",
+            f"Configurations of aluminum from {DATASET_NAME} dataset",
         ]
     ]
 
@@ -135,6 +167,7 @@ def main(argv):
     for i, (name, regex, desc) in enumerate(cs_regexes):
         cs_id = client.query_and_insert_configuration_set(
             co_hashes=all_co_ids,
+            ds_id=ds_id,
             name=name,
             description=desc,
             query={"names": {"$regex": regex}},
@@ -144,12 +177,12 @@ def main(argv):
 
     client.insert_dataset(
         do_hashes=all_do_ids,
-        name=DATASET,
+        name=DATASET_NAME,
         authors=AUTHORS,
         links=LINKS,
-        description=DS_DESC,
+        description=DATASET_DESC,
         verbose=True,
-        cs_ids=cs_ids,
+        cs_ids=cs_ids,  # remove line if no configuration sets to insert
     )
 
 
