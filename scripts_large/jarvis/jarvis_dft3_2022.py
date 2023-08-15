@@ -13,6 +13,9 @@ slme = spectroscopic limited maximum efficiency
 encut = ecut/energy cutoff
 kpoint_length_unit -> want?
 optb88vdw_total_energy (dft_3d)
+efg = electric field gradient
+mbj_bandgap = band-gap calculated with TBmBJ method
+
 
 For all JARVIS datasets, if for configuration "cartesian=False", use an
 AtomicConfiguration or ase.Atoms object with 'scaled_positions' arg instead of
@@ -92,19 +95,25 @@ import sys
 
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
+from colabfit.tools.property_definitions import potential_energy_pd
 
 DATASET_FP = Path("jarvis_json_zips/")
 GLOB = "jdft_3d-12-12-2022.json"
 DS_NAME = "JARVIS-DFT-3D-12-12-2022"
 DS_DESC = (
-    "The jdft_3d-12-12-2022 dataset from the joint automated repository for "
-    "various integrated simulations (JARVIS) DFT database. JARVIS-DFT is the "
-    "portion of the JARVIS database "
+    "The DFT-3D-12-12-2022 dataset is part of the joint automated repository for "
+    "various integrated simulations (JARVIS) DFT database. This subset contains "
+    "configurations of 3D materials. JARVIS is a set of "
+    "tools and datasets built to meet current materials design challenges. JARVIS-DFT "
+    "is the portion of the JARVIS database based on DFT calculations, primarily made "
+    "using the vdW-DF-OptB88 functional, containing numerous separate datasets."
 )
 
-SOFTWARE = "VASP"
-METHODS = "DFT-optB88vdW"
-LINKS = ["https://doi.org/10.1038/s41524-020-00440-1", "https://jarvis.nist.gov/"]
+LINKS = [
+    "https://doi.org/10.1038/s41524-020-00440-1",
+    "https://jarvis.nist.gov/",
+    "https://doi.org/10.6084/m9.figshare.6815699",
+]
 AUTHORS = [
     "Kamal Choudhary",
     "Kevin F. Garrity",
@@ -137,31 +146,53 @@ AUTHORS = [
 ]
 ELEMENTS = None
 
-PI_METADATA = {
-    "software": {"value": SOFTWARE},
-    "method": {"value": METHODS},
-    "ecut": {"field": "encut"}
-    # "basis-set": {"field": "basis_set"}
-}
 
 PROPERTY_MAP = {
     "formation-energy": [
         {
             "energy": {"field": "formation_energy_peratom", "units": "eV"},
             "per-atom": {"value": True, "units": None},
-            "_metadata": PI_METADATA,
+            "_metadata": {
+                "software": {"value": "VASP"},
+                "method": {"field": "method"},
+                "ecut": {"field": "encut"},
+            },
+        }
+    ],
+    "band-gap": [
+        {
+            "energy": {"field": "mbj_bandgap", "units": "eV"},
+            "_metadata": {
+                "method": {"value": "DFT-TBmBJ"},
+                "software": {"value": "VASP"},
+            },
+        },
+        {
+            "energy": {"field": "optb88vdw_bandgap", "units": "eV"},
+            "_metadata": {
+                "method": {"value": "DFT-OptB88vdW"},
+                "software": {"value": "VASP"},
+            },
+        },
+    ],
+    "potential-energy": [
+        {
+            "energy": {"field": "optb88vdw_total_energy", "units": "eV"},
+            "per-atom": {"value": False, "units": None},
+            "_metadata": {
+                "software": {"value": "VASP"},
+                "method": {"value": "DFT-OptB88vdW"},
+                "ecut": {"field": "encut"},
+            },
         }
     ],
 }
 
 
-CO_METADATA = {
-    "enthalpy": {"field": "h", "units": "Ha"},
-    "zpve": {"field": "zpve", "units": "Ha"},
-}
-
-with open("formation_energy_pd.json", "r") as f:
+with open("formation_energy.json", "r") as f:
     formation_energy_pd = json.load(f)
+with open("band_gap.json", "r") as f:
+    band_gap_pd = json.load(f)
 
 
 def reader(fp):
@@ -183,8 +214,9 @@ def reader(fp):
                 cell=atoms["lattice_mat"],
             )
         config.info["name"] = f"{fp}_{i}"
+        config.info["method"] = f"DFT-{row.pop('func')}"
         for key, val in row.items():
-            if type(val) == str and val != "na":
+            if type(val) == str and val != "na" and len(val) > 0:
                 config.info[key] = val
             elif type(val) == list and len(val) > 0 and any([x != "" for x in val]):
                 config.info[key] = val
@@ -233,6 +265,8 @@ def main(argv):
     )
 
     client.insert_property_definition(formation_energy_pd)
+    client.insert_property_definition(band_gap_pd)
+    client.insert_property_definition(potential_energy_pd)
 
     ids = list(
         client.insert_data(
@@ -256,6 +290,69 @@ def main(argv):
         description=DS_DESC,
         verbose=True,
     )
+
+
+CO_KEYS = [
+    "Tc_supercon",
+    "avg_elec_mass",
+    "avg_hole_mass",
+    "bulk_modulus_kv",
+    "crys",
+    "density",
+    "dfpt_piezo_max_dielectric",
+    "dfpt_piezo_max_dielectric_electronic",
+    "dfpt_piezo_max_dielectric_ionic",
+    "dfpt_piezo_max_dij",
+    "dfpt_piezo_max_eij",
+    "dimensionality",
+    "effective_masses_300K",
+    "efg",
+    "ehull",
+    "elastic_tensor",
+    "epsx",
+    "epsy",
+    "epsz",
+    "exfoliation_energy",
+    "formula",
+    "hse_gap",
+    "icsd",
+    "jid",
+    "kpoint_length_unit",
+    "magmom_oszicar",
+    "magmom_outcar",
+    "max_efg",
+    "max_ir_mode",
+    "maxdiff_bz",
+    "maxdiff_mesh",
+    "mbj_bandgap",
+    "mepsx",
+    "mepsy",
+    "mepsz",
+    "min_ir_mode",
+    "modes",
+    "n-Seebeck",
+    "n-powerfact",
+    "nat",
+    "ncond",
+    "nkappa",
+    "p-Seebeck",
+    "p-powerfact",
+    "pcond",
+    "pkappa",
+    "poisson",
+    "raw_files",
+    "reference",
+    "search",
+    "shear_modulus_gv",
+    "slme",
+    "spg",
+    "spg_number",
+    "spg_symbol",
+    "spillage",
+    "typ",
+    "xml_data_link",
+]
+CO_METADATA = {key: {"field": key} for key in CO_KEYS}
 
 
 if __name__ == "__main__":
