@@ -64,7 +64,7 @@ DS_DESC = (
     '(~466k trajectories)" data split under the "Relaxation Trajectories" '
     "section of the Open Catalyst Project GitHub page."
 )
-DATASET = "OC20-IS2RES"
+DATASET = "OC20-IS2RES-Train"
 DATASET_FP = Path("is2res_train_trajectories")
 PKL_FP = DATASET_FP / "oc20_data_mapping.pkl"
 GLOB_STR = "*.extxyz"
