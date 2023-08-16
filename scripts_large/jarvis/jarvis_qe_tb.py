@@ -8,11 +8,10 @@ having this as a dependency.
 
 Properties key:
 spg = space group
-fund = functional
+func = functional
 slme = spectroscopic limited maximum efficiency
 encut = ecut/energy cutoff
 kpoint_length_unit -> want?
-optb88vdw_total_energy (dft_3d)
 efg = electric field gradient
 mbj_bandgap = band-gap calculated with TBmBJ method
 
@@ -21,22 +20,22 @@ For all JARVIS datasets, if for configuration "cartesian=False", use an
 AtomicConfiguration or ase.Atoms object with 'scaled_positions' arg instead of
 'positions'.
 
-dft_3-12-12-2022 property keys
+QE-TB property keys
 
 ['atoms',
  'crystal_system',
- 'energy_per_atom', <- potential energy, per-atom=True
- 'f_enp',
- 'final_energy',    <- potential energy, per-atom=False
- 'forces',          <- atomic forces
+ 'energy_per_atom', <- potential energy, per-atom=True eV
+ 'f_enp',           <- formation energy eV
+ 'final_energy',    <- potential energy, per-atom=False eV
+ 'forces',          <- atomic forces eV/A
  'formula',
- 'indir_gap',
+ 'indir_gap',       <- band gap eV
  'jid',
  'natoms',
  'source_folder',
  'spacegroup_number',
  'spacegroup_symbol',
- 'stress']          <- cauchy stress
+ 'stress']          <- cauchy stress eV/A
 """
 
 from argparse import ArgumentParser
@@ -58,9 +57,10 @@ DS_NAME = "JARVIS-QE-TB"
 DS_DESC = (
     "The QE-TB dataset is part of the joint automated repository for "
     "various integrated simulations (JARVIS) DFT database. This subset contains "
-    "configurations generated with a tight-binding (TB) method. JARVIS is a set of "
-    "tools and datasets built to meet current materials design challenges. JARVIS-DFT "
-    "is the portion of the JARVIS database based on DFT calculations."
+    "configurations generated in Quantum ESPRESSO. "
+    "JARVIS is a set oftools and datasets built to meet current materials design "
+    "challenges. JARVIS-DFT is the portion of the JARVIS database based on DFT "
+    "calculations."
 )
 
 LINKS = [
@@ -100,16 +100,49 @@ AUTHORS = [
     "Francesca Tavazza",
 ]
 ELEMENTS = None
+PI_MD = {
+    "software": {"value": "Quantum ESPRESSO"},
+    "method": {"value": "DFT-PBEsol"},
+    "ecut": {"value": "45 Ry"},
+}
 
 PROPERTY_MAP = {
     "potential-energy": [
         {
-            "energy": {"field": "optb88vdw_total_energy", "units": "eV"},
+            "energy": {"field": "final_energy", "units": "eV"},
             "per-atom": {"value": False, "units": None},
-            "_metadata": {
-                "software": {"value": "VASP"},
-                "method": {"value": "DFT-OptB88vdW"},
-            },
+            "_metadata": PI_MD,
+        },
+        {
+            "energy": {"field": "energy_per_atom", "units": "eV"},
+            "per-atom": {"value": True, "units": None},
+            "_metadata": PI_MD,
+        },
+    ],
+    "formation-energy": [
+        {
+            "energy": {"field": "f_enp", "units": "eV"},
+            "per-atom": {"value": True, "units": None},
+            "_metadata": PI_MD,
+        }
+    ],
+    "cauchy-stress": [
+        {
+            "stress": {"field": "stress", "units": "eV/A"},
+            "volume-normalized": {"value": False, "units": None},
+            "_metadata": PI_MD,
+        }
+    ],
+    "band-gap": [
+        {
+            "energy": {"field": "indir_gap", "units": "eV"},
+            "_metadata": PI_MD,
+        }
+    ],
+    "atomic-forces": [
+        {
+            "forces": {"field": "forces", "units": "eV/A"},
+            "_metadata": PI_MD,
         }
     ],
 }
@@ -134,7 +167,6 @@ def reader(fp):
                 cell=atoms["lattice_mat"],
             )
         config.info["name"] = f"{fp}_{i}"
-        config.info["method"] = f"DFT-{row.pop('func')}"
         for key, val in row.items():
             if type(val) == str and val != "na" and len(val) > 0:
                 config.info[key] = val
@@ -148,6 +180,12 @@ def reader(fp):
                 pass
         configs.append(config)
     return configs
+
+
+with open("formation_energy.json", "r") as f:
+    formation_energy_pd = json.load(f)
+with open("band_gap.json", "r") as f:
+    band_gap_pd = json.load(f)
 
 
 def main(argv):
@@ -187,6 +225,8 @@ def main(argv):
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(cauchy_stress_pd)
     client.insert_property_definition(potential_energy_pd)
+    client.insert_property_definition(formation_energy_pd)
+    client.insert_property_definition(band_gap_pd)
 
     ids = list(
         client.insert_data(
@@ -213,15 +253,20 @@ def main(argv):
 
 
 CO_KEYS = [
+    # "atoms",            <- atom structures
     "crystal_system",
-    "f_enp",
+    #  'energy_per_atom', <- potential energy, per-atom=True eV
+    #  'f_enp',           <- formation energy eV
+    #  'final_energy',    <- potential energy, per-atom=False eV
+    #  'forces',          <- atomic forces eV/A
     "formula",
-    "indir_gap",
+    #  'indir_gap',       <- band gap eV
     "jid",
     "natoms",
     "source_folder",
     "spacegroup_number",
     "spacegroup_symbol",
+    #  'stress'           <- cauchy stress eV/A
 ]
 
 CO_METADATA = {key: {"field": key} for key in CO_KEYS}
