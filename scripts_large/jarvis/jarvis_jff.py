@@ -64,10 +64,9 @@ DS_DESC = (
 )
 
 LINKS = [
-    "https://arxiv.org/abs/2112.11585",
-    "https://doi.org/10.1103/PhysRevMaterials.7.044603",
+    "https://doi.org/10.1038/s41524-020-00440-1",
     "https://jarvis.nist.gov/",
-    "https://ndownloader.figshare.com/files/29070555",
+    "https://ndownloader.figshare.com/files/28937793",
 ]
 AUTHORS = [
     "Kamal Choudhary",
