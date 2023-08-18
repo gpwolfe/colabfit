@@ -29,10 +29,11 @@ import itertools
 import multiprocessing
 import numpy as np
 from pathlib import Path
+import subprocess
 import sys
 from tqdm import tqdm
 
-BATCH_SIZE = 512
+BATCH_SIZE = 1024
 
 AUTHORS = [
     "Lowik Chanussot",
@@ -255,6 +256,15 @@ def main(argv):
         ds_id=ds_id,
         nprocs=nprocs,
     )
+    subprocess.run("kubectl port-forward svc/mongo 5000:27017 &", shell=True)
+
+    client = MongoDatabase(
+        args.db_name, nprocs=nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
+    ds_id = generate_ds_id()
+    client.insert_property_definition(potential_energy_pd)
+    client.insert_property_definition(free_energy_pd)
+    client.insert_property_definition(atomic_forces_pd)
 
     client.insert_dataset(
         do_hashes=do_hashes,
