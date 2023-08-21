@@ -66,7 +66,9 @@ DS_DESC = (
     "section of the Open Catalyst Project GitHub page."
 )
 DATASET = "OC20-IS2RES-Train"
-DATASET_FP = Path("is2res_train_trajectories")
+DATASET_FP = Path("/vast/gw2338is2res_train_trajectories")
+# DATASET_FP = Path("is2res_train_trajectories")  # remove
+
 PKL_FP = DATASET_FP / "oc20_data_mapping.pkl"
 GLOB_STR = "*.extxyz"
 NAME_FIELD = "name"
