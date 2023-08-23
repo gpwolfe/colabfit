@@ -3,6 +3,11 @@ author: gpwolfe
 
 File notes
 ----------
+JFF appears to be the Jarvis-Force-Field dataset, which may not be of interest.
+Script has not been completed.
+Links are accurate. Keys are accurate.
+
+
 Files have been previously downloaded and unzipped using jarvis-tools to avoid
 having this as a dependency.
 
@@ -22,16 +27,16 @@ AtomicConfiguration or ase.Atoms object with 'scaled_positions' arg instead of
 
 JFF property keys
 
-'atoms',       <- atom structures
+'atoms',        <- atom structures
 'elastic_tensor_data',
 'final_str',
 'formula',
-'func',        <- functional
-'gv',
+'func',         <- functional
+'gv',           < Voigt modulus
 'jid',
-'kv',
-'phon_dat',
-'ref',         <- reference energy?
+'kv',           <--Voigt modulus
+'phon_dat',     <-- Available//not available
+'ref',          <- reference energy?
 'search',
 'spg',
 'surf_dat',
@@ -52,12 +57,11 @@ from colabfit.tools.property_definitions import (
 )
 
 DATASET_FP = Path("jarvis_json_zips/")
-GLOB = "jqe_tb_folder.json"
-DS_NAME = "JARVIS-QE-TB"
+GLOB = "jff-7-24-2021.json"
+DS_NAME = "JARVIS-JFF"
 DS_DESC = (
-    "The QE-TB dataset is part of the joint automated repository for "
-    "various integrated simulations (JARVIS) DFT database. This subset contains "
-    "configurations generated in Quantum ESPRESSO. "
+    "The JFF dataset is part of the joint automated repository for "
+    "various integrated simulations (JARVIS) database. "
     "JARVIS is a set oftools and datasets built to meet current materials design "
     "challenges. JARVIS-DFT is the portion of the JARVIS database based on DFT "
     "calculations."
