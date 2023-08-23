@@ -33,7 +33,7 @@ import subprocess
 import sys
 from tqdm import tqdm
 
-BATCH_SIZE = 1024
+BATCH_SIZE = 512
 
 AUTHORS = [
     "Lowik Chanussot",
@@ -66,7 +66,7 @@ DS_DESC = (
     "section of the Open Catalyst Project GitHub page."
 )
 DATASET = "OC20-IS2RES-Train"
-DATASET_FP = Path("/vast/gw2338is2res_train_trajectories")
+DATASET_FP = Path("/vast/gw2338/is2res_train_trajectories")
 # DATASET_FP = Path("is2res_train_trajectories")  # remove
 
 PKL_FP = DATASET_FP / "oc20_data_mapping.pkl"
@@ -243,14 +243,14 @@ def main(argv):
     )
     args = parser.parse_args(argv)
     nprocs = args.nprocs
-    client = MongoDatabase(
-        args.db_name, nprocs=nprocs, uri=f"mongodb://{args.ip}:27017"
-    )
+
+    subprocess.run("kubectl port-forward svc/mongo 5000:27017 &", shell=True)
+
+    client = MongoDatabase(args.db_name, nprocs=nprocs, uri=f"mongodb://{args.ip}:5000")
     ds_id = generate_ds_id()
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(free_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
-
     do_hashes = upload_configs(
         client=client,
         co_md_map=co_md_map,
@@ -258,16 +258,6 @@ def main(argv):
         ds_id=ds_id,
         nprocs=nprocs,
     )
-    subprocess.run("kubectl port-forward svc/mongo 5000:27017 &", shell=True)
-
-    client = MongoDatabase(
-        args.db_name, nprocs=nprocs, uri=f"mongodb://{args.ip}:27017"
-    )
-    ds_id = generate_ds_id()
-    client.insert_property_definition(potential_energy_pd)
-    client.insert_property_definition(free_energy_pd)
-    client.insert_property_definition(atomic_forces_pd)
-
     client.insert_dataset(
         do_hashes=do_hashes,
         ds_id=ds_id,
