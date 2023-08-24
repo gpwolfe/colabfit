@@ -58,7 +58,7 @@ DS_DESC = (
     "The QE-TB dataset is part of the joint automated repository for "
     "various integrated simulations (JARVIS) DFT database. This subset contains "
     "configurations generated in Quantum ESPRESSO. "
-    "JARVIS is a set oftools and datasets built to meet current materials design "
+    "JARVIS is a set of tools and datasets built to meet current materials design "
     "challenges. JARVIS-DFT is the portion of the JARVIS database based on DFT "
     "calculations."
 )
@@ -69,36 +69,7 @@ LINKS = [
     "https://jarvis.nist.gov/",
     "https://ndownloader.figshare.com/files/29070555",
 ]
-AUTHORS = [
-    "Kamal Choudhary",
-    "Kevin F. Garrity",
-    "Andrew C. E. Reid",
-    "Brian DeCost",
-    "Adam J. Biacchi",
-    "Angela R. Hight Walker",
-    "Zachary Trautt",
-    "Jason Hattrick-Simpers",
-    "A. Gilad Kusne",
-    "Andrea Centrone",
-    "Albert Davydov",
-    "Jie Jiang",
-    "Ruth Pachter",
-    "Gowoon Cheon",
-    "Evan Reed",
-    "Ankit Agrawal",
-    "Xiaofeng Qian",
-    "Vinit Sharma",
-    "Houlong Zhuang",
-    "Sergei V. Kalinin",
-    "Bobby G. Sumpter",
-    "Ghanshyam Pilania",
-    "Pinar Acar",
-    "Subhasish Mandal",
-    "Kristjan Haule",
-    "David Vanderbilt",
-    "Karin Rabe",
-    "Francesca Tavazza",
-]
+AUTHORS = ["Kevin F. Garrity", "Kamal Choudhary"]
 ELEMENTS = None
 PI_MD = {
     "software": {"value": "Quantum ESPRESSO"},

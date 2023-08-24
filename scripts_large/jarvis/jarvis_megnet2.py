@@ -56,36 +56,7 @@ LINKS = [
     "https://jarvis.nist.gov/",
     "https://ndownloader.figshare.com/files/28332741",
 ]
-AUTHORS = [
-    "Kamal Choudhary",
-    "Kevin F. Garrity",
-    "Andrew C. E. Reid",
-    "Brian DeCost",
-    "Adam J. Biacchi",
-    "Angela R. Hight Walker",
-    "Zachary Trautt",
-    "Jason Hattrick-Simpers",
-    "A. Gilad Kusne",
-    "Andrea Centrone",
-    "Albert Davydov",
-    "Jie Jiang",
-    "Ruth Pachter",
-    "Gowoon Cheon",
-    "Evan Reed",
-    "Ankit Agrawal",
-    "Xiaofeng Qian",
-    "Vinit Sharma",
-    "Houlong Zhuang",
-    "Sergei V. Kalinin",
-    "Bobby G. Sumpter",
-    "Ghanshyam Pilania",
-    "Pinar Acar",
-    "Subhasish Mandal",
-    "Kristjan Haule",
-    "David Vanderbilt",
-    "Karin Rabe",
-    "Francesca Tavazza",
-]
+AUTHORS = ["Chi Chen", "Weike Ye", "Yunxing Zuo", "Chen Zheng", "Shyue Ping Ong"]
 ELEMENTS = None
 PI_MD = {
     "software": {"value": "VASP"},
