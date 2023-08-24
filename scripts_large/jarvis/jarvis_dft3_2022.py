@@ -105,8 +105,8 @@ DS_DESC = (
     "various integrated simulations (JARVIS) DFT database. This subset contains "
     "configurations of 3D materials. JARVIS is a set of "
     "tools and datasets built to meet current materials design challenges. JARVIS-DFT "
-    "is the portion of the JARVIS database based on DFT calculations, primarily made "
-    "using the vdW-DF-OptB88 functional, containing numerous separate datasets."
+    "is the portion of the JARVIS database based on DFT calculations, containing "
+    "numerous separate datasets."
 )
 
 LINKS = [

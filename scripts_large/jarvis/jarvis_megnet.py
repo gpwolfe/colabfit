@@ -55,8 +55,8 @@ DS_DESC = (
     "configurations with 3D materials properties from the 2018 version of Materials "
     "Project, as used in the training of the MEGNet ML model. JARVIS is a set of "
     "tools and datasets built to meet current materials design challenges. JARVIS-DFT "
-    "is the portion of the JARVIS database based on DFT calculations, primarily made "
-    "using the vdW-DF-OptB88 functional, containing numerous separate datasets."
+    "is the portion of the JARVIS database based on DFT calculations, "
+    "containing numerous separate datasets."
 )
 
 LINKS = [
@@ -64,36 +64,7 @@ LINKS = [
     "https://jarvis.nist.gov/",
     "https://ndownloader.figshare.com/files/26724977",
 ]
-AUTHORS = [
-    "Kamal Choudhary",
-    "Kevin F. Garrity",
-    "Andrew C. E. Reid",
-    "Brian DeCost",
-    "Adam J. Biacchi",
-    "Angela R. Hight Walker",
-    "Zachary Trautt",
-    "Jason Hattrick-Simpers",
-    "A. Gilad Kusne",
-    "Andrea Centrone",
-    "Albert Davydov",
-    "Jie Jiang",
-    "Ruth Pachter",
-    "Gowoon Cheon",
-    "Evan Reed",
-    "Ankit Agrawal",
-    "Xiaofeng Qian",
-    "Vinit Sharma",
-    "Houlong Zhuang",
-    "Sergei V. Kalinin",
-    "Bobby G. Sumpter",
-    "Ghanshyam Pilania",
-    "Pinar Acar",
-    "Subhasish Mandal",
-    "Kristjan Haule",
-    "David Vanderbilt",
-    "Karin Rabe",
-    "Francesca Tavazza",
-]
+AUTHORS = ["Chi Chen", "Weike Ye", "Yunxing Zuo", "Chen Zheng", "Shyue Ping Ong"]
 ELEMENTS = None
 PI_MD = {
     "software": {"value": "VASP"},
