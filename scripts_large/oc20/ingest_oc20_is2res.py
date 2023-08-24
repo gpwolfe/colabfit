@@ -177,28 +177,8 @@ def read_for_pool(filepath):
     return configurations
 
 
-def get_configs(filepaths, client, co_md_map, property_map, ds_id, nprocs):
-    pool = multiprocessing.Pool(nprocs)
-
-    configurations = list(
-        itertools.chain.from_iterable(pool.map(read_for_pool, filepaths))
-    )
-
-    ids = list(
-        client.insert_data(
-            configurations,
-            ds_id=ds_id,
-            co_md_map=co_md_map,
-            property_map=property_map,
-            generator=False,
-            verbose=False,
-        )
-    )
-    return ids
-
-
-def upload_configs(client, co_md_map, property_map, ds_id, nprocs):
-    ids = []
+def get_configs(nprocs):
+    configurations = []
     fps = list(DATASET_FP.rglob(GLOB_STR))
     n_batches = len(fps) // BATCH_SIZE
     leftover = len(fps) % BATCH_SIZE
@@ -208,20 +188,12 @@ def upload_configs(client, co_md_map, property_map, ds_id, nprocs):
     for batch in tqdm(indices):
         beg, end = batch
         filepaths = fps[beg:end]
-        ids.extend(
-            get_configs(
-                filepaths,
-                client=client,
-                co_md_map=co_md_map,
-                property_map=property_map,
-                ds_id=ds_id,
-                nprocs=nprocs,
-            )
+        pool = multiprocessing.Pool(nprocs)
+        config_batch = list(
+            itertools.chain.from_iterable(pool.map(read_for_pool, filepaths))
         )
-
-    all_co_ids, all_do_ids = list(zip(*ids))
-
-    return all_do_ids
+        configurations.extend(config_batch)
+    return configurations
 
 
 def main(argv):
@@ -244,22 +216,34 @@ def main(argv):
     args = parser.parse_args(argv)
     nprocs = args.nprocs
 
+    # For running from Greene
     subprocess.run("kubectl port-forward svc/mongo 5000:27017 &", shell=True)
-
     client = MongoDatabase(args.db_name, nprocs=nprocs, uri=f"mongodb://{args.ip}:5000")
+
+    # for local testing
+    # client = MongoDatabase(
+    #     args.db_name, nprocs=nprocs, uri=f"mongodb://{args.ip}:27017"
+    # )
+
     ds_id = generate_ds_id()
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(free_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
-    do_hashes = upload_configs(
-        client=client,
-        co_md_map=co_md_map,
-        property_map=property_map,
-        ds_id=ds_id,
-        nprocs=nprocs,
+    configurations = get_configs(nprocs=nprocs)
+    ids = list(
+        client.insert_data(
+            configurations,
+            ds_id=ds_id,
+            co_md_map=co_md_map,
+            property_map=property_map,
+            generator=False,
+            verbose=False,
+        )
     )
+
+    all_co_ids, all_do_ids = list(zip(*ids))
     client.insert_dataset(
-        do_hashes=do_hashes,
+        do_hashes=all_do_ids,
         ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
