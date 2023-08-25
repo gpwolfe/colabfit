@@ -169,7 +169,7 @@ def reader(fp):
                 symbols=atoms["elements"],
                 cell=atoms["lattice_mat"],
             )
-        config.info["name"] = f"{fp}_{i}"
+        config.info["name"] = f"{fp.stem}_{i}"
         for key, val in row.items():
             if type(val) == str and val != "na" and len(val) > 0:
                 config.info[key] = val

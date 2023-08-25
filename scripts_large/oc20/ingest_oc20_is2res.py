@@ -177,8 +177,8 @@ def read_for_pool(filepath):
     return configurations
 
 
-def get_configs(nprocs):
-    configurations = []
+def get_configs(ds_id, args):
+    ids = []
     fps = list(DATASET_FP.rglob(GLOB_STR))
     n_batches = len(fps) // BATCH_SIZE
     leftover = len(fps) % BATCH_SIZE
@@ -188,12 +188,33 @@ def get_configs(nprocs):
     for batch in tqdm(indices):
         beg, end = batch
         filepaths = fps[beg:end]
-        pool = multiprocessing.Pool(nprocs)
-        config_batch = list(
+        pool = multiprocessing.Pool(args.nprocs)
+        configurations = list(
             itertools.chain.from_iterable(pool.map(read_for_pool, filepaths))
         )
-        configurations.extend(config_batch)
-    return configurations
+        # For running from Greene
+        subprocess.run("kubectl port-forward svc/mongo 5000:27017 &", shell=True)
+        client = MongoDatabase(
+            args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:5000"
+        )
+
+        # for local testing
+        # client = MongoDatabase(
+        #     args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        # )
+        ids_batch = list(
+            client.insert_data(
+                configurations,
+                ds_id=ds_id,
+                co_md_map=co_md_map,
+                property_map=property_map,
+                generator=False,
+                verbose=False,
+            )
+        )
+        ids.extend(ids_batch)
+        subprocess.run("pkill kubectl", shell=True)
+    return ids
 
 
 def main(argv):
@@ -229,19 +250,13 @@ def main(argv):
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(free_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
-    configurations = get_configs(nprocs=nprocs)
-    ids = list(
-        client.insert_data(
-            configurations,
-            ds_id=ds_id,
-            co_md_map=co_md_map,
-            property_map=property_map,
-            generator=False,
-            verbose=False,
-        )
-    )
+    subprocess.run("pkill kubectl", shell=True)
+
+    ids = get_configs(ds_id, args)
 
     all_co_ids, all_do_ids = list(zip(*ids))
+    subprocess.run("kubectl port-forward svc/mongo 5000:27017 &", shell=True)
+    client = MongoDatabase(args.db_name, nprocs=nprocs, uri=f"mongodb://{args.ip}:5000")
     client.insert_dataset(
         do_hashes=all_do_ids,
         ds_id=ds_id,

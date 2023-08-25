@@ -142,7 +142,7 @@ def reader(fp):
         #     energy = energy.get("energy")
         #     if energy:
         #         config.info["energy"] = energy
-        config.info["name"] = f"{fp}_{i}"
+        config.info["name"] = f"{fp.stem}_{i}"
 
         for key, val in row.items():
             if type(val) == str and val != "na" and len(val) > 0:
