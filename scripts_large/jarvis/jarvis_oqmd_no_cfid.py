@@ -47,7 +47,7 @@ DS_NAME = "JARVIS_OQMD_no_CFID"
 DS_DESC = (
     "The JARVIS_OQMD_no_CFID dataset is part of the joint automated repository for "
     "various integrated simulations (JARVIS) database. This dataset contains "
-    "configurations from the Open Quantum Materials Database, created to hold "
+    "configurations from the Open Quantum Materials Database (OQMD), created to hold "
     "information about the electronic structure and stability of organic materials "
     "for the purpose of aiding in materials discovery. Calculations were performed "
     "at the DFT level of theory, using the PAW-PBE functional implemented by VASP. "
@@ -104,7 +104,7 @@ with open("formation_energy.json", "r") as f:
 def reader(fp):
     with open(fp, "r") as f:
         data = json.load(f)
-        data = data[:10000]
+        data = data
     configs = []
     for i, row in enumerate(data):
         atoms = row.pop("atoms")
