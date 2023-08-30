@@ -21,24 +21,6 @@ For all JARVIS datasets, if for configuration "cartesian=False", use an
 AtomicConfiguration or ase.Atoms object with 'scaled_positions' arg instead of
 'positions'.
 
-Polymer genome keys:
-Original keys (from publication):
-
-Source: VSharma_etal:NatCommun.5.4845(2014)
-Class: organic_polymer_crystal
-Label: Polyimide
-Structure prediction method used: USPEX
-Number of atoms: 32
-Number of atom types: 4
-Atom types: C H O N
-Dielectric constant, electronic: 3.71475E+00
-Dielectric constant, ionic: 1.54812E+00
-Dielectric constant, total: 5.26287E+00
-Band gap at the GGA level (eV): 2.05350E+00
-Band gap at the HSE06 level (eV): 3.30140E+00
-Atomization energy (eV/atom): -6.46371E+00
-Volume of the unit cell (A^3): 2.79303E+02
-
 Keys
 ['atoms',
 'desc',
@@ -70,6 +52,8 @@ DS_DESC = (
     "information about the electronic structure and stability of organic materials "
     "for the purpose of aiding in materials discovery. Calculations were performed "
     "at the DFT level of theory, using the PAW-PBE functional implemented by VASP. "
+    "This dataset also includes classical force-field inspired descriptors (CFID) for "
+    "each configuration. "
     "JARVIS is a set of tools and collected datasets built to meet current materials "
     "design challenges."
 )
@@ -93,7 +77,7 @@ ELEMENTS = None
 
 
 PROPERTY_MAP = {
-    "potential-energy": [
+    "formation-energy": [
         {
             "energy": {"field": "total_energy", "units": "eV"},
             "per-atom": {"value": False, "units": None},
@@ -102,11 +86,9 @@ PROPERTY_MAP = {
                 "method": {"value": "DFT-PBE"},
             },
         },
-    ],
-    "formation-energy": [
         {
             "energy": {"field": "form_energy", "units": "eV"},
-            "per-atom": {"value": False, "units": None},
+            "per-atom": {"value": True, "units": None},
             "_metadata": {
                 "software": {"value": "VASP"},
                 "method": {"value": "DFT-PBE"},
