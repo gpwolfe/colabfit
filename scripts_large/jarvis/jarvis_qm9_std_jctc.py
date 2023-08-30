@@ -98,10 +98,7 @@ AUTHORS = [
     "O. Anatole von Lilienfeld",
 ]
 ELEMENTS = None
-PI_MD = {
-    "software": {"value": "Gaussian 09"},
-    "method": {"value": "DFT-B3LYP/6-31G(2df,p)"},
-}
+
 
 PROPERTY_MAP = {
     "potential-energy": [
@@ -110,7 +107,8 @@ PROPERTY_MAP = {
             "per-atom": {"value": False, "units": None},
             "_metadata": {
                 "software": {"value": "Gaussian 09"},
-                "method": {"value": "DFT-B3LYP/6-31G(2df,p)"},
+                "method": {"value": "DFT-B3LYP"},
+                "basis-set": {"value": "6-31G(2df,p)"},
                 "temperature": {"value": "0K"},
             },
         },
@@ -119,7 +117,8 @@ PROPERTY_MAP = {
             "per-atom": {"value": False, "units": None},
             "_metadata": {
                 "software": {"value": "Gaussian 09"},
-                "method": {"value": "DFT-B3LYP/6-31G(2df,p)"},
+                "method": {"value": "DFT-B3LYP"},
+                "basis-set": {"value": "6-31G(2df,p)"},
                 "temperature": {"value": "298.15K"},
             },
         },
@@ -130,7 +129,8 @@ PROPERTY_MAP = {
             "per-atom": {"value": False, "units": None},
             "_metadata": {
                 "software": {"value": "Gaussian 09"},
-                "method": {"value": "DFT-B3LYP/6-31G(2df,p)"},
+                "method": {"value": "DFT-B3LYP"},
+                "basis-set": {"value": "6-31G(2df,p)"},
                 "temperature": {"value": "0K"},
             },
         },
@@ -140,7 +140,8 @@ PROPERTY_MAP = {
             "energy": {"field": "gap", "units": "eV"},
             "_metadata": {
                 "software": {"value": "Gaussian 09"},
-                "method": {"value": "DFT-B3LYP/6-31G(2df,p)"},
+                "method": {"value": "DFT-B3LYP"},
+                "basis-set": {"value": "6-31G(2df,p)"},
             },
         },
     ],
