@@ -185,10 +185,10 @@ def get_configs(ds_id, args):
     indices = [((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(n_batches)]
     if leftover:
         indices.append((BATCH_SIZE * n_batches, len(fps)))
+    pool = multiprocessing.Pool(args.nprocs)
     for batch in tqdm(indices):
         beg, end = batch
         filepaths = fps[beg:end]
-        pool = multiprocessing.Pool(args.nprocs)
         configurations = list(
             itertools.chain.from_iterable(pool.map(read_for_pool, filepaths))
         )
