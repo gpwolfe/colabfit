@@ -57,7 +57,7 @@ import h5py
 import os
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/ani_al")
-# DATASET_FP = Path("data/Al-data")  # remove
+# DATASET_FP = Path().cwd().parent / "data/Al-data"  # remove
 DATASET = "ANI-Al_NC2021"
 
 SOFTWARE = "Quantum ESPRESSO"
