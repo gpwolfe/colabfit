@@ -50,13 +50,17 @@ from colabfit.tools.property_definitions import potential_energy_pd
 
 
 DATASET_FP = Path("jarvis_json_zips/")
-GLOB = "qmof_db.json"
+GLOB = "snumat.json"
 DS_NAME = "JARVIS_SNUMAT"
 DS_DESC = (
     "The JARVIS_SNUMAT dataset is part of the joint automated repository for "
     "various integrated simulations (JARVIS) database. This dataset contains "
     "band gap data for >10,000 materials, computed using a hybrid functional and "
-    "considering the stable magnetic ordering. "
+    "considering the stable magnetic ordering. Structure relaxation and band edges "
+    "are obtained using the PBE XC functional; band gap energy is subsequently "
+    "obtained using the HSE06 hybrid functional. Optical and fundamental band gap "
+    "energies are included. Some gap energies are recalculated by including spin-orbit "
+    'coupling. These are noted in the band gap metadata as "SOC=true". '
     "JARVIS is a set of tools and collected datasets built to meet current materials "
     "design challenges."
 )
@@ -64,6 +68,7 @@ DS_DESC = (
 LINKS = [
     "https://doi.org/10.1038/s41597-020-00723-8",
     "https://jarvis.nist.gov/",
+    "https://www.snumat.com/",
     "https://ndownloader.figshare.com/files/38521736",
 ]
 AUTHORS = [
@@ -83,24 +88,45 @@ ELEMENTS = None
 
 
 PROPERTY_MAP = {
-    "potential-energy": [
-        {
-            "energy": {"field": "energy_total", "units": "eV"},
-            "per-atom": {"value": False, "units": None},
-            "_metadata": {
-                "software": {"value": "VASP 5.4.4"},
-                "method": {"value": "DFT-PBE-D3(BJ)"},
-                "cutoff": {"value": "520 eV"},
-            },
-        },
-    ],
     "band-gap": [
         {
-            "energy": {"field": "bandgap", "units": "eV"},
+            "energy": {"field": "Band_gap_GGA", "units": "eV"},
             "_metadata": {
-                "software": {"value": "VASP 5.4.4"},
-                "method": {"value": "DFT-PBE-D3(BJ)"},
-                "cutoff": {"value": "520 eV"},
+                "software": {"value": "VASP"},
+                "method": {"value": "DFT-PBE"},
+                "fundamental_optical": {"value": "fundamental"},
+                "direct_indirect": {"field": "Direct_or_indirect"},
+                "SOC": {"field": "SOC"},
+            },
+        },
+        {
+            "energy": {"field": "Band_gap_GGA_optical", "units": "eV"},
+            "_metadata": {
+                "software": {"value": "VASP"},
+                "method": {"value": "DFT-PBE"},
+                "fundamental_optical": {"value": "optical"},
+                "direct_indirect": {"field": "Direct_or_indirect"},
+                "SOC": {"field": "SOC"},
+            },
+        },
+        {
+            "energy": {"field": "Band_gap_HSE", "units": "eV"},
+            "_metadata": {
+                "software": {"value": "VASP"},
+                "method": {"value": "DFT-HSE06"},
+                "fundamental_optical": {"value": "fundamental"},
+                "direct_indirect": {"field": "Direct_or_indirect_HSE"},
+                "SOC": {"field": "SOC"},
+            },
+        },
+        {
+            "energy": {"field": "Band_gap_HSE_optical", "units": "eV"},
+            "_metadata": {
+                "software": {"value": "VASP"},
+                "method": {"value": "DFT-HSE06"},
+                "fundamental_optical": {"value": "optical"},
+                "direct_indirect": {"field": "Direct_or_indirect_HSE"},
+                "SOC": {"field": "SOC"},
             },
         },
     ],
@@ -120,19 +146,19 @@ def reader(fp):
     configs = []
     for i, row in enumerate(data):
         atoms = row.pop("atoms")
+        elements = [x if x != "D" else "H" for x in atoms["elements"]]
         if atoms["cartesian"] is True:
             config = AtomicConfiguration(
                 positions=atoms["coords"],
-                symbols=atoms["elements"],
+                symbols=elements,
                 cell=atoms["lattice_mat"],
             )
         else:
             config = AtomicConfiguration(
                 scaled_positions=atoms["coords"],
-                symbols=atoms["elements"],
+                symbols=elements,
                 cell=atoms["lattice_mat"],
             )
-
         config.info["name"] = f"{fp.stem}_{i}"
 
         for key, val in row.items():
@@ -214,19 +240,19 @@ def main(argv):
 
 
 CO_KEYS = [
-    "Band_gap_GGA",
-    "Band_gap_GGA_optical",
-    "Band_gap_HSE",
-    "Band_gap_HSE_optical",
-    "Direct_or_indirect",
-    "Direct_or_indirect_HSE",
+    # "Band_gap_GGA",
+    # "Band_gap_GGA_optical",
+    # "Band_gap_HSE",
+    # "Band_gap_HSE_optical",
+    # "Direct_or_indirect",
+    # "Direct_or_indirect_HSE",
     "ICSD_number",
     "Magnetic_ordering",
     "SNUMAT_id",
-    "SOC",
+    # "SOC",
     "Space_group_rlx",
     "Structure_rlx",
-    "atoms",
+    # "atoms",
 ]
 
 
