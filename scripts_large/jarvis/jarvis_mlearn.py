@@ -47,7 +47,7 @@ from colabfit.tools.property_definitions import (
 )
 
 
-DATASET_FP = Path("jarvis_json_zips/")
+DATASET_FP = Path("jarvis_json/")
 GLOB = "mlearn.json"
 DS_NAME = "JARVIS_mlearn"
 DS_DESC = (
@@ -118,8 +118,8 @@ PROPERTY_MAP = {
 
 # with open("formation_energy.json", "r") as f:
 #     formation_energy_pd = json.load(f)
-with open("band_gap.json", "r") as f:
-    band_gap_pd = json.load(f)
+# with open("band_gap.json", "r") as f:
+#     band_gap_pd = json.load(f)
 
 
 def reader(fp):
@@ -184,6 +184,9 @@ def main(argv):
     client = MongoDatabase(
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
     )
+    # client = MongoDatabase(  # for remote testing: remove
+    #     args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:5000"
+    # )
 
     ds_id = generate_ds_id()
 
