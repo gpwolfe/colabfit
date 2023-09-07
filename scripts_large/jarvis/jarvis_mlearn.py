@@ -87,7 +87,7 @@ ELEMENTS = None
 
 PI_MD = {
     "software": {"value": "VASP 5.4.1"},
-    "method": {"value": "PBE"},
+    "method": {"value": "DFT-PBE"},
     "k-point-mesh": {"field": "kpoint"},
     "cutoff": {"value": "520 eV"},
 }

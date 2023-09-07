@@ -94,7 +94,7 @@ def main(argv):
 
     metadata = {
         "software": {"value": "ORCA"},
-        "method": {"value": "PBE"},  # SchNOrb
+        "method": {"value": "DFT-PBE"},  # SchNOrb
         "basis-set": {"value": "def2-SVP"},
     }
     property_map = {

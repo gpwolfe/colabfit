@@ -57,7 +57,7 @@ ELEMENTS = None
 
 PI_MD = {
     "software": {"value": "Quantum ESPRESSO"},
-    "method": {"value": "PBE"},
+    "method": {"value": "DFT-PBE"},
     "mp-mesh": {"value": "6 x 6 x 1"},
     "cutoff": {"value": "500 eV"},
 }
