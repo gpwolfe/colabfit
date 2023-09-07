@@ -39,7 +39,7 @@ DATASET_FP = Path(
 DATASET = "HfO2_NPJ_2020"
 
 SOFTWARE = "VASP"
-METHODS = "PBE"
+METHODS = "DFT-PBE"
 LINKS = [
     "https://github.com/argonne-lcf/active-learning-md",
     "https://doi.org/10.1038/s41524-020-00367-7",

@@ -106,7 +106,7 @@ property_map = {
             "per-atom": {"field": "per-atom", "units": None},
             "_metadata": {
                 "software": {"value": "Gaussian 09"},
-                "method": {"value": "PBE0"},
+                "method": {"value": "DFT-PBE0"},
                 "basis-set": {"value": "6-311G*"},
             },
         }
@@ -116,7 +116,7 @@ property_map = {
             "forces": {"field": "forces", "units": "kcal/mol/A"},
             "_metadata": {
                 "software": {"value": "Gaussian 09"},
-                "method": {"value": "PBE0"},
+                "method": {"value": "DFT-PBE0"},
                 "basis-set": {"value": "6-311G*"},
             },
         }
