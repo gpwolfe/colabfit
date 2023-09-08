@@ -7,7 +7,7 @@
     qe_tb, dict_keys(['jid', 'natoms', 'energy_per_atom', 'formula', 'atoms', 'indir_gap', 'forces', 'stress', 'f_enp', 'final_energy', 'spacegroup_symbol', 'spacegroup_number', 'crystal_system', 'source_folder'])
 
 jff, dict_keys(['search', 'func', 'jid', 'spg', 'elastic_tensor_data', 'gv', 'kv', 'formula', 'final_str', 'atoms', 'ref', 'vac_dat', 'surf_dat', 'phon_dat'])
-alignn_ff_db, dict_keys(['total_energy', 'forces', 'stresses', 'jid', 'atoms'])
+    alignn_ff_db, dict_keys(['total_energy', 'forces', 'stresses', 'jid', 'atoms'])
 edos_pdos, dict_keys(['edos_up', 'jid', 'atoms', 'pdos_elast'])
 
     megnet, dict_keys(['id', 'desc', 'formula', 'e_hull', 'gap pbe', 'mu_b', 'elastic anisotropy', 'bulk modulus', 'shear modulus', 'atoms', 'e_form'])
@@ -40,3 +40,9 @@ ocp_all, dict_keys(['id', 'atoms', 'relaxed_energy'])
     tinnet_N, dict_keys(['id', 'atoms', 'ead'])
     tinnet_O, dict_keys(['id', 'atoms', 'ead'])
     tinnet_OH, dict_keys(['id', 'atoms', 'ead'])
+
+vacancydb.json, dict_keys(['jid', 'bulk_atoms', 'bulk_formula', 'bulk_energy', 'defective_atoms', 'symbol', 'wycoff', 'defective_energy', 'chem_pot', 'material_type', 'ff_vac', 'id', 'ef'])
+supercon_chem.json, dict_keys(['id', 'Tc', 'formula'])
+jarvis_epc_data_figshare_1058.json, dict_keys(['stability', 'jid', 'atoms', 'cfid', 'wlog', 'lamb', 'Tc', 'a2F', 'a2F_original_x', 'a2F_original_y', 'press'])
+jarvis_epc_data_2d, dict_keys(['stability', 'jid', 'atoms', 'cfid', 'wlog', 'lamb', 'Tc', 'a2F', 'press', 'a2F_original_x', 'a2F_original_y', 'dos_info', 'formula', 'spg_number', 'formation_energy_peratom'])
+figshare_data-10-28-2020.json, dict_keys(['FD-ELAST', 'DFPT', 'CFID', 'STM', 'OPT-LOPTICS', 'OPT-Bandst', 'TBMBJ', 'DFT-SCF', 'WANN'])

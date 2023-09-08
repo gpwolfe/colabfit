@@ -59,7 +59,7 @@ AUTHORS = [
     "Daniel Wines",
     "Kamal Choudhary",
     "Adam J. Biacchi",
-    "evin F. Garrity",
+    "Kevin F. Garrity",
     "Francesca Tavazza",
 ]
 ELEMENTS = None

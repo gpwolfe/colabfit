@@ -248,14 +248,17 @@ def main(argv):
             "Cu configurations from JARVIS-mlearn dataset",
         ),
     ]
+    cs_ids = []
+
     for name, reg, desc in css:
-        client.query_and_insert_configuration_set(
+        cs_id = client.query_and_insert_configuration_set(
             co_hashes=all_co_ids,
             query={"names": {"$regex": reg}},
             name=name,
             description=desc,
             ds_id=ds_id,
         )
+        cs_ids.append(cs_id)
 
     client.insert_dataset(
         ds_id=ds_id,
