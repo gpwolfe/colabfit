@@ -3,6 +3,11 @@ author: gpwolfe
 
 File notes
 ----------
+The "energy" key reported here has the same value for all configurations
+Additionally, AGRA-CHO, AGRA-CO and AGRA-COOH share the same value:
+-106.79480578611286
+This is therefore being placed in metadata rather than a PI
+
 Files have been previously downloaded and unzipped using jarvis-tools to avoid
 having this as a dependency.
 
@@ -33,7 +38,8 @@ import sys
 
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
-from colabfit.tools.property_definitions import potential_energy_pd
+
+# from colabfit.tools.property_definitions import potential_energy_pd
 
 DATASET_FP = Path("jarvis_json2/")
 GLOB = "AGRA_CHO.json"
@@ -41,11 +47,12 @@ DS_NAME = "JARVIS_AGRA_CHO"
 DS_DESC = (
     "The JARVIS_AGRA_CHO dataset is part of the joint automated repository for "
     "various integrated simulations (JARVIS) DFT database. This dataset contains "
-    "data from the training set for the automated graph representation algorithm (AGRA)"
-    " dataset: a collection of DFT training data for training a graph representation "
-    "method to extract the local chemical environment of metallic surface adsorption "
-    "sites. This data was in turn taken from the CO2RR dataset: Chen et al. "
-    "(https://doi.org/10.1021/acscatal.2c03675). JARVIS is a set of "
+    "data from the CO2 reduction reaction (CO2RR) dataset from Chen et al., as used "
+    "in the automated graph representation algorithm "
+    "(AGRA) training dataset: a collection of DFT training data for training a graph "
+    "representation method to extract the local chemical environment of metallic "
+    "surface adsorption sites. "
+    "JARVIS is a set of "
     "tools and datasets built to meet current materials design challenges."
 )
 
@@ -54,21 +61,26 @@ LINKS = [
     "https://jarvis.nist.gov/",
     "https://figshare.com/ndownloader/files/41923284",
     "https://doi.org/10.1063/5.0140487",
+    "https://doi.org/10.1021/acscatal.2c03675",
 ]
 AUTHORS = [
+    "Zhi Wen Chen",
     "Zachary Gariepy",
-    "ZhiWen Chen",
+    "Lixin Chen",
+    "Xue Yao",
+    "Abu Anand",
+    "Szu-Jia Liu",
+    "Conrard Giresse Tetsassi Feugmo",
     "Isaac Tamblyn",
     "Chandra Veer Singh",
-    "Conrard Giresse Tetsassi Feugmo",
 ]
 ELEMENTS = None
 
 
 PROPERTY_MAP = {
-    "formation-energy": [
+    "adsorption-energy": [
         {
-            "energy": {"field": "formation_energy_peratom", "units": "eV"},
+            "energy": {"field": "ead", "units": "eV"},
             "per-atom": {"value": True, "units": None},
             "_metadata": {
                 "software": {"value": "VASP"},
@@ -78,39 +90,24 @@ PROPERTY_MAP = {
             },
         }
     ],
-    "band-gap": [
-        {
-            "energy": {"field": "mbj_bandgap", "units": "eV"},
-            "_metadata": {
-                "method": {"value": "DFT-TBmBJ"},
-                "software": {"value": "VASP"},
-            },
-        },
-        {
-            "energy": {"field": "optb88vdw_bandgap", "units": "eV"},
-            "_metadata": {
-                "method": {"value": "DFT-OptB88vdW"},
-                "software": {"value": "VASP"},
-            },
-        },
-    ],
-    "potential-energy": [
-        {
-            "energy": {"field": "optb88vdw_total_energy", "units": "eV"},
-            "per-atom": {"value": False, "units": None},
-            "_metadata": {
-                "software": {"value": "VASP"},
-                "method": {"value": "DFT-OptB88vdW"},
-            },
-        }
-    ],
+    # "potential-energy": [
+    #     {
+    #         "energy": {"field": "energy", "units": "eV"},
+    #         "per-atom": {"value": False, "units": None},
+    #         "_metadata": {
+    #             "software": {"value": "GPAW"},
+    #             "method": {"value": "DFT-rPBE"},
+    #             "energy-cutoff": {"value": "400 eV"},
+    #         },
+    #     }
+    # ],
 }
 
 
-with open("formation_energy.json", "r") as f:
-    formation_energy_pd = json.load(f)
-with open("band_gap.json", "r") as f:
-    band_gap_pd = json.load(f)
+with open("adsorption_energy.json", "r") as f:
+    adsorption_energy_pd = json.load(f)
+# with open("band_gap.json", "r") as f:
+#     band_gap_pd = json.load(f)
 
 
 def reader(fp):
@@ -181,9 +178,8 @@ def main(argv):
         generator=False,
     )
 
-    client.insert_property_definition(formation_energy_pd)
-    client.insert_property_definition(band_gap_pd)
-    client.insert_property_definition(potential_energy_pd)
+    client.insert_property_definition(adsorption_energy_pd)
+    # client.insert_property_definition(potential_energy_pd)
 
     ids = list(
         client.insert_data(
@@ -209,7 +205,12 @@ def main(argv):
     )
 
 
-CO_KEYS = ["atoms", "ead", "energy", "id"]
+CO_KEYS = [
+    # "atoms",
+    # "ead",
+    "energy",
+    "id",
+]
 CO_METADATA = {key: {"field": key} for key in CO_KEYS}
 
 
