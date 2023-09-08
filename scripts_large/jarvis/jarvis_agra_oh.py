@@ -39,19 +39,21 @@ import sys
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 
-# from colabfit.tools.property_definitions import potential_energy_pd
+from colabfit.tools.property_definitions import potential_energy_pd
 
 DATASET_FP = Path("jarvis_json2/")
-GLOB = "AGRA_CHO.json"
-DS_NAME = "JARVIS_AGRA_CHO"
+GLOB = "AGRA_OH.json"
+DS_NAME = "JARVIS_AGRA_OH"
 DS_DESC = (
-    "The JARVIS_AGRA_CHO dataset is part of the joint automated repository for "
+    "The JARVIS_AGRA_OH dataset is part of the joint automated repository for "
     "various integrated simulations (JARVIS) DFT database. This dataset contains "
-    "data from the CO2 reduction reaction (CO2RR) dataset from Chen et al., as used "
-    "in the automated graph representation algorithm "
+    "data from the training set for the oxygen reduction reaction (ORR) dataset "
+    "from Batchelor et al., as used in the automated graph representation algorithm "
     "(AGRA) training dataset: a collection of DFT training data for training a graph "
     "representation method to extract the local chemical environment of metallic "
-    "surface adsorption sites. "
+    "surface adsorption sites.  Bulk calculations were "
+    "performed with k-point = 8 x 8 x 4. Training adsorption energies were calculated "
+    "on slabs, k-point = 4 x 4 x 1, while testing energies used k-point = 3 x 3 x 1. "
     "JARVIS is a set of "
     "tools and datasets built to meet current materials design challenges."
 )
@@ -61,18 +63,15 @@ LINKS = [
     "https://jarvis.nist.gov/",
     "https://figshare.com/ndownloader/files/41923284",
     "https://doi.org/10.1063/5.0140487",
-    "https://doi.org/10.1021/acscatal.2c03675",
+    "https://doi.org/10.1016/j.joule.2018.12.015",
 ]
 AUTHORS = [
-    "Zhi Wen Chen",
-    "Zachary Gariepy",
-    "Lixin Chen",
-    "Xue Yao",
-    "Abu Anand",
-    "Szu-Jia Liu",
-    "Conrard Giresse Tetsassi Feugmo",
-    "Isaac Tamblyn",
-    "Chandra Veer Singh",
+    "Thomas A.A. Batchelor",
+    "Jack K. Pedersen",
+    "Simon H. Winther",
+    "Ivano E. Castelli",
+    "Karsten W. Jacobsen",
+    "Jan Rossmeisl",
 ]
 ELEMENTS = None
 
@@ -83,24 +82,23 @@ PROPERTY_MAP = {
             "energy": {"field": "ead", "units": "eV"},
             "per-atom": {"value": True, "units": None},
             "_metadata": {
-                "software": {"value": "VASP"},
-                "method": {"value": "DFT-PBE"},
-                "energy-cutoff": {"value": "550 eV"},
-                "k-point": {"value": "4 x 4 x 1"},
+                "software": {"value": "GPAW"},
+                "method": {"value": "DFT-rPBE"},
+                "energy-cutoff": {"value": "400 eV"},
             },
         }
     ],
-    # "potential-energy": [
-    #     {
-    #         "energy": {"field": "energy", "units": "eV"},
-    #         "per-atom": {"value": False, "units": None},
-    #         "_metadata": {
-    #             "software": {"value": "GPAW"},
-    #             "method": {"value": "DFT-rPBE"},
-    #             "energy-cutoff": {"value": "400 eV"},
-    #         },
-    #     }
-    # ],
+    "potential-energy": [
+        {
+            "energy": {"field": "energy", "units": "eV"},
+            "per-atom": {"value": False, "units": None},
+            "_metadata": {
+                "software": {"value": "GPAW"},
+                "method": {"value": "DFT-rPBE"},
+                "energy-cutoff": {"value": "400 eV"},
+            },
+        }
+    ],
 }
 
 
@@ -179,7 +177,7 @@ def main(argv):
     )
 
     client.insert_property_definition(adsorption_energy_pd)
-    # client.insert_property_definition(potential_energy_pd)
+    client.insert_property_definition(potential_energy_pd)
 
     ids = list(
         client.insert_data(
@@ -208,7 +206,7 @@ def main(argv):
 CO_KEYS = [
     # "atoms",
     # "ead",
-    "energy",
+    # "energy",
     "id",
 ]
 CO_METADATA = {key: {"field": key} for key in CO_KEYS}

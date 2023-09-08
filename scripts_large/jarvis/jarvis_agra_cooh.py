@@ -42,10 +42,10 @@ from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 # from colabfit.tools.property_definitions import potential_energy_pd
 
 DATASET_FP = Path("jarvis_json2/")
-GLOB = "AGRA_CHO.json"
-DS_NAME = "JARVIS_AGRA_CHO"
+GLOB = "AGRA_COOH.json"
+DS_NAME = "JARVIS_AGRA_COOH"
 DS_DESC = (
-    "The JARVIS_AGRA_CHO dataset is part of the joint automated repository for "
+    "The JARVIS_AGRA_COOH dataset is part of the joint automated repository for "
     "various integrated simulations (JARVIS) DFT database. This dataset contains "
     "data from the CO2 reduction reaction (CO2RR) dataset from Chen et al., as used "
     "in the automated graph representation algorithm "
