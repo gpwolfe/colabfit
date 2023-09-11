@@ -65,50 +65,35 @@ from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 from colabfit.tools.property_definitions import potential_energy_pd
 
 DATASET_FP = Path("jarvis_json/")
-GLOB = "jdft_3d-8-18-2021.json"
-DS_NAME = "JARVIS_DFT_3D_8_18_2022"
+GLOB = "all_mp.json"
+DS_NAME = "JARVIS_Materials_Project_2020"
 DS_DESC = (
-    "The JARVIS_DFT_3D_8_18_2022 dataset is part of the joint automated repository for "
-    "various integrated simulations (JARVIS) DFT database. This subset contains "
-    "configurations of 3D materials. JARVIS is a set of "
+    "The JARVIS_Materials_Project_2020 dataset is part of the joint automated "
+    "repository for various integrated simulations (JARVIS) DFT database. "
+    "This subset contains 127,000 configurations of 3D materials from the Materials "
+    "Project database. "
+    "JARVIS is a set of "
     "tools and datasets built to meet current materials design challenges. JARVIS-DFT "
     "is the portion of the JARVIS database based on DFT calculations."
 )
 
 LINKS = [
-    "https://doi.org/10.1038/s41524-020-00440-1",
+    "https://doi.org/10.1063/1.4812323",
     "https://jarvis.nist.gov/",
-    "https://doi.org/10.6084/m9.figshare.6815699",
+    "https://ndownloader.figshare.com/files/26791259",
 ]
 AUTHORS = [
-    "Kamal Choudhary",
-    "Kevin F. Garrity",
-    "Andrew C. E. Reid",
-    "Brian DeCost",
-    "Adam J. Biacchi",
-    "Angela R. Hight Walker",
-    "Zachary Trautt",
-    "Jason Hattrick-Simpers",
-    "A. Gilad Kusne",
-    "Andrea Centrone",
-    "Albert Davydov",
-    "Jie Jiang",
-    "Ruth Pachter",
-    "Gowoon Cheon",
-    "Evan Reed",
-    "Ankit Agrawal",
-    "Xiaofeng Qian",
-    "Vinit Sharma",
-    "Houlong Zhuang",
-    "Sergei V. Kalinin",
-    "Bobby G. Sumpter",
-    "Ghanshyam Pilania",
-    "Pinar Acar",
-    "Subhasish Mandal",
-    "Kristjan Haule",
-    "David Vanderbilt",
-    "Karin Rabe",
-    "Francesca Tavazza",
+    "Anubhav Jain",
+    "Shyue Ping Ong",
+    "Geoffroy Hautier",
+    "Wei Chen",
+    "William Davidson Richards",
+    "Stephen Dacek",
+    "Shreyas Cholia",
+    "Dan Gunter",
+    "David Skinner",
+    "Gerbrand Ceder",
+    "Kristin A. Persson",
 ]
 ELEMENTS = None
 
@@ -140,8 +125,8 @@ PROPERTY_MAP = {
             "per-atom": {"value": False, "units": None},
             "_metadata": {
                 "software": {"value": "VASP"},
-                "method": {"value": "DFT-OptB88vdW"},
-                "ecut": {"field": "encut"},
+                # "method": {"value": "DFT-OptB88vdW"},
+                # "ecut": {"field": "encut"},
             },
         },
         {
@@ -182,7 +167,6 @@ def reader(fp):
                 cell=atoms["lattice_mat"],
             )
         config.info["name"] = f"{fp.stem}_{i}"
-        config.info["method"] = f"DFT-{row.pop('func')}"
         for key, val in row.items():
             if type(val) == str and val != "na" and len(val) > 0:
                 config.info[key] = val
@@ -261,17 +245,17 @@ def main(argv):
 
 
 CO_KEYS = [
-    "atoms",
-    "band_gap",
+    # "atoms",
+    # "band_gap",
     "density",
     "desc",
     "diel",
     "e_above_hull",
     "elasticity",
     "elements",
-    "energy",
-    "energy_per_atom",
-    "formation_energy_per_atom",
+    # "energy",
+    # "energy_per_atom",
+    # "formation_energy_per_atom",
     "full_formula",
     "hubbards",
     "icsd_id",
