@@ -24,35 +24,16 @@ AtomicConfiguration or ase.Atoms object with 'scaled_positions' arg instead of
 keys:
 
 ['atoms',
- 'band_gap',
- 'density',
+ 'bulk modulus',
  'desc',
- 'diel',
- 'e_above_hull',
- 'elasticity',
- 'elements',
- 'energy',
- 'energy_per_atom',
- 'formation_energy_per_atom',
- 'full_formula',
- 'hubbards',
- 'icsd_id',
- 'icsd_ids',
+ 'e_form',
+ 'e_hull',
+ 'elastic anisotropy',
+ 'formula',
+ 'gap pbe',
  'id',
- 'is_compatible',
- 'is_hubbard',
- 'material_id',
- 'nelements',
- 'nsites',
- 'oxide_type',
- 'piezo',
- 'pretty_formula',
- 'spacegroup',
- 'tags',
- 'task_ids',
- 'total_magnetization',
- 'unit_cell_formula',
- 'volume']
+ 'mu_b',
+ 'shear modulus']
 """
 
 from argparse import ArgumentParser
@@ -65,12 +46,12 @@ from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 from colabfit.tools.property_definitions import potential_energy_pd
 
 DATASET_FP = Path("jarvis_json/")
-GLOB = "all_mp.json"
-DS_NAME = "JARVIS_Materials_Project_2020"
+GLOB = "CFID_mp_desc_data_84k.json"
+DS_NAME = "JARVIS_Materials_Project_84K"
 DS_DESC = (
-    "The JARVIS_Materials_Project_2020 dataset is part of the joint automated "
+    "The JARVIS_Materials_Project_84K dataset is part of the joint automated "
     "repository for various integrated simulations (JARVIS) DFT database. "
-    "This subset contains 127,000 configurations of 3D materials from the Materials "
+    "This subset contains 84,000 configurations of 3D materials from the Materials "
     "Project database. "
     "JARVIS is a set of "
     "tools and datasets built to meet current materials design challenges. JARVIS-DFT "
@@ -80,7 +61,7 @@ DS_DESC = (
 LINKS = [
     "https://doi.org/10.1063/1.4812323",
     "https://jarvis.nist.gov/",
-    "https://ndownloader.figshare.com/files/26791259",
+    "https://ndownloader.figshare.com/files/24979850",
 ]
 AUTHORS = [
     "Anubhav Jain",
@@ -101,7 +82,7 @@ ELEMENTS = None
 PROPERTY_MAP = {
     "formation-energy": [
         {
-            "energy": {"field": "formation_energy_per_atom", "units": "eV"},
+            "energy": {"field": "e_form", "units": "eV"},
             "per-atom": {"value": True, "units": None},
             "_metadata": {
                 "software": {"value": "VASP"},
@@ -114,28 +95,8 @@ PROPERTY_MAP = {
         {
             "energy": {"field": "band_gap", "units": "eV"},
             "_metadata": {
-                # "method": {"value": "DFT-TBmBJ"},
+                "method": {"value": "DFT-PBE"},
                 "software": {"value": "VASP"},
-            },
-        },
-    ],
-    "potential-energy": [
-        {
-            "energy": {"field": "energy", "units": "eV"},
-            "per-atom": {"value": False, "units": None},
-            "_metadata": {
-                "software": {"value": "VASP"},
-                # "method": {"value": "DFT-OptB88vdW"},
-                # "ecut": {"field": "encut"},
-            },
-        },
-        {
-            "energy": {"field": "energy_per_atom", "units": "eV"},
-            "per-atom": {"value": True, "units": None},
-            "_metadata": {
-                "software": {"value": "VASP"},
-                # "method": {"value": "DFT-OptB88vdW"},
-                # "ecut": {"field": "encut"},
             },
         },
     ],
@@ -168,13 +129,14 @@ def reader(fp):
             )
         config.info["name"] = f"{fp.stem}_{i}"
         for key, val in row.items():
+            key = key.replace(" ", "_")
             if type(val) == str and val != "na" and len(val) > 0:
                 config.info[key] = val
             elif type(val) == list and len(val) > 0 and any([x != "" for x in val]):
                 config.info[key] = val
             elif type(val) == dict and all([v != "na" for v in val.values()]):
                 config.info[key] = val
-            elif type(val) == float or type(val) == int:
+            elif (type(val) == float) or type(val) == int:
                 config.info[key] = val
             else:
                 pass
@@ -245,36 +207,17 @@ def main(argv):
 
 
 CO_KEYS = [
-    # "atoms",
-    # "band_gap",
-    "density",
+    # 'atoms',
+    "bulk_modulus",
     "desc",
-    "diel",
-    "e_above_hull",
-    "elasticity",
-    "elements",
-    # "energy",
-    # "energy_per_atom",
-    # "formation_energy_per_atom",
-    "full_formula",
-    "hubbards",
-    "icsd_id",
-    "icsd_ids",
+    "e_form",
+    "e_hull",
+    "elastic_anisotropy",
+    "formula",
+    # "gap_pbe",
     "id",
-    "is_compatible",
-    "is_hubbard",
-    "material_id",
-    "nelements",
-    "nsites",
-    "oxide_type",
-    "piezo",
-    "pretty_formula",
-    "spacegroup",
-    "tags",
-    "task_ids",
-    "total_magnetization",
-    "unit_cell_formula",
-    "volume",
+    "mu_b",
+    "shear_modulus",
 ]
 CO_METADATA = {key: {"field": key} for key in CO_KEYS}
 
