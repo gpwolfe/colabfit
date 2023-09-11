@@ -3,6 +3,9 @@ author: gpwolfe
 
 File notes
 ----------
+The energy herein is 'vacancy formation energy'. Not sure that this is of interest to
+us.
+
 Files have been previously downloaded and unzipped using jarvis-tools to avoid
 having this as a dependency.
 
@@ -64,8 +67,8 @@ ELEMENTS = None
 PROPERTY_MAP = {
     "formation-energy": [
         {
-            "energy": {"field": "formation_energy_peratom", "units": "eV"},
-            "per-atom": {"value": True, "units": None},
+            "energy": {"field": "energy", "units": "eV"},
+            "per-atom": {"value": False, "units": None},
             "_metadata": {
                 "software": {"value": "Quantum ESPRESSO"},
                 "method": {"value": "PBEsol"},
@@ -204,9 +207,14 @@ def main(argv):
     all_co_ids, all_do_ids = list(zip(*ids))
     css = [
         (
-            "JARVIS-mlearn-Ni",
-            "mlearn_Ni.*",
-            "Ni configurations from JARVIS-mlearn dataset",
+            "JARVIS_Vacancy_DB_bulk",
+            ".*_bulk_.*",
+            "Bulk calculations with no structural defects",
+        ),
+        (
+            "JARVIS_Vacancy_DB_defect",
+            ".*_defective_.*",
+            "Calculations with included structural defects",
         ),
     ]
     cs_ids = []
@@ -234,12 +242,12 @@ def main(argv):
 
 
 CO_KEYS = [
-    "bulk_atoms",
-    "bulk_energy",
+    # "bulk_atoms",
+    # "bulk_energy",
     "bulk_formula",
     "chem_pot",
-    "defective_atoms",
-    "defective_energy",
+    # "defective_atoms",
+    # "defective_energy",
     "ef",
     "ff_vac",
     "id",
