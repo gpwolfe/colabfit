@@ -71,7 +71,7 @@ from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 from colabfit.tools.property_definitions import free_energy_pd, potential_energy_pd
 
 
-DATASET_FP = Path("jarvis_json_zips/")
+DATASET_FP = Path().cwd().parent / "jarvis_json/"
 GLOB = "qm9_std_jctc.json"
 DS_NAME = "JARVIS_QM9_STD_JCTC"
 DS_DESC = (

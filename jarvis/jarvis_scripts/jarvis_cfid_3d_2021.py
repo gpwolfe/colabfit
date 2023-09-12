@@ -98,7 +98,7 @@ from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 from colabfit.tools.property_definitions import potential_energy_pd
 
-DATASET_FP = Path("jarvis_json/")
+DATASET_FP = Path().cwd().parent / "jarvis_json/"
 GLOB = "cfid_3d-8-18-2021.json"
 DS_NAME = "JARVIS_CFID_3D_8_18_2022"
 DS_DESC = (

@@ -56,7 +56,7 @@ from colabfit.tools.property_definitions import (
     atomic_forces_pd,
 )
 
-DATASET_FP = Path("jarvis_json_zips/")
+DATASET_FP = Path().cwd().parent / "jarvis_json/"
 GLOB = "jff-7-24-2021.json"
 DS_NAME = "JARVIS-JFF"
 DS_DESC = (

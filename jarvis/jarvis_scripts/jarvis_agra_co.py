@@ -41,7 +41,7 @@ from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 
 # from colabfit.tools.property_definitions import potential_energy_pd
 
-DATASET_FP = Path("jarvis_json2/")
+DATASET_FP = Path().cwd().parent / "jarvis_json/"
 GLOB = "AGRA_CO.json"
 DS_NAME = "JARVIS_AGRA_CO"
 DS_DESC = (
