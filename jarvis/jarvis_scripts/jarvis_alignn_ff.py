@@ -32,7 +32,7 @@ from colabfit.tools.property_definitions import (
     potential_energy_pd,
 )
 
-DATASET_FP = Path("jarvis_json/")
+DATASET_FP = Path().cwd().parent / "jarvis_json/"
 GLOB = "id_prop.json"
 DS_NAME = "JARVIS_ALIGNN_FF"
 DS_DESC = (

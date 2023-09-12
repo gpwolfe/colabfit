@@ -26,7 +26,7 @@ from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 
 
-DATASET_FP = Path("jarvis_json/")
+DATASET_FP = Path().cwd().parent / "jarvis_json/"
 GLOB = "tinnet_O.json"
 DS_NAME = "JARVIS_TinNet_O"
 DS_DESC = (

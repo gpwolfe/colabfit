@@ -45,7 +45,7 @@ from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 
 from colabfit.tools.property_definitions import potential_energy_pd
 
-DATASET_FP = Path("jarvis_json_zips/")
+DATASET_FP = Path().cwd().parent / "jarvis_json/"
 GLOB = "c2db_atoms.json"
 DS_NAME = "JARVIS-C2DB"
 DS_DESC = (

@@ -47,7 +47,7 @@ from colabfit.tools.property_definitions import (
 )
 
 
-DATASET_FP = Path("jarvis_json/")
+DATASET_FP = Path().cwd().parent / "jarvis_json/"
 GLOB = "mlearn.json"
 DS_NAME = "JARVIS_mlearn"
 DS_DESC = (

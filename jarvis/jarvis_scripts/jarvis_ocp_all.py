@@ -36,7 +36,7 @@ from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 from colabfit.tools.property_definitions import potential_energy_pd
 
-DATASET_FP = Path("jarvis_json/")
+DATASET_FP = Path().cwd().parent / "jarvis_json/"
 GLOB = "ocp_all.json"
 DS_NAME = "JARVIS_Open_Catalyst_All"
 DS_DESC = (
