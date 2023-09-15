@@ -2,7 +2,7 @@
 File notes
 -------------
 Check names of files on kubernetes
-Publications do not list software used
+Publications do not list software used, obtained from Dr. Gasteiger.
 """
 
 
