@@ -29,7 +29,7 @@ are grouped manually
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     cauchy_stress_pd,
@@ -39,7 +39,7 @@ import numpy as np
 from pathlib import Path
 import sys
 
-DATASET_FP = Path("data/23-Single-Element-DNPs-main/Training_Data")
+DATASET_FP = Path("data/saidi_23_dnps/Training_Data")
 DATASET = "23-DNPs-RSCDD-2023"
 
 LINKS = [
@@ -91,7 +91,7 @@ def assemble_props(filepath: Path, element: str):
     prop_paths = list(filepath.parent.glob("*.npy"))
     for p in prop_paths:
         key = p.stem
-        props[key] = np.load(p)
+        props[key] = np.load(p, allow_pickle=True)
     num_configs = props["force"].shape[0]
     num_atoms = props["force"].shape[1] // 3
     props["forces"] = props["force"].reshape(num_configs, num_atoms, 3)
@@ -164,8 +164,43 @@ def main(argv):
     client = MongoDatabase(
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
     )
+    client.insert_property_definition(atomic_forces_pd)
+    client.insert_property_definition(potential_energy_pd)
+    client.insert_property_definition(cauchy_stress_pd)
 
+    metadata = {
+        "software": {"value": SOFTWARE},
+        "method": {"value": METHODS},
+        "encut": {"value": "400 eV"},
+    }
+    co_md_map = {
+        "materials-project-id": {"field": "mp_id"},
+        "temperature": {"field": "temp"},
+    }
+    property_map = {
+        "potential-energy": [
+            {
+                "energy": {"field": "energy", "units": "eV"},
+                "per-atom": {"value": False, "units": None},
+                "_metadata": metadata,
+            }
+        ],
+        "atomic-forces": [
+            {
+                "forces": {"field": "forces", "units": "eV/A"},
+                "_metadata": metadata,
+            }
+        ],
+        "cauchy-stress": [
+            {
+                "stress": {"field": "virial", "units": "eV"},
+                "volume-normalized": {"value": True, "units": None},
+                "_metadata": metadata,
+            }
+        ],
+    }
     for element in ELEMENTS:
+        ds_id = generate_ds_id()
         elem_fp = next(DATASET_FP.glob(element))
         configurations = load_data(
             file_path=elem_fp,
@@ -176,44 +211,10 @@ def main(argv):
             glob_string=GLOB_STR,
             generator=False,
         )
-        client.insert_property_definition(atomic_forces_pd)
-        client.insert_property_definition(potential_energy_pd)
-        client.insert_property_definition(cauchy_stress_pd)
-
-        metadata = {
-            "software": {"value": SOFTWARE},
-            "method": {"value": METHODS},
-            # "": {"field": ""}
-        }
-        co_md_map = {
-            "materials-project-id": {"field": "mp_id"},
-            "temperature": {"field": "temp"},
-        }
-        property_map = {
-            "potential-energy": [
-                {
-                    "energy": {"field": "energy", "units": "eV"},
-                    "per-atom": {"value": False, "units": None},
-                    "_metadata": metadata,
-                }
-            ],
-            "atomic-forces": [
-                {
-                    "forces": {"field": "forces", "units": "eV/A"},
-                    "_metadata": metadata,
-                }
-            ],
-            "cauchy-stress": [
-                {
-                    "stress": {"field": "virial", "units": "eV"},
-                    "volume-normalized": {"value": True, "units": None},
-                    "_metadata": metadata,
-                }
-            ],
-        }
         ids = list(
             client.insert_data(
                 configurations,
+                ds_id=ds_id,
                 property_map=property_map,
                 co_md_map=co_md_map,
                 generator=False,
@@ -222,9 +223,32 @@ def main(argv):
         )
 
         all_co_ids, all_do_ids = list(zip(*ids))
-
+        css = [
+            (
+                f"{DATASET}_{element}_initial",
+                "_iter0_",
+                f"Initial training configurations of {element} from {DATASET}",
+            ),
+            (
+                f"{DATASET}_{element}_adaptive",
+                "_iter[1-9]_",
+                f"Adaptive training configurations of {element} from {DATASET}",
+            ),
+        ]
+        cs_ids = []
+        for name, reg, desc in css:
+            cs_id = client.query_and_insert_configuration_set(
+                co_hashes=all_co_ids,
+                query={"names": {"$regex": reg}},
+                name=name,
+                description=desc,
+                ds_id=ds_id,
+            )
+            cs_ids.append(cs_id)
         client.insert_dataset(
             do_hashes=all_do_ids,
+            cs_ids=cs_ids,
+            ds_id=ds_id,
             name=f"{DATASET}-{element}",
             authors=AUTHORS,
             links=LINKS,
@@ -232,7 +256,6 @@ def main(argv):
                 f"Configurations of {element} from Andolina & Saidi, 2023. {DS_DESC}"
             ),
             verbose=True,
-            # cs_ids=cs_ids,
         )
 
 
