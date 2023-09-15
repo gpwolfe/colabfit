@@ -4,16 +4,32 @@ import os
 from pathlib import Path
 import sys
 
-j_scripts = Path().cwd().glob("*.py")
+j_scripts = sorted(list(Path().cwd().glob("*.py")))
 
 
 def main(db_ip, db_name, nprocs):
     for script in j_scripts:
         if script.stem not in [
             "run_jarvis",
+            "jarvis_alignn_ff",
+            "jarvis_c2db",
+            "jarvis_cfid_3d_2021",
+            "jarvis_dft2_2021",
+            "jarvis_hopv",
+            "jarvis_dft3_2022",
+            "jarvis_dft3_2021",
+            "jarvis_megnet2",
+            "jarvis_mlearn",
+            "jarvis_mp_84",
+            "jarvis_polymer_genome",
             "jarvis_ocp_all",
             "jarvis_ocp_100K",
+            "jarvis_ocp_10k",
+            "jarvis_oqmd_no_cfid",
+            "jarvis_cfid_oqmd",
             "jarvis_mp_all",
+            "jarvis_qe_tb",
+            "jarvis_qm9_dgl",
         ]:
             print(script)
             exit_code = os.system(
