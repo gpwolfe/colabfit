@@ -102,8 +102,7 @@ DS_DESC = (
     "The DFT-2D-3-12-2021 dataset is part of the joint automated repository for "
     "various integrated simulations (JARVIS) DFT database. This subset contains "
     "configurations of 2D materials. JARVIS is a set of "
-    "tools and datasets built to meet current materials design challenges. JARVIS-DFT "
-    "is the portion of the JARVIS database based on DFT calculations."
+    "tools and datasets built to meet current materials design challenges."
 )
 
 LINKS = [

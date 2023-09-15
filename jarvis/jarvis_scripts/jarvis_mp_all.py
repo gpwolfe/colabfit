@@ -73,8 +73,7 @@ DS_DESC = (
     "This subset contains 127,000 configurations of 3D materials from the Materials "
     "Project database. "
     "JARVIS is a set of "
-    "tools and datasets built to meet current materials design challenges. JARVIS-DFT "
-    "is the portion of the JARVIS database based on DFT calculations."
+    "tools and datasets built to meet current materials design challenges."
 )
 
 LINKS = [

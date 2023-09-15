@@ -59,8 +59,7 @@ DS_DESC = (
     "various integrated simulations (JARVIS) DFT database. This subset contains "
     "configurations generated in Quantum ESPRESSO. "
     "JARVIS is a set of tools and datasets built to meet current materials design "
-    "challenges. JARVIS-DFT is the portion of the JARVIS database based on DFT "
-    "calculations."
+    "challenges."
 )
 
 LINKS = [
