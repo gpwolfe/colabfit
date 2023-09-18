@@ -55,8 +55,7 @@ DS_DESC = (
     "variety of properties for 2-dimensional materials across more than 30 different"
     "crystal structures. "
     "JARVIS is a set of tools and datasets built to meet "
-    "current materials design challenges. JARVIS-DFT is the portion of the JARVIS "
-    "database based on DFT calculations, containing numerous separate datasets."
+    "current materials design challenges."
 )
 
 LINKS = [

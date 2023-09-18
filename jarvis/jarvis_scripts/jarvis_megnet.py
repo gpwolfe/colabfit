@@ -54,9 +54,7 @@ DS_DESC = (
     "various integrated simulations (JARVIS) database. This subset contains "
     "configurations with 3D materials properties from the 2018 version of Materials "
     "Project, as used in the training of the MEGNet ML model. JARVIS is a set of "
-    "tools and datasets built to meet current materials design challenges. JARVIS-DFT "
-    "is the portion of the JARVIS database based on DFT calculations, "
-    "containing numerous separate datasets."
+    "tools and datasets built to meet current materials design challenges."
 )
 
 LINKS = [

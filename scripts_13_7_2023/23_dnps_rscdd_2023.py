@@ -39,7 +39,10 @@ import numpy as np
 from pathlib import Path
 import sys
 
-DATASET_FP = Path("data/saidi_23_dnps/Training_Data")
+DATASET_FP = Path(
+    "/persistent/colabfit_raw_data/new_raw_datasets_2.0/saidi_23_dnps"
+)  # HSRN K8s pod location
+DATASET_FP = Path("data/23-Single-Element-DNPs-main/Training_Data")
 DATASET = "23-DNPs-RSCDD-2023"
 
 LINKS = [
