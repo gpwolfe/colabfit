@@ -57,9 +57,7 @@ DS_DESC = (
     "materials from the Materials Project database; and a bottom-up approach, "
     "replacing each element in a 2D material with another from the same group "
     "(according to column number). JARVIS is a set of tools and datasets built to meet "
-    "current materials design challenges. JARVIS-DFT is the portion of the JARVIS "
-    "database based on DFT calculations, containing numerous separate "
-    "datasets."
+    "current materials design challenges."
 )
 
 LINKS = [
