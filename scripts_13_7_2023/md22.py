@@ -1,17 +1,14 @@
 """
-author:
-
-Data can be downloaded from:
-
+author: gpwolfe
 
 Properties
 ----------
-
-Other properties added to metadata
-----------------------------------
+Forces
+Potential energy
 
 File notes
 ----------
+tested locally, should run w/out problem on Kubernetes
 
 """
 from argparse import ArgumentParser
