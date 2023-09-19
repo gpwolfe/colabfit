@@ -1,23 +1,16 @@
 """
 author:gpwolfe
 
-Data can be downloaded from:
-
-
-Run: $ python3 <script_name>.py -i (or --ip) <database_ip> -d <database_name> \
-    -p <number_of_processors>
-
 Properties
 ----------
 energy
 forces
 virial
 
-Other properties added to metadata
-----------------------------------
-
 File notes
 ----------
+Tested locally. Kubernetes files should  have same changes described below
+
 the file for coordinates at:
 23-Single-Element-DNPs-main/Training_Data/Zn/iter0/T225/T225_2/hxNPwQaO0Pg_2-2v8T_6JeSoclea/elastic/B222_dist03_0/set.000
 is empty, so these will have to be ignored. I left the files in place but renamed the
