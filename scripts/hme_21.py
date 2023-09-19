@@ -33,7 +33,7 @@ from pathlib import Path
 import sys
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/hme21")
-# DATASET_FP = Path("data/hme")  # remove
+DATASET_FP = Path().cwd().parent / "data/hme"  # remove
 DATASET = "HME21"
 
 SOFTWARE = "VASP"
@@ -67,11 +67,12 @@ AUTHORS = [
     "Takeshi Ibuka",
 ]
 DS_DESC = (
-    "Approximately 25,000 configurations, including 37 elements, used in "
+    "HME21 comprises approximately 25,000 configurations, including 37 elements, "
+    "used in "
     "the training of a universal NNP called PreFerential Potential (PFP). The "
     "dataset specifically contains disordered and unstable structures, and "
     "structures that include irregular substitutions, as well as varied "
-    "temperature and density."
+    "temperature and density. "
 )
 ELEMENTS = [
     "H",
@@ -112,7 +113,6 @@ ELEMENTS = [
     "Au",
     "Pb",
 ]
-GLOB_STR = "*.xyz"
 
 
 def reader(filepath):
@@ -170,23 +170,19 @@ def main(argv):
         ],
     }
 
-    f_names = [x.name for x in DATASET_FP.rglob(GLOB_STR)]
-    file_dict = dict()
-    for fn in f_names:
-        if "train" in fn:
-            file_dict[fn] = f"{DATASET_FP}-train"
-        elif "test" in fn:
-            file_dict[fn] = f"{DATASET_FP}-test"
-        elif "val" in fn:
-            file_dict[fn] = f"{DATASET_FP}-validation"
-    for fn in f_names:
+    dss = (
+        ("HME21_test", "hme21_test.xyz", "The test set from HME21. "),
+        ("HME21_train", "hme21_train.xyz", "The training set from HME21. "),
+        ("HME21_validation", "hme21_val.xyz", "The validation set from HME21. "),
+    )
+    for name, glob, desc in dss:
         configurations = load_data(
             file_path=DATASET_FP,
             file_format="folder",
             name_field="name",
             elements=ELEMENTS,
             reader=reader,
-            glob_string=fn,
+            glob_string=glob,
             generator=False,
         )
 
@@ -203,10 +199,10 @@ def main(argv):
 
         client.insert_dataset(
             do_hashes=all_do_ids,
-            name=DATASET,
+            name=name,
             authors=AUTHORS,
             links=LINKS,
-            description=DS_DESC,
+            description=f"{desc}{DS_DESC}",
             verbose=True,
             # cs_ids=cs_ids,
         )

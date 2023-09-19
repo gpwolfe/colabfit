@@ -126,7 +126,7 @@ def main(argv):
     property_map = {
         "potential-energy": [
             {
-                "energy": {"field": "energy", "units": "Kcal/Mol"},
+                "energy": {"field": "energy", "units": "kcal/mol"},
                 "per-atom": {"field": "per-atom", "units": None},
                 "_metadata": {
                     "software": {"value": "FHI-aims"},

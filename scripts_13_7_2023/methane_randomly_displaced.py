@@ -1,23 +1,29 @@
 """
 File notes
 -----------
-find better name for dataset
-double-check properties/metadata
-Improve dataset description
+Tested locally with first 100,000 index
+Should work on Kubernetes
 """
 from argparse import ArgumentParser
 from pathlib import Path
 import sys
 
+from ase.io import read
+
 from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import potential_energy_pd, atomic_forces_pd
 
-DATASET_FP = Path("/large_data/new_raw_datasets_2.0/methane/methane.extxyz")
-DATASET_FP = Path("data/methane/methane.extxyz")
-DS_NAME = "Randomly-displaced_methane"
+DATASET_FP = Path("/large_data/new_raw_datasets_2.0/methane/")
+# DATASET_FP = Path("data/methane/")
+DS_NAME = "Methane_randomly_displaced"
 DS_DESC = (
     "This dataset provides a large number (7,732,488) of configurations for a simple "
     "CH4 composition that are generated in an almost completely unbiased fashion."
+    "This dataset provides a large number (7732488) configurations for a simple CH4"
+    "composition, that are generated in an almost completely unbiased fashion. "
+    "Hydrogen atoms are randomly distributed in a 3A sphere centered around the carbon "
+    "atom, and the only structures that are discarded are those with atoms that are "
+    "closer than 0.5A, or such that the reference DFT calculation does not converge."
     "This dataset is ideal to benchmark structural representations and regression "
     "algorithms, verifying whether they allow reaching arbitrary accuracy in a data-"
     "rich regime."
@@ -38,7 +44,7 @@ property_map = {
     "potential-energy": [
         {
             "energy": {"field": "energy", "units": "Ha"},
-            "per-atom": {"field": "per-atom", "units": None},
+            "per-atom": {"field": False, "units": None},
             "_metadata": {
                 "software": {"value": "psi4"},
                 "method": {"value": "DFT-PBE"},
@@ -59,8 +65,11 @@ property_map = {
 }
 
 
-def tform(c):
-    c.info["per-atom"] = False
+def reader(fp):
+    configs = read(fp, index=":")
+    for i, config in enumerate(configs):
+        config.info["name"] = f"{fp.stem}_{i}"
+    return configs
 
 
 def main(argv):
@@ -91,11 +100,12 @@ def main(argv):
 
     configurations = load_data(
         file_path=DATASET_FP,
-        file_format="extxyz",
-        name_field=None,
+        file_format="folder",
+        reader=reader,
+        name_field="name",
         elements=["C", "H"],
-        default_name="methane",
         verbose=True,
+        glob_string="*.extxyz",
         generator=False,
     )
 
@@ -105,7 +115,6 @@ def main(argv):
             ds_id=ds_id,
             property_map=property_map,
             generator=False,
-            transform=tform,
             verbose=True,
         )
     )
@@ -119,7 +128,7 @@ def main(argv):
         authors=AUTHORS,
         links=LINKS,
         description=DS_DESC,
-        resync=True,
+        # resync=True,
         verbose=True,
     )
 
