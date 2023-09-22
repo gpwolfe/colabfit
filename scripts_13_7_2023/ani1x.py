@@ -1,17 +1,23 @@
 """
 author:
 
-Data can be downloaded from:
 
 
 Properties
 ----------
+potential energy
+atomic forces
 
 Other properties added to metadata
 ----------------------------------
+dipole
+quadrupole
+octupole
+volume
 
 File notes
 ----------
+tested locally, should work with Kubernetes
 
 methods, software (where stated) and basis sets as follows:
 "hf_dz.energy": meth("HF",  "cc-pVDZ"),
@@ -209,8 +215,6 @@ def reader(filepath: Path):
             config.info = {key: val[i] for key, val in data.items()}
             config.info["name"] = f"{filepath.stem}_{i}"
             configs.append(config)
-            if i > 200:  # remove --> local testing
-                break
     return configs
 
 
@@ -254,6 +258,7 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations=configurations,
+            co_md_map=CO_METADATA,
             ds_id=ds_id,
             property_map=PROPERTY_MAP,
             generator=False,
@@ -299,28 +304,28 @@ def main(argv):
 CO_METADATA = {  # "hf_dz.energy": meth("HF",  "cc-pVDZ"),
     # "hf_qz.energy": meth("HF", "cc-pVQZ"),
     # "hf_tz.energy": meth("HF", "cc-pVTZ"),
-    "mp2_dz.corr_energy",
-    "mp2_qz.corr_energy",
-    "mp2_tz.corr_energy",
-    "npno_ccsd(t)_dz.corr_energy",
-    "npno_ccsd(t)_tz.corr_energy",
-    "tpno_ccsd(t)_dz.corr_energy",
-    "wb97x_dz.cm5_charges",
-    "wb97x_dz.dipole",
-    # "wb97x_dz.energy": meth("wB97x", "Gaussian 09","6-31G*"),
-    # "wb97x_dz.forces": meth("wB97x", "Gaussian 09","6-31G*"),
-    "wb97x_dz.hirshfeld_charges",
-    "wb97x_dz.quadrupole",
-    "wb97x_tz.dipole",
-    # "wb97x_tz.energy": meth("wB97x", "ORCA","def2-TZVPP"),
-    # "wb97x_tz.forces": meth("wB97x", "ORCA","def2-TZVPP"),
-    "wb97x_tz.mbis_charges",
-    "wb97x_tz.mbis_dipoles",
-    "wb97x_tz.mbis_octupoles",
-    "wb97x_tz.mbis_quadrupoles",
-    "wb97x_tz.mbis_volumes",
-    # "ccsd(t)_cbs.energy": meth("CCSD(T)*", "ORCA","CBS"),
-    "wb97x_tz.quadrupole",
+    "mp2_dz.corr_energy": {"field": "mp2_dz.corr_energy"},
+    "mp2_qz.corr_energy": {"field": "mp2_qz.corr_energy"},
+    "mp2_tz.corr_energy": {"field": "mp2_tz.corr_energy"},
+    "npno_ccsd(t)_dz.corr_energy": {"field": "npno_ccsd(t)_dz.corr_energy"},
+    "npno_ccsd(t)_tz.corr_energy": {"field": "npno_ccsd(t)_tz.corr_energy"},
+    "tpno_ccsd(t)_dz.corr_energy": {"field": "tpno_ccsd(t)_dz.corr_energy"},
+    "wb97x_dz.cm5_charges": {"field": "wb97x_dz.cm5_charges"},
+    "wb97x_dz.dipole": {"field": "wb97x_dz.dipole"},
+    # "wb97x_dz.energy": meth("wB97x"}, "Gaussian 09"},"6-31G*"),
+    # "wb97x_dz.forces": meth("wB97x"}, "Gaussian 09"},"6-31G*"),
+    "wb97x_dz.hirshfeld_charges": {"field": "wb97x_dz.hirshfeld_charges"},
+    "wb97x_dz.quadrupole": {"field": "wb97x_dz.quadrupole"},
+    "wb97x_tz.dipole": {"field": "wb97x_tz.dipole"},
+    # "wb97x_tz.energy": meth("wB97x"}, "ORCA"},"def2-TZVPP"),
+    # "wb97x_tz.forces": meth("wB97x"}, "ORCA"},"def2-TZVPP"),
+    "wb97x_tz.mbis_charges": {"field": "wb97x_tz.mbis_charges"},
+    "wb97x_tz.mbis_dipoles": {"field": "wb97x_tz.mbis_dipoles"},
+    "wb97x_tz.mbis_octupoles": {"field": "wb97x_tz.mbis_octupoles"},
+    "wb97x_tz.mbis_quadrupoles": {"field": "wb97x_tz.mbis_quadrupoles"},
+    "wb97x_tz.mbis_volumes": {"field": "wb97x_tz.mbis_volumes"},
+    # "ccsd(t)_cbs.energy": meth("CCSD(T)*"}, "ORCA"},"CBS"),
+    "wb97x_tz.quadrupole": {"field": "wb97x_tz.quadrupole"},
 }
 
 if __name__ == "__main__":
