@@ -16,6 +16,8 @@ File notes
 """
 from argparse import ArgumentParser
 from ase.io import read
+from pathlib import Path
+import sys
 
 # from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
@@ -24,8 +26,7 @@ from colabfit.tools.property_definitions import (
     # cauchy_stress_pd,
     potential_energy_pd,
 )
-from pathlib import Path
-import sys
+
 
 DATASET_FP = Path("").cwd()
 DATASET_NAME = ""

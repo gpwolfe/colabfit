@@ -166,13 +166,13 @@ PROPERTY_MAP = {
                 "software": {"value": "VASP"},
             },
         },
-        {
-            "energy": {"field": "optb88vdw_bandgap", "units": "eV"},
-            "_metadata": {
-                "method": {"value": "DFT-OptB88vdW"},
-                "software": {"value": "VASP"},
-            },
-        },
+        # {
+        #     "energy": {"field": "optb88vdw_bandgap", "units": "eV"},
+        #     "_metadata": {
+        #         "method": {"value": "DFT-OptB88vdW"},
+        #         "software": {"value": "VASP"},
+        #     },
+        # },
     ],
     "potential-energy": [
         {

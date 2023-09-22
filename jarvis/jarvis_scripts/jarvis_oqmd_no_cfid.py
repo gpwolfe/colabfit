@@ -6,6 +6,28 @@ File notes
 Files have been previously downloaded and unzipped using jarvis-tools to avoid
 having this as a dependency.
 
+There are six entries that have an ambiguous element list, with two elements
+in parentheses standing in for one coordinate position.
+These can be seen using this function:
+def reader(fp):
+    with open(fp, "r") as f:
+        data = json.load(f)
+        data = data
+    configs = []
+    for i, row in enumerate(data):
+        atoms = row.pop("atoms")
+        elements = [symbol.replace(" ", "") for symbol in atoms["elements"]]
+        if any([len(x) > 2 for x in elements]):
+            print(atoms['elements'])
+            print(atoms)
+            print(row)
+example: ['(Cs,Os) ', '(Cs,Os) ', '(Cs,Os) ', '(Cs,Os) ', 'Np ']
+
+The corresponding oqmd entry id (949080) does not return a page on oqmd.org
+i.e. https://oqmd.org/materials/entry/949080
+
+These entries are being excluded.
+
 Properties key:
 spg = space group
 fund = functional
@@ -108,16 +130,19 @@ def reader(fp):
     configs = []
     for i, row in enumerate(data):
         atoms = row.pop("atoms")
-        if atoms["cartesian"] is True:
+        elements = [symbol.replace(" ", "") for symbol in atoms["elements"]]
+        if any([len(x) > 2 for x in elements]):
+            pass
+        elif atoms["cartesian"] is True:
             config = AtomicConfiguration(
                 positions=atoms["coords"],
-                symbols=atoms["elements"],
+                symbols=elements,
                 cell=atoms["lattice_mat"],
             )
         else:
             config = AtomicConfiguration(
                 scaled_positions=atoms["coords"],
-                symbols=atoms["elements"],
+                symbols=elements,
                 cell=atoms["lattice_mat"],
             )
 
