@@ -178,6 +178,7 @@ def main(argv):
 
     client.insert_dataset(
         do_hashes=all_do_ids,
+        ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
         links=LINKS,

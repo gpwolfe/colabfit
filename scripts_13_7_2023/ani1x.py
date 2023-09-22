@@ -40,6 +40,9 @@ methods, software (where stated) and basis sets as follows:
 "ccsd(t)_cbs.energy": meth("CCSD(T)*", "ORCA","CBS"),
 # "wb97x_tz.quadrupole": meth("wB97x", "ORCA","def2-TZVPP"),
 
+
+Units for props are described here:
+https://www.nature.com/articles/s41597-020-0473-z/tables/2
 """
 from argparse import ArgumentParser
 from collections import namedtuple
@@ -95,64 +98,78 @@ method = {
 PROPERTY_MAP = {
     "potential-energy": [
         {
-            "energy": {"field": "energy", "units": "eV"},
+            "energy": {"field": "hf_dz.energy", "units": "Ha"},
             "per-atom": {"value": False, "units": None},
             "_metadata": {
-                "software": {"value": method["energy"].software},
-                "method": {"value": method["energy"].method},
-                "basis-set": {"value": method["energy"].basis - set},
+                "software": {"value": method["hf_dz.energy"].software},
+                "method": {"value": method["hf_dz.energy"].method},
+                "basis-set": {"value": method["hf_dz.energy"].basis},
             },
         },
         {
-            "energy": {"field": "energy", "units": "eV"},
+            "energy": {"field": "hf_qz.energy", "units": "Ha"},
             "per-atom": {"value": False, "units": None},
             "_metadata": {
-                "software": {"value": method["energy"].software},
-                "method": {"value": method["energy"].method},
-                "basis-set": {"value": method["energy"].basis - set},
+                "software": {"value": method["hf_qz.energy"].software},
+                "method": {"value": method["hf_qz.energy"].method},
+                "basis-set": {"value": method["hf_qz.energy"].basis},
             },
         },
         {
-            "energy": {"field": "energy", "units": "eV"},
+            "energy": {"field": "hf_tz.energy", "units": "Ha"},
             "per-atom": {"value": False, "units": None},
             "_metadata": {
-                "software": {"value": method["energy"].software},
-                "method": {"value": method["energy"].method},
-                "basis-set": {"value": method["energy"].basis - set},
+                "software": {"value": method["hf_tz.energy"].software},
+                "method": {"value": method["hf_tz.energy"].method},
+                "basis-set": {"value": method["hf_tz.energy"].basis},
             },
         },
         {
-            "energy": {"field": "energy", "units": "eV"},
+            "energy": {"field": "wb97x_dz.energy", "units": "Ha"},
             "per-atom": {"value": False, "units": None},
             "_metadata": {
-                "software": {"value": method["energy"].software},
-                "method": {"value": method["energy"].method},
-                "basis-set": {"value": method["energy"].basis - set},
+                "software": {"value": method["wb97x_dz.energy"].software},
+                "method": {"value": method["wb97x_dz.energy"].method},
+                "basis-set": {"value": method["wb97x_dz.energy"].basis},
             },
         },
         {
-            "energy": {"field": "energy", "units": "eV"},
+            "energy": {"field": "wb97x_tz.energy", "units": "Ha"},
             "per-atom": {"value": False, "units": None},
             "_metadata": {
-                "software": {"value": method["energy"].software},
-                "method": {"value": method["energy"].method},
-                "basis-set": {"value": method["energy"].basis - set},
+                "software": {"value": method["wb97x_tz.energy"].software},
+                "method": {"value": method["wb97x_tz.energy"].method},
+                "basis-set": {"value": method["wb97x_tz.energy"].basis},
+            },
+        },
+        {
+            "energy": {"field": "ccsd(t)_cbs.energy", "units": "Ha"},
+            "per-atom": {"value": False, "units": None},
+            "_metadata": {
+                "software": {"value": method["ccsd(t)_cbs.energy"].software},
+                "method": {"value": method["ccsd(t)_cbs.energy"].method},
+                "basis-set": {"value": method["ccsd(t)_cbs.energy"].basis},
             },
         },
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "forces", "units": "eV/A"},
-            "_metadata": PI_METADATA,
+            "forces": {"field": "wb97x_dz.forces", "units": "Ha/A"},
+            "_metadata": {
+                "software": {"value": method["wb97x_dz.forces"].software},
+                "method": {"value": method["wb97x_dz.forces"].method},
+                "basis-set": {"value": method["wb97x_dz.forces"].basis},
+            },
+        },
+        {
+            "forces": {"field": "wb97x_tz.forces", "units": "Ha/A"},
+            "_metadata": {
+                "software": {"value": method["wb97x_tz.forces"].software},
+                "method": {"value": method["wb97x_tz.forces"].method},
+                "basis-set": {"value": method["wb97x_tz.forces"].basis},
+            },
         },
     ],
-    # "cauchy-stress": [
-    #     {
-    #         "stress": {"field": "stress", "units": "eV"},
-    #         "volume-normalized": {"value": True, "units": None},
-    #         "_metadata": metadata,
-    #     }
-    # ],
 }
 
 CO_METADATA = {}
@@ -194,7 +211,7 @@ def reader(filepath: Path):
             config.info = {key: val[i] for key, val in data.items()}
             config.info["name"] = f"{filepath.stem}_{i}"
             configs.append(config)
-            if i > 2000:
+            if i > 2000:  # remove --> local testing
                 break
     return configs
 
@@ -248,39 +265,36 @@ def main(argv):
 
     all_co_ids, all_do_ids = list(zip(*ids))
 
-    # If no obvious divisions between configurations exist (i.e., different methods or
-    # materials), remove the following lines through 'cs_ids.append(...)' and from
-    # 'insert_dataset(...) function remove 'cs_ids=cs_ids' argument.
+    # cs_regexes = [
+    #     [
+    #         f"{DATASET_NAME}_aluminum",
+    #         "aluminum",
+    #         f"Configurations of aluminum from {DATASET_NAME} dataset",
+    #     ]
+    # ]
 
-    cs_regexes = [
-        [
-            f"{DATASET_NAME}_aluminum",
-            "aluminum",
-            f"Configurations of aluminum from {DATASET_NAME} dataset",
-        ]
-    ]
+    # cs_ids = []
 
-    cs_ids = []
+    # for i, (name, regex, desc) in enumerate(cs_regexes):
+    #     cs_id = client.query_and_insert_configuration_set(
+    #         co_hashes=all_co_ids,
+    #         ds_id=ds_id,
+    #         name=name,
+    #         description=desc,
+    #         query={"names": {"$regex": regex}},
+    #     )
 
-    for i, (name, regex, desc) in enumerate(cs_regexes):
-        cs_id = client.query_and_insert_configuration_set(
-            co_hashes=all_co_ids,
-            ds_id=ds_id,
-            name=name,
-            description=desc,
-            query={"names": {"$regex": regex}},
-        )
-
-        cs_ids.append(cs_id)
+    #     cs_ids.append(cs_id)
 
     client.insert_dataset(
         do_hashes=all_do_ids,
+        ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
         links=LINKS,
         description=DATASET_DESC,
         verbose=True,
-        cs_ids=cs_ids,  # remove line if no configuration sets to insert
+        # cs_ids=cs_ids,  # remove line if no configuration sets to insert
     )
 
 
