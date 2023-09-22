@@ -38,7 +38,7 @@ methods, software (where stated) and basis sets as follows:
 # "wb97x_tz.mbis_quadrupoles": meth("wB97x", "ORCA","def2-TZVPP"),
 # "wb97x_tz.mbis_volumes": meth("wB97x", "ORCA","def2-TZVPP"),
 "ccsd(t)_cbs.energy": meth("CCSD(T)*", "ORCA","CBS"),
-# "wb97x_tz.quadrupole": meth("wB97x", "ORCA","def2-TZVPP"),
+# "wb97x_tz.quadrupole": meth("wB97x", "ORCA","def2-TZVPP")
 
 
 Units for props are described here:
@@ -172,8 +172,6 @@ PROPERTY_MAP = {
     ],
 }
 
-CO_METADATA = {}
-
 
 def read_h5(h5filename):
     """
@@ -211,7 +209,7 @@ def reader(filepath: Path):
             config.info = {key: val[i] for key, val in data.items()}
             config.info["name"] = f"{filepath.stem}_{i}"
             configs.append(config)
-            if i > 2000:  # remove --> local testing
+            if i > 200:  # remove --> local testing
                 break
     return configs
 
@@ -297,6 +295,33 @@ def main(argv):
         # cs_ids=cs_ids,  # remove line if no configuration sets to insert
     )
 
+
+CO_METADATA = {  # "hf_dz.energy": meth("HF",  "cc-pVDZ"),
+    # "hf_qz.energy": meth("HF", "cc-pVQZ"),
+    # "hf_tz.energy": meth("HF", "cc-pVTZ"),
+    "mp2_dz.corr_energy",
+    "mp2_qz.corr_energy",
+    "mp2_tz.corr_energy",
+    "npno_ccsd(t)_dz.corr_energy",
+    "npno_ccsd(t)_tz.corr_energy",
+    "tpno_ccsd(t)_dz.corr_energy",
+    "wb97x_dz.cm5_charges",
+    "wb97x_dz.dipole",
+    # "wb97x_dz.energy": meth("wB97x", "Gaussian 09","6-31G*"),
+    # "wb97x_dz.forces": meth("wB97x", "Gaussian 09","6-31G*"),
+    "wb97x_dz.hirshfeld_charges",
+    "wb97x_dz.quadrupole",
+    "wb97x_tz.dipole",
+    # "wb97x_tz.energy": meth("wB97x", "ORCA","def2-TZVPP"),
+    # "wb97x_tz.forces": meth("wB97x", "ORCA","def2-TZVPP"),
+    "wb97x_tz.mbis_charges",
+    "wb97x_tz.mbis_dipoles",
+    "wb97x_tz.mbis_octupoles",
+    "wb97x_tz.mbis_quadrupoles",
+    "wb97x_tz.mbis_volumes",
+    # "ccsd(t)_cbs.energy": meth("CCSD(T)*", "ORCA","CBS"),
+    "wb97x_tz.quadrupole",
+}
 
 if __name__ == "__main__":
     main(sys.argv[1:])
