@@ -66,8 +66,8 @@ from colabfit.tools.property_definitions import (
     potential_energy_pd,
 )
 
-
-DATASET_FP = Path("data/ani1x")
+DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/ani1x/")  # HSRN
+# DATASET_FP = Path("data/ani1x") # remove --> local
 DATASET_NAME = "ANI-1x"
 LINKS = [
     "https://doi.org/10.1038/s41597-020-0473-z",
@@ -87,7 +87,14 @@ AUTHORS = [
     "Olexandr Isayev",
     "Sergei Tretiak",
 ]
-DATASET_DESC = ""
+DATASET_DESC = (
+    "ANI-1x contains DFT calculations for approximately 5 million molecular "
+    "conformations. From an initial training set, an active learning method was used "
+    "to iteratively add conformations where insufficient diversity was detected. "
+    "Additional conformations were sampled from existing databases of molecules, such "
+    "as GDB-11 and ChEMBL. On each of these configurations, one of molecular dynamics "
+    "sampling, normal mode sampling, dimer sampling, or torsion sampling was performed."
+)
 ELEMENTS = None
 GLOB_STR = "*.h5"
 meth = namedtuple(typename="meth", field_names=["method", "software", "basis"])

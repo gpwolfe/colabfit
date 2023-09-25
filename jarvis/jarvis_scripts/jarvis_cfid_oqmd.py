@@ -78,14 +78,14 @@ ELEMENTS = None
 
 PROPERTY_MAP = {
     "formation-energy": [
-        {
-            "energy": {"field": "total_energy", "units": "eV"},
-            "per-atom": {"value": False, "units": None},
-            "_metadata": {
-                "software": {"value": "VASP"},
-                "method": {"value": "DFT-PBE"},
-            },
-        },
+        # {
+        #     "energy": {"field": "total_energy", "units": "eV"},
+        #     "per-atom": {"value": False, "units": None},
+        #     "_metadata": {
+        #         "software": {"value": "VASP"},
+        #         "method": {"value": "DFT-PBE"},
+        #     },
+        # },
         {
             "energy": {"field": "form_energy", "units": "eV"},
             "per-atom": {"value": True, "units": None},
@@ -209,7 +209,7 @@ CO_KEYS = [
     # "form_energy",
     "id",
     "stable",
-    # "total_energy"
+    "total_energy",
 ]
 
 
