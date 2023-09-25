@@ -1,7 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-
 """
 author:
 
@@ -45,7 +41,18 @@ from colabfit.tools.property_definitions import (
 DATASET_FP = Path("/large_data/new_raw_datasets/Si_Berk/Si_md.extxyz")
 DATASET_FP = Path().cwd().parent / "data/berk_si"
 DS_NAME = "Si_JCP_2017"
-DS_DESC = "Silicon dataset used to train machine learning models."
+DS_DESC = (
+    "A dataset of 64-atom silicon configurations in four phases: cubic-diamond, "
+    "(beta)-tin, R8, and liquid. MD simulations are run at 300, 600 and 900 K for "
+    "solid phases; up to 2500 K for the L phase. All relaxations performed at zero "
+    "pressure. Additional configurations prepared by random distortion of crystal "
+    "structures. VASP was used with a PAW pseudopotential and PBE exchange "
+    "correlation. k-point mesh was optimized for energy convergence of 0.5 meV/atom "
+    "and stress convergence of 0.1 kbar. The plane wave energy cutoff was set to 300 "
+    "eV. To reduce the correlation between data points MD, data were thinned by using "
+    "one of every 100 consecutive structures from the MD simulations at 300 K and one "
+    "of every 20 structures from higher temperature MD simulations."
+)
 AUTHORS = [
     "Ekin D. Cubuk",
     "Brad D. Malone",
@@ -54,44 +61,45 @@ AUTHORS = [
     "Efthimios Kaxiras",
 ]
 LINKS = [
-    "https://aip.scitation.org/doi/10.1063/1.4990503",
+    "https://doi.org/10.1063/1.4990503",
 ]
 GLOB = "Si_md.extxyz"
+
+PI_MD = {
+    "software": {"value": "VASP"},
+    "method": {"value": "DFT-PBE"},
+    "energy-cutoff": {"value": "300 eV"},
+    "temperature": {"field": "temperature"},
+}
 property_map = {
     "potential-energy": [
         {
-            "energy": {"field": "energy", "units": "____"},  # TODO
+            "energy": {"field": "energy", "units": "eV"},
             "per-atom": {"field": "per-atom", "units": None},
-            "_metadata": {
-                "software": {"value": "____"},  # TODO
-            },
-        }
+            "_metadata": PI_MD,
+        },
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "forces", "units": "____"},  # TODO
-            "_metadata": {
-                "software": {"value": "____"},  # TODO
-            },
+            "forces": {"field": "forces", "units": "eV/A"},
+            "_metadata": PI_MD,
         }
     ],
-    "kinetic-energy": [
-        {
-            "energy": {"field": "kinetic_energy", "units": ""},  # TODO
-            "_metadata": {
-                "software": {"value": ""},  # TODO
-            },
-        }
-    ],
+    # "kinetic-energy": [
+    #     {
+    #         "energy": {"field": "kinetic_energy", "units": "eV"},
+    #         "_metadata": PI_MD,
+    #     }
+    # ],
     "free-energy": [
         {
-            "energy": {"field": "free_energy", "units": ""},  # TODO
-            "_metadata": {
-                "software": {"value": ""},  # TODO
-            },
+            "energy": {"field": "free_energy", "units": "eV"},
+            "per-atom": {"value": False, "units": None},
+            "_metadata": PI_MD,
         }
     ],
 }
+CO_MD = {"kinetic-energy": {"field": "kinetic_energy"}}
 
 
 def reader(fp):
@@ -130,9 +138,11 @@ def main(argv):
         file_path=DATASET_FP,
         file_format="folder",
         name_field="name",
+        reader=reader,
         elements=["Si"],
         verbose=True,
         generator=False,
+        glob_string=GLOB,
     )
 
     # kinetic_energy, energy, forces, free_energy
@@ -160,6 +170,8 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
+            co_md_map=CO_MD,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -169,7 +181,7 @@ def main(argv):
     all_co_ids, all_pr_ids = list(zip(*ids))
 
     ds_id = client.insert_dataset(
-        pr_hashes=all_pr_ids,
+        do_hashes=all_pr_ids,
         ds_id=ds_id,
         name=DS_NAME,
         authors=AUTHORS,
