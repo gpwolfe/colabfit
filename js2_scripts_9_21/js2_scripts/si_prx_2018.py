@@ -134,7 +134,6 @@ from ase.io import read
 from pathlib import Path
 import sys
 
-# from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
@@ -145,7 +144,20 @@ from colabfit.tools.property_definitions import (
 DATASET_FP = Path("/large_data/new_raw_datasets/Si_Berk/Si.extxyz")
 DATASET_FP = Path().cwd().parent / "data/berk_si"
 DS_NAME = "Si_PRX_2018"
-DS_DESC = ""
+DS_DESC = (
+    "This dataset was intended to allow accurate energy estimates for a "
+    "material (silicon) by interpolating a dataset that covers the entire range of "
+    "physically relevant configurations. "
+    "The dataset was built over an extended period, using multiple computational "
+    "facilities. The kinds of configuration that included are chosen using "
+    "intuition and past experience to guide what needs to be included to obtain "
+    "good coverage pertaining to a range of properties. The number of configurations "
+    "in the final database is a result of somewhat ad hoc choices, driven partly by "
+    "the varying computational cost of the electronic-structure calculation and partly "
+    "by observed success in predicting properties, signaling a sufficient amount of "
+    "data. Each configuration yields a total energy, six components of the stress "
+    "tensor, and three force components for each atom."
+)
 AUTHORS = ["Albert P. Bartók", "James Kermode", "Noam Bernstein", "Gábor Csányi"]
 LINKS = [
     "https://doi.org/10.1063/1.4990503",
@@ -392,5 +404,6 @@ CO_MD = {
         "velo",
     ]
 }
+
 if __name__ == "__main__":
     main(sys.argv[1:])
