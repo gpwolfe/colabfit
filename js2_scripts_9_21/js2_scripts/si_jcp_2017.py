@@ -180,7 +180,7 @@ def main(argv):
 
     all_co_ids, all_pr_ids = list(zip(*ids))
 
-    ds_id = client.insert_dataset(
+    client.insert_dataset(
         do_hashes=all_pr_ids,
         ds_id=ds_id,
         name=DS_NAME,
