@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
-
 
 from colabfit.tools.database import MongoDatabase, load_data
 from colabfit.tools.property_settings import PropertySettings
@@ -18,8 +16,6 @@ client = MongoDatabase(
     drop_database=True,
 )
 
-
-# In[ ]:
 
 # Loads data, specify reader function if not "usual" file format
 configurations = load_data(
@@ -110,15 +106,10 @@ configurations += load_data(
     generator=False,
 )
 
-# In[ ]:
-
 
 client.insert_property_definition("/home/ubuntu/notebooks/potential-energy.json")
 client.insert_property_definition("/home/ubuntu/notebooks/atomic-forces.json")
 client.insert_property_definition("/home/ubuntu/notebooks/cauchy-stress.json")
-
-
-# In[ ]:
 
 
 property_map = {
@@ -166,14 +157,8 @@ property_map = {
 }
 
 
-# In[ ]:
-
-
 def tform(c):
     c.info["per-atom"] = False
-
-
-# In[ ]:
 
 
 ids = list(
@@ -236,9 +221,6 @@ for i, (regex, desc) in enumerate(cs_regexes.items()):
     cs_id = client.insert_configuration_set(co_ids, description=desc, name=cs_names[i])
 
     cs_ids.append(cs_id)
-
-
-# In[ ]:
 
 
 ds_id = client.insert_dataset(
