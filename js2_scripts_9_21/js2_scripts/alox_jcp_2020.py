@@ -15,12 +15,17 @@ Lattice
 Properties=species:S:1:pos:R:3:forces:R:3
 energy=-206.92580857
 pbc="F F F"
+
+from publication SI
+            Al12    Al24    Al48    Al0
+k-points    5x5x2   5x3x2   3x3x2   5x3x2
 """
 
 from argparse import ArgumentParser
-from ase.io import read
 from pathlib import Path
 import sys
+
+from ase.io import read
 
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 from colabfit.tools.property_definitions import (
@@ -29,20 +34,22 @@ from colabfit.tools.property_definitions import (
 )
 
 DATASET_FP = Path("/new_raw_datasets_2.0/a-AlOx/")
-DATASET_FP = Path().cwd().parent / "data/a-AlOx"
+DATASET_FP = Path().cwd().parent / "data/a-AlOx"  # comment out, local path
 DS_NAME = "a-AlOx_JCP_2020"
 DS_DESC = (
-    "In this work, the ab initio calculations were performed"
+    "This dataset was used for the training of an MLIP for amorphous alumina (a-AlOx). "
+    "Two configurations sets correspond to i) the actual training data and ii) "
+    "additional reference data. "
+    "Ab initio calculations were performed"
     "with the Vienna Ab initio Simulation Package. The projector"
     "augmented wave method was used to treat the atomic core electrons,"
-    "and the Perdew–Burke–Ernzerhof functional within the generalized "
-    "gradient approximation was used to describe the electron–electron "
-    "interactions.The cutoff energy for the plane-wave basis set was "
-    "set to 550 eV during the ab initio calculation.The structural, "
-    "vibrational, mechanical, and thermal properties of the "
-    "a-AlOx models were investigated. Finally, the obtained reference "
-    "database includes the DFT energies of 41 203 structures. "
-    "The supercell size of the AlOx reference structures varied from 24 to 132 atoms",
+    "and the Perdew-Burke-Ernzerhof functional within the generalized "
+    "gradient approximation was used to describe the electron-electron "
+    "interactions. The cutoff energy for the plane-wave basis set was "
+    "set to 550 eV during the ab initio calculation. The obtained reference "
+    "database includes the DFT energies of 41,203 structures. "
+    "The supercell size of the AlOx reference structures varied from 24 to 132 atoms. "
+    "K-point values are given for structures with: Al0, Al12, Al24, Al48 and Al192.",
 )
 AUTHORS = ["Wenwen Li", "Yasunobu Ando", "Satoshi Watanabe"]
 LINKS = [
@@ -52,11 +59,10 @@ LINKS = [
 GLOB = "*.xyzdat"
 
 PI_MD = {
-    "software": {"value": "CASTEP"},
-    "method": {"value": "DFT-PW91"},
-    "energy-cutoff": {"value": "250 eV"},
-    "temperature": {"field": "temperature"},
-    "kpoints": {"field": "kpoints"},
+    "software": {"value": "VASP"},
+    "method": {"value": "DFT-PBE"},
+    "energy-cutoff": {"value": "550 eV"},
+    "kpoints": {"field": "kpoint"},
 }
 
 property_map = {
@@ -69,42 +75,32 @@ property_map = {
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "forces", "units": "eV/A"},
+            "forces": {"field": "forces", "units": "eV/Ang"},
             "_metadata": PI_MD,
         }
     ],
 }
 
 
-property_map = {
-    "potential-energy": [
-        {
-            "energy": {"field": "energy", "units": "eV"},
-            "per-atom": {"field": "per-atom", "units": None},
-            "_metadata": {
-                "software": {"value": "VASP"},
-                "method": {"value": "PBE"},
-                "ecut": {"value": "550 eV"},
-                "kpoint": {"value": "5×5×2 or 5×3×2"},
-            },
-        }
-    ],
-    "atomic-forces": [
-        {
-            "forces": {"field": "forces", "units": "eV/Ang"},
-            "_metadata": {
-                "software": {"value": "VASP"},
-                "method": {"value": "PBE"},
-                "ecut": {"value": "550 eV"},
-                "kpoint": {"value": "5×5×2 or 5×3×2"},
-            },
-        }
-    ],
-}
-
-
 def reader(fp):
-    configs = read(fp, index=":")
+    configs = read(fp, index=":", format="extxyz")
+    # configs = read(fp, index="::100", format="extxyz") # local testing
+    for i, config in enumerate(configs):
+        symbols = str(config.symbols)
+        config.info["name"] = f"{fp.stem}_{i}"
+        if "Al12" in symbols:
+            config.info["kpoint"] = "5x5x2"
+        elif "Al24" in symbols:
+            config.info["kpoint"] = "5x3x2"
+        elif "Al48" in symbols:
+            config.info["kpoint"] = "3x3x2"
+        elif "Al" not in symbols:
+            config.info["kpoint"] = "5x3x2"
+        elif "Al192" in symbols:
+            config.info["kpoint"] = "single gamma k-point"
+        else:
+            pass
+
     return configs
 
 
@@ -135,9 +131,10 @@ def main(argv):
     configurations = load_data(
         file_path=DATASET_FP,
         file_format="folder",
-        name_field=None,
+        name_field="name",
         elements=["Al", "O"],
         verbose=True,
+        reader=reader,
         generator=False,
         glob_string=GLOB,
     )
@@ -148,6 +145,7 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -187,7 +185,6 @@ def main(argv):
         authors=AUTHORS,
         links=LINKS,
         description=DS_DESC,
-        resync=True,
         verbose=True,
     )
 
