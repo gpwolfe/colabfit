@@ -134,7 +134,7 @@ def main(argv):
         )
 
         all_co_ids, all_pr_ids = list(zip(*ids))
-        ds_id = client.insert_dataset(
+        client.insert_dataset(
             ds_id=ds_id,
             do_hashes=all_pr_ids,
             name=ds_name,

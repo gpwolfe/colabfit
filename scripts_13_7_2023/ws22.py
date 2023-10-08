@@ -198,6 +198,7 @@ def main(argv):
     for cs_name, glob, desc in name_glob_desc:
         cs_id = client.query_and_insert_configuration_set(
             co_hashes=all_cos,
+            ds_id=ds_id,
             name=cs_name,
             description=desc,
             query={"names": {"$regex": glob}},

@@ -1,12 +1,26 @@
-#!/usr/bin/env python
-# coding: utf-8
+"""
+author: Gregory Wolfe, Alexander Tao
 
-# In[ ]:
+Properties
+----------
+potential energy
+atomic forces
 
+File notes
+----------
+"""
+from argparse import ArgumentParser
+from pathlib import Path
+import sys
 
-from colabfit.tools.database import MongoDatabase, load_data
-from colabfit.tools.property_settings import PropertySettings
-from colabfit.tools.configuration import AtomicConfiguration
+from ase.io import read
+
+from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
+from colabfit.tools.property_definitions import (
+    atomic_forces_pd,
+    cauchy_stress_pd,
+    potential_energy_pd,
+)
 import pandas as pd
 from ase import Atoms
 from ase.io import read
@@ -15,16 +29,31 @@ from ase.db import connect
 from tqdm import tqdm
 import numpy as np
 
-# call database using its name
-# drop_database=True means to start with fresh database
-client = MongoDatabase(
-    "new_data_test_alexander",
-    configuration_type=AtomicConfiguration,
-    nprocs=4,
-    drop_database=True,
+DS_NAME = "CoDimer_JPCA_2022"
+DS_PATH = Path(
+    "/persistent/colabfit_raw_data/new_raw_datasets_2.0/Co_dimer/Co_dimer_data/"
 )
 
-# In[ ]:
+LINKS = [
+    "https://doi.org/10.1021/acs.jpca.1c08950",
+    "https://doi.org/10.24435/materialscloud:pe-zv",
+]
+AUTHORS = [
+    "Sijin Ren",
+    "Eric Fonseca",
+    "William Perry",
+    "Hai-Ping Cheng",
+    "Xiao-Guang Zhang",
+    "Richard Hennig",
+]
+DS_DESC = (
+    "a data set of 1081 Co(II) dimer molecules with the Co atoms in the high-spin "
+    "state of S = 3/2. All molecules contain the same atomic core region, "
+    "consisting of the tetrahedral and octahedral Co centers and the "
+    "three PO2R2 bridging ligands. The ligand exchange provides a broad range of "
+    "exchange energies, ΔEJ, from +50 to −200 meV, with 80% of the "
+    "ligands yielding a small ΔEJ < 10 meV."
+)
 
 
 def reader_Codimer(p):
@@ -87,7 +116,7 @@ configurations = load_data(
 # print(configurations)
 
 configurations += load_data(
-    file_path="/large_data/new_raw_datasets_2.0/Co_dimer/Co_dimer_data/",
+    file_path="/large_data",
     file_format="folder",
     name_field=None,
     elements=None,
@@ -98,17 +127,16 @@ configurations += load_data(
     generator=False,
 )
 
-# In[ ]:
-
-
 client.insert_property_definition("/home/ubuntu/notebooks/potential-energy.json")
 # client.insert_property_definition('/home/ubuntu/notebooks/atomic-forces.json')
 # client.insert_property_definition('/home/ubuntu/notebooks/cauchy-stress.json')
 
 
-# In[ ]:
-
-# property included electronic and dispersion energies, highest occupied molecular orbital (HOMO) and lowest unoccupied molecular orbital (LUMO) energies, HOMO/LUMO gap, dipole moment, and natural charge of the metal center; GFN2-xTB polarizabilities are also provided. Need to decide what to add in the property setting
+# property included electronic and dispersion energies, highest occupied molecular
+#  orbital (HOMO) and lowest unoccupied molecular orbital (LUMO) energies,
+# HOMO/LUMO gap, dipole moment, and natural charge of the metal center;
+# GFN2-xTB polarizabilities are also provided. Need to decide what to add
+# in the property setting
 
 property_map = {
     "potential-energy": [
@@ -138,22 +166,11 @@ property_map = {
 }
 
 
-# In[ ]:
-
-
-def tform(c):
-    c.info["per-atom"] = False
-
-
-# In[ ]:
-
-
 ids = list(
     client.insert_data(
         configurations,
         property_map=property_map,
         generator=False,
-        transform=tform,
         verbose=True,
     )
 )
@@ -161,12 +178,7 @@ ids = list(
 all_co_ids, all_pr_ids = list(zip(*ids))
 
 
-# matches to data CO "name" field
 cs_regexes = {
-    #    '.*':
-    #        'DFT data set of 1081 ligand substitutions for the Co(II) dimer. The ligand exchange '\
-    #        'provides a broad range of exchange energies, ΔEJ, from +50 to −200 meV, with 80% of the '\
-    #        'ligands yielding a small ΔEJ < 10 meV.',
     "Codimer training": "Configurations used in machine learning",
 }
 
@@ -189,31 +201,13 @@ for i, (regex, desc) in enumerate(cs_regexes.items()):
     cs_ids.append(cs_id)
 
 
-# In[ ]:
-
-
 ds_id = client.insert_dataset(
     cs_ids=cs_ids,
     do_hashes=all_pr_ids,
-    name="CoDimer_JPCA_2022",
-    authors=[
-        "Sijin Ren",
-        " Eric Fonseca",
-        "William Perry",
-        "Hai-Ping Cheng",
-        "Xiao-Guang Zhang",
-        "Richard Hennig",
-    ],
-    links=[
-        "https://pubs.acs.org/doi/10.1021/acs.jpca.1c08950",
-        "https://archive.materialscloud.org/record/2021.214",
-    ],
-    description="a data set of 1081 Co(II) dimer molecules with the Co atoms in the high-spin "
-    "state of S = 3/2. All molecules contain the same atomic core region, "
-    "consisting of the tetrahedral and octahedral Co centers and the "
-    "three PO2R2 bridging ligands. The ligand exchange provides a broad range of "
-    "exchange energies, ΔEJ, from +50 to −200 meV, with 80% of the "
-    "ligands yielding a small ΔEJ < 10 meV.",
+    name=DS_NAME,
+    authors=AUTHORS,
+    links=LINKS,
+    description=DS_DESC,
     resync=True,
     verbose=True,
 )

@@ -1,3 +1,26 @@
+"""
+author: Gregory Wolfe
+This script runs JARVIS ingest scripts that do not have problems on ingest
+as of 6 Sept. 2023.
+Most of the problems relate to a dataset having too many band-gap energy values
+equal to 0.0, which runs the property instance above the BSON size limit.
+Those scripts with large numbers of 0.0-value band-gap are:
+cfid_3d_2021:   37,589
+
+megnet:         24,383
+qe_tb:          750,134
+dft3_2021       37,589
+dft3_2022       52,932
+mp_all          over 20,000
+
+Other datasets cause the dataset object to be too large.
+ocp_all
+oqmd_no_cfid
+
+
+
+"""
+
 from argparse import ArgumentParser
 from datetime import datetime
 import os
@@ -10,26 +33,20 @@ j_scripts = sorted(list(Path().cwd().glob("*.py")))
 def main(db_ip, db_name, nprocs):
     for script in j_scripts:
         if script.stem not in [
+            #  running scripts
             "run_jarvis",
-            "jarvis_alignn_ff",
-            "jarvis_c2db",
+            "run_jarvis_without_problem_scripts",
+            "run_jarvis_ocp",
+            # problematic jarvis scripts
             "jarvis_cfid_3d_2021",
-            "jarvis_dft2_2021",
-            "jarvis_hopv",
+            "jarvis_cfid_oqmd",
             "jarvis_dft3_2022",
             "jarvis_dft3_2021",
-            "jarvis_megnet2",
-            "jarvis_mlearn",
-            "jarvis_mp_84",
-            "jarvis_polymer_genome",
+            "jarvis_megnet",
             "jarvis_ocp_all",
-            "jarvis_ocp_100K",
-            "jarvis_ocp_10k",
             "jarvis_oqmd_no_cfid",
-            "jarvis_cfid_oqmd",
             "jarvis_mp_all",
             "jarvis_qe_tb",
-            "jarvis_qm9_dgl",
         ]:
             print(script)
             exit_code = os.system(

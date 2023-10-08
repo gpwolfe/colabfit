@@ -121,7 +121,7 @@ other
 
 File notes
 ----------
-File appears to be incomplete, with just the number of atoms and part of the Lattice=
+File appears to be incomplete, with just the number of atoms and part of the "Lattice="
 for the next configuration header. This has been deleted for the reader function.
 
 """
