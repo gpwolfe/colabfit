@@ -30,7 +30,7 @@ from ase.io import read
 from ase.calculators.calculator import PropertyNotImplementedError
 from colabfit import ATOMS_LABELS_FIELD, ATOMS_NAME_FIELD
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
@@ -273,11 +273,12 @@ def main(argv):
         glob_string=GLOB_STR2,
         generator=False,
     )
-
+    ds_id = generate_ds_id()
     ids.extend(
         list(
             client.insert_data(
                 configurations,
+                ds_id=ds_id,
                 property_map=property_map,
                 generator=False,
                 verbose=False,
@@ -311,6 +312,7 @@ def main(argv):
     for i, (name, regex, desc) in enumerate(cs_regexes):
         cs_id = client.query_and_insert_configuration_set(
             co_hashes=all_co_ids,
+            ds_id=ds_id,
             name=name,
             description=desc,
             query={"names": {"$regex": regex}},
@@ -321,6 +323,7 @@ def main(argv):
     client.insert_dataset(
         do_hashes=all_do_ids,
         name=DATASET,
+        ds_id=ds_id,
         authors=AUTHORS,
         links=LINKS,
         description=DS_DESC,

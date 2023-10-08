@@ -7,15 +7,6 @@ Files have been previously downloaded and unzipped using jarvis-tools to avoid
 having this as a dependency.
 
 Properties key:
-spg = space group
-fund = functional
-slme = spectroscopic limited maximum efficiency
-encut = ecut/energy cutoff
-kpoint_length_unit -> want?
-optb88vdw_total_energy (dft_3d)
-efg = electric field gradient
-mbj_bandgap = band-gap calculated with TBmBJ method
-
 
 For all JARVIS datasets, if for configuration "cartesian=False", use an
 AtomicConfiguration or ase.Atoms object with 'scaled_positions' arg instead of
