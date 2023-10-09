@@ -35,7 +35,7 @@ from colabfit.tools.property_definitions import potential_energy_pd, atomic_forc
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/new_raw_datasets_2.0/flexible_molecules/Datasets/"
 )
-DATASET_FP = Path("data/flexible_molecules/Datasets/Datasets")
+# DATASET_FP = Path("data/flexible_molecules/Datasets")  # comment out--local testing
 DS_NAME = "flexible_molecules_JCP2021"
 LINKS = [
     "https://doi.org/10.1063/5.0038516",
@@ -181,7 +181,7 @@ def main(argv):
 
         cs_ids.append(cs_id)
 
-    ds_id = client.insert_dataset(
+    client.insert_dataset(
         cs_ids=cs_ids,
         do_hashes=all_pr_ids,
         ds_id=ds_id,

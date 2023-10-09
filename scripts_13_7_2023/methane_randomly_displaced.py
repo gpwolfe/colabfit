@@ -13,8 +13,8 @@ from ase.io import read
 from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import potential_energy_pd, atomic_forces_pd
 
-DATASET_FP = Path("/large_data/new_raw_datasets_2.0/methane/")
-# DATASET_FP = Path("data/methane/")
+DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/methane/methane")
+# DATASET_FP = Path("data/methane/") comment out, local testing
 DS_NAME = "Methane_randomly_displaced"
 DS_DESC = (
     "This dataset provides a large number (7,732,488) of configurations for a simple "
