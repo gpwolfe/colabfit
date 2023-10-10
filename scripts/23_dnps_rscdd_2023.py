@@ -35,7 +35,7 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/new_raw_datasets_2.0/saidi_23_dnps"
 )  # HSRN K8s pod location
-DATASET_FP = Path("data/23-Single-Element-DNPs-main/Training_Data")
+# DATASET_FP = Path("data/saidi_23_dnps/Training_Data")
 DATASET = "23-DNPs-RSCDD-2023"
 
 LINKS = [
@@ -46,8 +46,9 @@ AUTHORS = ["Christopher M. Andolina", "Wissam A. Saidi"]
 DS_DESC = (
     "One of 23 minimalist, curated sets of DFT-calculated properties for "
     "individual elements for the purpose of providing input to machine learning of "
-    "atomic potentials. Each element set contains on average ~4000 structures with "
-    "27 atoms per structure. Configuration metadata includes Materials Project ID "
+    "deep neural network potentials (DNPs). Each element set contains on average ~4000 "
+    "structures with 27 atoms per structure. Configuration metadata includes Materials "
+    "Project ID "
     "where available, as well as temperatures at which MD trajectories were calculated."
     "These temperatures correspond to the melting temperature (MT) and 0.25*MT for "
     "elements with MT < 2000K, and MT, 0.6*MT and 0.25*MT for elements with MT > 2000K."
