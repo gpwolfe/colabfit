@@ -67,7 +67,7 @@ from colabfit.tools.property_definitions import (
 )
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/ani1x/")  # HSRN
-DATASET_FP = Path("data/ani1x")  # remove --> local
+DATASET_FP = Path("data/ani1x")  # local and Greene
 DATASET_NAME = "ANI-1x"
 LINKS = [
     "https://doi.org/10.1038/s41597-020-0473-z",
@@ -96,7 +96,7 @@ DATASET_DESC = (
     "sampling, normal mode sampling, dimer sampling, or torsion sampling was performed."
 )
 ELEMENTS = None
-GLOB_STR = "*.h5"
+GLOB_STR = "ani1x-release.h5"
 meth = namedtuple(typename="meth", field_names=["method", "software", "basis"])
 method = {
     "hf_dz.energy": meth("HF", "ORCA", "cc-pVDZ"),

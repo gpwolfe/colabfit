@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
 """
 author: Gregory Wolfe, Alexander Tao
 
@@ -33,8 +31,8 @@ from colabfit.tools.property_definitions import (
     potential_energy_pd,
 )
 
-DATASET_FP = Path("/new_raw_datasets_2.0/a-AlOx/")
-DATASET_FP = Path().cwd().parent / "data/a-AlOx"  # comment out, local path
+DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/a-AlOx/")
+# DATASET_FP = Path().cwd().parent / "data/a-AlOx"  # comment out, local path
 DS_NAME = "a-AlOx_JCP_2020"
 DS_DESC = (
     "This dataset was used for the training of an MLIP for amorphous alumina (a-AlOx). "
@@ -49,7 +47,7 @@ DS_DESC = (
     "set to 550 eV during the ab initio calculation. The obtained reference "
     "database includes the DFT energies of 41,203 structures. "
     "The supercell size of the AlOx reference structures varied from 24 to 132 atoms. "
-    "K-point values are given for structures with: Al0, Al12, Al24, Al48 and Al192.",
+    "K-point values are given for structures with: Al0, Al12, Al24, Al48 and Al192."
 )
 AUTHORS = ["Wenwen Li", "Yasunobu Ando", "Satoshi Watanabe"]
 LINKS = [

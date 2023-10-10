@@ -88,7 +88,33 @@ def reader_Codimer(p):
     return structures_FM + structures_AFM
 
 
-# Loads data, specify reader function if not "usual" file format
+def main(argv):
+    parser = ArgumentParser()
+    parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
+    parser.add_argument(
+        "-d",
+        "--db_name",
+        type=str,
+        help="Name of MongoDB database to add dataset to",
+        default="cf-test",
+    )
+    parser.add_argument(
+        "-p",
+        "--nprocs",
+        type=int,
+        help="Number of processors to use for job",
+        default=4,
+    )
+    args = parser.parse_args(argv)
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
+
+    client.insert_property_definition(potential_energy_pd)
+    client.insert_property_definition(atomic_forces_pd)
+    client.insert_property_definition(cauchy_stress_pd)
+
+
 """
 configurations = load_data(
     file_path='/large_data/new_raw_datasets_2.0/Co_dimer/Co_dimer_data/',
@@ -211,3 +237,6 @@ ds_id = client.insert_dataset(
     resync=True,
     verbose=True,
 )
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
