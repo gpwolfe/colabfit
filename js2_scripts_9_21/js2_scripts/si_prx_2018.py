@@ -138,8 +138,8 @@ from colabfit.tools.property_definitions import (
     potential_energy_pd,
 )
 
-DATASET_FP = Path("/large_data/new_raw_datasets/Si_Berk/Si.extxyz")
-DATASET_FP = Path().cwd().parent / "data/berk_si"
+DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets/Si_Berk/Si.extxyz")
+# DATASET_FP = Path().cwd().parent / "data/berk_si"
 DS_NAME = "Si_PRX_2018"
 DS_DESC = (
     "This dataset was intended to allow accurate energy estimates for a "

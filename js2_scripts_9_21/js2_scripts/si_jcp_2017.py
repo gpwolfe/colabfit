@@ -13,7 +13,7 @@ Other properties added to metadata
 File notes
 ----------
 From Dylan's unfinished script
-
+Dylan's original note:
 Data being uploaded from Si_md.extxyz is half of a dataset obtained
 from a paper called 'Sensitivity and Dimensionality...' by Onat, Ortner, andn Kermode
 ( https://aip.scitation.org/doi/10.1063/5.0016005 ).
@@ -38,8 +38,8 @@ from colabfit.tools.property_definitions import (
     potential_energy_pd,
 )
 
-DATASET_FP = Path("/large_data/new_raw_datasets/Si_Berk/Si_md.extxyz")
-DATASET_FP = Path().cwd().parent / "data/berk_si"
+DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets/Si_Berk/")
+# DATASET_FP = Path().cwd().parent / "data/berk_si"
 DS_NAME = "Si_JCP_2017"
 DS_DESC = (
     "A dataset of 64-atom silicon configurations in four phases: cubic-diamond, "
