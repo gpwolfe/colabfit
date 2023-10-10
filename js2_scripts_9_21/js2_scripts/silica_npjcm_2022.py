@@ -40,6 +40,7 @@ from colabfit.tools.property_definitions import (
     potential_energy_pd,
 )
 
+DS_PATH = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/silica")
 DS_PATH = Path().cwd().parent / "data/silica/database/"
 GLOB_STR = "dataset.scan.2.xyz"
 DS_NAME = "Silica_NPJCM_2022"
@@ -85,28 +86,43 @@ PI_MAP = {
     ],
     "cauchy-stress": [
         {
-            "stress": {"field": "virial", "units": "kB"},
+            "stress": {"field": "virials", "units": "kB"},
             "volume-normalized": {"value": True, "units": None},
             "_metadata": PI_MD,
         },
-        # {
-        #     "stress": {"field": "stress", "units": "kB"},
-        #     "volume-normalized": {"value": False, "units": None},
-        #     "_metadata": PI_MD,
-        # },
+        {
+            "stress": {"field": "stress", "units": "kB"},
+            "volume-normalized": {"value": False, "units": None},
+            "_metadata": PI_MD,
+        },
     ],
 }
 CO_MD = {
     key: {"field": key}
-    for key in ["config_type", "stress", "simulation_state", "sub_simulation_type"]
+    for key in [
+        "config_type",
+        "stress",
+        "simulation_state",
+        "sub_simulation_type",
+        "6-virial",
+        "6-stress",
+    ]
 }
 
 
 def reader(fp):
     configs = read(fp, index=":")
     for config in configs:
+        if config.info.get("virials") is not None:
+            if len(config.info["virials"]) == 9:
+                config.info["virials"] = config.info["virials"].reshape((3, 3))
+            else:
+                config.info["6-virial"] = config.info.pop("virials")
         if config.arrays.get("stress") is not None:
             config.info["stress"] = config.arrays.pop("stress")
+        if config.info.get("stress") is not None:
+            if config.info["stress"].shape != (3, 3):
+                config.info["6-stress"] = config.info.pop("stress")
     return configs
 
 
