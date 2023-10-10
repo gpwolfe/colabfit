@@ -17,7 +17,7 @@ volume
 
 File notes
 ----------
-tested locally, should work with Kubernetes
+
 
 methods, software (where stated) and basis sets as follows:
 "hf_dz.energy": meth("HF",  "cc-pVDZ"),
@@ -67,7 +67,7 @@ from colabfit.tools.property_definitions import (
 )
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/ani1x/")  # HSRN
-# DATASET_FP = Path("data/ani1x") # remove --> local
+DATASET_FP = Path("data/ani1x")  # remove --> local
 DATASET_NAME = "ANI-1x"
 LINKS = [
     "https://doi.org/10.1038/s41597-020-0473-z",
@@ -188,7 +188,7 @@ PROPERTY_MAP = {
 
 def read_h5(h5filename):
     """
-    Sourced from https://github.com/aiqm/ANI1x_datasets/tree/master
+    Inspired by https://github.com/aiqm/ANI1x_datasets/tree/master
     Iterate over buckets of data in ANI HDF5 file.
     Yields dicts with atomic numbers (shape [Na,]) coordinated (shape [Nc, Na, 3])
     and other available properties specified by `keys` list, w/o NaN values.
@@ -199,29 +199,24 @@ def read_h5(h5filename):
         keys.discard("atomic_numbers")
         keys.discard("coordinates")
         for grp in f.values():
-            Nc = grp["coordinates"].shape[0]
-            mask = np.ones(Nc, dtype=bool)
-            data = dict((k, grp[k][()]) for k in keys)
-            for k in keys:
-                v = data[k].reshape(Nc, -1)
-                mask = mask & ~np.isnan(v).any(axis=1)
-            if not np.sum(mask):
-                continue
-            d = dict((k, data[k][mask]) for k in keys)
-            d["atomic_numbers"] = grp["atomic_numbers"][()]
-            d["coordinates"] = grp["coordinates"][()][mask]
-            yield d
+            data = {k: list(grp[k]) for k in keys}
+            a_nums = list(grp["atomic_numbers"])
+            for i, coords in enumerate(grp["coordinates"]):
+                row = {k: data[k][i] for k in keys if (~np.isnan(data[k][i]).any())}
+                row["coords"] = coords
+                row["a_nums"] = a_nums
+                yield row
 
 
 def reader(filepath: Path):
     configs = []
-    for data in read_h5(filepath):
-        atomic_nums = data.pop("atomic_numbers")
-        for i, coord in enumerate(data.pop("coordinates")):
-            config = AtomicConfiguration(positions=coord, numbers=atomic_nums)
-            config.info = {key: val[i] for key, val in data.items()}
-            config.info["name"] = f"{filepath.stem}_{i}"
-            configs.append(config)
+    for i, row in enumerate(read_h5(filepath)):
+        config = AtomicConfiguration(
+            positions=row.pop("coords"), numbers=row.pop("a_nums")
+        )
+        config.info = {key: val for key, val in row.items()}
+        config.info["name"] = f"{filepath.stem}_{i}"
+        configs.append(config)
     return configs
 
 
