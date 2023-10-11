@@ -98,16 +98,17 @@ ELEMENTS = None
 PROPERTY_MAP = {
     "formation-energy": [
         {
-            "energy": {"field": "total_energy", "units": "eV"},
-            "per-atom": {"value": False, "units": None},
+            "energy": {"field": "_oqmd_delta_e", "units": "eV"},
+            "per-atom": {"field": "per-atom", "units": None},
             "_metadata": {
                 "software": {"value": "VASP"},
                 "method": {"value": "DFT-PBE"},
             },
         },
+    ],
+    "band-gap": [
         {
-            "energy": {"field": "form_energy", "units": "eV"},
-            "per-atom": {"value": True, "units": None},
+            "energy": {"field": "_oqmd_band_gap", "units": "eV"},
             "_metadata": {
                 "software": {"value": "VASP"},
                 "method": {"value": "DFT-PBE"},
@@ -117,10 +118,14 @@ PROPERTY_MAP = {
 }
 
 
+def tform(c):
+    c.info["per-atom"] = False
+
+
 with open("formation_energy.json", "r") as f:
     formation_energy_pd = json.load(f)
-# with open("band_gap.json", "r") as f:
-#     band_gap_pd = json.load(f)
+with open("band_gap.json", "r") as f:
+    band_gap_pd = json.load(f)
 
 
 def reader(fp):
@@ -199,7 +204,8 @@ def main(argv):
 
     # client.insert_property_definition(free_energy_pd)
     client.insert_property_definition(formation_energy_pd)
-    client.insert_property_definition(potential_energy_pd)
+    client.insert_property_definition(band_gap_pd)
+    # client.insert_property_definition(potential_energy_pd)
 
     ids = list(
         client.insert_data(
@@ -208,6 +214,7 @@ def main(argv):
             co_md_map=CO_METADATA,
             property_map=PROPERTY_MAP,
             generator=False,
+            transform=tform,
             verbose=True,
         )
     )

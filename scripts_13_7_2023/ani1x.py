@@ -54,6 +54,7 @@ from argparse import ArgumentParser
 from collections import namedtuple
 import h5py
 from pathlib import Path
+import subprocess
 import sys
 
 import numpy as np
@@ -65,6 +66,7 @@ from colabfit.tools.property_definitions import (
     # cauchy_stress_pd,
     potential_energy_pd,
 )
+
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/ani1x/")  # HSRN
 DATASET_FP = Path("data/ani1x")  # local and Greene
@@ -243,9 +245,6 @@ def main(argv):
         default=4,
     )
     args = parser.parse_args(argv)
-    client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
-    )
 
     ds_id = generate_ds_id()
 
@@ -258,6 +257,16 @@ def main(argv):
         glob_string=GLOB_STR,
         generator=False,
     )
+    # For forwarding from Greene
+    subprocess.run("kubectl port-forward svc/mongo 5000:27017 &", shell=True)
+
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:5000"
+    )
+    # For running locally
+    # client = MongoDatabase(
+    #     args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    # )
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
     # client.insert_property_definition(cauchy_stress_pd)
