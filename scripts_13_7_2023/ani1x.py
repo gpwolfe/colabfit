@@ -254,7 +254,6 @@ def main(argv):
     )
     # For forwarding from Greene
     subprocess.run("kubectl port-forward svc/mongo 5000:27017 &", shell=True)
-
     client = MongoDatabase(
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:5000"
     )
