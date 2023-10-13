@@ -190,6 +190,16 @@ PROPERTY_MAP = {
 }
 
 
+def numpy_array_to_list(arr):
+    if isinstance(arr, np.ndarray):
+        if arr.ndim == 0:
+            return arr.item()
+        if arr.ndim == 1:
+            return arr.tolist()
+        return [numpy_array_to_list(subarray) for subarray in arr]
+    return arr
+
+
 def read_h5(h5filename):
     """
     Inspired by https://github.com/aiqm/ANI1x_datasets/tree/master
@@ -207,62 +217,67 @@ def read_h5(h5filename):
             a_nums = list(grp["atomic_numbers"])
             for i, coords in enumerate(grp["coordinates"]):
                 row = {k: data[k][i] for k in keys if (~np.isnan(data[k][i]).any())}
-                row["coords"] = coords
+                row["coords"] = numpy_array_to_list(coords)
                 row["a_nums"] = a_nums
                 yield row
 
 
 def reader(filepath: Path):
-    # configs = []
     for i, row in enumerate(read_h5(filepath)):
         config = AtomicConfiguration(
             positions=row.pop("coords"), numbers=row.pop("a_nums")
         )
         config.info = {key: val for key, val in row.items()}
         config.info["name"] = f"{filepath.stem}_{i}"
-        # configs.append(config)
+        config = config.todict()
+        for key, val in config.items():
+            if isinstance(val, np.ndarray):
+                config[key] = numpy_array_to_list(val)
+        for key, val in config["info"].items():
+            if isinstance(val, np.ndarray):
+                config["info"][key] = numpy_array_to_list(val)
         yield config
 
 
-def main(argv):
-    parser = ArgumentParser()
-    parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
-    parser.add_argument(
-        "-d",
-        "--db_name",
-        type=str,
-        help="Name of MongoDB database to add dataset to",
-        default="cf-test",
-    )
-    parser.add_argument(
-        "-p",
-        "--nprocs",
-        type=int,
-        help="Number of processors to use for job",
-        default=4,
-    )
-    args = parser.parse_args(argv)
+# def main(argv):
+#     parser = ArgumentParser()
+#     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
+#     parser.add_argument(
+#         "-d",
+#         "--db_name",
+#         type=str,
+#         help="Name of MongoDB database to add dataset to",
+#         default="cf-test",
+#     )
+#     parser.add_argument(
+#         "-p",
+#         "--nprocs",
+#         type=int,
+#         help="Number of processors to use for job",
+#         default=4,
+#     )
+#     args = parser.parse_args(argv)
 
-    # ds_id = generate_ds_id()
+
+# ds_id = generate_ds_id()
+def main():
     with open("ani1x_configs.json", "w") as out_f:
-        with open(DATASET_FP / GLOB_STR, "r") as in_f:
-            rdr = reader(in_f)
-            for i, config in enumerate(rdr):
-                if i > 100:
-                    break
-                json_conf = config.todict()
-                json.dump(json_conf, out_f, indent=2)
-                in_f.write("\n")
+        rdr = reader(Path("data/ani1x/ani1x-release.h5"))
+        for i, config in enumerate(rdr):
+            if i > 10000:
+                break
+            json.dump(config, out_f, separators=(",", ":"))
+            out_f.write("\n")
 
-    configurations = load_data(
-        file_path=DATASET_FP,
-        file_format="folder",
-        name_field="name",
-        elements=ELEMENTS,
-        reader=reader,
-        glob_string=GLOB_STR,
-        generator=False,
-    )
+    # configurations = load_data(
+    #     file_path=DATASET_FP,
+    #     file_format="folder",
+    #     name_field="name",
+    #     elements=ELEMENTS,
+    #     reader=reader,
+    #     glob_string=GLOB_STR,
+    #     generator=False,
+    # )
 
 
 #     # For forwarding from Greene
@@ -352,4 +367,5 @@ def main(argv):
 # }
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    # main(sys.argv[1:])
+    main()
