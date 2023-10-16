@@ -53,8 +53,6 @@ https://www.nature.com/articles/s41597-020-0473-z/tables/2
 from argparse import ArgumentParser
 from collections import namedtuple
 import h5py
-import json
-from multiprocessing.pool import Pool
 from pathlib import Path
 import subprocess
 import sys
@@ -190,16 +188,6 @@ PROPERTY_MAP = {
 }
 
 
-def numpy_array_to_list(arr):
-    if isinstance(arr, np.ndarray):
-        if arr.ndim == 0:
-            return arr.item()
-        if arr.ndim == 1:
-            return arr.tolist()
-        return [numpy_array_to_list(subarray) for subarray in arr]
-    return arr
-
-
 def read_h5(h5filename):
     """
     Inspired by https://github.com/aiqm/ANI1x_datasets/tree/master
@@ -217,155 +205,138 @@ def read_h5(h5filename):
             a_nums = list(grp["atomic_numbers"])
             for i, coords in enumerate(grp["coordinates"]):
                 row = {k: data[k][i] for k in keys if (~np.isnan(data[k][i]).any())}
-                row["coords"] = numpy_array_to_list(coords)
+                row["coords"] = coords
                 row["a_nums"] = a_nums
                 yield row
 
 
 def reader(filepath: Path):
+    configs = []
     for i, row in enumerate(read_h5(filepath)):
         config = AtomicConfiguration(
             positions=row.pop("coords"), numbers=row.pop("a_nums")
         )
         config.info = {key: val for key, val in row.items()}
         config.info["name"] = f"{filepath.stem}_{i}"
-        config = config.todict()
-        for key, val in config.items():
-            if isinstance(val, np.ndarray):
-                config[key] = numpy_array_to_list(val)
-        for key, val in config["info"].items():
-            if isinstance(val, np.ndarray):
-                config["info"][key] = numpy_array_to_list(val)
-        yield config
+        configs.append(config)
+    return configs
 
 
-# def main(argv):
-#     parser = ArgumentParser()
-#     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
-#     parser.add_argument(
-#         "-d",
-#         "--db_name",
-#         type=str,
-#         help="Name of MongoDB database to add dataset to",
-#         default="cf-test",
-#     )
-#     parser.add_argument(
-#         "-p",
-#         "--nprocs",
-#         type=int,
-#         help="Number of processors to use for job",
-#         default=4,
-#     )
-#     args = parser.parse_args(argv)
+def main(argv):
+    parser = ArgumentParser()
+    parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
+    parser.add_argument(
+        "-d",
+        "--db_name",
+        type=str,
+        help="Name of MongoDB database to add dataset to",
+        default="cf-test",
+    )
+    parser.add_argument(
+        "-p",
+        "--nprocs",
+        type=int,
+        help="Number of processors to use for job",
+        default=4,
+    )
+    args = parser.parse_args(argv)
 
+    ds_id = generate_ds_id()
 
-# ds_id = generate_ds_id()
-def main():
-    with open("ani1x_configs.json", "w") as out_f:
-        rdr = reader(Path("data/ani1x/ani1x-release.h5"))
-        for i, config in enumerate(rdr):
-            if i > 10000:
-                break
-            json.dump(config, out_f, separators=(",", ":"))
-            out_f.write("\n")
-
-    # configurations = load_data(
-    #     file_path=DATASET_FP,
-    #     file_format="folder",
-    #     name_field="name",
-    #     elements=ELEMENTS,
-    #     reader=reader,
-    #     glob_string=GLOB_STR,
-    #     generator=False,
+    configurations = load_data(
+        file_path=DATASET_FP,
+        file_format="folder",
+        name_field="name",
+        elements=ELEMENTS,
+        reader=reader,
+        glob_string=GLOB_STR,
+        generator=False,
+    )
+    # For forwarding from Greene
+    subprocess.run("kubectl port-forward svc/mongo 5000:27017 &", shell=True)
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:5000"
+    )
+    # For running locally
+    # client = MongoDatabase(
+    #     args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
     # )
+    client.insert_property_definition(atomic_forces_pd)
+    client.insert_property_definition(potential_energy_pd)
+    # client.insert_property_definition(cauchy_stress_pd)
+
+    ids = list(
+        client.insert_data(
+            configurations=configurations,
+            co_md_map=CO_METADATA,
+            ds_id=ds_id,
+            property_map=PROPERTY_MAP,
+            generator=False,
+            verbose=True,
+        )
+    )
+
+    all_co_ids, all_do_ids = list(zip(*ids))
+
+    # cs_regexes = [
+    #     [
+    #         f"{DATASET_NAME}_aluminum",
+    #         "aluminum",
+    #         f"Configurations of aluminum from {DATASET_NAME} dataset",
+    #     ]
+    # ]
+
+    # cs_ids = []
+
+    # for i, (name, regex, desc) in enumerate(cs_regexes):
+    #     cs_id = client.query_and_insert_configuration_set(
+    #         co_hashes=all_co_ids,
+    #         ds_id=ds_id,
+    #         name=name,
+    #         description=desc,
+    #         query={"names": {"$regex": regex}},
+    #     )
+
+    #     cs_ids.append(cs_id)
+
+    client.insert_dataset(
+        do_hashes=all_do_ids,
+        ds_id=ds_id,
+        name=DATASET_NAME,
+        authors=AUTHORS,
+        links=LINKS,
+        description=DATASET_DESC,
+        verbose=True,
+        # cs_ids=cs_ids,  # remove line if no configuration sets to insert
+    )
 
 
-#     # For forwarding from Greene
-#     subprocess.run("kubectl port-forward svc/mongo 5000:27017 &", shell=True)
-#     client = MongoDatabase(
-#         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:5000"
-#     )
-#     # For running locally
-#     # client = MongoDatabase(
-#     #     args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
-#     # )
-#     client.insert_property_definition(atomic_forces_pd)
-#     client.insert_property_definition(potential_energy_pd)
-#     # client.insert_property_definition(cauchy_stress_pd)
-
-#     ids = list(
-#         client.insert_data(
-#             configurations=configurations,
-#             co_md_map=CO_METADATA,
-#             ds_id=ds_id,
-#             property_map=PROPERTY_MAP,
-#             generator=False,
-#             verbose=True,
-#         )
-#     )
-
-#     all_co_ids, all_do_ids = list(zip(*ids))
-
-#     # cs_regexes = [
-#     #     [
-#     #         f"{DATASET_NAME}_aluminum",
-#     #         "aluminum",
-#     #         f"Configurations of aluminum from {DATASET_NAME} dataset",
-#     #     ]
-#     # ]
-
-#     # cs_ids = []
-
-#     # for i, (name, regex, desc) in enumerate(cs_regexes):
-#     #     cs_id = client.query_and_insert_configuration_set(
-#     #         co_hashes=all_co_ids,
-#     #         ds_id=ds_id,
-#     #         name=name,
-#     #         description=desc,
-#     #         query={"names": {"$regex": regex}},
-#     #     )
-
-#     #     cs_ids.append(cs_id)
-
-#     client.insert_dataset(
-#         do_hashes=all_do_ids,
-#         ds_id=ds_id,
-#         name=DATASET_NAME,
-#         authors=AUTHORS,
-#         links=LINKS,
-#         description=DATASET_DESC,
-#         verbose=True,
-#         # cs_ids=cs_ids,  # remove line if no configuration sets to insert
-#     )
-
-
-# CO_METADATA = {  # "hf_dz.energy": meth("HF",  "cc-pVDZ"),
-#     # "hf_qz.energy": meth("HF", "cc-pVQZ"),
-#     # "hf_tz.energy": meth("HF", "cc-pVTZ"),
-#     "mp2_dz.corr_energy": {"field": "mp2_dz.corr_energy"},
-#     "mp2_qz.corr_energy": {"field": "mp2_qz.corr_energy"},
-#     "mp2_tz.corr_energy": {"field": "mp2_tz.corr_energy"},
-#     "npno_ccsd(t)_dz.corr_energy": {"field": "npno_ccsd(t)_dz.corr_energy"},
-#     "npno_ccsd(t)_tz.corr_energy": {"field": "npno_ccsd(t)_tz.corr_energy"},
-#     "tpno_ccsd(t)_dz.corr_energy": {"field": "tpno_ccsd(t)_dz.corr_energy"},
-#     "wb97x_dz.cm5_charges": {"field": "wb97x_dz.cm5_charges"},
-#     "wb97x_dz.dipole": {"field": "wb97x_dz.dipole"},
-#     # "wb97x_dz.energy": meth("wB97x"}, "Gaussian 09"},"6-31G*"),
-#     # "wb97x_dz.forces": meth("wB97x"}, "Gaussian 09"},"6-31G*"),
-#     "wb97x_dz.hirshfeld_charges": {"field": "wb97x_dz.hirshfeld_charges"},
-#     "wb97x_dz.quadrupole": {"field": "wb97x_dz.quadrupole"},
-#     "wb97x_tz.dipole": {"field": "wb97x_tz.dipole"},
-#     # "wb97x_tz.energy": meth("wB97x"}, "ORCA"},"def2-TZVPP"),
-#     # "wb97x_tz.forces": meth("wB97x"}, "ORCA"},"def2-TZVPP"),
-#     "wb97x_tz.mbis_charges": {"field": "wb97x_tz.mbis_charges"},
-#     "wb97x_tz.mbis_dipoles": {"field": "wb97x_tz.mbis_dipoles"},
-#     "wb97x_tz.mbis_octupoles": {"field": "wb97x_tz.mbis_octupoles"},
-#     "wb97x_tz.mbis_quadrupoles": {"field": "wb97x_tz.mbis_quadrupoles"},
-#     "wb97x_tz.mbis_volumes": {"field": "wb97x_tz.mbis_volumes"},
-#     # "ccsd(t)_cbs.energy": meth("CCSD(T)*"}, "ORCA"},"CBS"),
-#     "wb97x_tz.quadrupole": {"field": "wb97x_tz.quadrupole"},
-# }
+CO_METADATA = {  # "hf_dz.energy": meth("HF",  "cc-pVDZ"),
+    # "hf_qz.energy": meth("HF", "cc-pVQZ"),
+    # "hf_tz.energy": meth("HF", "cc-pVTZ"),
+    "mp2_dz.corr_energy": {"field": "mp2_dz.corr_energy"},
+    "mp2_qz.corr_energy": {"field": "mp2_qz.corr_energy"},
+    "mp2_tz.corr_energy": {"field": "mp2_tz.corr_energy"},
+    "npno_ccsd(t)_dz.corr_energy": {"field": "npno_ccsd(t)_dz.corr_energy"},
+    "npno_ccsd(t)_tz.corr_energy": {"field": "npno_ccsd(t)_tz.corr_energy"},
+    "tpno_ccsd(t)_dz.corr_energy": {"field": "tpno_ccsd(t)_dz.corr_energy"},
+    "wb97x_dz.cm5_charges": {"field": "wb97x_dz.cm5_charges"},
+    "wb97x_dz.dipole": {"field": "wb97x_dz.dipole"},
+    # "wb97x_dz.energy": meth("wB97x"}, "Gaussian 09"},"6-31G*"),
+    # "wb97x_dz.forces": meth("wB97x"}, "Gaussian 09"},"6-31G*"),
+    "wb97x_dz.hirshfeld_charges": {"field": "wb97x_dz.hirshfeld_charges"},
+    "wb97x_dz.quadrupole": {"field": "wb97x_dz.quadrupole"},
+    "wb97x_tz.dipole": {"field": "wb97x_tz.dipole"},
+    # "wb97x_tz.energy": meth("wB97x"}, "ORCA"},"def2-TZVPP"),
+    # "wb97x_tz.forces": meth("wB97x"}, "ORCA"},"def2-TZVPP"),
+    "wb97x_tz.mbis_charges": {"field": "wb97x_tz.mbis_charges"},
+    "wb97x_tz.mbis_dipoles": {"field": "wb97x_tz.mbis_dipoles"},
+    "wb97x_tz.mbis_octupoles": {"field": "wb97x_tz.mbis_octupoles"},
+    "wb97x_tz.mbis_quadrupoles": {"field": "wb97x_tz.mbis_quadrupoles"},
+    "wb97x_tz.mbis_volumes": {"field": "wb97x_tz.mbis_volumes"},
+    # "ccsd(t)_cbs.energy": meth("CCSD(T)*"}, "ORCA"},"CBS"),
+    "wb97x_tz.quadrupole": {"field": "wb97x_tz.quadrupole"},
+}
 
 if __name__ == "__main__":
-    # main(sys.argv[1:])
-    main()
+    main(sys.argv[1:])
