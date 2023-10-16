@@ -241,29 +241,39 @@ def main(argv):
     )
     args = parser.parse_args(argv)
 
-    ds_id = generate_ds_id()
 
-    configurations = load_data(
-        file_path=DATASET_FP,
-        file_format="folder",
-        name_field="name",
-        elements=ELEMENTS,
-        reader=reader,
-        glob_string=GLOB_STR,
-        generator=False,
-    )
-    # For forwarding from Greene
-    subprocess.run("kubectl port-forward svc/mongo 5000:27017 &", shell=True)
-    client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:5000"
-    )
-    # For running locally
-    # client = MongoDatabase(
-    #     args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+# ds_id = generate_ds_id()
+def main():
+    with open("ani1x_configs.json", "w") as out_f:
+        rdr = reader(Path("data/ani1x/ani1x-release.h5"))
+        for i, config in enumerate(rdr):
+            # if i > 10000:
+            #     break
+            json.dump(config, out_f, separators=(",", ":"))
+            out_f.write("\n")
+
+    # configurations = load_data(
+    #     file_path=DATASET_FP,
+    #     file_format="folder",
+    #     name_field="name",
+    #     elements=ELEMENTS,
+    #     reader=reader,
+    #     glob_string=GLOB_STR,
+    #     generator=False,
     # )
-    client.insert_property_definition(atomic_forces_pd)
-    client.insert_property_definition(potential_energy_pd)
-    # client.insert_property_definition(cauchy_stress_pd)
+
+    #     # For forwarding from Greene
+    #     subprocess.run("kubectl port-forward svc/mongo 5000:27017 &", shell=True)
+    #     client = MongoDatabase(
+    #         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:5000"
+    #     )
+    #     # For running locally
+    #     # client = MongoDatabase(
+    #     #     args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    #     # )
+    #     client.insert_property_definition(atomic_forces_pd)
+    #     client.insert_property_definition(potential_energy_pd)
+    #     # client.insert_property_definition(cauchy_stress_pd)
 
     ids = list(
         client.insert_data(
