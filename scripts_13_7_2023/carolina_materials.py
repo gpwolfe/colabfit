@@ -5,30 +5,46 @@ File notes
 ----------
 Files have been renamed to data.mdb and lock.mdb to conform to lmdb
 
+row keys
+"_symmetry_space_group_name_H-M",
+"_cell_length_a",
+"_cell_length_b",
+"_cell_length_c",
+"_cell_angle_alpha",
+"_cell_angle_beta",
+"_cell_angle_gamma",
+"_symmetry_Int_Tables_number",
+"_chemical_formula_structural",
+"_chemical_formula_sum",
+"_cell_volume",
+"_cell_formula_units_Z",
+"symmetry_dict",
+"atomic_numbers",
+"cart_coords",
+"energy",
+"formula_pretty"
 """
 
 from argparse import ArgumentParser
+import json
 import lmdb
 from pathlib import Path
 import pickle
 import sys
 
 from ase.atoms import Atoms
-from colabfit.tools.converters import AtomicConfiguration
+
+# from colabfit.tools.converters import AtomicConfiguration
 from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
-from colabfit.tools.property_definitions import potential_energy_pd, free_energy_pd
+
+# from colabfit.tools.property_definitions import potential_energy_pd, free_energy_pd
 
 
-def load_row(txn, row):
-    data = pickle.loads(txn.get(f"{row}".encode("ascii")))
-    return data
+DATASET_FP = Path("data/carolina_matdb")
+DATASET_NAME = "Carolina_Materials"
 
-
-DATASET_FP = Path("").cwd()
-DATASET_NAME = ""
-
-SOFTWARE = ""
-METHODS = "DFT"
+SOFTWARE = "VASP"
+METHODS = "DFT-PBE"
 LINKS = [
     "https://zenodo.org/records/8381476",
     "https://doi.org/10.1002/advs.202100566",
@@ -44,73 +60,83 @@ AUTHORS = [
     "Alireza Nasiri",
     "Jianjun Hu",
 ]
-DATASET_DESC = ""
+DATASET_DESC = (
+    "Carolina Materials contains structures used to train several machine "
+    "learning models for the efficient generation of hypothetical inorganic materials. "
+    "The database is built using structures from OQMD, Materials Project and "
+    "ICSD, as well as ML generated structures validated by DFT. "
+)
 ELEMENTS = None
 GLOB_STR = "data.mdb"
 # LICENSE = "https://creativecommons.org/licenses/by/4.0/"
 LICENSE = "Creative Commons Attribution 4.0 International License"
 
-# Assign additional relevant property instance metadata, such as basis set used
 PI_METADATA = {
     "software": {"value": SOFTWARE},
     "method": {"value": METHODS},
-    # "basis-set": {"field": "basis_set"}
 }
 
-# Define dynamic 'field' -> value relationships or static 'value' -> value relationships
-# for your properties here. Any "field" value should be contained in your PI_METADATA
-# In this example, the custom reader function should return ase.Atoms objects with
-# atoms.info['energy'] and atoms.info['forces'] or atoms.arrays['forces'] values.
-
 PROPERTY_MAP = {
-    "potential-energy": [
+    "formation-energy": [
         {
             "energy": {"field": "energy", "units": "eV"},
             "per-atom": {"value": False, "units": None},
             "_metadata": PI_METADATA,
         }
     ],
-    "atomic-forces": [
-        {
-            "forces": {"field": "forces", "units": "eV/A"},
-            "_metadata": PI_METADATA,
-        },
-    ],
-    # "cauchy-stress": [
-    #     {
-    #         "stress": {"field": "stress", "units": "eV"},
-    #         "volume-normalized": {"value": True, "units": None},
-    #         "_metadata": metadata,
-    #     }
-    # ],
 }
-
-# Define any configuration-specific metadata here.
-CO_METADATA = {
-    "enthalpy": {"field": "h", "units": "Ha"},
-    "zpve": {"field": "zpve", "units": "Ha"},
+CO_MD = {
+    key: {"field": key}
+    for key in [
+        "_symmetry_space_group_name_H-M",
+        "_symmetry_Int_Tables_number",
+        "_chemical_formula_structural",
+        "_chemical_formula_sum",
+        "_cell_volume",
+        "_cell_formula_units_Z",
+        "symmetry_dict",
+        "formula_pretty",
+    ]
 }
+with open("formation_energy.json", "r") as f:
+    formation_energy_pd = json.load(f)
 
 
-def reader(filepath: Path):
-    """
-    If using a customer reader function, define here.
+def load_row(txn, row):
+    data = pickle.loads(txn.get(f"{row}".encode("ascii")))
+    return data
 
-    Reader function should accept only one argument--a Path() object--and return
-    either a list or generator of AtomicConfiguration objects or ase.Atoms objects.
-    Examples of custom reader functions can be found in the finished scripts
-    directories.
 
-    Below is a minimal example using ase.io.read to parse e.g., an extxyz file.
-    If the extxyz header contains the fields defined in PROPERTY_MAP and CO_METADATA
-    above (i.e., 'energy' and 'forces'; and 'h' and 'zpve', respectively), these fields
-    will be used in the data ingestion process to create property-instance -> PI-medata
-    relationships and configuration -> CO-metadata relationships.
-    """
-    configs = read(filepath, index=":")
-    for i, config in enumerate(configs):
-        config.info["name"] = f"{filepath.stem}_{i}"
-    return configs
+def config_from_row(row: dict, row_num: int):
+    coords = row.pop("cart_coords")
+    a_num = row.pop("atomic_numbers")
+    cell = [
+        row.pop(x)
+        for x in [
+            "_cell_length_a",
+            "_cell_length_b",
+            "_cell_length_c",
+            "_cell_angle_alpha",
+            "_cell_angle_beta",
+            "_cell_angle_gamma",
+        ]
+    ]
+    config = Atoms(scaled_positions=coords, numbers=a_num, cell=cell)
+    config.info = row
+    config.info["name"] = f"carolina_materials_{row_num}"
+    return config
+
+
+def reader(fp: Path):
+    parent = fp.parent
+    print(fp.exists())
+    env = lmdb.open(str(parent))
+    txn = env.begin()
+    row_num = 0
+    while True:
+        row = load_row(txn, row_num)
+        yield config_from_row(row, row_num)
+    env.close()
 
 
 def main(argv):
@@ -144,11 +170,9 @@ def main(argv):
         elements=ELEMENTS,
         reader=reader,
         glob_string=GLOB_STR,
-        generator=False,
+        generator=True,
     )
-    client.insert_property_definition(atomic_forces_pd)
-    client.insert_property_definition(potential_energy_pd)
-    # client.insert_property_definition(cauchy_stress_pd)
+    client.insert_property_definition(formation_energy_pd)
 
     ids = list(
         client.insert_data(
@@ -162,31 +186,6 @@ def main(argv):
 
     all_co_ids, all_do_ids = list(zip(*ids))
 
-    # If no obvious divisions between configurations exist (i.e., different methods or
-    # materials), remove the following lines through 'cs_ids.append(...)' and from
-    # 'insert_dataset(...) function remove 'cs_ids=cs_ids' argument.
-
-    cs_regexes = [
-        [
-            f"{DATASET_NAME}_aluminum",
-            "aluminum",
-            f"Configurations of aluminum from {DATASET_NAME} dataset",
-        ]
-    ]
-
-    cs_ids = []
-
-    for i, (name, regex, desc) in enumerate(cs_regexes):
-        cs_id = client.query_and_insert_configuration_set(
-            co_hashes=all_co_ids,
-            ds_id=ds_id,
-            name=name,
-            description=desc,
-            query={"names": {"$regex": regex}},
-        )
-
-        cs_ids.append(cs_id)
-
     client.insert_dataset(
         do_hashes=all_do_ids,
         ds_id=ds_id,
@@ -195,7 +194,6 @@ def main(argv):
         links=LINKS,
         description=DATASET_DESC,
         verbose=True,
-        cs_ids=cs_ids,  # remove line if no configuration sets to insert
     )
 
 
