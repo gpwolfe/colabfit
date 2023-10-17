@@ -1,0 +1,203 @@
+"""
+author: Gregory Wolfe
+
+File notes
+----------
+Files have been renamed to data.mdb and lock.mdb to conform to lmdb
+
+"""
+
+from argparse import ArgumentParser
+import lmdb
+from pathlib import Path
+import pickle
+import sys
+
+from ase.atoms import Atoms
+from colabfit.tools.converters import AtomicConfiguration
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
+from colabfit.tools.property_definitions import potential_energy_pd, free_energy_pd
+
+
+def load_row(txn, row):
+    data = pickle.loads(txn.get(f"{row}".encode("ascii")))
+    return data
+
+
+DATASET_FP = Path("").cwd()
+DATASET_NAME = ""
+
+SOFTWARE = ""
+METHODS = "DFT"
+LINKS = [
+    "https://zenodo.org/records/8381476",
+    "https://doi.org/10.1002/advs.202100566",
+    "http://www.carolinamatdb.org/",
+    "https://github.com/IntelLabs/matsciml",
+]
+AUTHORS = [
+    "Yong Zhao",
+    "Mohammed Al-Fahdi",
+    "Ming Hu",
+    "Edirisuriya M. D. Siriwardane",
+    "Yuqi Song",
+    "Alireza Nasiri",
+    "Jianjun Hu",
+]
+DATASET_DESC = ""
+ELEMENTS = None
+GLOB_STR = "data.mdb"
+# LICENSE = "https://creativecommons.org/licenses/by/4.0/"
+LICENSE = "Creative Commons Attribution 4.0 International License"
+
+# Assign additional relevant property instance metadata, such as basis set used
+PI_METADATA = {
+    "software": {"value": SOFTWARE},
+    "method": {"value": METHODS},
+    # "basis-set": {"field": "basis_set"}
+}
+
+# Define dynamic 'field' -> value relationships or static 'value' -> value relationships
+# for your properties here. Any "field" value should be contained in your PI_METADATA
+# In this example, the custom reader function should return ase.Atoms objects with
+# atoms.info['energy'] and atoms.info['forces'] or atoms.arrays['forces'] values.
+
+PROPERTY_MAP = {
+    "potential-energy": [
+        {
+            "energy": {"field": "energy", "units": "eV"},
+            "per-atom": {"value": False, "units": None},
+            "_metadata": PI_METADATA,
+        }
+    ],
+    "atomic-forces": [
+        {
+            "forces": {"field": "forces", "units": "eV/A"},
+            "_metadata": PI_METADATA,
+        },
+    ],
+    # "cauchy-stress": [
+    #     {
+    #         "stress": {"field": "stress", "units": "eV"},
+    #         "volume-normalized": {"value": True, "units": None},
+    #         "_metadata": metadata,
+    #     }
+    # ],
+}
+
+# Define any configuration-specific metadata here.
+CO_METADATA = {
+    "enthalpy": {"field": "h", "units": "Ha"},
+    "zpve": {"field": "zpve", "units": "Ha"},
+}
+
+
+def reader(filepath: Path):
+    """
+    If using a customer reader function, define here.
+
+    Reader function should accept only one argument--a Path() object--and return
+    either a list or generator of AtomicConfiguration objects or ase.Atoms objects.
+    Examples of custom reader functions can be found in the finished scripts
+    directories.
+
+    Below is a minimal example using ase.io.read to parse e.g., an extxyz file.
+    If the extxyz header contains the fields defined in PROPERTY_MAP and CO_METADATA
+    above (i.e., 'energy' and 'forces'; and 'h' and 'zpve', respectively), these fields
+    will be used in the data ingestion process to create property-instance -> PI-medata
+    relationships and configuration -> CO-metadata relationships.
+    """
+    configs = read(filepath, index=":")
+    for i, config in enumerate(configs):
+        config.info["name"] = f"{filepath.stem}_{i}"
+    return configs
+
+
+def main(argv):
+    parser = ArgumentParser()
+    parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
+    parser.add_argument(
+        "-d",
+        "--db_name",
+        type=str,
+        help="Name of MongoDB database to add dataset to",
+        default="cf-test",
+    )
+    parser.add_argument(
+        "-p",
+        "--nprocs",
+        type=int,
+        help="Number of processors to use for job",
+        default=4,
+    )
+    args = parser.parse_args(argv)
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
+
+    ds_id = generate_ds_id()
+
+    configurations = load_data(
+        file_path=DATASET_FP,
+        file_format="folder",
+        name_field="name",
+        elements=ELEMENTS,
+        reader=reader,
+        glob_string=GLOB_STR,
+        generator=False,
+    )
+    client.insert_property_definition(atomic_forces_pd)
+    client.insert_property_definition(potential_energy_pd)
+    # client.insert_property_definition(cauchy_stress_pd)
+
+    ids = list(
+        client.insert_data(
+            configurations=configurations,
+            ds_id=ds_id,
+            property_map=PROPERTY_MAP,
+            generator=False,
+            verbose=True,
+        )
+    )
+
+    all_co_ids, all_do_ids = list(zip(*ids))
+
+    # If no obvious divisions between configurations exist (i.e., different methods or
+    # materials), remove the following lines through 'cs_ids.append(...)' and from
+    # 'insert_dataset(...) function remove 'cs_ids=cs_ids' argument.
+
+    cs_regexes = [
+        [
+            f"{DATASET_NAME}_aluminum",
+            "aluminum",
+            f"Configurations of aluminum from {DATASET_NAME} dataset",
+        ]
+    ]
+
+    cs_ids = []
+
+    for i, (name, regex, desc) in enumerate(cs_regexes):
+        cs_id = client.query_and_insert_configuration_set(
+            co_hashes=all_co_ids,
+            ds_id=ds_id,
+            name=name,
+            description=desc,
+            query={"names": {"$regex": regex}},
+        )
+
+        cs_ids.append(cs_id)
+
+    client.insert_dataset(
+        do_hashes=all_do_ids,
+        ds_id=ds_id,
+        name=DATASET_NAME,
+        authors=AUTHORS,
+        links=LINKS,
+        description=DATASET_DESC,
+        verbose=True,
+        cs_ids=cs_ids,  # remove line if no configuration sets to insert
+    )
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
