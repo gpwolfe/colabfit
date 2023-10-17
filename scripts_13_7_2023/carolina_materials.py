@@ -129,13 +129,13 @@ def config_from_row(row: dict, row_num: int):
 
 def reader(fp: Path):
     parent = fp.parent
-    print(fp.exists())
     env = lmdb.open(str(parent))
     txn = env.begin()
     row_num = 0
     while True:
         row = load_row(txn, row_num)
         yield config_from_row(row, row_num)
+        row_num += 1
     env.close()
 
 
