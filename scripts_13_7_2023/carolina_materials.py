@@ -103,8 +103,11 @@ with open("formation_energy.json", "r") as f:
 
 
 def load_row(txn, row):
-    data = pickle.loads(txn.get(f"{row}".encode("ascii")))
-    return data
+    try:
+        data = pickle.loads(txn.get(f"{row}".encode("ascii")))
+        return data
+    except TypeError:
+        return False
 
 
 def config_from_row(row: dict, row_num: int):
@@ -122,8 +125,13 @@ def config_from_row(row: dict, row_num: int):
         ]
     ]
     config = Atoms(scaled_positions=coords, numbers=a_num, cell=cell)
+    symmetry_dict = {str(key): val for key, val in row.pop("symmetry_dict").items()}
+    for key in symmetry_dict:
+        key = str(key)
     config.info = row
+    config.info["symmetry_dict"] = symmetry_dict
     config.info["name"] = f"carolina_materials_{row_num}"
+    # print(config.info)
     return config
 
 
@@ -134,9 +142,11 @@ def reader(fp: Path):
     row_num = 0
     while True:
         row = load_row(txn, row_num)
+        if row is False:
+            env.close()
+            break
         yield config_from_row(row, row_num)
         row_num += 1
-    env.close()
 
 
 def main(argv):
@@ -178,6 +188,7 @@ def main(argv):
         client.insert_data(
             configurations=configurations,
             ds_id=ds_id,
+            co_md_map=CO_MD,
             property_map=PROPERTY_MAP,
             generator=False,
             verbose=True,
