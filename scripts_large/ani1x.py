@@ -17,7 +17,8 @@ volume
 
 File notes
 ----------
-
+Run successfully from Greene using NodePort connection; ingested to colabfit-web
+16.10.2023
 
 methods, software (where stated) and basis sets as follows:
 "hf_dz.energy": meth("HF",  "cc-pVDZ"),
