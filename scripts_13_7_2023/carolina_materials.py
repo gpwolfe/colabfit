@@ -39,8 +39,11 @@ from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 
 # from colabfit.tools.property_definitions import potential_energy_pd, free_energy_pd
 
-
-DATASET_FP = Path("data/carolina_matdb")
+# Kubernetes pod location
+DATASET_FP = Path(
+    "/persistent/colabfit_raw_data/new_raw_datasets_2.0/carolina_materials"
+)
+# DATASET_FP = Path("data/carolina_matdb") # local
 DATASET_NAME = "Carolina_Materials"
 
 SOFTWARE = "VASP"
