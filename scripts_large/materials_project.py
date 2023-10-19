@@ -21,13 +21,20 @@ import sys
 from datetime import datetime
 from tqdm import tqdm
 
-BATCH_SIZE = 8
+BATCH_SIZE = 100
 START_IX = 0  # for testing, in case of errors causing script stop
 
+# DATASET_FP = Path("mat_proj_xyz_files")
+
+# Greene
 DATASET_FP = Path(
-    "/persistent/colabfit_raw_data/gw_scripts_large/large_scripts_data/"
-    "materials_project/mat_proj_xyz_files"
+    "/vast/gw2338/materials_project/materials_project/mat_proj_xyz_files_expanded_data/"
 )
+
+# DATASET_FP = Path(
+#     "/persistent/colabfit_raw_data/gw_scripts_large/large_scripts_data/"
+#     "materials_project/mat_proj_xyz_files"
+# )
 DATASET = "Materials Project"
 
 AUTHORS = [
@@ -155,7 +162,7 @@ def reconstruct_nested(info: dict, superkey: str):
     in_out_car = dict()
     for key, val in info.items():
         # Some values in header are blank, so ase.io.read returns key1 = "key2=val2"
-        if type(val) == str and "=" in val:
+        if isinstance(val, str) and "=" in val:
             key, val = val.split("=")[-2:]
             if val != "F":
                 try:
@@ -166,9 +173,9 @@ def reconstruct_nested(info: dict, superkey: str):
             # pymongo/MongoDB throws error regarding use of numpy objects:
             # bson.errors.InvalidDocument: cannot encode object: 100, \
             # of type: <class 'numpy.int64'>
-            if type(val) == np.ndarray:
+            if isinstance(val, np.ndarray):
                 val = val.tolist()
-            if type(val) == np.int64:
+            if isinstance(val, np.int64):
                 val = int(val)
             outkey = key.split("-")
             if len(outkey) == 2:
@@ -182,9 +189,9 @@ def reconstruct_nested(info: dict, superkey: str):
 
 
 def reader(file_path):
-    atom_configs = []
-    configs = read(file_path, index=":")
-    for i, config in enumerate(configs):
+    # atom_configs = []
+    configs = tqdm(read(file_path, index=":", format="extxyz"))
+    for i, config in tqdm(enumerate(configs)):
         info = dict()
         info["outcar"] = reconstruct_nested(config.info, "outcar")
         info["output"] = reconstruct_nested(config.info, "output")
@@ -197,7 +204,7 @@ def reader(file_path):
         # info['is-gap-direct'] = config.info['output-is_gap_direct']
         for key, val in config.info.items():
             if not any([match in key for match in ["outcar", "incar", "output"]]):
-                if type(val) == str and "=" in val:
+                if isinstance(val, str) and "=" in val:
                     key, val = val.split("=")[-2:]
                     # print(key, val)
                     if val != "F":
@@ -215,12 +222,14 @@ def reader(file_path):
         )
         atoms.info = info
         atoms.info["forces"] = config.arrays["forces"]
-        atom_configs.append(atoms)
-    return atom_configs
+        # atom_configs.append(atoms)
+        yield atoms
+    # return atom_configs
 
 
 def main(ip, db_name, nprocs):
-    client = MongoDatabase(db_name, nprocs=nprocs, uri=f"mongodb://{ip}:27017")
+    # client = MongoDatabase(db_name, nprocs=nprocs, uri=f"mongodb://{ip}:27017")
+    client = MongoDatabase(db_name, nprocs=nprocs, uri=f"mongodb://{ip}:30007")
     for pd in [
         atomic_forces_pd,
         cauchy_stress_pd,
