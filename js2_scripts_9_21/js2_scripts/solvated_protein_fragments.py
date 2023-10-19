@@ -112,7 +112,7 @@ def reader_protein(p):
     forces = data["F"]
     dipole = data["D"]
     total_charge = data["Q"]
-    for i, num in tqdm(enumerate(num_atoms[:1000])):
+    for i, num in tqdm(enumerate(num_atoms)):
         numbers = atom_num[i, :num]
         atom = Atoms(numbers=numbers, positions=coords[i, :num, :])
         atom.info["energy"] = float(energy[i])
