@@ -8,9 +8,10 @@ generate_schema_all will generate JSON elements for all datasets in a database
 
 generate_schema_single will generate JSON elements for a single given dataset
 """
-
+from argparse import ArgumentParser
 import json
 import pymongo
+import sys
 
 
 def generate_schema_all(db: pymongo.database.Database):
@@ -74,3 +75,28 @@ def generate_schema_single(db: pymongo.database.Database, ds: str):
     json_document = json.dumps(schema_org_data, indent=2)
 
     return json_document
+
+
+if __name__ == "__main__":
+    args = sys.argv[1:]
+    parser = ArgumentParser()
+    parser.add_argument("-i", help="IP address for MongoDB client")
+    parser.add_argument(
+        "-p", type=int, default=27017, help="Port to use for MongoDB client"
+    )
+    parser.add_argument(
+        "-b", type=str, help="Name of database on MongoDB client to use"
+    )
+    parser.add_argument(
+        "-s",
+        default=None,
+        help="Dataset name: optional. If not defined, generates schema for all datasets",
+    )
+    args = parser.parse_args(args)
+    client = pymongo.MongoClient(host=f"mongodb://{args.i}:{args.p}")
+    db = client[args.b]
+    ds = args.s
+    if ds is None:
+        print(list(generate_schema_all(db)))
+    else:
+        print(generate_schema_single(db, ds))
