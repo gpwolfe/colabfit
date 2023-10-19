@@ -41,23 +41,17 @@ AUTHORS = ["Oliver T. Unke", "Markus Meuwly"]
 DATASET_DESC = (
     "The solvated protein fragments dataset was generated as a "
     "benchmark for measuring the performance of machine learning models, "
-    "and in particular PhysNet, for describing chemical reactions, long-range "
-    "interactions, and condensed phase systems. "
-    "The solvated protein fragments dataset probes many-body "
-    'intermolecular interactions between "protein fragments" and water molecules, '
-    "which are important for the description of many biologically relevant"
-    "condensed phase systems. It contains structures for all possible"
-    '"amons" (hydrogen-saturated covalently bonded fragments) of up to eight heavy '
-    "atoms (C, N, O, S) that can be derived from chemical graphs of proteins "
-    "containing the 20 natural amino acids connected via peptide bonds or disulfide "
-    "bridges. For amino acids that can occur in different charge states due to (de)"
-    "protonation (i.e. carboxylic acids that can be negatively charged or amines that "
-    "can be positively charged), all possible structures with up to a total "
-    "charge of +-2e "
-    "are included. In total, the dataset provides reference energies, forces, "
-    "and dipole "
-    "moments for 2731180 structures calculated at the revPBE-D3(BJ)/def2-TZVP level of "
-    "theory using the ORCA 4.0.1 code."
+    "in particular PhysNet, at describing chemical reactions, long-range "
+    "interactions, and condensed phase systems. The dataset contains structures "
+    'for all possible "amons" (hydrogen-saturated covalently bonded fragments) of up '
+    "to eight heavy atoms (C, N, O, S) that can be derived from chemical graphs of "
+    "proteins containing the 20 natural amino acids connected via peptide bonds or "
+    "disulfide bridges. For amino acids that can occur in different charge states due "
+    "to (de)protonation (i.e., carboxylic acids that can be negatively charged or "
+    "amines that can be positively charged), all possible structures with up to a "
+    "total charge of +-2e are included. In total, the dataset provides reference "
+    "energies, forces, and dipole moments for 2,731,180 structures calculated at the "
+    "revPBE-D3(BJ)/def2-TZVP level of theory using ORCA 4.0.1."
 )
 ELEMENTS = [""]
 GLOB_STR = "*.npz"
@@ -171,6 +165,7 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
+            co_md_map=CO_MD,
             ds_id=ds_id,
             property_map=PROPERTY_MAP,
             generator=False,
