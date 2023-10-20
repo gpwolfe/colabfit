@@ -9,7 +9,9 @@ Other properties added to metadata
 
 File notes
 ----------
-
+The "all data" split, called "data", only contains 35767 configurations.
+These are also all duplicates of configurations that appear in other splits
+(test, train or val). There seems to be no reason to include this split.
 """
 from argparse import ArgumentParser
 import h5py
@@ -25,9 +27,9 @@ from colabfit.tools.property_definitions import (
 )
 
 # DATASET_FP = Path("persistent/colabfit_raw_data/new_raw_datasets/Transition1x/")
-DATASET_FP = Path().cwd().parent / "data/transition1x"  # local
+DATASET_FP = Path().cwd() / "data"  # local
 # DATASET_FP = Path().cwd()  # Greene
-DATASET_NAME = "Transition1x"
+# DATASET_NAME = "Transition1x"
 SOFTWARE = "ORCA 5.0.2"
 METHODS = "DFT-wb97x"
 LINKS = [
@@ -50,7 +52,7 @@ DATASET_DESC = (
     "configurations on and around reaction pathways at the ωB97x/6-31 G(d) level of "
     "theory. The configurations contained in this dataset allow a better "
     "representation of features in transition state regions when compared to other "
-    "benchmark datasets -- in particular QM9 and ANI1x"
+    "benchmark datasets -- in particular QM9 and ANI1x."
 )
 ELEMENTS = None
 GLOB_STR = "*.h5"
@@ -107,24 +109,48 @@ def generator(formula, rxn, grp, split):
         yield config
 
 
-def reader(fp):
+def reader_train(fp):
     with h5py.File(fp, "r") as f:
-        for tr_te_val in [
-            # "train",
-            # "test",
-            "val"
-        ]:
-            split = f[tr_te_val]
-            for h, (formula, grp) in enumerate(split.items()):
-                if h > 5:  # remove
-                    break  # remove
-                for i, (rxn, subgrp) in enumerate(grp.items()):
-                    for j, config in enumerate(generator(formula, rxn, subgrp, split)):
-                        yield config
+        split = f["train"]
+        for h, (formula, grp) in enumerate(split.items()):
+            if h > 5:  # remove
+                break  # remove
+            for i, (rxn, subgrp) in enumerate(grp.items()):
+                for j, config in enumerate(generator(formula, rxn, subgrp, split)):
+                    yield config
 
 
-# with open("atomization_energy.json", "r") as f:
-#     atomization_energy_pd = json.load(f)
+def reader_test(fp):
+    with h5py.File(fp, "r") as f:
+        split = f["test"]
+        for h, (formula, grp) in enumerate(split.items()):
+            if h > 5:  # remove
+                break  # remove
+            for i, (rxn, subgrp) in enumerate(grp.items()):
+                for j, config in enumerate(generator(formula, rxn, subgrp, split)):
+                    yield config
+
+
+def reader_val(fp):
+    with h5py.File(fp, "r") as f:
+        split = f["val"]
+        for h, (formula, grp) in enumerate(split.items()):
+            if h > 5:  # remove
+                break  # remove
+            for i, (rxn, subgrp) in enumerate(grp.items()):
+                for j, config in enumerate(generator(formula, rxn, subgrp, split)):
+                    yield config
+
+
+# def reader_all(fp): # see file notes for reason not to include
+#     with h5py.File(fp, "r") as f:
+#         split = f["data"]
+#         for h, (formula, grp) in enumerate(split.items()):
+#             if h > 5:  # remove
+#                 break  # remove
+#             for i, (rxn, subgrp) in enumerate(grp.items()):
+#                 for j, config in enumerate(generator(formula, rxn, subgrp, split)):
+#                     yield config
 
 
 def main(argv):
@@ -151,46 +177,68 @@ def main(argv):
         # uri=f"mongodb://{args.ip}:30007",
         uri=f"mongodb://{args.ip}:27017",
     )
-    ds_id = generate_ds_id()
-
-    configurations = list(
-        load_data(
-            file_path=DATASET_FP,
-            file_format="folder",
-            name_field="name",
-            elements=ELEMENTS,
-            verbose=True,
-            reader=reader,
-            generator=True,
-            glob_string=GLOB_STR,
-        )
-    )
 
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
+    dss = (
+        (
+            "Transition1x_train",
+            reader_train,
+            "The training split of the Transition1x dataset. ",
+        ),
+        (
+            "Transition1x-test",
+            reader_test,
+            "The test split of the Transition1x dataset. ",
+        ),
+        (
+            "Transition1x-validation",
+            reader_val,
+            "The validation split of the Transition1x dataset. ",
+        ),
+        # ( # See file notes for reason not to include
+        #     "Transition1x-all",
+        #     reader_all,
+        #     "All configurations from the Transition1x dataset. ",
+        # ),
+    )
+    for name, read_function, description in dss:
+        ds_id = generate_ds_id()
 
-    ids = list(
-        client.insert_data(
-            configurations,
+        configurations = list(
+            load_data(
+                file_path=DATASET_FP,
+                file_format="folder",
+                name_field="name",
+                elements=ELEMENTS,
+                verbose=True,
+                reader=read_function,
+                generator=True,
+                glob_string=GLOB_STR,
+            )
+        )
+
+        ids = list(
+            client.insert_data(
+                configurations,
+                ds_id=ds_id,
+                property_map=PROPERTY_MAP,
+                # generator=False,
+                verbose=True,
+            )
+        )
+
+        all_co_ids, all_do_ids = list(zip(*ids))
+
+        client.insert_dataset(
+            do_hashes=all_do_ids,
             ds_id=ds_id,
-            property_map=PROPERTY_MAP,
-            # generator=False,
+            name=name,
+            authors=AUTHORS,
+            links=LINKS,
+            description=description + DATASET_DESC,
             verbose=True,
         )
-    )
-
-    all_co_ids, all_do_ids = list(zip(*ids))
-
-    client.insert_dataset(
-        do_hashes=all_do_ids,
-        ds_id=ds_id,
-        name=DATASET_NAME,
-        authors=AUTHORS,
-        links=LINKS,
-        description=DATASET_DESC,
-        verbose=True,
-        # cs_ids=cs_ids,  # remove line if no configuration sets to insert
-    )
 
 
 if __name__ == "__main__":
