@@ -90,7 +90,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-s",
         default=None,
-        help="Dataset name: optional. If not defined, generates schema for all datasets",
+        help="Dataset name: optional. If not defined, generate schema for all datasets",
     )
     args = parser.parse_args(args)
     client = pymongo.MongoClient(host=f"mongodb://{args.i}:{args.p}")
