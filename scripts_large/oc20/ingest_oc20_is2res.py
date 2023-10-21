@@ -29,7 +29,6 @@ import itertools
 import multiprocessing
 import numpy as np
 from pathlib import Path
-import subprocess
 import sys
 from tqdm import tqdm
 
@@ -193,7 +192,6 @@ def get_configs(ds_id, args):
             itertools.chain.from_iterable(pool.map(read_for_pool, filepaths))
         )
         # For running from Greene
-        subprocess.run("kubectl port-forward svc/mongo 5000:27017 &", shell=True)
         client = MongoDatabase(
             args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:5000"
         )
@@ -213,7 +211,6 @@ def get_configs(ds_id, args):
             )
         )
         ids.extend(ids_batch)
-        subprocess.run("pkill kubectl", shell=True)
     return ids
 
 
@@ -234,28 +231,22 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument("-r", "--port", type=int, help="Target port for MongoDB")
+
     args = parser.parse_args(argv)
     nprocs = args.nprocs
-
-    # For running from Greene
-    subprocess.run("kubectl port-forward svc/mongo 5000:27017 &", shell=True)
-    client = MongoDatabase(args.db_name, nprocs=nprocs, uri=f"mongodb://{args.ip}:5000")
-
-    # for local testing
-    # client = MongoDatabase(
-    #     args.db_name, nprocs=nprocs, uri=f"mongodb://{args.ip}:27017"
-    # )
+    client = MongoDatabase(
+        args.db_name, nprocs=nprocs, uri=f"mongodb://{args.ip}:{args.port}"
+    )
 
     ds_id = generate_ds_id()
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(free_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
-    subprocess.run("pkill kubectl", shell=True)
 
     ids = get_configs(ds_id, args)
 
     all_co_ids, all_do_ids = list(zip(*ids))
-    subprocess.run("kubectl port-forward svc/mongo 5000:27017 &", shell=True)
     client = MongoDatabase(args.db_name, nprocs=nprocs, uri=f"mongodb://{args.ip}:5000")
     client.insert_dataset(
         do_hashes=all_do_ids,
