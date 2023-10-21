@@ -1,33 +1,42 @@
-#!/usr/bin/env python
-# coding: utf-8
+"""
+author:
 
-# In[ ]:
+Properties
+----------
 
+Other properties added to metadata
+----------------------------------
 
-from colabfit.tools.database import MongoDatabase, load_data
-from colabfit.tools.property_settings import PropertySettings
-from colabfit.tools.configuration import AtomicConfiguration
+File notes
+----------
 
+"""
+from argparse import ArgumentParser
+from ase.io import read
+from pathlib import Path
+import sys
 
-# from cfkit.database import MongoDatabase, load_data
-# from cfkit.configuration import AtomicConfiguration
-
-from tqdm import tqdm
-import numpy as np
-from ase import Atoms
-
-# call database using its name
-# drop_database=True means to start with fresh database
-client = MongoDatabase(
-    "new_data_test_alexander",
-    configuration_type=AtomicConfiguration,
-    nprocs=4,
-    drop_database=True,
+# from colabfit.tools.configuration import AtomicConfiguration
+from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
+from colabfit.tools.property_definitions import (
+    atomic_forces_pd,
+    # cauchy_stress_pd,
+    potential_energy_pd,
 )
 
 
-# In[ ]:
-# solvated_protein-check out README in data's directory
+DATASET_FP = Path("").cwd()
+DATASET_NAME = ""
+
+SOFTWARE = ""
+METHODS = ""
+LINKS = ["", ""]
+AUTHORS = [""]
+DATASET_DESC = ""
+ELEMENTS = [""]
+GLOB_STR = ".*"
+
+
 def reader_SN2(p):
     atoms = []
     a = np.load(p)
@@ -267,3 +276,18 @@ ds_id = client.insert_dataset(
     resync=True,
     verbose=True,
 )
+
+    client.insert_dataset(
+        do_hashes=all_do_ids,
+        ds_id=ds_id,
+        name=DATASET_NAME,
+        authors=AUTHORS,
+        links=LINKS,
+        description=DATASET_DESC,
+        verbose=True,
+        cs_ids=cs_ids,  # remove line if no configuration sets to insert
+    )
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
