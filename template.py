@@ -1,9 +1,6 @@
 """
 author:
 
-Data can be downloaded from:
-
-
 Properties
 ----------
 
@@ -123,6 +120,9 @@ def main(argv):
     client = MongoDatabase(
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
     )
+    client.insert_property_definition(atomic_forces_pd)
+    client.insert_property_definition(potential_energy_pd)
+    # client.insert_property_definition(cauchy_stress_pd)
 
     ds_id = generate_ds_id()
 
@@ -135,9 +135,6 @@ def main(argv):
         glob_string=GLOB_STR,
         generator=False,
     )
-    client.insert_property_definition(atomic_forces_pd)
-    client.insert_property_definition(potential_energy_pd)
-    # client.insert_property_definition(cauchy_stress_pd)
 
     ids = list(
         client.insert_data(
