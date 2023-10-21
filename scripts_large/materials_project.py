@@ -9,28 +9,31 @@ from argparse import ArgumentParser
 from ase.io import read
 from colabfit import ATOMS_LABELS_FIELD, ATOMS_NAME_FIELD
 from colabfit.tools.converters import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase
+from colabfit.tools.database import MongoDatabase, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     cauchy_stress_pd,
     free_energy_pd,
 )
+import itertools
+from multiprocessing import Pool
 import numpy as np
 from pathlib import Path
 import sys
 from datetime import datetime
-from tqdm import tqdm
 
 BATCH_SIZE = 100
 START_IX = 0  # for testing, in case of errors causing script stop
 
-# DATASET_FP = Path("mat_proj_xyz_files")
+# Local
+# DATASET_FP = Path("materials_project/mat_proj_xyz_files")
 
 # Greene
 DATASET_FP = Path(
     "/vast/gw2338/materials_project/materials_project/mat_proj_xyz_files_expanded_data/"
 )
 
+# Kubernetes
 # DATASET_FP = Path(
 #     "/persistent/colabfit_raw_data/gw_scripts_large/large_scripts_data/"
 #     "materials_project/mat_proj_xyz_files"
@@ -151,6 +154,57 @@ ELEMENTS = [
 ]
 
 
+metadata = {
+    "software": {"value": "VASP"},
+    "method": {"field": "calc_type"},
+}
+# excluded keys are included under other names or in property_map
+exclude = {"calc_type", "e_fr_energy", "forces", "stress", "material_id"}
+co_md_map = {
+    "material-id": {"field": "material_id"},
+    "internal_energy": {"field": "e_0_energy"},
+}
+
+KEYS = [
+    "calc_type",
+    "e_0_energy",
+    "e_fr_energy",
+    "e_wo_entrp",
+    "incar",
+    "material_id",
+    "name",
+    "outcar",
+    "output",
+    "stress",
+    "task_id",
+]
+
+co_md_map.update({k: {"field": k} for k in KEYS if k not in exclude})
+property_map = {
+    "free-energy": [
+        {
+            "energy": {"field": "e_fr_energy", "units": "eV"},
+            "per-atom": {"value": False, "units": None},
+            "_metadata": metadata,
+        }
+    ],
+    "atomic-forces": [
+        {
+            "forces": {"field": "forces", "units": "eV/A"},
+            "_metadata": metadata,
+        }
+    ],
+    "cauchy-stress": [
+        {
+            "stress": {"field": "stress", "units": "eV/A"},
+            "_metadata": metadata,
+        }
+    ],
+}
+NAME_FIELD = "name"
+LABEL_FIELD = "labels"
+
+
 def reconstruct_nested(info: dict, superkey: str):
     """
     Create dicts, nested if necessary, for configuration info from xyz headers.
@@ -189,31 +243,23 @@ def reconstruct_nested(info: dict, superkey: str):
 
 
 def reader(file_path):
-    # atom_configs = []
-    configs = tqdm(read(file_path, index=":", format="extxyz"))
-    for i, config in tqdm(enumerate(configs)):
+    configs = read(file_path, index=":")
+    for i, config in enumerate(configs):
         info = dict()
         info["outcar"] = reconstruct_nested(config.info, "outcar")
         info["output"] = reconstruct_nested(config.info, "output")
         # info["incar"] = reconstruct_nested(config.info, "incar")
-        # info["magnetization"] = [info["outcar-"]
-        # info['charge'] =
-        # info['total-magnetization'] = config.info['outcar-total_magnetization']
-        # info['efermi'] = config.info['output-efermi']
-        # info['band-gap'] = config.info['output-bandgap']
-        # info['is-gap-direct'] = config.info['output-is_gap_direct']
         for key, val in config.info.items():
             if not any([match in key for match in ["outcar", "incar", "output"]]):
                 if isinstance(val, str) and "=" in val:
                     key, val = val.split("=")[-2:]
-                    # print(key, val)
                     if val != "F":
                         try:
                             val = float(val)
                         except ValueError:
                             pass
                 info[key] = val
-
+        # yield config
         atoms = AtomicConfiguration(
             numbers=config.numbers,
             positions=config.positions,
@@ -222,14 +268,46 @@ def reader(file_path):
         )
         atoms.info = info
         atoms.info["forces"] = config.arrays["forces"]
-        # atom_configs.append(atoms)
         yield atoms
-    # return atom_configs
 
 
-def main(ip, db_name, nprocs):
+def get_configs(fpaths):
+    configs = []
+    for fpath in fpaths:
+        try:
+            new = reader(fpath)
+
+            for i, atoms in enumerate(new):
+                if NAME_FIELD in atoms.info:
+                    name = []
+                    name.append(atoms.info[NAME_FIELD])
+                    atoms.info[ATOMS_NAME_FIELD] = name
+                else:
+                    raise RuntimeError(
+                        f"Field {NAME_FIELD} not in atoms.info for index "
+                        f"{i} in {fpath}. Set `NAME_FIELD=None` "
+                        "to use `default_name`."
+                    )
+
+                if LABEL_FIELD not in atoms.info:
+                    atoms.info[ATOMS_LABELS_FIELD] = set()
+                else:
+                    atoms.info[ATOMS_LABELS_FIELD] = set(atoms.info[LABEL_FIELD])
+                configs.append(atoms)
+
+        except Exception as e:
+            with open("ingest_mp_error_files.log", "a") as f:
+                f.write(
+                    f"{fpath}\t{datetime.strftime(datetime.now(), '%d-%b-%Y')}"
+                    f"\t{e}\n"
+                )
+    return configs
+
+
+def main(ip, port, db_name, nprocs):
     # client = MongoDatabase(db_name, nprocs=nprocs, uri=f"mongodb://{ip}:27017")
-    client = MongoDatabase(db_name, nprocs=nprocs, uri=f"mongodb://{ip}:30007")
+    client = MongoDatabase(db_name, nprocs=nprocs, uri=f"mongodb://{ip}:{port}")
+    ds_id = generate_ds_id()
     for pd in [
         atomic_forces_pd,
         cauchy_stress_pd,
@@ -237,105 +315,39 @@ def main(ip, db_name, nprocs):
     ]:
         client.insert_property_definition(pd)
 
-    metadata = {
-        "software": {"value": "VASP"},
-        "method": {"field": "calc_type"},
-    }
-    # excluded keys are included under other names or in property_map
-    exclude = {"calc_type", "e_fr_energy", "forces", "stress", "material_id"}
-    co_md_map = {
-        "material-id": {"field": "material_id"},
-        "internal_energy": {"field": "e_0_energy"},
-    }
-    co_md_map.update({k: {"field": k} for k in KEYS if k not in exclude})
-    property_map = {
-        "free-energy": [
-            {
-                "energy": {"field": "e_fr_energy", "units": "eV"},
-                "per-atom": {"value": False, "units": None},
-                "_metadata": metadata,
-            }
-        ],
-        "atomic-forces": [
-            {
-                "forces": {"field": "forces", "units": "eV/A"},
-                "_metadata": metadata,
-            }
-        ],
-        "cauchy-stress": [
-            {
-                "stress": {"field": "stress", "units": "eV/A"},
-                "_metadata": metadata,
-            }
-        ],
-    }
-
-    name_field = "name"
-    labels_field = "labels"
-    ai = 0
     ids = []
     fps = sorted(list(DATASET_FP.rglob(GLOB_STR)))[START_IX:]
-    n_batches = len(fps) // BATCH_SIZE
-    leftover = len(fps) % BATCH_SIZE
-    indices = [((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(n_batches)]
-    if leftover:
-        indices.append((BATCH_SIZE * n_batches, len(fps)))
-    for batch in tqdm(indices):
-        configurations = []
-        beg, end = batch
-        for fpath in fps[beg:end]:
-            try:
-                new = reader(fpath)
-
-                for atoms in new:
-                    a_elems = set(atoms.get_chemical_symbols())
-                    if not a_elems.issubset(ELEMENTS):
-                        raise RuntimeError(
-                            "Image {} elements {} is not a subset of {}.".format(
-                                ai, a_elems, ELEMENTS
-                            )
-                        )
-                    else:
-                        if name_field in atoms.info:
-                            name = []
-                            name.append(atoms.info[name_field])
-                            atoms.info[ATOMS_NAME_FIELD] = name
-                        else:
-                            raise RuntimeError(
-                                f"Field {name_field} not in atoms.info for index "
-                                f"{ai}. Set `name_field=None` "
-                                "to use `default_name`."
-                            )
-
-                    if labels_field not in atoms.info:
-                        atoms.info[ATOMS_LABELS_FIELD] = set()
-                    else:
-                        atoms.info[ATOMS_LABELS_FIELD] = set(atoms.info[labels_field])
-                    ai += 1
-                    configurations.append(atoms)
-            except Exception as e:
-                with open("ingest_mp_error_files.log", "a") as f:
-                    f.write(
-                        f"{fpath}\t{datetime.strftime(datetime.now(), '%d-%b-%Y')}"
-                        f"\t{e}\n"
-                    )
-
-        ids.extend(
-            list(
-                client.insert_data(
-                    configurations,
-                    co_md_map=co_md_map,
-                    property_map=property_map,
-                    generator=False,
-                    verbose=False,
-                )
+    if len(fps) < BATCH_SIZE:
+        indices = [(0, len(fps))]
+    else:
+        n_batches = len(fps) // BATCH_SIZE
+        leftover = len(fps) % BATCH_SIZE
+        indices = [((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(n_batches)]
+        if leftover:
+            indices.append((BATCH_SIZE * n_batches, len(fps)))
+    slices = [(fps[batch[0] : batch[1]]) for batch in indices]
+    with Pool(nprocs) as pool:
+        configurations = list(
+            itertools.chain.from_iterable(pool.map(get_configs, slices))
+        )
+    ids.extend(
+        list(
+            client.insert_data(
+                configurations,
+                ds_id=ds_id,
+                co_md_map=co_md_map,
+                property_map=property_map,
+                generator=False,
+                verbose=False,
             )
         )
+    )
 
     all_co_ids, all_do_ids = list(zip(*ids))
 
     client.insert_dataset(
         do_hashes=all_do_ids,
+        ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
         links=["https://materialsproject.org/", "https://doi.org/10.1063/1.4812323"],
@@ -343,20 +355,6 @@ def main(ip, db_name, nprocs):
         verbose=True,
     )
 
-
-KEYS = [
-    "calc_type",
-    "e_0_energy",
-    "e_fr_energy",
-    "e_wo_entrp",
-    "incar",
-    "material_id",
-    "name",
-    "outcar",
-    "output",
-    "stress",
-    "task_id",
-]
 
 if __name__ == "__main__":
     parser = ArgumentParser()
@@ -375,9 +373,11 @@ if __name__ == "__main__":
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument("-r", "--port", type=int, help="Target port for MongoDB")
     args = parser.parse_args(sys.argv[1:])
 
     ip = args.ip
     nprocs = args.nprocs
     db_name = args.db_name
-    main(ip, db_name, nprocs)
+    port = args.port
+    main(ip, port, db_name, nprocs)
