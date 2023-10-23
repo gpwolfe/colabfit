@@ -191,15 +191,10 @@ def get_configs(ds_id, args):
         configurations = list(
             itertools.chain.from_iterable(pool.map(read_for_pool, filepaths))
         )
-        # For running from Greene
         client = MongoDatabase(
-            args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:5000"
+            args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
         )
 
-        # for local testing
-        # client = MongoDatabase(
-        #     args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
-        # )
         ids_batch = list(
             client.insert_data(
                 configurations,
@@ -211,6 +206,7 @@ def get_configs(ds_id, args):
             )
         )
         ids.extend(ids_batch)
+        client.close()
     return ids
 
 
@@ -247,7 +243,6 @@ def main(argv):
     ids = get_configs(ds_id, args)
 
     all_co_ids, all_do_ids = list(zip(*ids))
-    client = MongoDatabase(args.db_name, nprocs=nprocs, uri=f"mongodb://{args.ip}:5000")
     client.insert_dataset(
         do_hashes=all_do_ids,
         ds_id=ds_id,
