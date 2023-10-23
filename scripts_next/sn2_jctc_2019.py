@@ -1,11 +1,15 @@
 """
-author:
+author: Gregory Wolfe, Alexander Tao
 
 Properties
 ----------
+potential energy w/ reference energy
+atomic forces
 
 Other properties added to metadata
 ----------------------------------
+dipoles
+charges
 
 File notes
 ----------
@@ -24,17 +28,19 @@ from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     # cauchy_stress_pd,
-    # potential_energy_pd,
+    potential_energy_pd,
 )
 
 
-DATASET_FP = Path(
-    "/persistent/colabfit_raw_data/new_raw_datasets/SN2_UnkeOliverMeuwly/"
-)
+# DATASET_FP = Path(
+#     "/persistent/colabfit_raw_data/new_raw_datasets/SN2_UnkeOliverMeuwly/"
+# )
+DATASET_FP = Path("data/sn2_reactions.npz")
 DATASET_NAME = "SN2_JCTC_2019"
 
-SOFTWARE = ""
-METHODS = ""
+SOFTWARE = "ORCA 4.0.1"
+METHODS = "DSD-BLYP-D3(BJ)"
+BASIS = "def2-TZVP"
 LINKS = [
     "https://doi.org/10.1021/acs.jctc.9b00181",
     "https://doi.org/10.5281/zenodo.2605341",
@@ -56,83 +62,73 @@ DATASET_DESC = (
     "calculated at the DSD-BLYP-D3(BJ)/def2-TZVP level of theory using ORCA 4.0.1."
 )
 ELEMENTS = ["C", "F", "Cl", "Br", "H", "I"]
-GLOB_STR = "*.npz"
+GLOB_STR = "sn2_reactions.npz"
 
 
-def reader_SN2(p):
-    atoms = []
-    a = np.load(p)
-    na = a["N"]
-    z = a["Z"]
-    e = a["E"]
-    r = a["R"]
-    f = a["F"]
-    d = a["D"]
-    q = a["Q"]
-    for i in tqdm(range(len(na))):
-        n = na[i]
-        atom = Atoms(numbers=z[i, :n], positions=r[i, :n, :])
-        atom.info["energy"] = e[i]
-        atom.arrays["forces"] = f[i, :n, :]
-        # print (f[i,:n,:])
-        atom.info["dipole_moment"] = d[i]
-        atom.info["charge"] = q[i]
-        atoms.append(atom)
-    return atoms
+def reader(fp):
+    # atoms = []
+    data = np.load(fp)
+    num_atoms = data["N"]
+    atom_num = data["Z"]
+    energy = data["E"]
+    coords = data["R"]
+    forces = data["F"]
+    dipole = data["D"]
+    total_charge = data["Q"]
+    for i, num in tqdm(enumerate(num_atoms)):
+        numbers = atom_num[i, :num]
+        atom = Atoms(numbers=numbers, positions=coords[i, :num, :])
+        atom.info["energy"] = float(energy[i])
+        atom.info["forces"] = forces[i, :num, :]
+        atom.info["dipole_moment"] = dipole[i]
+        atom.info["charge"] = float(total_charge[i])
+        atom.info["name"] = f"solvated_protein_{i}"
+        atom.info["ref_energy"] = sum([REF_ENERGY[x] for x in atom.symbols])
+        yield atom
+    # return atoms
+
+
+PI_MD = {
+    "software": {"value": SOFTWARE},
+    "methods": {"value": METHODS},
+    "basis-set": {"value": BASIS},
+}
+CO_MD = {
+    "dipole": [
+        {
+            "dipole_moment": {"field": "dipole_moment"},
+        }
+    ],
+    "charge": [{"charge": {"field": "charge"}}],
+}
+
+REF_ENERGY = {
+    "H": -13.579407869766147,
+    "C": -1028.9362774711024,
+    "F": -2715.578463075019,
+    "Cl": -12518.663203367176,
+    "Br": -70031.09203874589,
+    "I": -8096.587166328217,
+}
 
 
 def tform(c):
     c.info["per-atom"] = False
 
 
-property_map = {
-    #    'potential-energy': [{
-    #        'energy':   {'field': 'energy',  'units': 'eV'},
-    #        'per-atom': {'field': 'per-atom', 'units': None},
-    #        '_metadata': {
-    #            'software': {'value':'VASP'},
-    #        }
-    #    }],
+PROPERTY_MAP = {
     "atomic-forces": [
         {
             "forces": {"field": "forces", "units": "eV/Ang"},
-            "_metadata": {
-                "software": {"value": "ORCA 4.0.1 code"},
-                "method": {"value": "DSD-BLYP-D3(BJ)/def2-TZVP"},
-            },
+            "_metadata": PI_MD,
         }
     ],
-    #    'cauchy-stress': [{
-    #    'stress':   {'field': 'virial',  'units': 'GPa'},
-    #                '_metadata': {
-    #            'software': {'value':'VASP'},
-    #        }
-    #    }]
-    "atomization-energy": [
+    "potential-energy": [
         {
             "energy": {"field": "energy", "units": "eV"},
-            "_metadata": {
-                "software": {"value": "ORCA 4.0.1 code"},
-                "method": {"value": "DSD-BLYP-D3(BJ)/def2-TZVP"},
-            },
-        }
-    ],
-    "dipole": [
-        {
-            "dipole": {"field": "dipole_moment", "units": "e*Ang"},
-            "_metadata": {
-                "software": {"value": "ORCA 4.0.1 code"},
-                "method": {"value": "DSD-BLYP-D3(BJ)/def2-TZVP"},
-            },
-        }
-    ],
-    "charge": [
-        {
-            "charge": {"field": "charge", "units": "e"},
-            "_metadata": {
-                "software": {"value": "ORCA 4.0.1 code"},
-                "method": {"value": "DSD-BLYP-D3(BJ)/def2-TZVP"},
-            },
+            "per-atom": {"value": False, "units": None},
+            "reference-energy": {"field": "ref_energy", "units": "eV"},
+            "_metadata": PI_MD,
         }
     ],
 }
@@ -160,21 +156,16 @@ def main(argv):
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
     )
     client.insert_property_definition(atomic_forces_pd)
-    # client.insert_property_definition(potential_energy_pd)
-    # client.insert_property_definition(cauchy_stress_pd)
+    client.insert_property_definition(potential_energy_pd)
 
     ds_id = generate_ds_id()
-
-    # client.insert_property_definition(atomization_property_definition)
-    # client.insert_property_definition(dipole_property_definition)
-    # client.insert_property_definition(charge_property_definition)
     configurations = load_data(
         file_path=DATASET_FP,
         file_format="folder",
         name_field=None,
         elements=ELEMENTS,
         default_name="SN2",
-        reader=reader_SN2,
+        reader=reader,
         glob_string=GLOB_STR,
         verbose=True,
         generator=False,
@@ -183,7 +174,7 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
-            property_map=property_map,
+            property_map=PROPERTY_MAP,
             generator=False,
             ds_id=ds_id,
             transform=tform,
