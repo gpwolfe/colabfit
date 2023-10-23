@@ -13,6 +13,7 @@ charges
 
 File notes
 ----------
+small enough to run from ingest pod
 
 """
 from argparse import ArgumentParser

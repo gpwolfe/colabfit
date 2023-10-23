@@ -12,6 +12,8 @@ File notes
 xyz files were reformatted to ext-xyz files by Alexander. These are on
 the ingest pod as "*data-reformatted.xyz"
 
+small enough to run from ingest pod
+
 """
 from argparse import ArgumentParser
 from pathlib import Path
