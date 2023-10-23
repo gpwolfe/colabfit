@@ -35,7 +35,7 @@ LINKS = ["", ""]
 AUTHORS = [""]
 DATASET_DESC = ""
 ELEMENTS = [""]
-GLOB_STR = ".*"
+GLOB_STR = "*.*"
 
 # Assign additional relevant property instance metadata, such as basis set used
 PI_METADATA = {
@@ -67,7 +67,7 @@ PROPERTY_MAP = {
     #     {
     #         "stress": {"field": "stress", "units": "eV"},
     #         "volume-normalized": {"value": True, "units": None},
-    #         "_metadata": metadata,
+    #         "_metadata": PI_METADATA,
     #     }
     # ],
 }
