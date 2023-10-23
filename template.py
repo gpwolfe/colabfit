@@ -12,9 +12,10 @@ File notes
 
 """
 from argparse import ArgumentParser
-from ase.io import read
 from pathlib import Path
 import sys
+
+from ase.io import read
 
 # from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
