@@ -18,16 +18,14 @@ import pandas as pd
 import tqdm as tqdm
 
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
-from colabfit.tools.property_definitions import (
-    atomic_forces_pd,
-    cauchy_stress_pd,
-    potential_energy_pd,
-)
+from colabfit.tools.property_definitions import potential_energy_pd
 
 DS_NAME = "Co_dimer_JPCA_2022"
-DS_PATH = Path(
-    "/persistent/colabfit_raw_data/new_raw_datasets_2.0/Co_dimer/Co_dimer_data/"
-)
+# Mongo pod
+# DS_PATH = Path(
+#     "/persistent/colabfit_raw_data/new_raw_datasets_2.0/Co_dimer/Co_dimer_data/"
+# )
+DS_PATH = Path().cwd().parent / "data/Co_dimer_data"  # Local
 XYZ_PATH = DS_PATH / "structures_xyz"
 
 LINKS = [
@@ -43,12 +41,14 @@ AUTHORS = [
     "Richard Hennig",
 ]
 DS_DESC = (
-    "A data set of 1081 Co(II) dimer molecules with the Co atoms in the high-spin "
-    "state of S = 3/2. All molecules contain the same atomic core region, "
-    "consisting of the tetrahedral and octahedral Co centers and the "
-    "three PO2R2 bridging ligands. The ligand exchange provides a broad range of "
-    "exchange energies, ΔEJ, from +50 to -200 meV, with 80% of the "
-    "ligands yielding a small ΔEJ < 10 meV."
+    "This dataset contains dimer molecules of Co(II) with potential energy "
+    "calculations for structures with ferromagnetic and antiferromagnetic "
+    "spin configurations. Calculations were carried out in Gaussian 16 with "
+    "the PBE exchange-correlation functional and 6-31+G* basis set. "
+    "All molecules contain the same atomic core region, consisting of "
+    "the tetrahedral and octahedral Co centers and the three PO2R2 bridging "
+    "ligands. The ligand exchange provides a broad range of exchange energies "
+    "(ΔEJ), from +50 to -200 meV, with 80% of the ligands yielding ΔEJ < 10 meV."
 )
 
 
@@ -58,49 +58,31 @@ property_map = {
             "energy": {"field": "energy", "units": "a.u."},
             "per-atom": {"field": "per-atom", "units": None},
             "_metadata": {
-                # 'software': {'value':'VASP'},
-                "method": {"value": "DFT/PBE"},
+                "software": {"value": "Gaussian 16"},
+                "method": {"value": "DFT-PBE"},
+                "basis-set": {"value": "6-31+G*"},
             },
         }
     ],
-    #    'atomic-forces': [{
-    #        'forces':   {'field': 'forces',  'units': 'eV/Ang'},
-    #            '_metadata': {
-    #            'software': {'value':'VASP'},
-    #        }
-    #    }],
-    #    'cauchy-stress': [{
-    #        'stress':   {'field': 'virial',  'units': 'GPa'},
-    #                '_metadata': {
-    #            'software': {'value':'VASP'},
-    #        }
-    #
-    #    }],
 }
 
 
 def reader(fp):
-    df = pd.read_csv(fp, index_col=0)
-    # df2=pd.read_csv('/large_data/new_raw_datasets_2.0/Co_dimer/Co_dimer_data/Co_dimer_data.csv',index_col=0)
-    # df=pd.concat([df1, df2])
-    # print(df)
-
+    df = pd.read_csv(fp, index_col=0, header=0)
     structures_FM = []
     structures_AFM = []
-    # atoms=read(p,index=',')
-    for row in tqdm(df.index):
-        file_FM = str(XYZ_PATH / str(df.loc[row, "xyz_filename_FM"]))
+    for i, row in enumerate(df.index):
+        file_FM = XYZ_PATH / df.loc[row, "xyz_filename_FM"]
         structure_FM = read(file_FM)
-        # structures_FM.append(structure_FM)
-        # print(structure_FM)
         structure_FM.info["energy"] = df.loc[row, "E-FM(a.u.)"].item()
+        structure_FM.info["name"] = file_FM.stem
         structures_FM.append(structure_FM)
-        # print(type(structure_FM.info['energy_FM']))
-        file_AFM = str(XYZ_PATH / str(df.loc[row, "xyz_filename_AFM"]))
+
+        file_AFM = XYZ_PATH / df.loc[row, "xyz_filename_AFM"]
         structure_AFM = read(file_AFM)
         structure_AFM.info["energy"] = df.loc[row, "E-AFM(a.u.)"].item()
+        structure_AFM.info["name"] = file_AFM.stem
         structures_AFM.append(structure_AFM)
-        # print(structures_AFM)
 
     return structures_FM + structures_AFM
 
@@ -128,8 +110,6 @@ def main(argv):
     )
 
     client.insert_property_definition(potential_energy_pd)
-    client.insert_property_definition(atomic_forces_pd)
-    client.insert_property_definition(cauchy_stress_pd)
 
     dss = (
         (
@@ -167,18 +147,39 @@ def main(argv):
             )
         )
 
-    all_co_ids, all_pr_ids = list(zip(*ids))
+        all_co_ids, all_pr_ids = list(zip(*ids))
 
-    client.insert_dataset(
-        do_hashes=all_pr_ids,
-        ds_id=ds_id,
-        name=DS_NAME,
-        authors=AUTHORS,
-        links=LINKS,
-        description=DS_DESC,
-        resync=True,
-        verbose=True,
-    )
+        css = (
+            (
+                "co_dimer_ferromagnetic",
+                "_FM",
+                "Structures of Co(II) with ferromagnetic spin configurations",
+            ),
+            (
+                "co_dimer_antiferromagnetic",
+                "_AFM",
+                "Structures of Co(II) with antiferromagnetic spin configurations",
+            ),
+        )
+        for csname, csreg, csdesc in css:
+            client.query_and_insert_configuration_set(
+                co_hashes=all_co_ids,
+                name=csname,
+                ds_id=ds_id,
+                description=csdesc,
+                query={"names": {"$regex": csreg}},
+            )
+
+        client.insert_dataset(
+            do_hashes=all_pr_ids,
+            ds_id=ds_id,
+            name=name,
+            authors=AUTHORS,
+            links=LINKS,
+            description=desc,
+            resync=True,
+            verbose=True,
+        )
 
 
 if __name__ == "__main__":
