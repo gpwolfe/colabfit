@@ -39,10 +39,11 @@ LINKS = [
 ]
 AUTHORS = ["Oliver T. Unke", "Markus Meuwly"]
 DATASET_DESC = (
-    "The solvated protein fragments dataset was generated as a "
-    "benchmark for measuring the performance of machine learning models, "
-    "in particular PhysNet, at describing chemical reactions, long-range "
-    "interactions, and condensed phase systems. The dataset contains structures "
+    "The solvated protein fragments dataset was generated as a partner "
+    "benchmark dataset, along with SN2, for measuring the performance of machine "
+    "learning models, in particular PhysNet, at describing chemical reactions, "
+    "long-range interactions, and condensed phase systems. The dataset contains "
+    "structures "
     'for all possible "amons" (hydrogen-saturated covalently bonded fragments) of up '
     "to eight heavy atoms (C, N, O, S) that can be derived from chemical graphs of "
     "proteins containing the 20 natural amino acids connected via peptide bonds or "
