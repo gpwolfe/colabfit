@@ -10,7 +10,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 import sys
 
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     free_energy_pd,
     potential_energy_pd,
@@ -24,6 +24,9 @@ AUTHORS = [
     "Christoph Ortner",
     "James R. Kermode",
 ]
+
+PUBLICATION = "https://doi.org/10.1063/5.0016005"
+DATA_LINK = "https://github.com/DescriptorZoo/sensitivity-dimensionality-results"
 LINKS = [
     "https://doi.org/10.1063/5.0016005",
     "https://github.com/DescriptorZoo/sensitivity-dimensionality-results",
@@ -157,10 +160,11 @@ def main(argv):
     for c in configurations:
         if "nomad_potential_energy" in c.info:
             c.info["per-atom"] = False
-
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -173,6 +177,7 @@ def main(argv):
         do_hashes=all_pr_ids,
         name=DATASET_NAME,
         authors=AUTHORS,
+        ds_id=ds_id,
         links=LINKS,
         description=DESCRIPTION,
         resync=True,

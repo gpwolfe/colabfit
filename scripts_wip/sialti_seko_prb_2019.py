@@ -36,6 +36,14 @@ DATASET_NAME = "Si_Al_Ti_Seko_PRB_2019"
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
+
+PUBLICATION = "https://doi.org/10.1103/PhysRevB.99.214108"
+# data downloaded from custom link sent by Dr. Seko
+DATA_LINK = None
+OTHER_LINKS = [
+    "https://doi.org/10.1063/5.0129045",
+    "https://sekocha.github.io/",
+]
 LINKS = [
     "https://doi.org/10.1103/PhysRevB.99.214108",
     "https://doi.org/10.1063/5.0129045",

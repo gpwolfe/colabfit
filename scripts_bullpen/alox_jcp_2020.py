@@ -50,6 +50,8 @@ DS_DESC = (
     "K-point values are given for structures with: Al0, Al12, Al24, Al48 and Al192."
 )
 AUTHORS = ["Wenwen Li", "Yasunobu Ando", "Satoshi Watanabe"]
+PUBLICATION = "https://doi.org/10.1063/5.0026289"
+DATA_LINK = "https://doi.org/10.24435/materialscloud:y1-zd"
 LINKS = [
     "https://doi.org/10.1063/5.0026289",
     "https://doi.org/10.24435/materialscloud:y1-zd",

@@ -2,7 +2,7 @@
 # coding: utf-8
 from argparse import ArgumentParser
 from ase import Atoms
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 import json
 from tqdm import tqdm
 from pathlib import Path
@@ -20,6 +20,8 @@ AUTHORS = [
     "O. Anatole von Lilienfeld",
     "Rickard Armiento",
 ]
+PUBLICATION = "https://doi.org/10.1103/PhysRevLett.117.135502"
+DATA_LINK = "https://qmml.org/datasets.html"
 LINKS = [
     "https://doi.org/10.1103/PhysRevLett.117.135502",
     "https://qmml.org/datasets.html",
@@ -222,7 +224,7 @@ def main(argv):
         generator=False,
     )
 
-    pdef_fps = SCRIPT_FP.glob("*.json")
+    pdef_fps = SCRIPT_FP.glob("*formation*.json")
     for fp in pdef_fps:
         with open(fp, "r") as f:
             pdef = json.load(f)
@@ -241,10 +243,11 @@ def main(argv):
             }
         ]
     }
-
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             transform=tform,
@@ -272,6 +275,7 @@ def main(argv):
         cs_id = client.query_and_insert_configuration_set(
             co_hashes=all_co_ids,
             name=cs_names[i],
+            ds_id=ds_id,
             description=desc,
             query={"names": {"$regex": regex}},
         )
@@ -280,6 +284,7 @@ def main(argv):
     client.insert_dataset(
         cs_ids=cs_ids,
         do_hashes=all_pr_ids,
+        ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
         links=LINKS,

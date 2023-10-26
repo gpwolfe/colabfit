@@ -24,7 +24,7 @@ File notes
 """
 from argparse import ArgumentParser
 from ase.io import read
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     cauchy_stress_pd,
@@ -40,6 +40,9 @@ DATASET = "HfO2_NPJ_2020"
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
+
+PUBLICATION = "https://doi.org/10.1038/s41524-020-00367-7"
+DATA_LINK = "https://github.com/argonne-lcf/active-learning-md"
 LINKS = [
     "https://github.com/argonne-lcf/active-learning-md",
     "https://doi.org/10.1038/s41524-020-00367-7",
@@ -132,9 +135,11 @@ def main(argv):
             }
         ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
@@ -146,6 +151,7 @@ def main(argv):
 
     client.insert_dataset(
         do_hashes=all_do_ids,
+        ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,

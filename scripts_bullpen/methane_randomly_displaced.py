@@ -19,8 +19,6 @@ DS_NAME = "Methane_randomly_displaced"
 DS_DESC = (
     "This dataset provides a large number (7,732,488) of configurations for a simple "
     "CH4 composition that are generated in an almost completely unbiased fashion."
-    "This dataset provides a large number (7732488) configurations for a simple CH4"
-    "composition, that are generated in an almost completely unbiased fashion. "
     "Hydrogen atoms are randomly distributed in a 3A sphere centered around the carbon "
     "atom, and the only structures that are discarded are those with atoms that are "
     "closer than 0.5A, or such that the reference DFT calculation does not converge."
@@ -28,6 +26,10 @@ DS_DESC = (
     "algorithms, verifying whether they allow reaching arbitrary accuracy in a data-"
     "rich regime."
 )
+
+PUBLICATION = "https://doi.org/10.1103/PhysRevLett.125.166001"
+DATA_LINK = "https://doi.org/10.24435/materialscloud:qy-dp"
+OTHER_LINKS = ["https://doi.org/10.1063/5.0021116"]
 LINKS = [
     "https://doi.org/10.1103/PhysRevLett.125.166001",
     "https://doi.org/10.1063/5.0021116",

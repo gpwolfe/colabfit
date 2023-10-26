@@ -24,7 +24,7 @@ File notes
 Dataset size is too large to run on local machine--insufficient memory
 """
 from argparse import ArgumentParser
-from colabfit.tools.configuration import AtomicConfiguration
+from colabfit.tools.configuration import AtomicConfiguration, generate_ds_id
 from colabfit import ATOMS_LABELS_FIELD, ATOMS_NAME_FIELD
 from colabfit.tools.database import MongoDatabase
 from colabfit.tools.property_definitions import (
@@ -46,6 +46,9 @@ DATASET = "DCGAT"
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
+
+PUBLICATION = "https://doi.org/10.1002/adma.202210788"
+DATA_LINK = "https://doi.org/10.24435/materialscloud:m7-50"
 LINKS = [
     "https://doi.org/10.24435/materialscloud:m7-50",
     "https://doi.org/10.1002/adma.202210788",
@@ -324,6 +327,7 @@ def main(argv):
 
     name_field = "name"
     labels_field = "labels"
+    ds_id = generate_ds_id()
     ai = 0
     ids = []
     fps = list(DATASET_FP.rglob(GLOB_STR))
@@ -368,6 +372,7 @@ def main(argv):
                         list(
                             client.insert_data(
                                 configurations,
+                                ds_id=ds_id,
                                 property_map=property_map,
                                 co_md_map=config_md,
                                 generator=False,
@@ -380,6 +385,7 @@ def main(argv):
                 list(
                     client.insert_data(
                         configurations,
+                        ds_id=ds_id,
                         property_map=property_map,
                         co_md_map=config_md,
                         generator=False,
@@ -421,6 +427,7 @@ def main(argv):
     client.insert_dataset(
         do_hashes=all_do_ids,
         name=DATASET,
+        ds_id=ds_id,
         authors=AUTHORS,
         links=LINKS,
         description=DS_DESC,

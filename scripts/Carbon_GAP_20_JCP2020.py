@@ -12,15 +12,15 @@ from pathlib import Path
 import sys
 
 
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets"
     "/Carbon_GAP_20/Carbon_GAP_20/"
 )
 DATASET = "Carbon_GAP_JCP2020"
-
-
+DATA_LINK = "https://www.repository.cam.ac.uk/handle/1810/307452"
+PUBLICATION = "https://doi.org/10.1063/5.0005084"
 LINKS = [
     "https://doi.org/10.1063/5.0005084",
     "https://www.repository.cam.ac.uk/handle/1810/307452",
@@ -138,10 +138,11 @@ def main(argv):
             }
         ],
     }
-
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             transform=tform,
@@ -153,6 +154,7 @@ def main(argv):
 
     client.insert_dataset(
         do_hashes=all_pr_ids,
+        ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,

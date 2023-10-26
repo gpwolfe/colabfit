@@ -46,6 +46,9 @@ DS_DESC_MBD = (
     "basis sets."
 )
 AUTHORS = ["Venkat Kapil", "Edgar A. Engel"]
+PUBLICATION = "https://doi.org/10.1073/pnas.2111769119"
+DATA_LINKS = "https://doi.org/10.24435/materialscloud:vp-jf"
+OTHER_LINKS = "https://github.com/venkatkapil24/data_molecular_fluctuations"
 LINKS = [
     "https://doi.org/10.1073/pnas.2111769119",
     "https://doi.org/10.24435/materialscloud:vp-jf",

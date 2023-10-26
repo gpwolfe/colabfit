@@ -30,7 +30,7 @@ File notes
 """
 from argparse import ArgumentParser
 from ase import Atoms
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import potential_energy_pd
 import numpy as np
 from pathlib import Path
@@ -39,6 +39,12 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/gfn_xtb_si/gfn_data/npz/"
 )
+PUBLICATION = "https://doi.org/10.1021/acs.jcim.1c01170"
+DATA_LINK = "https://doi.org/10.24435/materialscloud:14-4m"
+LINKS = [
+    "https://doi.org/10.24435/materialscloud:14-4m",
+    "https://doi.org/10.1021/acs.jcim.1c01170",
+]
 
 
 def reader(file):
@@ -109,9 +115,11 @@ def main(argv):
             }
         ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
@@ -123,12 +131,10 @@ def main(argv):
 
     client.insert_dataset(
         do_hashes=all_do_ids,
+        ds_id=ds_id,
         name="GFN-xTB_jcim_2021",
         authors=["Leonid Komissarov", "Toon Verstraelen"],
-        links=[
-            "https://doi.org/10.24435/materialscloud:14-4m",
-            "https://doi.org/10.1021/acs.jcim.1c01170",
-        ],
+        links=LINKS,
         description="10,000 configurations of organosilicon compounds "
         "with energies predicted by an improved GFN-xTB Hamiltonian "
         "parameterization, using revPBE.",

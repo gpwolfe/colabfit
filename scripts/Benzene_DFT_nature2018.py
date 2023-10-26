@@ -4,13 +4,15 @@ from argparse import ArgumentParser
 from pathlib import Path
 import sys
 
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from ase.atoms import Atoms
 
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets")
 DATASET = "Benzene_DFT_NC2018"
-
+PUBLICATION = "https://doi.org/10.1126/sciadv.1603015"
+DATA_LINK = "http://sgdml.org/"
+OTHER_LINKS = ["https://doi.org/10.1038/s41467-018-06169-2"]
 LINKS = [
     "https://doi.org/10.1126/sciadv.1603015",
     "https://doi.org/10.1038/s41467-018-06169-2",
@@ -122,10 +124,11 @@ def main(argv):
             }
         ],
     }
-
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             transform=tform,
@@ -138,6 +141,7 @@ def main(argv):
     client.insert_dataset(
         do_hashes=all_pr_ids,
         name=DATASET,
+        ds_id=ds_id,
         authors=AUTHORS,
         links=LINKS,
         description=DS_DESC,

@@ -5,13 +5,18 @@ from pathlib import Path
 import sys
 
 
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/colabfit_data/"
     "new_raw_datasets/CHON_berk/CHON.extxyz"
 )
 DATASET = "CHON_JCP2020"
+PUBLICATION = "https://doi.org/10.1063/5.0016005"
+DATA_LINK = (
+    "https://github.com/DescriptorZoo/sensitivity-dimensionality-results/tree"
+    "/master/datasets"
+)
 
 LINKS = [
     "https://doi.org/10.1063/5.0016005",
@@ -83,10 +88,11 @@ def main(argv):
             }
         ],
     }
-
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -97,6 +103,7 @@ def main(argv):
 
     client.insert_dataset(
         do_hashes=all_pr_ids,
+        ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,

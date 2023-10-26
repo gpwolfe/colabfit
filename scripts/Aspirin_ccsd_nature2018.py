@@ -4,7 +4,7 @@
 from argparse import ArgumentParser
 from pathlib import Path
 import sys
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
@@ -21,6 +21,10 @@ AUTHORS = [
     "Klaus-Robert Müller",
     "Alexandre Tkatchenko",
 ]
+
+PUBLICATION = "https://doi.org/10.1038/s41467-018-06169-2"
+DATA_LINK = "http://sgdml.org/"
+
 LINKS = [
     "https://doi.org/10.1038/s41467-018-06169-2",
     "http://sgdml.org/",
@@ -125,6 +129,7 @@ def main(argv):
             verbose=True,
             generator=False,
         )
+        ds_id = generate_ds_id()
 
         for c in configurations:
             c.info["per-atom"] = False
@@ -132,6 +137,7 @@ def main(argv):
         ids = list(
             client.insert_data(
                 configurations,
+                ds_id=ds_id,
                 property_map=property_map,
                 generator=False,
                 verbose=True,
@@ -160,6 +166,7 @@ def main(argv):
             # cs_ids=cs_ids,
             do_hashes=all_pr_ids,
             name=f"{DATASET_NAME}-{train_test}",
+            ds_id=ds_id,
             authors=AUTHORS,
             links=LINKS,
             description=(

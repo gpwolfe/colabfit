@@ -13,6 +13,8 @@ from argparse import ArgumentParser
 from pathlib import Path
 import sys
 
+PUBLICATION = "https://doi.org/10.48550/arXiv.2011.14115"
+DATA_LINK = "https://doi.org/10.6084/m9.figshare.13289165.v1"
 LINKS = [
     "https://doi.org/10.48550/arXiv.2011.14115",
     "https://doi.org/10.6084/m9.figshare.13289165.v1",

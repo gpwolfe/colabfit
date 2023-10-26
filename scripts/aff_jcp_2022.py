@@ -32,7 +32,7 @@ aspirin_rearrange.npz
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
@@ -50,6 +50,9 @@ DATASET = "AFF_JCP_2022"
 METHODS = "DFT-PBE-TS-vdW"
 BASIS_SET = "6-31G(d,p)"
 SOFTWARE = "Q-Chem"
+
+PUBLICATION = "https://doi.org/10.1063/5.0088017"
+DATA_LINK = "https://github.com/UncertaintyQuantification/AFF/tree/master"
 LINKS = [
     "https://doi.org/10.1063/5.0088017",
     "https://github.com/UncertaintyQuantification/AFF/tree/master",
@@ -146,9 +149,11 @@ def main(argv):
             }
         ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -198,7 +203,9 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
+            cs_id = client.insert_configuration_set(
+                co_ids, ds_id=ds_id, description=desc, name=name
+            )
 
             cs_ids.append(cs_id)
         else:
@@ -207,6 +214,7 @@ def main(argv):
     client.insert_dataset(
         cs_ids=cs_ids,
         do_hashes=all_do_ids,
+        ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,

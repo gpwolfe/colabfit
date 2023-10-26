@@ -1,5 +1,5 @@
 """
-
+author: Gregory Wolfe, Alexander Tao
 
 File notes
 ----------
@@ -39,6 +39,9 @@ DS_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/Iron_nanopartic
 # DS_FP = Path().cwd().parent / "data/fe_nano"  # local
 DS_NAME = "Fe_nanoparticles_PRB_2023"
 AUTHORS = ["Richard Jana", "Miguel A. Caro"]
+
+PUBLICATION = "https://doi.org/10.1103/PhysRevB.107.245421"
+DATA_LINK = "https://doi.org/10.5281/zenodo.7632315"
 LINKS = [
     "https://doi.org/10.1103/PhysRevB.107.245421",
     "https://doi.org/10.5281/zenodo.7632315",

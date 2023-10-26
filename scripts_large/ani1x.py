@@ -72,6 +72,15 @@ from colabfit.tools.property_definitions import (
 DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/ani1x/")  # HSRN
 DATASET_FP = Path("data/ani1x")  # local and Greene
 DATASET_NAME = "ANI-1x"
+
+PUBLICATION = "https://doi.org/10.1038/s41597-020-0473-z"
+DATA_LINK = "https://doi.org/10.6084/m9.figshare.c.4712477.v1"
+OTHER_LINKS = [
+    "https://doi.org/10.1063/1.5023802",
+    "https://doi.org/10.1038/s41467-019-10827-4",
+    "https://doi.org/10.1126/sciadv.aav6490",
+    "https://github.com/aiqm/ANI1x_datasets",
+]
 LINKS = [
     "https://doi.org/10.1038/s41597-020-0473-z",
     "https://doi.org/10.1063/1.5023802",

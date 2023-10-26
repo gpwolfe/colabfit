@@ -15,7 +15,6 @@ import sys
 
 from ase.io import read
 import pandas as pd
-import tqdm as tqdm
 
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 from colabfit.tools.property_definitions import potential_energy_pd
@@ -28,6 +27,8 @@ DS_NAME = "Co_dimer_JPCA_2022"
 DS_PATH = Path().cwd().parent / "data/Co_dimer_data"  # Local
 XYZ_PATH = DS_PATH / "structures_xyz"
 
+PUBLICATION = "https://doi.org/10.1021/acs.jpca.1c08950"
+DATA_LINK = "https://doi.org/10.24435/materialscloud:pe-zv"
 LINKS = [
     "https://doi.org/10.1021/acs.jpca.1c08950",
     "https://doi.org/10.24435/materialscloud:pe-zv",

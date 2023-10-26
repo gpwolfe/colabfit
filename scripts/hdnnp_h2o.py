@@ -23,7 +23,7 @@ https://theochemgoettingen.gitlab.io/RuNNer/1.3/reference/files/#inputdata
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
@@ -38,6 +38,9 @@ DATASET_FP = Path(
 DATASET = "HDNNP-H2O"
 
 SOFTWARE = "FHI-aims"
+PUBLICATION = "https://doi.org/10.1073/pnas.1602375113"
+DATA_LINK = "https://doi.org/10.5281/zenodo.2634097"
+OTHER_LINKS = "https://doi.org/10.1103/PhysRevLett.98.146401"
 LINKS = [
     "https://doi.org/10.5281/zenodo.2634097",
     "https://doi.org/10.1103/PhysRevLett.98.146401",
@@ -154,9 +157,11 @@ def main(argv):
             }
         ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
@@ -207,7 +212,9 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
+            cs_id = client.insert_configuration_set(
+                co_ids, ds_id=ds_id, description=desc, name=name
+            )
 
             cs_ids.append(cs_id)
         else:
@@ -215,6 +222,7 @@ def main(argv):
 
     client.insert_dataset(
         do_hashes=all_do_ids,
+        ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,

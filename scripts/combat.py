@@ -21,7 +21,7 @@ File notes
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     potential_energy_pd,
 )
@@ -33,6 +33,8 @@ DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/comba
 DATASET = "ComBat"
 
 SOFTWARE = "Gaussian 16"
+PUBLICATION = "https://doi.org/10.1038/s41598-022-20009-w"
+DATA_LINK = "https://github.com/rashatwi/combat/"
 LINKS = [
     "https://github.com/rashatwi/combat/",
     "https://doi.org/10.1038/s41598-022-20009-w",
@@ -128,9 +130,11 @@ def main(argv):
             }
         ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -142,6 +146,7 @@ def main(argv):
     client.insert_dataset(
         do_hashes=all_do_ids,
         name=DATASET,
+        ds_id=ds_id,
         authors=AUTHORS,
         links=LINKS,
         description=DS_DESC,

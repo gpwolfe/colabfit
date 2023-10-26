@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 import sys
 
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 import ase
 
 
@@ -13,6 +13,8 @@ DATASET_FP = Path(
     "new_raw_datasets/C_allotropes_MingjianEllad/carbon_energies_forces/"
 )
 DATASET = "C_npj2020"
+PUBLICATION = "https://doi.org/10.1038/s41524-020-00390-8"
+DATA_LINK = "https://doi.org/10.6084/m9.figshare.12649811.v1"
 
 LINKS = [
     "https://doi.org/10.1038/s41524-020-00390-8",
@@ -120,10 +122,11 @@ def main(argv):
             }
         ],
     }
-
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             transform=tform,
@@ -162,7 +165,7 @@ def main(argv):
         )
 
         cs_id = client.insert_configuration_set(
-            co_ids, description=desc, name=cs_names[i]
+            co_ids, ds_id=ds_id, description=desc, name=cs_names[i]
         )
 
         cs_ids.append(cs_id)
@@ -170,6 +173,7 @@ def main(argv):
     client.insert_dataset(
         cs_ids=cs_ids,
         do_hashes=all_pr_ids,
+        ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,

@@ -42,6 +42,9 @@ DATASET_NAME = "SN2_JCTC_2019"
 SOFTWARE = "ORCA 4.0.1"
 METHODS = "DSD-BLYP-D3(BJ)"
 BASIS = "def2-TZVP"
+
+PUBLICATION = "https://doi.org/10.1021/acs.jctc.9b00181"
+DATA_LINK = "https://doi.org/10.5281/zenodo.2605341"
 LINKS = [
     "https://doi.org/10.1021/acs.jctc.9b00181",
     "https://doi.org/10.5281/zenodo.2605341",

@@ -22,7 +22,7 @@ File notes
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     cauchy_stress_pd,
@@ -39,6 +39,9 @@ DATASET = "Ag-PBE-MSMSE-2021"
 
 SOFTWARE = "VASP, DP-GEN"
 METHODS = "DFT-PBE-D3"
+
+PUBLICATION = "https://doi.org/10.48550/arXiv.2108.06232"
+DATA_LINK = "https://www.aissquare.com/datasets/detail?pageType=datasets&name=Ag-PBE"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=Ag-PBE",
     "https://doi.org/10.48550/arXiv.2108.06232",
@@ -131,7 +134,7 @@ def main(argv):
         nprocs=args.nprocs,
         uri=f"mongodb://{args.ip}:27017",
     )
-
+    ds_id = generate_ds_id()
     configurations = load_data(
         file_path=DATASET_FP,
         file_format="folder",
@@ -174,6 +177,7 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -185,6 +189,7 @@ def main(argv):
     client.insert_dataset(
         do_hashes=all_do_ids,
         name=DATASET,
+        ds_id=ds_id,
         authors=AUTHORS,
         links=LINKS,
         description=DS_DESC,

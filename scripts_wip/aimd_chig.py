@@ -47,8 +47,7 @@ GLOB_STR = "*.*"
 PI_METADATA = {
     "software": {"value": SOFTWARE},
     "method": {"value": METHODS},
-    "basis-set": {"value": "6–31 G*"}
-    # "basis-set": {"field": "basis_set"}
+    "basis-set": {"value": "6-31 G*"},
 }
 
 # Define dynamic 'field' -> value relationships or static 'value' -> value relationships
@@ -59,14 +58,14 @@ PI_METADATA = {
 PROPERTY_MAP = {
     "potential-energy": [
         {
-            "energy": {"field": "energy", "units": "eV"},
+            "energy": {"field": "energy", "units": "Hartree"},
             "per-atom": {"value": False, "units": None},
             "_metadata": PI_METADATA,
         }
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "forces", "units": "eV/A"},
+            "forces": {"field": "forces", "units": "Hartree/A"},
             "_metadata": PI_METADATA,
         },
     ],
@@ -87,20 +86,6 @@ CO_METADATA = {
 
 
 def reader(filepath: Path):
-    """
-    If using a customer reader function, define here.
-
-    Reader function should accept only one argument--a Path() object--and return
-    either a list or generator of AtomicConfiguration objects or ase.Atoms objects.
-    Examples of custom reader functions can be found in the finished scripts
-    directories.
-
-    Below is a minimal example using ase.io.read to parse e.g., an extxyz file.
-    If the extxyz header contains the fields defined in PROPERTY_MAP and CO_METADATA
-    above (i.e., 'energy' and 'forces'; and 'h' and 'zpve', respectively), these fields
-    will be used in the data ingestion process to create property-instance -> PI-medata
-    relationships and configuration -> CO-metadata relationships.
-    """
     configs = read(filepath, index=":")
     for i, config in enumerate(configs):
         config.info["name"] = f"{filepath.stem}_{i}"

@@ -22,7 +22,7 @@ File notes
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     cauchy_stress_pd,
@@ -39,6 +39,8 @@ DATASET = "Au-PBE-MSMSE-2021"
 
 SOFTWARE = "VASP, DP-GEN"
 METHODS = "DFT-PBE-D3"
+PUBLICATION = "https://doi.org/10.48550/arXiv.2108.06232"
+DATA_LINK = "https://www.aissquare.com/datasets/detail?pageType=datasets&name=Au-PBE"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=Au-PBE",
     "https://doi.org/10.48550/arXiv.2108.06232",
@@ -140,6 +142,7 @@ def main(argv):
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(cauchy_stress_pd)
+    ds_id = generate_ds_id()
 
     metadata = {
         "software": {"value": SOFTWARE},
@@ -171,6 +174,7 @@ def main(argv):
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -181,6 +185,7 @@ def main(argv):
 
     client.insert_dataset(
         do_hashes=all_do_ids,
+        ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,

@@ -11,6 +11,8 @@ DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets/sGDML")
 # DATASET_FP = Path().cwd().parents[1] / "scripts/data/benzene_ccsd_t"  # remove
 DATASET = "Benzene_ccsdt_NC2018"
 
+PUBLICATION = "https://doi.org/10.1038/s41467-018-06169-2"
+DATA_LINK = "http://sgdml.org/"
 LINKS = [
     "https://doi.org/10.1038/s41467-018-06169-2",
     "http://sgdml.org/",

@@ -38,6 +38,8 @@ DATASET_FP = Path(
 # DATASET_FP = Path("data/saidi_23_dnps/Training_Data")
 DATASET = "23-DNPs-RSCDD-2023"
 
+PUBLICATION = "https://doi.org/10.1039/D3DD00046J"
+DATA_LINK = "https://github.com/saidigroup/23-Single-Element-DNPs"
 LINKS = [
     "https://doi.org/10.1039/D3DD00046J",
     "https://github.com/saidigroup/23-Single-Element-DNPs",

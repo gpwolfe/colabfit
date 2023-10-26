@@ -39,7 +39,9 @@ DATASET_FP = Path(
 #     "materials_project/mat_proj_xyz_files"
 # )
 DATASET = "Materials Project"
-
+PUBLICATION = "https://doi.org/10.1063/1.4812323"
+DATA_LINK = "https://materialsproject.org"
+LINKS = ["https://materialsproject.org", "https://doi.org/10.1063/1.4812323"]
 AUTHORS = [
     "Anubhav Jain",
     "Shyue Ping Ong",
@@ -350,7 +352,7 @@ def main(ip, port, db_name, nprocs):
         ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
-        links=["https://materialsproject.org/", "https://doi.org/10.1063/1.4812323"],
+        links=LINKS,
         description=DS_DESC,
         verbose=True,
     )
