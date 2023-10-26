@@ -48,6 +48,10 @@ DATASET_NAME = "Carolina_Materials"
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
+
+PUBLICATION = "https://doi.org/10.1002/advs.202100566"
+DATA_LINK = "https://zenodo.org/records/8381476"
+OTHER_LINKS = ["http://www.carolinamatdb.org/", "https://github.com/IntelLabs/matsciml"]
 LINKS = [
     "https://zenodo.org/records/8381476",
     "https://doi.org/10.1002/advs.202100566",

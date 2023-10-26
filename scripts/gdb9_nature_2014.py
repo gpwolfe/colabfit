@@ -35,7 +35,7 @@ File notes
 ----------
 """
 from argparse import ArgumentParser
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.property_definitions import (
     free_energy_pd,
@@ -47,6 +47,15 @@ import re
 import sys
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/gdb9")
+
+PUBLICATION = "https://doi.org/10.1038/sdata.2014.22"
+DATA_LINK = "https://doi.org/10.6084/m9.figshare.c.978904.v5"
+
+LINKS = [
+    "https://doi.org/10.6084/m9.figshare.c.978904.v5",
+    "https://doi.org/10.1038/sdata.2014.22",
+]
+
 
 HEADER_RE = re.compile(
     r"gdb (?P<index>\d+)\s(?P<rotational_a>[-\d\.]+)\s"
@@ -194,10 +203,11 @@ def main(argv):
             }
         ],
     }
-
+    ds_id = generate_ds_id
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
@@ -209,6 +219,7 @@ def main(argv):
 
     client.insert_dataset(
         do_hashes=all_do_ids,
+        ds_id=ds_id,
         name="GDB_9_nature_2014",
         authors=[
             "Raghunathan Ramakrishnan",
@@ -216,10 +227,7 @@ def main(argv):
             "Matthias Rupp",
             "O. Anatole von Lilienfeld",
         ],
-        links=[
-            "https://doi.org/10.6084/m9.figshare.c.978904.v5",
-            "https://doi.org/10.1038/sdata.2014.22",
-        ],
+        links=LINKS,
         description="133,855 configurations of stable small organic molecules"
         " composed of CHONF. A subset of GDB-17, with calculations of energies"
         ", dipole moment, polarizability and enthalpy. Calculations performed"

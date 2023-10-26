@@ -30,7 +30,7 @@ https://cms-lab.github.io/edu/AMM/FHI_aims_lab1.pdf
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
@@ -46,6 +46,9 @@ DATASET = "Cu_FHIaims_NPJCM_2021"
 
 SOFTWARE = "FHI-aims"
 METHODS = "DFT-PBE"
+
+PUBLICATION = "https://doi.org/10.1038/s41524-021-00559-9"
+DATA_LINK = "https://doi.org/10.5281/zenodo.4734035"
 LINKS = [
     "https://doi.org/10.5281/zenodo.4734035",
     "https://doi.org/10.1038/s41524-021-00559-9",
@@ -158,9 +161,11 @@ def main(argv):
             }
         ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -172,6 +177,7 @@ def main(argv):
     client.insert_dataset(
         do_hashes=all_do_ids,
         name=DATASET,
+        ds_id=ds_id,
         authors=AUTHORS,
         links=LINKS,
         description=DS_DESC,

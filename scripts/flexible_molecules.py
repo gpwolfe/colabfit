@@ -37,6 +37,9 @@ DATASET_FP = Path(
 )
 # DATASET_FP = Path("data/flexible_molecules/Datasets")  # comment out--local testing
 DS_NAME = "flexible_molecules_JCP2021"
+PUBLICATION = "https://doi.org/10.1063/5.0038516"
+# Data in supplementary materials
+DATA_LINK = "https://doi.org/10.1063/5.0038516"
 LINKS = [
     "https://doi.org/10.1063/5.0038516",
 ]

@@ -22,7 +22,7 @@ File notes
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     cauchy_stress_pd,
@@ -39,6 +39,10 @@ DATASET = "HfO2-DPGEN-PRB-2021"
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
+PUBLICATION = "https://doi.org/10.1103/PhysRevB.103.024108"
+DATA_LINK = (
+    "https://www.aissquare.com/datasets/detail?pageType=datasets&name=HfO2-dpgen"
+)
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=HfO2-dpgen",
     "https://doi.org/10.1103/PhysRevB.103.024108",
@@ -167,9 +171,11 @@ def main(argv):
             }
         ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -180,6 +186,7 @@ def main(argv):
 
     client.insert_dataset(
         do_hashes=all_do_ids,
+        ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,

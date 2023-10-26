@@ -45,7 +45,7 @@ ala.npy (contained in mdsim_data.tar.gz), and are therefore not downloaded
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
@@ -65,9 +65,12 @@ LIPS_FP = DATASET_FP / "mdsim_data/lips"
 MD17_FP = DATASET_FP / "mdsim_data/md17"
 
 DATASET = "Forces-are-not-Enough"
+PUBLICATION = "https://doi.org/10.48550/arXiv.2210.07237"
+DATA_LINK = "https://doi.org/10.5281/zenodo.7196767"
+OTHER_LINKS = ["https://github.com/kyonofx/MDsim/"]
 
 LINKS = [
-    "https://doi.org/10.5281/zenodo.7196578",
+    "https://doi.org/10.5281/zenodo.7196767",
     "https://doi.org/10.48550/arXiv.2210.07237",
     "https://github.com/kyonofx/MDsim/",
 ]
@@ -244,9 +247,11 @@ def main(argv):
             }
         ]
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -255,6 +260,7 @@ def main(argv):
     ala_ids = list(
         client.insert_data(
             ala_configs,
+            ds_id=ds_id,
             property_map=ala_property_map,
             generator=False,
             verbose=True,
@@ -294,7 +300,9 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
+            cs_id = client.insert_configuration_set(
+                co_ids, ds_id=ds_id, description=desc, name=name
+            )
 
             cs_ids.append(cs_id)
         else:
@@ -303,6 +311,7 @@ def main(argv):
     client.insert_dataset(
         cs_ids=cs_ids,
         do_hashes=all_do_ids,
+        ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,

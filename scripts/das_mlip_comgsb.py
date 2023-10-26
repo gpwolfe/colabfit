@@ -29,7 +29,7 @@ virial is a 6-vector, not a 9-vector
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
@@ -45,6 +45,9 @@ DATASET = "DAS_ML-IP_CoSb_MgSb"
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
+PUBLICATION = "https://doi.org/10.1103/PhysRevB.104.094310"
+# Data download from supplemental materials section
+DATA_FILE = "https://doi.org/10.1103/PhysRevB.104.094310"
 LINKS = ["https://doi.org/10.1103/PhysRevB.104.094310"]
 AUTHORS = [
     "Hongliang Yang",
@@ -177,9 +180,11 @@ def main(argv):
         #     }
         # ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
@@ -220,7 +225,9 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
+            cs_id = client.insert_configuration_set(
+                co_ids, ds_id=ds_id, description=desc, name=name
+            )
 
             cs_ids.append(cs_id)
         else:
@@ -229,6 +236,7 @@ def main(argv):
     client.insert_dataset(
         cs_ids=cs_ids,
         do_hashes=all_do_ids,
+        ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,

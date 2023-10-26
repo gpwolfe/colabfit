@@ -33,7 +33,7 @@ File notes
 from argparse import ArgumentParser
 from ase.db import connect
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import potential_energy_pd
 from pathlib import Path
 import sys
@@ -43,6 +43,8 @@ DATASET = "cG-SchNet"
 
 SOFTWARE = "ORCA"
 METHODS = "DFT"
+PUBLICATION = "https://doi.org/10.1038/s41467-022-28526-y"
+DATA_LINK = "https://github.com/atomistic-machine-learning/cG-SchNet/"
 LINKS = [
     "https://doi.org/10.1038/s41467-022-28526-y",
     "https://github.com/atomistic-machine-learning/cG-SchNet/",
@@ -177,9 +179,11 @@ def main(argv):
             }
         ]
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
@@ -277,7 +281,9 @@ def main(argv):
             f"{len(co_ids)}".rjust(7),
         )
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
+            cs_id = client.insert_configuration_set(
+                co_ids, ds_id=ds_id, description=desc, name=name
+            )
 
             cs_ids.append(cs_id)
         else:
@@ -285,6 +291,7 @@ def main(argv):
 
     client.insert_dataset(
         cs_ids=cs_ids,
+        ds_id=ds_id,
         do_hashes=all_do_ids,
         name=DATASET,
         authors=AUTHORS,

@@ -23,7 +23,7 @@ File notes
 from argparse import ArgumentParser
 from colabfit import ATOMS_NAME_FIELD, ATOMS_LABELS_FIELD
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase
+from colabfit.tools.database import MongoDatabase, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     cauchy_stress_pd,
@@ -44,6 +44,9 @@ DATASET = "CHO-methane-combustion-NC-2020"
 
 SOFTWARE = "Gaussian 16"
 METHODS = "NVT-QM-MN15"
+
+PUBLICATION = "https://doi.org/10.1038/s41467-020-19497-z"
+DATA_LINK = "https://doi.org/10.6084/m9.figshare.12973055.v3"
 LINKS = [
     "https://doi.org/10.6084/m9.figshare.12973055.v3",
     "https://doi.org/10.1038/s41467-020-19497-z",
@@ -185,6 +188,7 @@ def main(argv):
 
     name_field = "name"
     labels_field = "labels"
+    ds_id = generate_ds_id()
     ai = 0
     ids = []
     fps = list(DATASET_FP.rglob(GLOB_STR))
@@ -230,6 +234,7 @@ def main(argv):
             list(
                 client.insert_data(
                     configurations,
+                    ds_id=ds_id,
                     property_map=property_map,
                     generator=False,
                     verbose=False,
@@ -241,6 +246,7 @@ def main(argv):
 
     client.insert_dataset(
         do_hashes=all_do_ids,
+        ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,

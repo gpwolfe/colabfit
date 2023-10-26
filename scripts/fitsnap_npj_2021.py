@@ -26,7 +26,7 @@ papers.
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     cauchy_stress_pd,
@@ -44,6 +44,8 @@ DATASET = "FitSNAP-Fe-NPJ-2021"
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
+PUBLICATION = "https://github.com/FitSNAP"
+DATA_LINK = "https://doi.org/10.1038/s41524-021-00617-2"
 LINKS = [
     "https://github.com/FitSNAP",
     "https://doi.org/10.1038/s41524-021-00617-2",
@@ -163,9 +165,11 @@ def main(argv):
             }
         ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
@@ -178,6 +182,7 @@ def main(argv):
     client.insert_dataset(
         do_hashes=all_do_ids,
         name=DATASET,
+        ds_id=ds_id,
         authors=AUTHORS,
         links=LINKS,
         description=DS_DESC,

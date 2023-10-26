@@ -15,8 +15,10 @@ from colabfit.tools.property_definitions import potential_energy_pd
 DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets")
 
 DATASET_NAME = "BA10-18"
+PUBLICATION = "https://doi.org/10.1038/s41524-019-0189-9"
+DATA_LINK = "https://qmml.org/datasets.html"
 LINKS = [
-    "https://www.nature.com/articles/s41524-019-0189-9",
+    "https://doi.org/10.1038/s41524-019-0189-9",
     "https://qmml.org/datasets.html",
 ]
 AUTHORS = [

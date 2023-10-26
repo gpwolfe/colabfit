@@ -51,6 +51,9 @@ DATASET = "AGOX"
 
 SOFTWARE = "AGOX-GPAW"
 METHODS = "DFT-PBE"
+
+PUBLICATION = "https://doi.org/10.1063/5.0121748"
+DATA_LINK = "https://gitlab.com/agox/agox_data"
 LINKS = [
     "https://gitlab.com/agox/agox_data",
     "https://doi.org/10.1063/5.0121748",

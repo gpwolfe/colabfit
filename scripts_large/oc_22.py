@@ -45,6 +45,12 @@ DATASET = "OC22"
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
+
+PUBLICATION = "https://doi.org/10.1021/acscatal.2c05426"
+DATA_LINK = (
+    "https://github.com/Open-Catalyst-Project/ocp/blob/main/DATASET.md#"
+    "open-catalyst-2022-oc22"
+)
 LINKS = [
     "https://github.com/Open-Catalyst-Project/ocp/blob/main/DATASET.md#"
     "open-catalyst-2022-oc22",

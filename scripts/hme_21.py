@@ -24,7 +24,7 @@ splitting into datasets based on file - train, test, val
 """
 from argparse import ArgumentParser
 from ase.io import read
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
@@ -38,6 +38,9 @@ DATASET = "HME21"
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
+
+PUBLICATION = "https://doi.org/10.1038/s41467-022-30687-9"
+DATA_LINK = "https://doi.org/10.6084/m9.figshare.19658538.v2"
 LINKS = [
     "https://doi.org/10.6084/m9.figshare.19658538.v2",
     "https://doi.org/10.1038/s41467-022-30687-9",
@@ -185,10 +188,11 @@ def main(argv):
             glob_string=glob,
             generator=False,
         )
-
+        ds_id = generate_ds_id()
         ids = list(
             client.insert_data(
                 configurations,
+                ds_id=ds_id,
                 property_map=property_map,
                 generator=False,
                 verbose=True,
@@ -199,6 +203,7 @@ def main(argv):
 
         client.insert_dataset(
             do_hashes=all_do_ids,
+            ds_id=ds_id,
             name=name,
             authors=AUTHORS,
             links=LINKS,

@@ -4,11 +4,16 @@ from argparse import ArgumentParser
 from pathlib import Path
 import sys
 
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/data/")
 DATASET = "AlNiTi_CMS2019"
 
+PUBLICATION = "https://doi.org/10.1016/j.commatsci.2018.09.031"
+DATA_LINK = (
+    "https://gitlab.com/kgubaev/accelerating-high-throughput"
+    "-searches-for-new-alloys-with-active-learning-data"
+)
 LINKS = [
     "https://doi.org/10.1016/j.commatsci.2018.09.031",
     "https://gitlab.com/kgubaev/accelerating-high-throughput"
@@ -110,10 +115,12 @@ def main(argv):
 
     for c in configurations:
         c.info["per-atom"] = False
+    ds_id = generate_ds_id()
 
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -146,7 +153,7 @@ def main(argv):
         )
 
         cs_id = client.insert_configuration_set(
-            co_ids, description=desc, name=cs_names[i]
+            co_ids, ds_id=ds_id, description=desc, name=cs_names[i]
         )
 
         cs_ids.append(cs_id)
@@ -154,6 +161,7 @@ def main(argv):
     client.insert_dataset(
         cs_ids=cs_ids,
         do_hashes=all_pr_ids,
+        ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,

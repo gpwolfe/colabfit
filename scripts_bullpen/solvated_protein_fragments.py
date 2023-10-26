@@ -33,6 +33,9 @@ DATASET_NAME = "solvated_protein_fragments"
 SOFTWARE = "ORCA 4.0.1"
 METHODS = "DFT-revPBE-D3(BJ)"
 BASIS = "def2-TZVP"
+
+PUBLICATION = "https://doi.org/10.1021/acs.jctc.9b00181"
+DATA_LINK = "https://doi.org/10.5281/zenodo.2605372"
 LINKS = [
     "https://doi.org/10.1021/acs.jctc.9b00181",
     "https://doi.org/10.5281/zenodo.2605372",

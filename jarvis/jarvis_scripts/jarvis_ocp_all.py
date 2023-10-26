@@ -116,13 +116,13 @@ def reader(fp):
             )
         config.info["name"] = f"{fp.stem}_{i}"
         for key, val in row.items():
-            if type(val) == str and val != "na" and len(val) > 0:
+            if isinstance(val, str) and val != "na" and len(val) > 0:
                 config.info[key] = val
-            elif type(val) == list and len(val) > 0 and any([x != "" for x in val]):
+            elif isinstance(val, list) and len(val) > 0 and any([x != "" for x in val]):
                 config.info[key] = val
-            elif type(val) == dict and all([v != "na" for v in val.values()]):
+            elif isinstance(val, dict) and all([v != "na" for v in val.values()]):
                 config.info[key] = val
-            elif type(val) == float or type(val) == int:
+            elif isinstance(val, float) or isinstance(val, int):
                 config.info[key] = val
             else:
                 pass

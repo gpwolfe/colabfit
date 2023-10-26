@@ -43,7 +43,7 @@ not all clear
 
 from argparse import ArgumentParser
 import ase
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     free_energy_pd,
@@ -57,6 +57,12 @@ DATASET_FP = Path(
 # DATASET_FP = Path("data/reaction-barriers-mlffs-main") # remove
 METHOD = "DFT"
 SOFTWARE = "Quantum ESPRESSO"
+PUBLICATION = "https://doi.org/10.48550/arXiv.2301.09931"
+DATA_LINK = "https://doi.org/10.5281/zenodo.8268726"
+LINKS = [
+    "https://doi.org/10.5281/zenodo.8268726",
+    "https://doi.org/10.48550/arXiv.2301.09931",
+]
 
 
 def namer(info):
@@ -136,9 +142,11 @@ def main(argv):
             }
         ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -177,13 +185,16 @@ def main(argv):
         )
 
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
+            cs_id = client.insert_configuration_set(
+                co_ids, ds_id=ds_id, description=desc, name=name
+            )
 
             cs_ids.append(cs_id)
     client.insert_dataset(
         cs_ids=cs_ids,
         do_hashes=all_do_ids,
         name="COHInPt_schaaf_2023",
+        ds_id=ds_id,
         authors=[
             "Lars Schaaf",
             "Edvin Fako",
@@ -191,10 +202,7 @@ def main(argv):
             "Ansgar Schafer",
             "Gabor Csanyi",
         ],
-        links=[
-            "https://github.com/LarsSchaaf/reaction-barriers-mlffs",
-            "https://doi.org/10.48550/arXiv.2301.09931",
-        ],
+        links=LINKS,
         description="Training and simulation data from machine learning"
         " force field model applied to steps of the hydrogenation of carbon"
         " dioxide to methanol over an indium oxide catalyst, with and"

@@ -5,7 +5,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 import sys
 
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
@@ -28,6 +28,8 @@ AUTHORS = [
     "Boris Kozinsky",
     "Gábor Csányi",
 ]
+PUBLICATION = "https://doi.org/10.48550/arXiv.2205.06643"
+DATA_LINK = "https://github.com/davkovacs/BOTNet-datasets"
 LINKS = [
     "https://doi.org/10.48550/arXiv.2205.06643",
     "https://github.com/davkovacs/BOTNet-datasets",
@@ -164,12 +166,13 @@ def main(argv):
             verbose=True,
             generator=False,
         )
-
+        ds_id = generate_ds_id()
         # for c in configurations:
         #     c.info["per-atom"] = False
         ids = list(
             client.insert_data(
                 configurations,
+                ds_id=ds_id,
                 property_map=property_map,
                 generator=False,
                 transform=tform,
@@ -222,6 +225,7 @@ def main(argv):
             # cs_ids=cs_ids,
             do_hashes=all_pr_ids,
             name=f"{DATASET_NAME}-{glob_ds[2]}",
+            ds_id=ds_id,
             authors=AUTHORS,
             links=LINKS,
             description=glob_ds[1],

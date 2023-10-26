@@ -63,7 +63,7 @@ Test images used to evaluate the trained NNPs
 from argparse import ArgumentParser
 from ase.db import connect
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
@@ -80,6 +80,8 @@ DATASET = "CA-9"
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
+PUBLICATION = "https://doi.org/10.1016/j.cartre.2021.100027"
+DATA_LINK = "https://doi.org/10.24435/materialscloud:6h-yj"
 LINKS = [
     "https://doi.org/10.24435/materialscloud:6h-yj",
     "https://doi.org/10.1016/j.cartre.2021.100027",
@@ -242,10 +244,11 @@ def main(argv):
             glob_string=glob_str,
             generator=False,
         )
-
+        ds_id = generate_ds_id()
         ids = list(
             client.insert_data(
                 configurations,
+                ds_id=ds_id,
                 property_map=property_map,
                 generator=False,
                 verbose=False,
@@ -284,6 +287,7 @@ def main(argv):
             # cs_ids=cs_ids,
             do_hashes=all_do_ids,
             name=ds_name,
+            ds_id=ds_id,
             authors=AUTHORS,
             links=LINKS,
             description=description,

@@ -34,6 +34,8 @@ from colabfit.tools.property_definitions import (
 DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/LML-retrain/")
 DATASET_FP = Path("").cwd().parent / "data/lml_retrain"
 
+PUBLICATION = "https://doi.org/10.1016/j.actamat.2023.118734"
+DATA_LINK = "https://github.com/marseille-matmol/LML-retrain"
 LINKS = [
     "https://github.com/marseille-matmol/LML-retrain",
     "https://doi.org/10.1016/j.actamat.2023.118734",

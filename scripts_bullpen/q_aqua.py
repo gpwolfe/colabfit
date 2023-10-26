@@ -53,6 +53,9 @@ INFO_DICT = {
         "name": "q-aqua_4-body",
     },
 }
+
+PUBLICATION = "https://doi.org/10.1021/acs.jpclett.2c00966"
+DATA_LINK = "https://github.com/jmbowma/q-AQUA"
 LINKS = [
     "https://doi.org/10.1021/acs.jpclett.2c00966",
     "https://github.com/jmbowma/q-AQUA",

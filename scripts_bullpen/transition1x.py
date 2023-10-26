@@ -32,6 +32,10 @@ DATASET_FP = Path().cwd() / "data"  # local
 # DATASET_NAME = "Transition1x"
 SOFTWARE = "ORCA 5.0.2"
 METHODS = "DFT-wb97x"
+
+PUBLICATION = "https://doi.org/10.1038/s41597-022-01870-w"
+DATA_LINK = "https://doi.org/10.6084/m9.figshare.19614657.v4"
+OTHER_LINKS = ["https://gitlab.com/matschreiner/Transition1x"]
 LINKS = [
     "https://doi.org/10.1038/s41597-022-01870-w",
     "https://gitlab.com/matschreiner/Transition1x",

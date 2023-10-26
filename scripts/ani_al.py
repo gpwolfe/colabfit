@@ -44,7 +44,7 @@ on each atom i.
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
@@ -62,6 +62,8 @@ DATASET = "ANI-Al_NC2021"
 
 SOFTWARE = "Quantum ESPRESSO"
 METHODS = "DFT-PBE"
+PUBLICATION = "https://doi.org/10.1038/s41467-021-21376-0"
+DATA_LINK = "https://github.com/atomistic-ml/ani-al"
 LINKS = [
     "https://github.com/atomistic-ml/ani-al",
     "https://doi.org/10.1038/s41467-021-21376-0",
@@ -156,10 +158,12 @@ def main(argv):
             glob_string=glob_ds[0],
             generator=False,
         )
+        ds_id = generate_ds_id()
 
         ids = list(
             client.insert_data(
                 configurations,
+                ds_id=ds_id,
                 co_md_map=co_md_map,
                 property_map=property_map,
                 generator=False,
@@ -210,6 +214,7 @@ def main(argv):
         client.insert_dataset(
             # cs_ids=cs_ids,
             do_hashes=all_do_ids,
+            ds_id=ds_id,
             name=f"{DATASET}-{glob_ds[1]}",
             authors=AUTHORS,
             links=LINKS,

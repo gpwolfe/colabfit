@@ -29,7 +29,7 @@ File notes
 """
 from argparse import ArgumentParser
 from ase.io import read
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
@@ -43,6 +43,8 @@ DATASET = "3BPA"
 
 SOFTWARE = "ORCA"
 METHODS = "DFT-ωB97X"
+DATA_LINK = "https://doi.org/10.1021/acs.jctc.1c00647"
+PUBLICATION = "https://doi.org/10.1021/acs.jctc.1c00647"
 LINKS = ["https://doi.org/10.1021/acs.jctc.1c00647"]
 AUTHORS = [
     "Dávid Péter Kovács",
@@ -199,10 +201,11 @@ def main(argv):
             glob_string=glob_ds[1],
             generator=False,
         )
-
+        ds_id = generate_ds_id()
         ids = list(
             client.insert_data(
                 configurations,
+                ds_id=ds_id,
                 property_map=property_map,
                 co_md_map=co_md_map,
                 generator=False,
@@ -242,6 +245,7 @@ def main(argv):
             # cs_ids=cs_ids,
             do_hashes=all_do_ids,
             name=glob_ds[0],
+            ds_id=ds_id,
             authors=AUTHORS,
             links=LINKS,
             description=glob_ds[2],

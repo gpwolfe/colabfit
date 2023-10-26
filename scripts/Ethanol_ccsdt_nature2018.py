@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 
 from ase.atoms import Atoms
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import potential_energy_pd, atomic_forces_pd
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets/sGDML")
@@ -125,10 +125,11 @@ def main(argv):
             verbose=True,
             generator=False,
         )
-
+        ds_id = generate_ds_id()
         ids = list(
             client.insert_data(
                 configurations,
+                ds_id=ds_id,
                 property_map=property_map,
                 generator=False,
                 transform=tform,
@@ -161,6 +162,7 @@ def main(argv):
             do_hashes=all_pr_ids,
             name=f"{DATASET}-{train_test}",
             authors=AUTHORS,
+            ds_id=ds_id,
             links=LINKS,
             description=(
                 f"The {train_test} set of a train/test pair from the "

@@ -26,6 +26,9 @@ DATASET_FP = Path("/vast/gw2338/orbnet/")
 # DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/OrbNet_Denali")
 # DATASET_FP = Path("data/orbnet")  # remove
 DS_NAME = "Orbnet-Denali"
+
+PUBLICATION = "https://doi.org/10.1063/5.0061990"
+DATA_LINK = "https://doi.org/10.6084/m9.figshare.14883867.v2"
 LINKS = [
     "https://doi.org/10.1063/5.0061990",
     "https://doi.org/10.6084/m9.figshare.14883867.v2",
