@@ -36,7 +36,7 @@ from colabfit.tools.property_definitions import (
 # DATASET_FP = Path(
 #     "/persistent/colabfit_raw_data/new_raw_datasets/SN2_UnkeOliverMeuwly/"
 # )
-DATASET_FP = Path("data/sn2_reactions.npz")
+DATASET_FP = Path("data/sn2_jctc_2019")
 DATASET_NAME = "SN2_JCTC_2019"
 
 SOFTWARE = "ORCA 4.0.1"
