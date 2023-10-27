@@ -24,7 +24,7 @@ DS_NAME = "Co_dimer_JPCA_2022"
 # DS_PATH = Path(
 #     "/persistent/colabfit_raw_data/new_raw_datasets_2.0/Co_dimer/Co_dimer_data/"
 # )
-DS_PATH = Path().cwd().parent / "data/Co_dimer_data"  # Local
+DS_PATH = Path().cwd() / "data/Co_dimer_data"  # Local
 XYZ_PATH = DS_PATH / "structures_xyz"
 
 PUBLICATION = "https://doi.org/10.1021/acs.jpca.1c08950"
