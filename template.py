@@ -78,6 +78,20 @@ CO_METADATA = {
     "zpve": {"field": "zpve", "units": "Ha"},
 }
 
+# If obvious configuration divisions exist, create mapping
+# In this example, the configurations set name is the first element;
+# the second element is the query with which to select configurations -- often
+# this queries over the "name" field, as shown.
+# The third element is the configuration set description. This should be human-readable
+# If no divisions exist, simply set CSS = None
+CSS = [
+    [
+        f"{DATASET_NAME}_aluminum",
+        {"names": {"$regex": "aluminum"}},
+        f"Configurations of aluminum from {DATASET_NAME} dataset",
+    ]
+]
+
 
 def reader(filepath: Path):
     """
@@ -141,6 +155,7 @@ def main(argv):
         client.insert_data(
             configurations=configurations,
             ds_id=ds_id,
+            co_md_map=CO_METADATA,
             property_map=PROPERTY_MAP,
             generator=False,
             verbose=True,
@@ -153,26 +168,18 @@ def main(argv):
     # materials), remove the following lines through 'cs_ids.append(...)' and from
     # 'insert_dataset(...) function remove 'cs_ids=cs_ids' argument.
 
-    cs_regexes = [
-        [
-            f"{DATASET_NAME}_aluminum",
-            "aluminum",
-            f"Configurations of aluminum from {DATASET_NAME} dataset",
-        ]
-    ]
-
     cs_ids = []
+    if CSS:
+        for i, (name, query, desc) in enumerate(CSS):
+            cs_id = client.query_and_insert_configuration_set(
+                co_hashes=all_co_ids,
+                ds_id=ds_id,
+                name=name,
+                description=desc,
+                query=query,
+            )
 
-    for i, (name, regex, desc) in enumerate(cs_regexes):
-        cs_id = client.query_and_insert_configuration_set(
-            co_hashes=all_co_ids,
-            ds_id=ds_id,
-            name=name,
-            description=desc,
-            query={"names": {"$regex": regex}},
-        )
-
-        cs_ids.append(cs_id)
+            cs_ids.append(cs_id)
 
     client.insert_dataset(
         do_hashes=all_do_ids,
