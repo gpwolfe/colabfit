@@ -52,7 +52,8 @@ from colabfit.tools.property_definitions import (
 
 
 DATASET_FP = Path("data/spice")
-DATASET_NAME = "SPICE"
+DATASET_NAME = "SPICE_2023"
+LICENSE = "Creative Commons 0"
 
 SOFTWARE = "Psi4 1.4.1"
 METHODS = "DFT-ωB97M-D3BJ"
