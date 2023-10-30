@@ -1,8 +1,10 @@
 """
-author:
+author: Gregory Wolfe
 
 Properties
 ----------
+energy
+forces
 
 Other properties added to metadata
 ----------------------------------
