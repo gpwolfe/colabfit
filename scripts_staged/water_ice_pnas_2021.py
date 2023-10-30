@@ -1,15 +1,17 @@
 """
-author:
+author: Gregory Wolfe
 
 Properties
 ----------
+energy
+forces
 
 Other properties added to metadata
 ----------------------------------
 
 File notes
 ----------
-uses same file format as NNIP_FeH_PRM_2021
+uses n2p2 file format
 
 """
 from argparse import ArgumentParser

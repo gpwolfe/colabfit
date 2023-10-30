@@ -1,5 +1,5 @@
 """
-author: Gregory Wolfe 
+author: Gregory Wolfe
 
 Properties
 ----------
@@ -55,7 +55,9 @@ DATASET_DESC = (
     "path-integral molecular dynamics (PIMD) simulations. The final dataset "
     "contains 814 structures of liquid water at different temperatures and "
     "pressures, water slab, and ice Ih and ice VIII. These systems cover a "
-    "wide range of structural and dynamical properties of water and ice."
+    "wide range of structural and dynamical properties of water and ice. "
+    "This dataset builds on the dataset from Schran, et al (2020) "
+    "https://doi.org/10.1063/5.0016004"
 )
 ELEMENTS = None
 GLOB_STR = "*.xyz"
