@@ -88,10 +88,6 @@ PROPERTY_MAP = {
     ],
 }
 
-CO_METADATA = {
-    "enthalpy": {"field": "h", "units": "Ha"},
-    "zpve": {"field": "zpve", "units": "Ha"},
-}
 
 CSS = [
     (

@@ -148,8 +148,8 @@ PROPERTY_MAP = {
 }
 
 CO_METADATA = {
-    "distances-to-migrating-atoms": {"field": "r", "units": "Ha"},
-    "distances-to-vacancy": {"field": "r_v", "units": "Ha"},
+    "distances-to-migrating-atoms": {"field": "r"},
+    "distances-to-vacancy": {"field": "r_v"},
     "vacancy-location": {"field": "vacancy"},
 }
 file_keys = [
