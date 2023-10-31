@@ -11,8 +11,12 @@ Other properties added to metadata
 vacancy
 distance to vacancy
 distance to migrating atoms
+
+
 File notes
 ----------
+Can be run from ingest pod
+
 vacancy position where exists added to CO metadata as dict (ase.Atoms.todict)
 
 Enhanced_Validation_Set DATA.json file:
