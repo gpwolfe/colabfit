@@ -64,7 +64,7 @@ DATASET_FP = Path("data/aCdataset-zenodo")
 DATASET_NAME = "aC_JCP_2023"
 
 SOFTWARE = "VASP"
-METHODS = "LDA"
+METHODS = "DFT-LDA"
 
 PUBLICATION = "https://doi.org/10.1063/5.0159349"
 DATA_LINK = "https://doi.org/10.5281/zenodo.7905585"
@@ -174,9 +174,18 @@ DSS = [
 ]
 
 
+def labels_builder(fp, config):
+    labels = ["process"]
+    if fp.parts[-2].split("_")[-1] in ["amorphous", "crystal"]:
+        labels.append(fp.parts[-2].split("_")[-1])
+    labels.append(config.info["process"])
+    return labels
+
+
 def reader(fp: Path):
     configs = read(fp, index=":")
     for i, config in enumerate(configs):
+        config.info["labels"] = labels_builder(fp, config)
         config.info["name"] = f"{fp.parts[-2]}_{fp.stem}_{i}"
     return configs
 
@@ -213,6 +222,7 @@ def main(argv):
             file_path=fp,
             file_format="folder",
             name_field="name",
+            labels_field="labels",
             elements=ELEMENTS,
             reader=reader,
             glob_string=ds_glob,
