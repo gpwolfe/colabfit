@@ -26,6 +26,10 @@ File notes
 ----------
 virial is a 6-vector, not a 9-vector
 
+files formatted with the MLIP package: https://mlip.skoltech.ru/
+manula can be viewed online here:
+https://gitlab.com/ashapeev/mlip-2-paper-supp-info/-/blob/master/manual.pdf
+
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
