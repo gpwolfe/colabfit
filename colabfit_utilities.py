@@ -3,7 +3,141 @@ from colabfit.tools.converters import AtomicConfiguration
 from collections import defaultdict
 import numpy as np
 from pathlib import Path
+import re
 
+
+####################################################################################
+"""
+MLIP
+Reader function and functions used within reader function for MLIP-formatted .cfg files
+The manual for MLIP can be viewed online here:
+https://gitlab.com/ashapeev/mlip-2-paper-supp-info/-/blob/master/manual.pdf
+
+Note that stresses are virials multiplied by cell volume. Units are eV
+Energy: eV
+Forces: eV/A
+Coordinates may be cartesian or 'direct'. This is handled in the reader function
+
+Ex. file:
+BEGIN_CFG
+ Size
+    4
+ Supercell
+    4.3499999999999996e+00 0.0000000000000000e+00 0.0000000000000000e+00
+    0.0000000000000000e+00 4.3499999999999996e+00 0.0000000000000000e+00
+    0.0000000000000000e+00 0.0000000000000000e+00 4.3499999999999996e+00
+ AtomData:  id type       cartes_x      cartes_y    cartes_z  fx   fy   fz
+    1 0  [corresponding float values...]
+    2 0  [corresponding float values...]
+    3 0  [corresponding float values...]
+    4 0  [corresponding float values...]
+ Energy
+    -2.4831664090000000e+01
+ PlusStress:  xx          yy          zz          yz          xz          xy
+     [6 float values...]
+ Feature   EFS_by	VASP
+ Feature   mindist	3.075914
+END_CFG
+"""
+SYMBOL_DICT = {"0": "Zr", "1": "Sn"}
+
+
+def convert_stress(keys, stress):
+    stresses = {k: s for k, s in zip(keys, stress)}
+    return [
+        [stresses["xx"], stresses["xy"], stresses["xz"]],
+        [stresses["xy"], stresses["yy"], stresses["yz"]],
+        [stresses["xz"], stresses["yz"], stresses["zz"]],
+    ]
+
+
+def reader(filepath):
+    with open(filepath, "rt") as f:
+        energy = None
+        forces = None
+        coords = []
+        cell = []
+        symbols = []
+        config_count = 0
+        for line in f:
+            if line.strip().startswith("Size"):
+                size = int(f.readline().strip())
+            elif line.strip().lower().startswith("supercell"):
+                cell.append([float(x) for x in f.readline().strip().split()])
+                cell.append([float(x) for x in f.readline().strip().split()])
+                cell.append([float(x) for x in f.readline().strip().split()])
+            elif line.strip().startswith("Energy"):
+                energy = float(f.readline().strip())
+            elif line.strip().startswith("PlusStress"):
+                stress_keys = line.strip().split()[-6:]
+                stress = [float(x) for x in f.readline().strip().split()]
+                stress = convert_stress(stress_keys, stress)
+            elif line.strip().startswith("AtomData:"):
+                keys = line.strip().split()[1:]
+                if "fx" in keys:
+                    forces = []
+                for i in range(size):
+                    li = {
+                        key: val for key, val in zip(keys, f.readline().strip().split())
+                    }
+                    symbols.append(SYMBOL_DICT[li["type"]])
+                    if "cartes_x" in keys:
+                        coords.append(
+                            [
+                                float(c)
+                                for c in [
+                                    li["cartes_x"],
+                                    li["cartes_y"],
+                                    li["cartes_z"],
+                                ]
+                            ]
+                        )
+                    elif "direct_x" in keys:
+                        coords.append(
+                            [
+                                float(c)
+                                for c in [
+                                    li["direct_x"],
+                                    li["direct_y"],
+                                    li["direct_z"],
+                                ]
+                            ]
+                        )
+
+                    if forces:
+                        forces.append(
+                            [float(f) for f in [li["fx"], li["fy"], li["fz"]]]
+                        )
+
+            elif line.startswith("END_CFG"):
+                if "cartes_x" in keys:
+                    config = AtomicConfiguration(
+                        positions=coords, symbols=symbols, cell=cell
+                    )
+                elif "direct_x" in keys:
+                    config = AtomicConfiguration(
+                        scaled_positions=coords, symbols=symbols, cell=cell
+                    )
+                config.info["energy"] = energy
+                if forces:
+                    config.info["forces"] = forces
+                config.info["stress"] = stress
+                config.info["name"] = f"{filepath.stem}_{config_count}"
+                config_count += 1
+                yield config
+                forces = None
+                stress = []
+                coords = []
+                cell = []
+                symbols = []
+                energy = None
+
+
+####################################################################################
+"""
+N2P2
+Reader function and regexes used in parsing n2p2 formatted files
+"""
 
 ATOM_RE = re.compile(
     r"atom\s+(?P<x>\-?\d+\.\d+)\s+(?P<y>\-?\d+\.\d+)\s+"
@@ -18,7 +152,7 @@ EN_RE = re.compile(
 )
 
 
-def reader(filepath):
+def n2p2_reader(filepath):
     with open(filepath) as f:
         configurations = []
         lattice = []
@@ -218,7 +352,7 @@ def assemble_props(filepath: Path):
 # Above used with below:
 
 
-def reader(filepath):
+def npy_reader(filepath):
     props = assemble_props(filepath)
     print(filepath)
     configs = [
