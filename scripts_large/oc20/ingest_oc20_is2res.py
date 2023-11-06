@@ -13,6 +13,10 @@ Files with different "random123456" ids are contained in the subdir uc
 These are plain extxyz files
 There is a set of metadata for the latter contained in the file 'oc20_data_mapping.pkl'
 
+The reconnect functool function comes from:
+https://gist.github.com/anthonywu/1696591#file-graceful_auto_reconnect-py
+as a way to handle a disconnect/connection reset by peer (hopfully)
+
 """
 
 from argparse import ArgumentParser
@@ -25,12 +29,19 @@ from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     free_energy_pd,
 )
+import functools
 import itertools
+import logging
 import multiprocessing
 import numpy as np
 from pathlib import Path
 import sys
+import time
 from tqdm import tqdm
+import aiohttp
+import asyncio
+import pymongo
+
 
 BATCH_SIZE = 512
 
@@ -65,8 +76,8 @@ DS_DESC = (
     "section of the Open Catalyst Project GitHub page."
 )
 DATASET = "OC20-IS2RES-Train"
-DATASET_FP = Path("/vast/gw2338/is2res_train_trajectories")
-# DATASET_FP = Path("is2res_train_trajectories")  # remove
+DATASET_FP = Path("/vast/gw2338/is2res_train_trajectories")  # Greene
+DATASET_FP = Path("is2res_train_trajectories")  # local
 
 PKL_FP = DATASET_FP / "oc20_data_mapping.pkl"
 GLOB_STR = "*.extxyz"
@@ -74,6 +85,24 @@ NAME_FIELD = "name"
 LABELS_FIELD = "labels"
 
 ID_META_MAP = np.load(PKL_FP, allow_pickle=True)
+
+
+async def fetch_data():
+    url = "http://10.32.250.13:30007"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as _:
+            pass
+
+
+async def poke_nodeport_and_sleep():
+    while True:
+        await fetch_data()
+        await asyncio.sleep(240)
+
+
+async def run_poke_and_sleep():
+    await poke_nodeport_and_sleep()
+
 
 with open(DATASET_FP / "system.txt", "r") as f:
     ref_text = [x.strip().split(",") for x in f.readlines()]
@@ -176,6 +205,27 @@ def read_for_pool(filepath):
     return configurations
 
 
+def auto_reconnect(mongo_func):
+    """Gracefully handle a reconnection event."""
+
+    @functools.wraps(mongo_func)
+    def wrapper(*args, **kwargs):
+        for attempt in range(MAX_AUTO_RECONNECT_ATTEMPTS):
+            try:
+                return mongo_func(*args, **kwargs)
+            except pymongo.errors.AutoReconnect as e:
+                wait_t = 0.5 * pow(2, attempt)  # exponential back off
+                logging.warning(
+                    "PyMongo auto-reconnecting... %s. Waiting %.1f seconds.",
+                    str(e),
+                    wait_t,
+                )
+                time.sleep(wait_t)
+
+    return wrapper
+
+
+@auto_reconnect
 def get_configs(ds_id, args):
     ids = []
     fps = list(DATASET_FP.rglob(GLOB_STR))
@@ -210,7 +260,11 @@ def get_configs(ds_id, args):
     return ids
 
 
-def main(argv):
+MAX_AUTO_RECONNECT_ATTEMPTS = 100
+
+
+@auto_reconnect
+async def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     parser.add_argument(
@@ -254,6 +308,11 @@ def main(argv):
     )
 
 
+async def submain(args):
+    asyncio.create_task(main(args))
+    await run_poke_and_sleep()
+
+
 if __name__ == "__main__":
     args = sys.argv[1:]
-    main(args)
+    asyncio.run(submain(args))
