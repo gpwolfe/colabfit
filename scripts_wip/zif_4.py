@@ -190,7 +190,7 @@ def read_energy(energy_fp):
 def reader(pos_fp):
     cell_fp = next(pos_fp.parent.glob("*.cell"))
     name = f"zif_4_{pos_fp.parts[-2]}"
-    configs = iread(pos_fp, index=":1000", format="extxyz")  # comment out
+    configs = iread(pos_fp, index=":", format="extxyz")  # comment out
     # configs = iread(pos_fp, index=":", format="extxyz")
     cells = read_cell_stress(cell_fp)
     force_fp = next(pos_fp.parent.glob("*.frc"))
