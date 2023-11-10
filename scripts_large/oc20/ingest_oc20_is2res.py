@@ -72,12 +72,12 @@ DS_DESC = (
     "Configurations for the initial structure to relaxed energy "
     "(IS2RE) and initial structure to relaxed structure (IS2RS) tasks of "
     'Open Catalyst 2020 (OC20). Dataset corresponds to the "All IS2RE/S training '
-    '(~466k trajectories)" data split under the "Relaxation Trajectories" '
+    'data split under the "Relaxation Trajectories" '
     "section of the Open Catalyst Project GitHub page."
 )
-DATASET = "OC20-IS2RES-Train"
+DATASET = "OC20_IS2RES_train"
 DATASET_FP = Path("/vast/gw2338/is2res_train_trajectories")  # Greene
-DATASET_FP = Path("is2res_train_trajectories")  # local
+# DATASET_FP = Path("is2res_train_trajectories")  # local
 
 PKL_FP = DATASET_FP / "oc20_data_mapping.pkl"
 GLOB_STR = "*.extxyz"
