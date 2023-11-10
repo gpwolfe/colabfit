@@ -15,6 +15,10 @@ only the 0% volume file for 300K. Likewise the crystal 1500 is only available fo
 -4 and liquid for 1500 is available for 0 and 2, while liquid 1750K is available for
 -2 and -4.
 
+directories have been renamed after unzipping for naming/config set purposes
+data is staged on Greene in /scratch/gw2338
+may be too large for ingest pod to manage quickly
+
 energy file header:
 Step Nr.   Time[fs]  Kin.[a.u.]  Temp[K]  Pot.[a.u.]  Cons Qty[a.u.]  UsedTime[s]
 This file will not be used, as potential energy is also reported in the position file
