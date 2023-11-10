@@ -55,14 +55,14 @@ PI_METADATA = {
 PROPERTY_MAP = {
     "potential-energy": [
         {
-            "energy": {"field": "energy", "units": "eV"},
+            "energy": {"field": "dft_energy", "units": "eV"},
             "per-atom": {"value": False, "units": None},
             "_metadata": PI_METADATA,
         }
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "forces", "units": "eV/A"},
+            "forces": {"field": "dft_forces", "units": "eV/A"},
             "_metadata": PI_METADATA,
         },
     ],
