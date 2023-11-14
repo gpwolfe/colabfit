@@ -40,8 +40,8 @@ from colabfit.tools.property_definitions import (
     potential_energy_pd,
 )
 
-DS_PATH = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/silica")
-DS_PATH = Path().cwd().parent / "data/silica/database/"
+# DS_PATH = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/silica")
+DS_PATH = Path().cwd().parent / "data/silica_npjcm_2022/database/"
 GLOB_STR = "dataset.scan.2.xyz"
 DS_NAME = "Silica_NPJCM_2022"
 AUTHORS = ["Linus C. Erhard", "Jochen Rohrer", "Karsten Albe", "Volker L. Deringer"]
@@ -143,9 +143,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     ds_id = generate_ds_id()

@@ -58,7 +58,7 @@ LINKS = [
 ]
 AUTHORS = ["Tong Wang", "Xinheng He", "Mingyu Li", "Bin Shao", "Tie-Yan Liu"]
 DATASET_DESC = (
-    "This dataset covers the conformational space of Chignolin with "
+    "This dataset covers the conformational space of chignolin with "
     "DFT-level precision. We sequentially applied replica exchange molecular "
     "dynamics (REMD), conventional MD, and ab initio MD (AIMD) simulations on a "
     "10 amino acid protein, Chignolin, and finally collected 2 "
@@ -115,7 +115,7 @@ def train_reader(fp):
     for i, config in tqdm(enumerate(configs)):
         name = f"chig_aimd_train_{config.info['name']}_{i}"
         config.info["name"] = name
-        config.info["labels"] = ["train"]
+        config.info["labels"] = ["train", f"anchor_{fp.parts[-2]}"]
 
         yield config
 
