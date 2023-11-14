@@ -32,10 +32,10 @@ import numpy as np
 from pathlib import Path
 import sys
 
-DATASET_FP = Path(
-    "/persistent/colabfit_raw_data/new_raw_datasets_2.0/saidi_23_dnps"
-)  # HSRN K8s pod location
-# DATASET_FP = Path("data/saidi_23_dnps/Training_Data")
+# DATASET_FP = Path(
+#     "/persistent/colabfit_raw_data/new_raw_datasets_2.0/saidi_23_dnps"
+# )  # HSRN K8s pod location
+DATASET_FP = Path("data/saidi_23_dnps/Training_Data")
 DATASET = "23-DNPs-RSCDD-2023"
 
 PUBLICATION = "https://doi.org/10.1039/D3DD00046J"
@@ -150,7 +150,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -159,9 +159,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
