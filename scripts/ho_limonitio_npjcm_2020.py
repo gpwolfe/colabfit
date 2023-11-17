@@ -22,7 +22,7 @@ File notes
 """
 from argparse import ArgumentParser
 from ase.io import read
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
@@ -34,10 +34,12 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/ho_limonitio"
 )
-# DATASET_FP = Path("data/limoniti")  # remove
-DATASET = "HO-LiMoNiTi-NPJCM-2020"
+# DATASET_FP = Path("data/limoniti")  # comment
+DATASET = "HO_LiMoNiTi_NPJCM_2020"
 
 SOFTWARE = "VASP"
+DATA_LINK = "https://doi.org/10.24435/materialscloud:2020.0037/v1"
+PUBLICATION = "https://doi.org/10.1038/s41524-020-0323-8"
 LINKS = [
     "https://doi.org/10.24435/materialscloud:2020.0037/v1",
     "https://doi.org/10.1038/s41524-020-0323-8",
@@ -85,7 +87,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -94,10 +96,14 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
 
@@ -123,35 +129,35 @@ def main(argv):
     }
     glob_dss = [
         [
-            f"{DATASET}-LiMoNiTi-train",
+            f"{DATASET}_LiMoNiTi_train",
             "LMNTO-SCAN-train-data",
             f"Training configurations of Li8Mo2Ni7Ti7O32 from {DATASET} used in the "
             "training of an ANN, whereby total energy is extrapolated "
             "by a Taylor expansion as a means of reducing computational costs.",
         ],
         [
-            f"{DATASET}-LiMoNiTi-validation",
+            f"{DATASET}_LiMoNiTi_validation",
             "LMNTO-SCAN-validation-data",
             f"Validation configurations of Li8Mo2Ni7Ti7O32 from {DATASET} used in the "
             "training of an ANN, whereby total energy is extrapolated by a Taylor "
             "expansion as a means of reducing computational costs.",
         ],
         [
-            f"{DATASET}-bulk-water-train-test",
+            f"{DATASET}_bulk_water_train_test",
             "liquid-64water-AIMD-RPBE-D3-train-test-data",
             f"Training and testing configurations of bulk water from {DATASET} used in "
             "the training of an ANN, whereby total energy is extrapolated by a Taylor "
             "expansion as a means of reducing computational costs.",
         ],
         [
-            f"{DATASET}-bulk-water-validation",
+            f"{DATASET}_bulk_water_validation",
             "liquid-64water-AIMD-RPBE-D3-validation-data",
             f"Validation configurations of bulk water from {DATASET} used in the "
             "training of an ANN, whereby total energy is extrapolated by a Taylor "
             "expansion as a means of reducing computational costs.",
         ],
         [
-            f"{DATASET}-water-clusters",
+            f"{DATASET}_water_clusters",
             "water-clusters-BLYP-D3",
             f"Configurations of water clusters from {DATASET} used in the training of "
             "an ANN, whereby total energy is extrapolated by a Taylor expansion as a "
@@ -159,6 +165,7 @@ def main(argv):
         ],
     ]
     for glob_ds in glob_dss:
+        ds_id = generate_ds_id()
         configurations = load_data(
             file_path=DATASET_FP / glob_ds[1],
             file_format="folder",
@@ -172,6 +179,7 @@ def main(argv):
         ids = list(
             client.insert_data(
                 configurations,
+                ds_id=ds_id,
                 property_map=property_map,
                 generator=False,
                 verbose=False,
@@ -180,37 +188,10 @@ def main(argv):
 
         all_co_ids, all_do_ids = list(zip(*ids))
 
-        # dataset name, dataset directory, dataset description
-
-        # cs_ids = []
-
-        # for i, (name, regex, desc) in enumerate(cs_regexes):
-        #     co_ids = client.get_data(
-        #         "configurations",
-        #         fields="hash",
-        #         query={
-        #             "hash": {"$in": all_co_ids},
-        #             "names": {"$regex": regex},
-        #         },
-        #         ravel=True,
-        #     ).tolist()
-
-        #     print(
-        #         f"Configuration set {i}",
-        #         f"({name}):".rjust(22),
-        #         f"{len(co_ids)}".rjust(7),
-        #     )
-        #     if len(co_ids) > 0:
-        #         cs_id = client.insert_configuration_set(co_ids, description=desc,
-        #                                                 name=name)
-
-        #         cs_ids.append(cs_id)
-        #     else:
-        #         pass
-
         client.insert_dataset(
             do_hashes=all_do_ids,
             name=glob_ds[0],
+            ds_id=ds_id,
             authors=AUTHORS,
             links=LINKS,
             description=glob_ds[2],

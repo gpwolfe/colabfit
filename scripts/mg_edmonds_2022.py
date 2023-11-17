@@ -25,7 +25,7 @@ File notes
 """
 from argparse import ArgumentParser
 from ase import Atoms
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     cauchy_stress_pd,
@@ -38,6 +38,21 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/"
     "mg_edmonds_2022/structures_packed/"
+)
+
+DS_NAME = "Mg_edmonds_2022"
+AUTHORS = ["Marvin Poul"]
+DATA_LINK = "https://doi.org/10.17617/3.A3MB7Z"
+PUBLICATION = "https://doi.org/10.1103/PhysRevB.107.104103"
+LINKS = [
+    "https://github.com/eisenforschung/magnesium-mtp-training-data",
+    "https://doi.org/10.17617/3.A3MB7Z",
+    "https://arxiv.org/abs/2207.04009",
+    "https://doi.org/10.1103/PhysRevB.107.104103",
+]
+DS_DESC = (
+    "16748 configurations of magnesium with gathered energy, "
+    "stress and forces at the DFT level of theory."
 )
 
 
@@ -76,7 +91,11 @@ def reader(filepath: Path):
         coords, element, pbcs, cells, stress, energy, forces, names
     ):
         atom = Atoms(positions=coords, symbols=element, pbc=pbcs, cell=cells)
-        atom.info["stress"] = stress
+        atom.info["stress"] = [
+            [stress[0], stress[5], stress[4]],
+            [stress[5], stress[1], stress[3]],
+            [stress[4], stress[3], stress[2]],
+        ]
         atom.info["energy"] = energy
         atom.info["forces"] = forces
         atom.info["name"] = f"{file_key}_{names}"
@@ -92,7 +111,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -101,9 +120,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
@@ -118,8 +140,10 @@ def main(argv):
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(cauchy_stress_pd)
     metadata = {
-        "software": {"value": "VASP"},
+        "software": {"value": "VASP 5.4.4"},
         "method": {"value": "DFT"},
+        "encut": {"value": "550 eV"},
+        "kpoints": {"value": "27 x 27 x 27"},
     }
     co_md_map = {
         # this is a stress tensor of size 6, not 9 or 3x3
@@ -141,14 +165,23 @@ def main(argv):
         ],
         "atomic-forces": [
             {
-                "forces": {"field": "forces", "units": "Unknown"},
+                "forces": {"field": "forces", "units": "eV/A"},
+                "_metadata": metadata,
+            }
+        ],
+        "cauchy-stress": [
+            {
+                "stress": {"field": "stress", "units": "kbar"},
+                "volume-normalized": {"value": True, "units": None},
                 "_metadata": metadata,
             }
         ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
@@ -207,38 +240,25 @@ def main(argv):
     ]
 
     cs_ids = []
-
     for i, (name, regex, desc) in enumerate(cs_regexes):
-        co_ids = client.get_data(
-            "configurations",
-            fields="hash",
-            query={"hash": {"$in": all_co_ids}, "names": {"$regex": regex}},
-            ravel=True,
-        ).tolist()
-
-        print(
-            f"Configuration set {i}",
-            f"({name}):".rjust(22),
-            f"{len(co_ids)}".rjust(7),
+        cs_id = client.query_and_insert_configuration_set(
+            co_hashes=all_co_ids,
+            ds_id=ds_id,
+            name=name,
+            description=desc,
+            query={"names": {"$regex": regex}},
         )
-
-        cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
         cs_ids.append(cs_id)
 
     client.insert_dataset(
         cs_ids=cs_ids,
         do_hashes=all_do_ids,
-        name="Mg_edmonds_2022",
-        authors=["Marvin Poul"],
-        links=[
-            "https://github.com/eisenforschung/magnesium-mtp-training-data",
-            "https://doi.org/10.17617/3.A3MB7Z",
-            "https://arxiv.org/abs/2207.04009",
-            "https://doi.org/10.1103/PhysRevB.107.104103",
-        ],
-        description="16748 configurations of magnesium with gathered energy, "
-        "stress and forces at the DFT level of theory.",
+        ds_id=ds_id,
+        name=DS_NAME,
+        authors=AUTHORS,
+        links=LINKS,
+        description=DS_DESC,
         verbose=True,
     )
 

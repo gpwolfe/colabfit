@@ -22,7 +22,7 @@ File notes
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     cauchy_stress_pd,
@@ -35,10 +35,15 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/in2se3_2d_dpgen"
 )
-DATASET = "In2Se3-2D-DPGEN"
+# DATASET_FP = Path().cwd().parent / "data/in2se3_2d_dpgen"  # local
+DATASET = "In2Se3_2D_DPGEN"
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
+PUBLICATION = "https://doi.org/10.1103/PhysRevB.104.174107"
+DATA_LINK = (
+    "https://www.aissquare.com/datasets/detail?pageType=datasets&name=In2Se3-2D-dpgen"
+)
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=In2Se3-2D-dpgen",
     "https://doi.org/10.1103/PhysRevB.104.174107",
@@ -133,7 +138,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -142,9 +147,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
@@ -160,9 +168,13 @@ def main(argv):
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(cauchy_stress_pd)
 
+    ds_id = generate_ds_id()
+
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
+        "encut": {"value": "700 eV"},
+        "kspacing": {"value": "0.3/Ang"}
         # "": {"field": ""}
     }
     property_map = {
@@ -191,6 +203,7 @@ def main(argv):
         client.insert_data(
             configurations,
             property_map=property_map,
+            ds_id=ds_id,
             generator=False,
             verbose=True,
         )
@@ -201,6 +214,7 @@ def main(argv):
     client.insert_dataset(
         do_hashes=all_do_ids,
         name=DATASET,
+        ds_id=ds_id,
         authors=AUTHORS,
         links=LINKS,
         description=DS_DESC,
