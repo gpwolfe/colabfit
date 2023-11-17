@@ -64,7 +64,7 @@ from gap
 method: MBE
 """
 from argparse import ArgumentParser
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
@@ -80,6 +80,21 @@ DATASET_FP = Path(
     "/mbgdml-h2o-meoh-mecn-md/"
 )
 
+DS_NAME = "mbGDML_maldonado_2023"
+
+AUTHORS = ["Alex M. Maldonado"]
+PUBLICATION = "https://doi.org/10.26434/chemrxiv-2023-wdd1r"
+DATA_LINK = "https://doi.org/10.5281/zenodo.7112197"
+LINKS = [
+    "https://doi.org/10.5281/zenodo.7112197",
+    "https://doi.org/10.26434/chemrxiv-2023-wdd1r",
+]
+DS_DESC = (
+    "Configurations of water, acetonitrile and methanol,"
+    " simulated with ASE and modeled using a variety of software and"
+    " methods: GAP, SchNet, GDML, ORCA and mbGDML. Forces and potential"
+    " energy included; metadata includes kinetic energy and velocities."
+)
 soft_meth = namedtuple("soft_meth", ["method", "software"])
 # The [-3]rd element of the Path(filepath).parts == key below
 method_soft_dict = {
@@ -131,7 +146,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -140,9 +155,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
@@ -186,10 +204,12 @@ def main(argv):
             }
         ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
             co_md_map=co_md_map,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -227,38 +247,25 @@ def main(argv):
     ]
 
     cs_ids = []
-
     for i, (name, regex, desc) in enumerate(cs_regexes):
-        co_ids = client.get_data(
-            "configurations",
-            fields="hash",
-            query={"hash": {"$in": all_co_ids}, "names": {"$regex": regex}},
-            ravel=True,
-        ).tolist()
-
-        print(
-            f"Configuration set {i}",
-            f"({name}):".rjust(22),
-            f"{len(co_ids)}".rjust(7),
+        cs_id = client.query_and_insert_configuration_set(
+            co_hashes=all_co_ids,
+            ds_id=ds_id,
+            name=name,
+            description=desc,
+            query={"names": {"$regex": regex}},
         )
 
-        if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
+        cs_ids.append(cs_id)
 
-            cs_ids.append(cs_id)
     client.insert_dataset(
         cs_ids=cs_ids,
+        ds_id=ds_id,
         do_hashes=all_do_ids,
-        name="mbGDML_maldonado_2023",
-        authors=["Alex M. Maldonado"],
-        links=[
-            "https://doi.org/10.5281/zenodo.7112197",
-            "https://doi.org/10.26434/chemrxiv-2023-wdd1r",
-        ],
-        description="Configurations of water, acetonitrile and methanol,"
-        " simulated with ASE and modeled using a variety of software and"
-        " methods: GAP, SchNet, GDML, ORCA and mbGDML. Forces and potential"
-        " energy included; metadata includes kinetic energy and velocities.",
+        name=DS_NAME,
+        authors=AUTHORS,
+        links=LINKS,
+        description=DS_DESC,
         verbose=True,
     )
 

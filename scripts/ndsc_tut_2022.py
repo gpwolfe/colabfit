@@ -35,7 +35,7 @@ pbc
 
 from argparse import ArgumentParser
 import ase
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     cauchy_stress_pd,
@@ -47,6 +47,18 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/ndsc_tut/"
     "ndsc_tut-master/example_data/"
     "hcp_Mg_geomopti_randshear_pm_0.01_product_symm_k0p012.extxyz"
+)
+DS_NAME = "NDSC_TUT_2022"
+PUBLICATION = "https://doi.org/10.48550/arXiv.2207.11828"
+DATA_LINK = "https://github.com/ConnorSA/ndsc_tut"
+LINKS = [
+    "https://github.com/ConnorSA/ndsc_tut",
+    "https://doi.org/10.48550/arXiv.2207.11828",
+]
+AUTHORS = ["Connor Allen", "Albert P. Bartok"]
+DS_DESC = (
+    "500 configurations of Mg2 for MD prediction using a model "
+    "fitted on Al, W, Mg and Si."
 )
 
 
@@ -81,7 +93,7 @@ def main(argv):
     configurations = load_data(
         file_path=DATASET_FP,
         file_format="extxyz",
-        name_field="config_type",
+        name_field=None,
         elements=["Mg"],
         reader=reader,
         # glob_string='*xyz',
@@ -93,7 +105,10 @@ def main(argv):
     metadata = {
         "software": {"value": "CASTEP"},
         "method": {"value": "DFT"},
+        "encut": {"value": "520 eV"},
+        "kspacing": {"value": "0.012/A"},
     }
+    co_md = {"config_type": {"field": "config_type"}}
     property_map = {
         "potential-energy": [
             {
@@ -116,10 +131,12 @@ def main(argv):
             }
         ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
-            # co_md_map=co_md_map,
+            ds_id=ds_id,
+            co_md_map=co_md,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -130,14 +147,11 @@ def main(argv):
 
     client.insert_dataset(
         do_hashes=all_do_ids,
-        name="NDSC_TUT_2022",
-        authors=["Connor Allen", "Albert P. Bartok"],
-        links=[
-            "https://github.com/ConnorSA/ndsc_tut",
-            "https://doi.org/10.48550/arXiv.2207.11828",
-        ],
-        description="500 configurations of Mg2 for MD prediction using a model "
-        "fitted on Al, W, Mg and Si.",
+        ds_id=ds_id,
+        name=DS_NAME,
+        authors=AUTHORS,
+        links=LINKS,
+        description=DS_DESC,
         verbose=True,
     )
 

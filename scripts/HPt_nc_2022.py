@@ -18,19 +18,39 @@ Run: $ python3 HPt_nc_2022.py -i (or --ip) <database_ip>
 """
 from argparse import ArgumentParser
 import ase
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
+    cauchy_stress_pd,
     potential_energy_pd,
 )
 from typing import List
 import numpy as np
 from pathlib import Path
-from pymongo.errors import OperationFailure
 import sys
 
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/hpt_nc_2022/training"
+)
+
+# DATASET_FP = Path().cwd().parent / "data/hpt_nc_2022" # local
+DS_NAME = "HPt_NC_2022"
+DATA_LINK = "https://doi.org/10.24435/materialscloud:r0-84"
+PUBLICATION = "https://doi.org/10.1038/s41467-022-32294-0"
+LINKS = [
+    "https://doi.org/10.24435/materialscloud:r0-84",
+    "https://doi.org/10.1038/s41467-022-32294-0",
+]
+AUTHORS = [
+    "Jonathan Vandermause",
+    "Yu Xie",
+    "Jin Soo Lim",
+    "Cameron J. Owen",
+    "Boris Kozinsky",
+]
+DS_DESC = (
+    "A training dataset of 90,000 configurations "
+    "with interaction properties between H2 and Pt(111) surfaces."
 )
 
 
@@ -48,7 +68,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -57,13 +77,19 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+
+    ds_id = generate_ds_id()
 
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
+    client.insert_property_definition(cauchy_stress_pd)
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -75,7 +101,11 @@ def main(argv):
         generator=False,
     )
 
-    metadata = {"software": {"value": "VASP"}, "method": {"value": "DFT-PBE"}}
+    metadata = {
+        "software": {"value": "VASP"},
+        "method": {"value": "DFT-PBE"},
+        "encut": {"value": "450 eV"},
+    }
 
     property_map = {
         "potential-energy": [
@@ -91,10 +121,18 @@ def main(argv):
                 "_metadata": metadata,
             }
         ],
+        "cauchy-stress": [
+            {
+                "stress": {"field": "stress", "units": "GPa"},
+                "volume-normalized": {"value": True, "units": None},
+                "_metadata": metadata,
+            }
+        ],
     }
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -125,54 +163,26 @@ def main(argv):
             "PtH configurations from H/Pt(III)",
         ],
     ]
-
     cs_ids = []
-
     for i, (name, regex, desc) in enumerate(cs_regexes):
-        try:
-            co_ids = client.get_data(
-                "configurations",
-                fields="hash",
-                query={
-                    "hash": {"$in": all_co_ids},
-                    "names": {"$regex": regex},
-                },
-                ravel=True,
-            ).tolist()
-        except OperationFailure:
-            print(f"No match for regex: {regex}")
-            continue
-
-        print(
-            f"Configuration set {i}",
-            f"({name}):".rjust(25),
-            f"{len(co_ids)}".rjust(7),
+        cs_id = client.query_and_insert_configuration_set(
+            co_hashes=all_co_ids,
+            ds_id=ds_id,
+            name=name,
+            description=desc,
+            query={"names": {"$regex": regex}},
         )
 
-        if len(co_ids) == 0:
-            pass
-        else:
-            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
-
-            cs_ids.append(cs_id)
+        cs_ids.append(cs_id)
 
     client.insert_dataset(
         cs_ids=cs_ids,
         do_hashes=all_do_ids,
-        name="HPt_nc_2022",
-        authors=[
-            "Jonathan Vandermause",
-            "Yu Xie",
-            "Jin Soo Lim",
-            "Cameron J. Owen",
-            "Boris Kozinsky",
-        ],
-        links=[
-            "https://doi.org/10.24435/materialscloud:r0-84",
-            "https://doi.org/10.1038/s41467-022-32294-0",
-        ],
-        description="A training dataset of 90,000 configurations"
-        " with interaction properties between H2 and Pt(111) surfaces.",
+        ds_id=ds_id,
+        name=DS_NAME,
+        authors=AUTHORS,
+        links=LINKS,
+        description=DS_DESC,
         verbose=True,
     )
 
@@ -390,7 +400,12 @@ class OtfAnalysis:
             cur_struc.stds = np.array(self.uncertainty_list[i])
             cur_struc.info["energy"] = energy
             cur_struc.info["name"] = f"{self.filename.parts[-2]}_{i}"
-            cur_struc.stress = self.stress_list[i]
+            stress = self.stress_list[i]
+            cur_struc.info["stress"] = [
+                [stress[0], stress[5], stress[4]],
+                [stress[5], stress[1], stress[3]],
+                [stress[4], stress[3], stress[2]],
+            ]
             structures.append(cur_struc)
         return structures
 

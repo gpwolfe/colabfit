@@ -22,7 +22,7 @@ File notes
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     cauchy_stress_pd,
@@ -35,9 +35,9 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/lisips_sse_pbe"
 )
-DATASET = "LiSiPS-SSE-PBE"
+DATASET = "LiSiPS_SSE_PBE"
 
-SOFTWARE = "VASP"
+SOFTWARE = "VASP 5.4.4"
 METHODS = "DFT-PBE"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=LiSiPS-SSE-PBE",
@@ -118,7 +118,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -127,9 +127,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
@@ -148,6 +151,8 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
+        "encut": {"value": "650 eV"},
+        "kspacing": {"value": "0.26/Ang"}
         # "": {"field": ""}
     }
     property_map = {
@@ -172,9 +177,11 @@ def main(argv):
             }
         ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -186,6 +193,7 @@ def main(argv):
     client.insert_dataset(
         do_hashes=all_do_ids,
         name=DATASET,
+        ds_id=ds_id,
         authors=AUTHORS,
         links=LINKS,
         description=DS_DESC,
