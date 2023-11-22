@@ -28,7 +28,7 @@ files, including dipole and quadrupole moments, same and opposite spin,
 and polarizability
 """
 from argparse import ArgumentParser
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.property_definitions import potential_energy_pd
 from collections import defaultdict
@@ -38,6 +38,33 @@ import sys
 
 
 DATASET_PATH = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/qm7b")
+DATASET_PATH = Path().cwd().parent / "data/qm7b"
+
+
+DS_NAME = "QM7b_AlphaML"
+AUTHORS = [
+    "Yang Yang",
+    "Ka Un Lao",
+    "David M. Wilkins",
+    "Andrea Grisafi",
+    "Michele Ceriotti",
+    "Robert A. DiStasio Jr",
+]
+PUBLICATION = "https://doi.org/10.1038/s41597-019-0157-8"
+DATA_LINK = "https://doi.org/10.24435/materialscloud:2019.0002/v3"
+OTHER_LINKS = "http://doi.org/10.1073/pnas.1816132116"
+LINKS = [
+    "https://doi.org/10.24435/materialscloud:2019.0002/v3",
+    "https://doi.org/10.1038/s41597-019-0157-8",
+    "http://doi.org/10.1073/pnas.1816132116",
+]
+
+DS_DESC = (
+    "Energy, computed with LR-CCSD, "
+    "hybrid DFT (B3LYP & SCAN0) for 7211 molecules in QM7b and 52 "
+    "molecules in AlphaML showcase database."
+)
+
 
 # Regex parsers for header line and coordinate lines
 
@@ -152,7 +179,9 @@ def reader_b3lyp(file_path):
     return [atoms]
 
 
-def load_data_wrapper(client, reader, glob_string, metadata, co_md_map, energy_map):
+def load_data_wrapper(
+    client, reader, glob_string, metadata, co_md_map, energy_map, ds_id
+):
     configurations = load_data(
         # Data can be downloaded here:
         # 'https://archive.materialscloud.org/record/2019.0002/v3'
@@ -174,6 +203,7 @@ def load_data_wrapper(client, reader, glob_string, metadata, co_md_map, energy_m
                 co_md_map=co_md_map,
                 property_map=energy_map,
                 generator=False,
+                ds_id=ds_id,
                 verbose=True,
             )
         )
@@ -183,6 +213,7 @@ def load_data_wrapper(client, reader, glob_string, metadata, co_md_map, energy_m
                 configurations,
                 property_map=energy_map,
                 generator=False,
+                ds_id=ds_id,
                 verbose=True,
             )
         )
@@ -199,7 +230,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -208,10 +239,14 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+    ds_id = generate_ds_id()
 
     # Metadata and property maps
     ccsd_metadata = {
@@ -232,10 +267,10 @@ def main(argv):
         "software": {"value": "Psi4"},
         "method": {"value": "DFT-B3LYP"},
     }
-    b3lyp_co_md_map = {
-        "lumo-energy": {"field": "lumo_energy", "units": "a.u."},
-        "homo-energy": {"field": "homo_energy", "units": "a.u."},
-    }
+    # b3lyp_co_md_map = {
+    #     "lumo-energy": {"field": "lumo_energy", "units": "a.u."},
+    #     "homo-energy": {"field": "homo_energy", "units": "a.u."},
+    # }
 
     b3lyp_energy_map = {
         "potential-energy": [
@@ -262,8 +297,9 @@ def main(argv):
         reader_ccsd,
         "CCSD_daDZ/*.xyz",
         ccsd_metadata,
-        None,
+        CO_MD,
         ccsd_total_energy_map,
+        ds_id=ds_id,
     )
     all_co_ids.update(co_ids)
     all_do_ids.update(do_ids)
@@ -272,8 +308,9 @@ def main(argv):
         reader_b3lyp,
         "B3LYP_daTZ/*xyz",
         b3lyp_metadata,
-        b3lyp_co_md_map,
+        CO_MD,
         b3lyp_energy_map,
+        ds_id=ds_id,
     )
     all_co_ids.update(co_ids)
     all_do_ids.update(do_ids)
@@ -282,8 +319,9 @@ def main(argv):
         reader_b3lyp,
         "B3LYP_daDZ/*.xyz",
         b3lyp_metadata,
-        b3lyp_co_md_map,
+        CO_MD,
         b3lyp_energy_map,
+        ds_id=ds_id,
     )
     all_co_ids.update(co_ids)
     all_do_ids.update(do_ids)
@@ -292,8 +330,9 @@ def main(argv):
         reader_b3lyp,
         "SCAN0_daDZ/*.xyz",
         scan0_metadata,
-        None,
+        CO_MD,
         b3lyp_energy_map,
+        ds_id=ds_id,
     )
     all_co_ids.update(co_ids)
     all_do_ids.update(do_ids)
@@ -326,58 +365,58 @@ def main(argv):
             " and the d-aug-cc-pVDZ basis set",
         ],
     ]
-
     cs_ids = []
-
+    all_co_ids = list(all_co_ids)
+    all_do_ids = list(all_do_ids)
     for i, (name, regex, desc) in enumerate(cs_regexes):
-        co_ids = client.get_data(
-            "configurations",
-            fields="hash",
-            query={
-                "hash": {"$in": list(all_co_ids)},
-                "names": {"$regex": regex},
-            },
-            ravel=True,
-        ).tolist()
-
-        print(
-            f"Configuration set {i}",
-            f"({name}):".rjust(22),
-            f"{len(co_ids)}".rjust(7),
+        cs_id = client.query_and_insert_configuration_set(
+            co_hashes=all_co_ids,
+            ds_id=ds_id,
+            name=name,
+            description=desc,
+            query={"names": {"$regex": regex}},
         )
 
-        if len(co_ids) == 0:
-            pass
-        else:
-            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
-
-            cs_ids.append(cs_id)
-
-    # Insert dataset
+        cs_ids.append(cs_id)
     client.insert_dataset(
         cs_ids=cs_ids,
+        ds_id=ds_id,
         do_hashes=list(all_do_ids),
-        name="QM7b_AlphaML",
-        authors=[
-            "Yang Yang",
-            "Ka Un Lao",
-            "David M. Wilkins",
-            "Andrea Grisafi",
-            "Michele Ceriotti",
-            "Robert A. DiStasio Jr",
-        ],
-        links=[
-            "https://doi.org/10.24435/materialscloud:2019.0002/v3",
-            "https://doi.org/10.1038/s41597-019-0157-8",
-            "http://doi.org/10.1073/pnas.1816132116",
-        ],
-        description="Energy, computed with LR-CCSD, "
-        "hybrid DFT (B3LYP & SCAN0) for 7211 molecules in QM7b and 52 "
-        "molecules in AlphaML showcase database.",
+        name=DS_NAME,
+        authors=AUTHORS,
+        links=LINKS,
+        description=DS_DESC,
         verbose=True,
     )
 
 
+CO_MD_KEYS = [
+    "aniso_di_pol",
+    "di_moment_1",
+    "di_moment_2",
+    "di_moment_3",
+    "di_pol_1",
+    "di_pol_2",
+    "di_pol_3",
+    "di_pol_4",
+    "di_pol_5",
+    "di_pol_6",
+    "homo_energy",
+    "iso_di_pol",
+    "lumo_energy",
+    "oppos_spin_ccsd_corr",
+    "oppos_spin_mp2_corr",
+    "quad_moment_1",
+    "quad_moment_2",
+    "quad_moment_3",
+    "quad_moment_4",
+    "quad_moment_5",
+    "quad_moment_6",
+    "same_spin_ccsd_corr",
+    "same_spin_mp2_corr",
+    #  'total_energy'
+]
+CO_MD = {key: {"field": key} for key in CO_MD_KEYS}
 # Property group names for ccsd
 # iso_di_pol
 # aniso_di_pol

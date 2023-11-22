@@ -75,7 +75,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -84,10 +84,14 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+
     configurations = load_data(
         file_path=DATASET_FP,
         file_format="folder",
@@ -101,7 +105,7 @@ def main(argv):
 
     metadata = {
         "software": {"value": "ADF"},
-        "method": {"value": "revPBE"},
+        "method": {"value": "DFT-revPBE"},
     }
     co_md_map = {
         "nuclear-gradients": {"field": "nuclear_gradients"},
@@ -132,7 +136,7 @@ def main(argv):
     client.insert_dataset(
         do_hashes=all_do_ids,
         ds_id=ds_id,
-        name="GFN-xTB_jcim_2021",
+        name="GFN-xTB_JCIM_2021",
         authors=["Leonid Komissarov", "Toon Verstraelen"],
         links=LINKS,
         description="10,000 configurations of organosilicon compounds "

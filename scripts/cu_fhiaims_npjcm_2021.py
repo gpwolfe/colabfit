@@ -42,7 +42,7 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/cu_fhiaims_npjcm_2021"
 )
-DATASET = "Cu_FHIaims_NPJCM_2021"
+DATASET = "Cu_FHI-aims_NPJCM_2021"
 
 SOFTWARE = "FHI-aims"
 METHODS = "DFT-PBE"
@@ -111,7 +111,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -120,9 +120,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
@@ -140,6 +143,8 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
+    }
+    co_md = {
         "energy_uncorrected": {"field": "energy"},
         "w_energy": {"field": "w_energy"},
         "w_forces": {"field": "w_forces"},
@@ -166,6 +171,7 @@ def main(argv):
         client.insert_data(
             configurations,
             ds_id=ds_id,
+            co_md_map=co_md,
             property_map=property_map,
             generator=False,
             verbose=True,

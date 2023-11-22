@@ -25,7 +25,7 @@ MD17, rMD17, etc.
 """
 from argparse import ArgumentParser
 from ase.io import read
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
@@ -36,7 +36,8 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/nequip_nature_2022"
 )
-DATASET = "NequIP-NC-2022"
+# DATASET_FP = Path().cwd().parent / "data/nequip_nature_2022"
+DATASET = "NequIP_NC_2022"
 
 SOFT_METH = {
     "lipo-quench": ("DFT-PBE", "VASP"),
@@ -90,7 +91,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -99,9 +100,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
@@ -119,7 +123,10 @@ def main(argv):
     metadata = {
         "software": {"field": "software"},
         "method": {"field": "method"},
-        # "": {"field": ""}
+        "encut": {"value": "520 eV"},
+        "sigma": {"value": 0.1},
+        "ismear": {"value": 0},
+        "kspacing": {"value": "0.25/Ang"},
     }
     property_map = {
         "potential-energy": [
@@ -136,9 +143,11 @@ def main(argv):
             }
         ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -148,19 +157,19 @@ def main(argv):
     all_co_ids, all_do_ids = list(zip(*ids))
     cs_regexes = [
         [
-            f"{DATASET}-LIPS",
+            f"{DATASET}_LIPS",
             "lips*",
             f"Lithium Thiophosphate (Li6.75P3S11) configurations from {DATASET} "
             "dataset",
         ],
         [
-            f"{DATASET}-LIPO-quench",
+            f"{DATASET}_LIPO_quench",
             "lipo-quench*",
             "Lithium Phosphate amorphous glass (Li4P2O7) configurations from "
             f"{DATASET} dataset",
         ],
         [
-            f"{DATASET}-Cu-formate",
+            f"{DATASET}_Cu_formate",
             "fcu*",
             "Cu-formate configurations, Cu <110> undergoing dehydrogenation "
             f"decomposition, from {DATASET} dataset",
@@ -170,30 +179,19 @@ def main(argv):
     cs_ids = []
 
     for i, (name, regex, desc) in enumerate(cs_regexes):
-        co_ids = client.get_data(
-            "configurations",
-            fields="hash",
-            query={
-                "hash": {"$in": all_co_ids},
-                "names": {"$regex": regex},
-            },
-            ravel=True,
-        ).tolist()
-
-        print(
-            f"Configuration set {i}",
-            f"({name}):".rjust(22),
-            f"{len(co_ids)}".rjust(7),
+        cs_id = client.query_and_insert_configuration_set(
+            co_hashes=all_co_ids,
+            ds_id=ds_id,
+            name=name,
+            description=desc,
+            query={"names": {"$regex": regex}},
         )
-        if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
-            cs_ids.append(cs_id)
-        else:
-            pass
+        cs_ids.append(cs_id)
 
     client.insert_dataset(
         do_hashes=all_do_ids,
+        ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,

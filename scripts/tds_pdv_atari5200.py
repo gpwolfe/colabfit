@@ -30,7 +30,7 @@ File notes
 ----------
 """
 from argparse import ArgumentParser
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.property_definitions import (
     potential_energy_pd,
@@ -44,6 +44,25 @@ import sys
 
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/tds_pdv_atari"
+)
+DATASET_FP = Path().cwd().parent / "data/tds_pdv_atari"
+
+DS_NAME = "TdS-PdV_Atari5200"
+AUTHORS = ["Pandu Wisesa", "Christopher M. Andolina", "Wissam A. Saidi"]
+
+PUBLICATION = "https://doi.org/10.1021/acs.jpclett.2c03445"
+DATA_LINK = "https://doi.org/10.5281/zenodo.7278341"
+OTHER_LINKS = ["https://doi.org/10.1021/acs.jpclett.2c03445"]
+LINKS = [
+    "https://doi.org/10.5281/zenodo.7278341",
+    "https://github.com/saidigroup/Metal-Oxide-Dataset/tree/v1.0",
+    "https://doi.org/10.1021/acs.jpclett.2c03445",
+]
+DS_DESC = (
+    "Approximately 45,000 configurations "
+    "of metal oxides of Mg, Ag, Pt, Cu and Zn, with "
+    "initial training structures taken from the "
+    "Materials Project database."
 )
 
 name_dict = {
@@ -124,7 +143,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -133,9 +152,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
@@ -153,6 +175,9 @@ def main(argv):
     metadata = {
         "software": {"value": "VASP"},
         "method": {"value": "DFT"},
+        "encut": {"value": "520 eV"},
+        "kspacing": {"value": "0.24/Ang"},
+        "ediff": {"value": "10^-8"},
     }
     property_map = {
         "potential-energy": [
@@ -176,9 +201,11 @@ def main(argv):
             }
         ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -187,15 +214,15 @@ def main(argv):
 
     all_co_ids, all_do_ids = list(zip(*ids))
     cs_regexes = [
-        ["CuO", "Cu", "All Cu(x)O(y) configurations from TdS-PdV & Atari5200"],
+        ["CuO", "Cu", "Cu(x)O(y) configurations from TdS-PdV & Atari5200"],
         [
             "MgO",
             r"(0_mp\-1265_files)|(additional*)|(thermal*)|bulk|surface",
             "All Mg(x)O(y) configurations from TdS-PdV & Atari5200",
         ],
-        ["ZnO", "Zn", "All Zn(x)O(y) configurations from TdS-PdV & Atari5200"],
-        ["PtO", "Pt", "All Pt(x)O(y) configurations from TdS-PdV & Atari5200"],
-        ["AgO", "Ag", "All Ag(x)O(y) configurations from TdS-PdV & Atari5200"],
+        ["ZnO", "Zn", "Zn(x)O(y) configurations from TdS-PdV & Atari5200"],
+        ["PtO", "Pt", "Pt(x)O(y) configurations from TdS-PdV & Atari5200"],
+        ["AgO", "Ag", "Ag(x)O(y) configurations from TdS-PdV & Atari5200"],
     ]
 
     cs_ids = []
@@ -215,23 +242,19 @@ def main(argv):
         )
 
         if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
+            cs_id = client.insert_configuration_set(
+                co_ids, ds_id=ds_id, description=desc, name=name
+            )
 
             cs_ids.append(cs_id)
     client.insert_dataset(
         cs_ids=cs_ids,
         do_hashes=all_do_ids,
-        name="TdS-PdV_Atari5200",
-        authors=["Pandu Wisesa", "Christopher M. Andolina", "Wissam A. Saidi"],
-        links=[
-            "https://doi.org/10.5281/zenodo.7278341",
-            "https://github.com/saidigroup/Metal-Oxide-Dataset/tree/v1.0",
-            "https://doi.org/10.1021/acs.jpclett.2c03445",
-        ],
-        description="Approximately 45,000 configurations "
-        "of metal oxides of Mg, Ag, Pt, Cu and Zn, with "
-        "initial training structures taken from the "
-        "Materials Project database.",
+        ds_id=ds_id,
+        name=DS_NAME,
+        authors=AUTHORS,
+        links=LINKS,
+        description=DS_DESC,
         verbose=True,
     )
 

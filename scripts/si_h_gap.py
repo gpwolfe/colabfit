@@ -30,7 +30,7 @@ example info
 """
 from argparse import ArgumentParser
 from ase.io import read
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     cauchy_stress_pd,
     potential_energy_pd,
@@ -44,11 +44,14 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data"
     "/si_h_gap/Si-H-GAP-main/structural_data"
 )
-# DATASET_FP = Path("data/si_h_gap")  # remove
+DATASET_FP = Path().cwd().parent / ("data/si_h_gap")  # remove
 DATASET = "Si-H-GAP"
 
 SOFTWARE = "Quantum ESPRESSO"
 METHODS = "DFT-PBE"
+
+PUBLICATION = "https://doi.org/10.1103/PhysRevMaterials.6.065603"
+DATA_LINK = "https://github.com/dgunruh/Si-H-GAP"
 LINKS = [
     "https://github.com/dgunruh/Si-H-GAP",
     "https://doi.org/10.1103/PhysRevMaterials.6.065603",
@@ -97,7 +100,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -106,10 +109,14 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+
     client.insert_property_definition(cauchy_stress_pd)
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
@@ -117,6 +124,8 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
+        "encut": {"value": "42 Ry"},
+        "kspacing": {"value": "0.2/Ang"},
     }
     co_md_map = {
         "energy-sigma": {"field": "energy_sigma"},
@@ -195,10 +204,11 @@ def main(argv):
                 glob_string=glob_ds[0],
                 generator=False,
             )
-
+        ds_id = generate_ds_id()
         ids = list(
             client.insert_data(
                 configurations,
+                ds_id=ds_id,
                 co_md_map=co_md_map,
                 property_map=property_map,
                 generator=False,
@@ -207,61 +217,12 @@ def main(argv):
         )
 
         all_co_ids, all_do_ids = list(zip(*ids))
-        # cs_regexes = [
-        #     [
-        #         f"{DATASET}-reference",
-        #         "reference",
-        #         f"Reference configurations from {DATASET} dataset",
-        #     ],
-        #     [
-        #         f"{DATASET}-training-alternate",
-        #         "alternate",
-        #         f"Training configurations from {DATASET} dataset with alternate "
-        #         "regularization parameters",
-        #     ],
-        #     [
-        #         f"{DATASET}-training-paper",
-        #         "paper",
-        #         f"Training configurations from {DATASET} dataset with regularization "
-        #         "parameters shown in publication",
-        #     ],
-        #     [
-        #         f"{DATASET}-validation",
-        #         "validation",
-        #         f"Validation configurations from {DATASET} dataset",
-        #     ],
-        # ]
-
-        # cs_ids = []
-
-        # for i, (name, regex, desc) in enumerate(cs_regexes):
-        #     co_ids = client.get_data(
-        #         "configurations",
-        #         fields="hash",
-        #         query={
-        #             "hash": {"$in": all_co_ids},
-        #             "names": {"$regex": regex},
-        #         },
-        #         ravel=True,
-        #     ).tolist()
-
-        #     print(
-        #         f"Configuration set {i}",
-        #         f"({name}):".rjust(22),
-        #         f"{len(co_ids)}".rjust(7),
-        #     )
-        #     if len(co_ids) > 0:
-        #         cs_id = client.insert_configuration_set(co_ids, description=desc,
-        #                                                 name=name)
-
-        #         cs_ids.append(cs_id)
-        #     else:
-        #         pass
 
         client.insert_dataset(
+            ds_id=ds_id,
             # cs_ids=cs_ids,
             do_hashes=all_do_ids,
-            name=f"{DATASET}-{glob_ds[1]}",
+            name=f"{DATASET}_{glob_ds[1]}",
             authors=AUTHORS,
             links=LINKS,
             description=glob_ds[2],

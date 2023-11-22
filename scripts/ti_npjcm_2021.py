@@ -38,11 +38,14 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/ti_npjcm_2021"
 )
 # comment out, local testing
-# DATASET_FP = Path().cwd().parent / ("data/ti_npjcm_2021")
-DATASET = "Ti-NPJCM-2021"
+DATASET_FP = Path().cwd().parent / ("data/ti_npjcm_2021")
+DATASET = "Ti_NPJCM_2021"
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
+
+DATA_LINK = "https://www.aissquare.com/datasets/detail?pageType=datasets&name=Ti"
+PUBLICATION = "https://doi.org/10.1038/s41524-021-00661-y"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=Ti",
     "https://doi.org/10.1038/s41524-021-00661-y",
@@ -128,7 +131,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -137,9 +140,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
@@ -195,18 +201,18 @@ def main(argv):
     all_co_ids, all_do_ids = list(zip(*ids))
     cs_regexes = [
         [
-            f"{DATASET}-initialization",
+            f"{DATASET}_initialization",
             "initialization",
             f"Configurations from initialization step of DP model for "
             f"{DATASET} dataset",
         ],
         [
-            f"{DATASET}-DP-GEN",
+            f"{DATASET}_DP_GEN",
             "dp_gen",
             f"Configurations from DeePMD DPGEN training step for {DATASET} " f"dataset",
         ],
         [
-            f"{DATASET}-specialization",
+            f"{DATASET}_specialization",
             "specialization",
             f"Configurations from specialization step for {DATASET} dataset, "
             f"where application-specific structures are created, such as "

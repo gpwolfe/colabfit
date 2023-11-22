@@ -16,10 +16,10 @@ forces
 
 Other properties added to metadata
 ----------------------------------
-free energy
 
 File notes
 ----------
+free energy is reported, but values are exactly the same as 'energy'
 
 """
 from argparse import ArgumentParser
@@ -38,7 +38,7 @@ DATASET_FP = Path(
 )
 DATASET = "HfO2_NPJ_2020"
 
-SOFTWARE = "VASP"
+SOFTWARE = "VASP 5.4.4"
 METHODS = "DFT-PBE"
 
 PUBLICATION = "https://doi.org/10.1038/s41524-020-00367-7"
@@ -78,7 +78,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -87,9 +87,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
@@ -108,12 +111,21 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
+        "encut": {"value": "520 eV"},
+        "k-point": {"value": "2 x 2 x 2"},
     }
-    co_md_map = {
-        "free-energy": {"field": "free_energy"}
-        # "": {"field": ""}
-    }
+    # co_md_map = {
+    #     "free-energy": {"field": "free_energy"}
+    #     # "": {"field": ""}
+    # }
     property_map = {
+        # "free-energy": [
+        #     {
+        #         "energy": {"field": "free_energy", "units": "eV"},
+        #         "per-atom": {"value": False, "units": None},
+        #         "_metadata": metadata,
+        #     }
+        # ],
         "potential-energy": [
             {
                 "energy": {"field": "energy", "units": "eV"},
@@ -140,7 +152,7 @@ def main(argv):
         client.insert_data(
             configurations,
             ds_id=ds_id,
-            co_md_map=co_md_map,
+            # co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
             verbose=True,

@@ -128,7 +128,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -137,9 +137,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
@@ -148,7 +151,7 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        "ecut": {"value": "520 eV"},
+        "encut": {"value": "520 eV"},
     }
     property_map = {
         "potential-energy": [
@@ -166,7 +169,7 @@ def main(argv):
         ],
         "cauchy-stress": [
             {
-                "stress": {"field": "stress", "units": "eV/A"},
+                "stress": {"field": "stress", "units": "eV/A^3"},
                 "_metadata": metadata,
             }
         ],
@@ -174,60 +177,55 @@ def main(argv):
     # name, glob string, description
     glob_dss = [
         [
-            f"{DATASET}-BR-training",
+            f"{DATASET}_BR_training",
             "BR_training.db",
             f"Binning-random configurations from {DATASET} dataset used for training "
             f"NNP_BR potential. {DS_DESC}",
         ],
         [
-            f"{DATASET}-BR-validation",
+            f"{DATASET}_BR_validation",
             "BR_validation.db",
             f"Binning-random configurations from {DATASET} dataset used during "
             f"validation step for NNP_BR potential. {DS_DESC}",
         ],
         [
-            f"{DATASET}-BB-training",
+            f"{DATASET}_BB_training",
             "BB_training.db",
             f"Binning-binning configurations from {DATASET} dataset used for training "
             f"NNP_BB potential. {DS_DESC}",
         ],
         [
-            f"{DATASET}-BB-validation",
+            f"{DATASET}_BB_validation",
             "BB_validation.db",
             f"Binning-binning configurations from {DATASET} dataset used during "
             f"validation step for NNP_BB potential. {DS_DESC}",
         ],
         [
-            f"{DATASET}-RR-validation",
+            f"{DATASET}_RR_validation",
             "RR_validation.db",
             f"Random-random configurations from {DATASET} dataset used during "
             f"validation step for NNP_RR potential. {DS_DESC}",
         ],
         [
-            f"{DATASET}-RR-training",
+            f"{DATASET}_RR_training",
             "RR_training.db",
             f"Random-random configurations from {DATASET} dataset used for training "
             f"NNP_RR potential. {DS_DESC}",
         ],
         [
-            f"{DATASET}-CA_9-training",
+            f"{DATASET}_training",
             "CA-9_training.db",
             f"Configurations from {DATASET} dataset used for training NNP_CA-9 "
             f"potential. {DS_DESC}",
         ],
         [
-            f"{DATASET}-CA_9-validation",
+            f"{DATASET}_validation",
             "CA-9_validation.db",
             f"Configurations from {DATASET} dataset used during validation step for "
             f"NNP_CA-9 potential. {DS_DESC}",
         ],
-        # [
-        #     f"{DATASET}-all",
-        #     "CA-9__.*",
-        #     f"Complete configuration set from {DATASET} dataset",
-        # ],
         [
-            f"{DATASET}-test",
+            f"{DATASET}_test",
             "test_images.db",
             f"Test configurations from {DATASET} dataset used to evaluate trained NNPs."
             f"{DS_DESC}",

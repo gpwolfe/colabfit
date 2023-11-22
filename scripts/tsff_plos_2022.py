@@ -17,7 +17,7 @@ Run: $ python3 tsff_plos_2022.py -i (or --ip) <database_ip>
 """
 from argparse import ArgumentParser
 from ase.io import read
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
@@ -26,6 +26,28 @@ from pathlib import Path
 import sys
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/tsff")
+DATASET_FP = Path().cwd().parent / "data/tsff"
+DS_NAME = "TSFF_PLOS_2022"
+AUTHORS = [
+    "Taylor R. Quinn",
+    "Himani N. Patel",
+    "Kevin H. Koh",
+    "Brandon E. Haines",
+    "Per-Ola Norrby",
+    "Paul Helquist",
+    "Olaf Wiest",
+]
+
+DATA_LINK = "https://doi.org/10.1371/journal.pone.0264960.s001"
+PUBLICATION = "https://doi.org/10.1371/journal.pone.0264960"
+LINKS = [
+    "https://doi.org/10.1371/journal.pone.0264960.s001",
+    "https://doi.org/10.1371/journal.pone.0264960",
+]
+DS_DESC = (
+    "One configuration of an enzyme: training data for "
+    "a quantum-guided molecular mechanics model."
+)
 
 
 def reader(filepath):
@@ -43,7 +65,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -52,9 +74,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
@@ -70,7 +95,8 @@ def main(argv):
     client.insert_property_definition(atomic_forces_pd)
     metadata = {
         "software": {"value": "Gaussian 09"},
-        "method": {"value": "DFT"},
+        "method": {"value": "DFT-RM06"},
+        "basis-set": {"value": "6-31g(d,p)"},
     }
 
     property_map = {
@@ -88,9 +114,11 @@ def main(argv):
             }
         ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -101,22 +129,11 @@ def main(argv):
 
     client.insert_dataset(
         all_do_ids,
-        name="TSFF_PLOS_2022",
-        authors=[
-            "Taylor R. Quinn",
-            "Himani N. Patel",
-            "Kevin H. Koh",
-            "Brandon E. Haines",
-            "Per-Ola Norrby",
-            "Paul Helquist",
-            "Olaf Wiest",
-        ],
-        links=[
-            "https://doi.org/10.1371/journal.pone.0264960.s001",
-            "https://doi.org/10.1371/journal.pone.0264960",
-        ],
-        description="One configuration of an enzyme: training data for "
-        "a quantum-guided molecular mechanics model.",
+        name=DS_NAME,
+        ds_id=ds_id,
+        authors=AUTHORS,
+        links=LINKS,
+        description=DS_DESC,
         verbose=True,
     )
 

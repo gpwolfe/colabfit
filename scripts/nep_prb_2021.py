@@ -32,9 +32,10 @@ files from this directory.
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
+    cauchy_stress_pd,
     potential_energy_pd,
 )
 import numpy as np
@@ -46,12 +47,30 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/"
     "nep_prb_2021/zenodo_nep_version_2"
 )
+# DATASET_FP = Path().cwd().parent / "data/nep_prb_2021" # local
 DATASET = "NEP_PRB_2021"
 SOFT_METH = {
-    "PbTe_Fan_2021": ("VASP", "DFT-PBE"),
-    "Si_Fan_2021": ("CASTEP", "DFT-PW91"),
-    "Silicene_Fan_2021": ("Quantum ESPRESSO", "DFT-PBE"),
+    "PbTe_Fan_2021": {
+        "software": "VASP",
+        "methods": "DFT-PBE",
+        "kpoints": "1 x 1 x 1",
+        "encut": "400 eV",
+    },
+    "Si_Fan_2021": {
+        "software": "CASTEP",
+        "methods": "DFT-PW91",
+        "kspacing": "0.03/Ang",
+        "encut": "250 eV",
+    },
+    "Silicene_Fan_2021": {
+        "software": "Quantum ESPRESSO",
+        "methods": "DFT-PBE",
+        "kpoints": "3 x 3 x 1",
+        "encut": "40 Ry",
+    },
 }
+DATA_LINK = "https://doi.org/10.5281/zenodo.5109599"
+PUBLICATION = "https://doi.org/10.1103/PhysRevB.104.104309"
 
 LINKS = [
     "https://doi.org/10.5281/zenodo.5109599",
@@ -128,7 +147,17 @@ def read_virial(filepath):
                 vir = []
                 l_no = 1
 
-    return virials
+    stresses = []
+    for stress in virials:
+        stresses.append(
+            [
+                [stress[0], stress[5], stress[4]],
+                [stress[5], stress[1], stress[3]],
+                [stress[4], stress[3], stress[2]],
+            ]
+        )
+
+    return stresses
 
 
 def read_train(filepath, a_num_dict):
@@ -205,8 +234,15 @@ def reader(filepath):
         atom.info["forces"] = forces[i]
         atom.info["virials"] = virials[i]
         atom.info["energy"] = energy[i]
-        atom.info["software"] = SOFT_METH[dir_name][0]
-        atom.info["methods"] = SOFT_METH[dir_name][1]
+        atom.info["software"] = SOFT_METH[dir_name]["software"]
+        atom.info["methods"] = SOFT_METH[dir_name]["methods"]
+        kpoints = SOFT_METH[dir_name].get("kpoints")
+        if kpoints:
+            atom.info["kpoints"] = kpoints
+        kspacing = SOFT_METH[dir_name].get("kspacing")
+        if kspacing:
+            atom.info["kspacing"] = kspacing
+
         configs.append(atom)
 
     return configs
@@ -220,7 +256,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -229,9 +265,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
@@ -245,18 +284,20 @@ def main(argv):
     )
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
-
+    client.insert_property_definition(cauchy_stress_pd)
     metadata = {
         "software": {"field": "software"},
         "method": {"field": "methods"},
+        "kpoints": {"field": "kpoints"},
+        "kspacing": {"field": "kspacing"},
     }
-    co_md_map = {
-        "virials": {
-            "field": "virials",
-            "units": "eV/atom",
-            "description": "A tensor of length 6 with virial stress values",
-        },
-    }
+    # co_md_map = {
+    #     "virials": {
+    #         "field": "virials",
+    #         "units": "eV/atom",
+    #         "description": "A tensor of length 6 with virial stress values",
+    #     },
+    # }
     property_map = {
         "potential-energy": [
             {
@@ -271,11 +312,20 @@ def main(argv):
                 "_metadata": metadata,
             }
         ],
+        "cauchy-stress": [
+            {
+                "stress": {"field": "virials", "units": "eV/atom"},
+                "volume-normalized": {"value": True, "units": None},
+                "_metadata": metadata,
+            }
+        ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
-            co_md_map=co_md_map,
+            ds_id=ds_id,
+            # co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -287,48 +337,37 @@ def main(argv):
         [
             f"{DATASET}-PbTe",
             "PbTe*",
-            f"All PbTe configurations from {DATASET} dataset",
+            f"PbTe configurations from {DATASET} dataset",
         ],
         [
             f"{DATASET}-Si",
             "Si_*",
-            f"All silicon configurations from {DATASET} dataset (excluding "
+            f"Silicon configurations from {DATASET} dataset (excludes "
             "separate silicene set)",
         ],
         [
             f"{DATASET}-Silicene",
             "Silicene*",
-            f"All Silicene configurations from {DATASET} dataset",
+            f"Silicene configurations from {DATASET} dataset",
         ],
     ]
 
     cs_ids = []
 
     for i, (name, regex, desc) in enumerate(cs_regexes):
-        co_ids = client.get_data(
-            "configurations",
-            fields="hash",
-            query={
-                "hash": {"$in": all_co_ids},
-                "names": {"$regex": regex},
-            },
-            ravel=True,
-        ).tolist()
-
-        print(
-            f"Configuration set {i}",
-            f"({name}):".rjust(22),
-            f"{len(co_ids)}".rjust(7),
+        cs_id = client.query_and_insert_configuration_set(
+            co_hashes=all_co_ids,
+            ds_id=ds_id,
+            name=name,
+            description=desc,
+            query={"names": {"$regex": regex}},
         )
-        if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
-            cs_ids.append(cs_id)
-        else:
-            pass
+        cs_ids.append(cs_id)
 
     client.insert_dataset(
         cs_ids=cs_ids,
+        ds_id=ds_id,
         do_hashes=all_do_ids,
         name=DATASET,
         authors=AUTHORS,

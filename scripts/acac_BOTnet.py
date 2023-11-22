@@ -15,8 +15,8 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/new_raw_datasets/"
     "BOTNet/BOTNet-datasets-main/dataset_acac"
 )
-# DATASET_FP = Path().cwd().parents[1] / "data/dataset_acac"  # remove
-DATASET_NAME = "BOTnetACAC_arXiv2022"
+DATASET_FP = Path().cwd().parents / "data/dataset_acac"  # local
+DATASET_NAME = "BOTnet_ACAC_2022"
 AUTHORS = [
     "Ilyes Batatia",
     "Simon Batzner",
@@ -70,10 +70,14 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
     # Loads data, specify reader function if not "usual" file format
@@ -167,8 +171,7 @@ def main(argv):
             generator=False,
         )
         ds_id = generate_ds_id()
-        # for c in configurations:
-        #     c.info["per-atom"] = False
+
         ids = list(
             client.insert_data(
                 configurations,
@@ -224,7 +227,7 @@ def main(argv):
         client.insert_dataset(
             # cs_ids=cs_ids,
             do_hashes=all_pr_ids,
-            name=f"{DATASET_NAME}-{glob_ds[2]}",
+            name=f"{DATASET_NAME}_{glob_ds[2]}",
             ds_id=ds_id,
             authors=AUTHORS,
             links=LINKS,

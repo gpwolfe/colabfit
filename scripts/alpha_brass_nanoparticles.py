@@ -54,6 +54,8 @@ DS_DESC = (
 metadata = {
     "software": {"value": "VASP"},
     "method": {"value": "DFT-PBE"},
+    # "k-point":{"value":"12 x 12 x 12"}, # for smaller systems. Larger use gamma-center
+    "encut": {"value": "500 eV"},
 }
 property_map = {
     "potential-energy": [

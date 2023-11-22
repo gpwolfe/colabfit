@@ -36,7 +36,7 @@ DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/hme21
 DATASET_FP = Path().cwd().parent / "data/hme"  # remove
 DATASET = "HME21"
 
-SOFTWARE = "VASP"
+SOFTWARE = "VASP 5.4.4"
 METHODS = "DFT-PBE"
 
 PUBLICATION = "https://doi.org/10.1038/s41467-022-30687-9"
@@ -70,8 +70,8 @@ AUTHORS = [
     "Takeshi Ibuka",
 ]
 DS_DESC = (
-    "HME21 comprises approximately 25,000 configurations, including 37 elements, "
-    "used in "
+    "The  high-temperature multi-element 2021 (HME21) dataset comprises approximately "
+    "25,000 configurations, including 37 elements, used in "
     "the training of a universal NNP called PreFerential Potential (PFP). The "
     "dataset specifically contains disordered and unstable structures, and "
     "structures that include irregular substitutions, as well as varied "
@@ -136,7 +136,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -145,15 +145,19 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
+        "encut": {"value": "520 eV"},
         # "": {"field": ""}
     }
     property_map = {
