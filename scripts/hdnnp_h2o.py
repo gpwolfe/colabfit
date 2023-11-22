@@ -35,7 +35,7 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/hdnnp_h2o_np"
     "/training-data_H2O"
 )
-DATASET = "HDNNP-H2O"
+DATASET = "HDNNP_H2O"
 
 SOFTWARE = "FHI-aims"
 PUBLICATION = "https://doi.org/10.1073/pnas.1602375113"
@@ -108,7 +108,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -117,9 +117,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
@@ -172,23 +175,23 @@ def main(argv):
     all_co_ids, all_do_ids = list(zip(*ids))
     cs_regexes = [
         [
-            f"{DATASET}-BLYP",
+            f"{DATASET}_BLYP",
             r"input\.data\.BLYP",
             f"All configurations from {DATASET} dataset",
         ],
         [
-            f"{DATASET}-BLYP-D3",
-            r"input\.data\.BLYP-D3",
+            f"{DATASET}_BLYP_D3",
+            r"input\.data\.BLYP_D3",
             f"All configurations from {DATASET} dataset",
         ],
         [
-            f"{DATASET}-RPBE",
+            f"{DATASET}_RPBE",
             r"input\.data\.RPBE",
             f"All configurations from {DATASET} dataset",
         ],
         [
-            f"{DATASET}-RPBE-D3",
-            r"input\.data\.RPBE-D3",
+            f"{DATASET}_RPBE_D3",
+            r"input\.data\.RPBE_D3",
             f"All configurations from {DATASET} dataset",
         ],
     ]

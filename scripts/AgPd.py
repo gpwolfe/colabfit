@@ -1,5 +1,20 @@
-#!/usr/bin/env python
-# coding: utf-8
+"""
+author: Gregory Wolfe, Alexander Tao
+
+Properties
+----------
+forces
+stress
+energy
+
+Other properties added to metadata
+----------------------------------
+
+File notes
+----------
+the file "pathway.xyz" has to be edited: "properties" --> "Properties" to enable
+xyz reading.
+"""
 from argparse import ArgumentParser
 from pathlib import Path
 import sys
@@ -14,8 +29,9 @@ from colabfit.tools.property_definitions import (
 # call database using its name
 # means to start with fresh database
 
-DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets")
-DATASET_NAME = "AgPd_npj2021"
+DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets/agpd")
+DATASET_FP = Path().cwd().parent / "data/agpd"
+DATASET_NAME = "AgPd_NPJ_2021"
 AUTHORS = [
     "Conrad W. Rosenbrock",
     "Konstantin Gubaev",
@@ -37,7 +53,13 @@ DESCRIPTION = (
     "an active learned dataset which was used to "
     "compare MTP- and SOAP-GAP-generated potentials."
 )
-ELEMENTS = ["Ag", "Pd"]
+ELEMENTS = None
+PI_MD = {
+    "software": {"value": "VASP"},
+    "method": {"DFT-PBE"},
+    "prec": {"value": "Accurate"},
+    "ediff": {"value": "1e-8"},
+}
 
 
 def main(argv):
@@ -66,8 +88,8 @@ def main(argv):
     client.insert_property_definition(potential_energy_pd)
 
     configurations = load_data(
-        file_path=DATASET_FP / "agpd/agpd-master/data/bcc_original.xyz",
-        file_format="xyz",
+        file_path=DATASET_FP / "agpd-master/data/bcc.xyz",
+        file_format="extxyz",
         name_field=None,
         elements=ELEMENTS,
         default_name="bcc",
@@ -75,8 +97,8 @@ def main(argv):
         generator=False,
     )
     configurations += load_data(
-        file_path=DATASET_FP / "agpd/agpd-master/data/fcc_original.xyz",
-        file_format="xyz",
+        file_path=DATASET_FP / "agpd-master/data/fcc.xyz",
+        file_format="extxyz",
         name_field=None,
         elements=ELEMENTS,
         default_name="fcc",
@@ -84,8 +106,8 @@ def main(argv):
         generator=False,
     )
     configurations += load_data(
-        file_path=DATASET_FP / "agpd/agpd-master/data/pathway.xyz",
-        file_format="xyz",
+        file_path=DATASET_FP / "agpd-master/data/pathway.xyz",
+        file_format="extxyz",
         name_field=None,
         elements=ELEMENTS,
         default_name="pathway",
@@ -93,8 +115,8 @@ def main(argv):
         generator=False,
     )
     configurations += load_data(
-        file_path=DATASET_FP / "agpd/agpd-master/data/relaxed_original.xyz",
-        file_format="xyz",
+        file_path=DATASET_FP / "agpd-master/data/relaxed.xyz",
+        file_format="extxyz",
         name_field=None,
         elements=ELEMENTS,
         default_name="relaxed",
@@ -102,8 +124,8 @@ def main(argv):
         generator=False,
     )
     configurations += load_data(
-        file_path=DATASET_FP / "agpd/agpd-master/data/unrelaxed_original.xyz",
-        file_format="xyz",
+        file_path=DATASET_FP / "agpd-master/data/unrelaxed.xyz",
+        file_format="extxyz",
         name_field=None,
         elements=ELEMENTS,
         default_name="unrelaxed",
@@ -137,10 +159,7 @@ def main(argv):
         "atomic-forces": [
             {
                 "forces": {"field": "vasp_force", "units": "eV/Ang"},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"DFT-PBE"},
-                },
+                "_metadata": PI_MD,
             }
         ],
         "cauchy-stress": [
@@ -185,10 +204,16 @@ def main(argv):
         "discussed in the paper.",
         "unrelaxed": "Contains 65 unrelaxed enumerated structures that are "
         "seeds for the phonon calculations.",
-        "relaxed": "Contains relaxed versions of respective unrelaxed" " structures",
+        "relaxed": "Contains relaxed versions of respective unrelaxed structures",
     }
 
-    cs_names = ["bcc", "fcc", "pathway", "unrelaxed", "relaxed"]
+    cs_names = [
+        f"{DATASET_NAME}_bcc",
+        f"{DATASET_NAME}_fcc",
+        f"{DATASET_NAME}_pathway",
+        f"{DATASET_NAME}_unrelaxed",
+        f"{DATASET_NAME}_relaxed",
+    ]
 
     cs_ids = []
 

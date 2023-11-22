@@ -40,7 +40,7 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/fitsnap/"
     "examples/Fe_Linear_NPJ2021/JSON"
 )
-DATASET = "FitSNAP-Fe-NPJ-2021"
+DATASET = "FitSNAP_Fe_NPJ_2021"
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
@@ -110,7 +110,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -119,9 +119,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(

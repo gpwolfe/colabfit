@@ -33,7 +33,7 @@ from pathlib import Path
 import sys
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/deepmd-se")
-DATASET = "DeePMD-SE"
+DATASET = "DeePMD_SE"
 PUBLICATION = "https://doi.org/10.48550/arXiv.1805.09003"
 DATA_LINK = (
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=deepmd-se-dataset"
@@ -154,7 +154,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -163,9 +163,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(

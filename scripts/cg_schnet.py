@@ -125,7 +125,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -134,9 +134,16 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
+    )
+    args = parser.parse_args(argv)
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
@@ -194,67 +201,67 @@ def main(argv):
     all_co_ids, all_do_ids = list(zip(*ids))
     cs_regexes = [
         [
-            f"{DATASET}-polarizability-predicted",
+            f"{DATASET}_polarizability_predicted",
             "1.*generated.*",
             f"Configurations from {DATASET} dataset with properties predicted using "
             "cG-SchNet model trained on isotropic polarizability data",
         ],
         [
-            f"{DATASET}-polarizability-computed",
+            f"{DATASET}_polarizability_computed",
             "1.*relaxed.*",
             f"Configurations from {DATASET} dataset with relaxation properties "
             "computed using ORCA, based on cG-Schnet model trained on isotropic "
             "polarizability data",
         ],
         [
-            f"{DATASET}-fingerprint-predicted",
+            f"{DATASET}_fingerprint_predicted",
             "2.*generated.*",
             f"Configurations from {DATASET} dataset with properties predicted "
             "using cG-SchNet model trained on vector-valued molecular fingerprints",
         ],
         [
-            f"{DATASET}-fingerprint-computed",
+            f"{DATASET}_fingerprint_computed",
             "2.*relaxed.*",
             f"Configurations from {DATASET} dataset with relaxation properties "
             "computed using ORCA, based on cG-Schnet model trained on vector-valued "
             "molecular fingerprints",
         ],
         [
-            f"{DATASET}-gap-predicted",
+            f"{DATASET}_gap_predicted",
             "3.*generated.*",
             f"Configurations from {DATASET} dataset with properties predicted "
             "using cG-SchNet model trained on HOMO-LUMO gap data",
         ],
         [
-            f"{DATASET}-gap-computed",
+            f"{DATASET}_gap_computed",
             "3.*relaxed.*",
             f"Configurations from {DATASET} dataset with relaxation properties "
             "computed using ORCA, based on cG-Schnet model trained on HOMO-LUMO "
             "gap data",
         ],
         [
-            f"{DATASET}-composition-relative-energy-predicted",
+            f"{DATASET}_composition_relative_energy_predicted",
             "4.*generated.*",
             f"Configurations from {DATASET} dataset with properties predicted "
             "using cG-SchNet model trained on atomic composition and relative atomic "
             "energy data",
         ],
         [
-            f"{DATASET}-composition-relative-energy-computed",
+            f"{DATASET}_composition_relative_energy_computed",
             "4.*relaxed.*",
             f"Configurations from {DATASET} dataset with relaxation properties "
             "computed using ORCA, based on cG-Schnet model trained on atomic "
             "composition and relative atomic energy data",
         ],
         [
-            f"{DATASET}-gap-relative-energy-predicted",
+            f"{DATASET}_gap_relative_energy_predicted",
             "5.*generated.*",
             f"Configurations from {DATASET} dataset with properties predicted "
             "using cG-SchNet model trained on HOMO-LUMO gap and relative atomic "
             "energy data",
         ],
         [
-            f"{DATASET}-gap-computed",
+            f"{DATASET}_gap_computed",
             "5.*relaxed.*",
             f"Configurations from {DATASET} dataset with relaxation properties "
             "computed using ORCA, based on cG-Schnet model trained on HOMO-LUMO gap "

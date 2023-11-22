@@ -22,7 +22,7 @@ File notes
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     cauchy_stress_pd,
@@ -35,10 +35,14 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/sn_scan_prm_2023"
 )
-DATASET = "Sn-SCAN-PRM-2023"
+DATASET_FP = Path().cwd().parent / "data/sn_scan_prm_2023"
+DATASET = "Sn-SCAN_PRM_2023"
 
-SOFTWARE = "VASP, DP-GEN"
+SOFTWARE = "VASP"
 METHODS = "DFT-SCAN"
+
+PUBLICATION = "https://doi.org/10.1103/PhysRevMaterials.7.053603"
+DATA_LINK = "https://www.aissquare.com/datasets/detail?pageType=datasets&name=Sn-SCAN"
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=Sn-SCAN",
     "https://doi.org/10.1103/PhysRevMaterials.7.053603",
@@ -134,7 +138,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -143,9 +147,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
@@ -164,6 +171,11 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
+        "encut": {"value": "650 eV"},
+        "ismear": {"value": "0"},
+        "sigma": {"value": "0.2"},
+        "kspacing": {"value": "0.1/Ang"},
+        "ediff": {"value": "10^-6 eV"}
         # "": {"field": ""}
     }
     property_map = {
@@ -188,9 +200,11 @@ def main(argv):
             }
         ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -201,6 +215,7 @@ def main(argv):
 
     client.insert_dataset(
         do_hashes=all_do_ids,
+        ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,

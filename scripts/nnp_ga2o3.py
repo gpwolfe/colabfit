@@ -28,7 +28,7 @@ File notes
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
@@ -40,10 +40,14 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/nnp_ga2o3/NNP_Ga2O3-master"
 )
+DATASET_FP = Path().cwd().parent / "data/nnp_ga2o3"
 DATASET = "NNP-Ga2O3"
 
 SOFTWARE = "CP2K"
-METHODS = "DFT"
+METHODS = "DFT-QUICKSTEP"
+
+DATA_LINK = "https://github.com/RuiyangLi6/NNP_Ga2O3"
+PUBLICATION = "https://doi.org/10.1063/5.0025051"
 LINKS = [
     "https://github.com/RuiyangLi6/NNP_Ga2O3",
     "https://doi.org/10.1063/5.0025051",
@@ -142,7 +146,10 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        "basis-set": {"value": "GTH-TZVP"},
+        "basis-set": {"value": "TZVP"},
+        "pseudopotentials": {"value": "GTH"},
+        "encut": {"value": "800 Ry"},
+        "k-points": {"value": "gamma-point"},
     }
     property_map = {
         "potential-energy": [
@@ -159,9 +166,11 @@ def main(argv):
             }
         ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -171,46 +180,34 @@ def main(argv):
     all_co_ids, all_do_ids = list(zip(*ids))
     cs_regexes = [
         [
-            f"{DATASET}-with-0K",
+            f"{DATASET}_with_0K",
             ".*with0K.*",
             f"All configurations from {DATASET} dataset, including those simulated "
             "between temperatures 0K - 600K",
         ],
         [
-            f"{DATASET}-without-0K",
+            f"{DATASET}_without_0K",
             ".*without0K.*",
             f"Configurations from {DATASET} dataset simulated between temperatures "
             "50K - 600K",
         ],
     ]
-
     cs_ids = []
 
     for i, (name, regex, desc) in enumerate(cs_regexes):
-        co_ids = client.get_data(
-            "configurations",
-            fields="hash",
-            query={
-                "hash": {"$in": all_co_ids},
-                "names": {"$regex": regex},
-            },
-            ravel=True,
-        ).tolist()
-
-        print(
-            f"Configuration set {i}",
-            f"({name}):".rjust(22),
-            f"{len(co_ids)}".rjust(7),
+        cs_id = client.query_and_insert_configuration_set(
+            co_hashes=all_co_ids,
+            ds_id=ds_id,
+            name=name,
+            description=desc,
+            query={"names": {"$regex": regex}},
         )
-        if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
-            cs_ids.append(cs_id)
-        else:
-            pass
+        cs_ids.append(cs_id)
 
     client.insert_dataset(
         cs_ids=cs_ids,
+        ds_id=ds_id,
         do_hashes=all_do_ids,
         name=DATASET,
         authors=AUTHORS,

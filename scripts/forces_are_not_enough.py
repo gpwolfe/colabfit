@@ -64,7 +64,7 @@ WATER_FP = DATASET_FP / "mdsim_data/water"
 LIPS_FP = DATASET_FP / "mdsim_data/lips"
 MD17_FP = DATASET_FP / "mdsim_data/md17"
 
-DATASET = "Forces-are-not-Enough"
+DATASET = "Forces_are_not_enough"
 PUBLICATION = "https://doi.org/10.48550/arXiv.2210.07237"
 DATA_LINK = "https://doi.org/10.5281/zenodo.7196767"
 OTHER_LINKS = ["https://github.com/kyonofx/MDsim/"]
@@ -162,7 +162,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -171,9 +171,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     ala_configs = load_data(

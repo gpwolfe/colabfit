@@ -32,7 +32,7 @@ different level of theory, and there is already an ethanol file at DFT level.
 """
 from argparse import ArgumentParser
 from ase.db import connect
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     potential_energy_pd,
     atomic_forces_pd,
@@ -41,6 +41,26 @@ from pathlib import Path
 import sys
 
 DB_PATH = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/qm_hamiltonian")
+
+DS_NAME = "QM_hamiltonian_nature_2019"
+AUTHORS = [
+    "Kristof T. Schütt",
+    "Michael Gastegger",
+    "Alexandre Tkatchenko",
+    "Klaus-Robert Müller",
+    "Reinhard J. Maurer",
+]
+PUBLICATION = "https://doi.org/10.1038/s41467-019-12875-2"
+DATA_LINK = "http://quantum-machine.org/datasets/"
+LINKS = [
+    "http://quantum-machine.org/datasets/",
+    "https://doi.org/10.1038/s41467-019-12875-2",
+]
+DS_DESC = (
+    "~100,000 configurations of water, ethanol, "
+    "malondialdehyde and uracil gathered at the PBE/def2-SVP "
+    "level of theory using ORCA."
+)
 
 
 def reader(filepath):
@@ -65,7 +85,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -74,9 +94,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
@@ -112,9 +135,11 @@ def main(argv):
             }
         ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -129,12 +154,6 @@ def main(argv):
             "All water configurations from the Quantum Machine Molecular \
             Hamiltonians and Overlap Matrices set",
         ],
-        # [
-        #     "QM_Hamiltonian_ethanol_hf",
-        #     "hf",
-        #     "All ethanol hf configurations from the Quantum Machine Molecular \
-        #     Hamiltonians and Overlap Matrices set",
-        # ],
         [
             "QM_Hamiltonian_ethanol_dft",
             "dft",
@@ -154,45 +173,28 @@ def main(argv):
                 Hamiltonians and Overlap Matrices set",
         ],
     ]
-
     cs_ids = []
 
     for i, (name, regex, desc) in enumerate(cs_regexes):
-        co_ids = client.get_data(
-            "configurations",
-            fields="hash",
-            query={"hash": {"$in": all_co_ids}, "names": {"$regex": regex}},
-            ravel=True,
-        ).tolist()
-
-        print(
-            f"Configuration set {i}",
-            f"({name}):".rjust(22),
-            f"{len(co_ids)}".rjust(7),
+        cs_ids = []
+        cs_id = client.query_and_insert_configuration_set(
+            co_hashes=all_co_ids,
+            ds_id=ds_id,
+            name=name,
+            description=desc,
+            query={"names": {"$regex": regex}},
         )
 
-        if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
-            cs_ids.append(cs_id)
+        cs_ids.append(cs_id)
 
     client.insert_dataset(
         cs_ids=cs_ids,
+        ds_id=ds_id,
         do_hashes=all_do_ids,
-        name="QM_hamiltonian_nature_2019",
-        authors=[
-            "Kristof T. Schütt",
-            "Michael Gastegger",
-            "Alexandre Tkatchenko",
-            "Klaus-Robert Müller",
-            "Reinhard J. Maurer",
-        ],
-        links=[
-            "http://quantum-machine.org/datasets/",
-            "https://doi.org/10.1038/s41467-019-12875-2",
-        ],
-        description="~100,000 configurations of water, ethanol, "
-        "malondialdehyde and uracil gathered at the PBE/def2-SVP"
-        " level of theory using ORCA.",
+        name=DS_NAME,
+        authors=AUTHORS,
+        links=LINKS,
+        description=DS_DESC,
         verbose=True,
     )
 

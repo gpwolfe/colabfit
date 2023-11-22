@@ -26,7 +26,7 @@ File notes
 """
 from argparse import ArgumentParser
 from ase import Atoms
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     potential_energy_pd,
     atomic_forces_pd,
@@ -36,8 +36,12 @@ from pathlib import Path
 import sys
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/rmd17")
+DATASET_FP = Path().cwd().parent / "data/rmd17"
 DATASET_NAME = "rMD17"
 ELEMENTS = ["C", "H", "O", "N"]
+
+PUBLICATION = "https://doi.org/10.48550/arXiv.2007.09593"
+DATA_LINK = "https://doi.org/10.6084/m9.figshare.12672038.v3"
 LINKS = [
     "https://doi.org/10.6084/m9.figshare.12672038.v3",
     "https://doi.org/10.48550/arXiv.2007.09593",
@@ -49,6 +53,31 @@ DESCRIPTION = "A dataset of 10 molecules (aspirin,\
  Based on the MD17 dataset, but with refined measurements."
 
 AUTHORS = ["Anders S. Christensen", "O. Anatole von Lilienfeld"]
+
+CO_MD_MAP = {
+    "MD17-index": {"field": "md17_index"},
+}
+PI_MD = {
+    "software": {"value": "ORCA 4.0.1"},
+    "method": {"value": "DFT-PBE"},
+    "basis_set": {"value": "def2-SVP"},
+}
+
+property_map = {
+    "potential-energy": [
+        {
+            "energy": {"field": "energy", "units": "kcal/mol"},
+            "per-atom": {"value": False, "units": None},
+            "_metadata": PI_MD,
+        }
+    ],
+    "atomic-forces": [
+        {
+            "forces": {"field": "forces", "units": "kcal/mol/A"},
+            "_metadata": PI_MD,
+        }
+    ],
+}
 
 
 def reader(file):
@@ -84,7 +113,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -93,33 +122,16 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
-    metadata = {
-        "software": {"value": "ORCA"},
-        "method": {"value": "DFT-PBE"},
-        "basis_set": {"value": "def2-SVP"},
-        "MD17-index": {"field": "md17_index"},
-    }
-    property_map = {
-        "potential-energy": [
-            {
-                "energy": {"field": "energy", "units": "kcal/mol"},
-                "per-atom": {"value": False, "units": None},
-                "_metadata": metadata,
-            }
-        ],
-        "atomic-forces": [
-            {
-                "forces": {"field": "forces", "units": "kcal/mol/A"},
-                "_metadata": metadata,
-            }
-        ],
-    }
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -130,35 +142,12 @@ def main(argv):
         glob_string="*.npz",
         generator=False,
     )
-    client.insert_property_definition(potential_energy_pd)
-    client.insert_property_definition(atomic_forces_pd)
-    metadata = {
-        "software": {"value": "ORCA"},
-        "method": {"value": "DFT-PBE"},
-        "basis_set": {"value": "def2-SVP"},
-    }
-    co_md_map = {
-        "MD17-index": {"field": "md17_index"},
-    }
-    property_map = {
-        "potential-energy": [
-            {
-                "energy": {"field": "energy", "units": "kcal/mol"},
-                "per-atom": {"value": False, "units": None},
-                "_metadata": metadata,
-            }
-        ],
-        "atomic-forces": [
-            {
-                "forces": {"field": "forces", "units": "kcal/mol/A"},
-                "_metadata": metadata,
-            }
-        ],
-    }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
-            co_md_map=co_md_map,
+            co_md_map=CO_MD_MAP,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -188,6 +177,7 @@ def main(argv):
     for i, (name, regex, desc) in enumerate(cs_regexes):
         cs_id = client.query_and_insert_configuration_set(
             co_hashes=all_co_ids,
+            ds_id=ds_id,
             name=name,
             description=desc,
             query={"names": {"$regex": regex}},
@@ -197,6 +187,7 @@ def main(argv):
 
     client.insert_dataset(
         cs_ids=cs_ids,
+        ds_id=ds_id,
         do_hashes=all_do_ids,
         name=DATASET_NAME,
         authors=AUTHORS,

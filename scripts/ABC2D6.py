@@ -12,8 +12,10 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets/ABC2D6-16/abc2d6-16/"
 )
+DATASET_FP = Path().cwd().parent / "data/abc2d6-16"
+
 SCRIPT_FP = Path().cwd()
-DATASET_NAME = "ABC2D6-16_PRL2018"
+DATASET_NAME = "ABC2D6-16_PRL_2018"
 AUTHORS = [
     "Felix Faber",
     "Alexander Lindmaa",
@@ -195,9 +197,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
@@ -237,8 +242,10 @@ def main(argv):
                 "energy": {"field": "formation_energy", "units": "eV"},
                 "per-atom": {"field": "per-atom", "units": None},
                 "_metadata": {
-                    "software": {"value": "VASP"},
+                    "software": {"value": "VASP 5.2.2"},
                     "method": {"value": "DFT-PBE"},
+                    "kpoint": {"value": "3 x 3 x 3"},
+                    "encut": {"value": "600 eV"},
                 },
             }
         ]

@@ -69,13 +69,12 @@ def reader(filepath):
 def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
-
     parser.add_argument(
         "-d",
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -84,13 +83,17 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+
     glob_dss = [
         [
-            f"{DATASET}-isolated-atoms",
+            f"{DATASET}_isolated_atoms",
             "iso_atoms.xyz",
             f"Reference C, H, O, and N atoms from {DATASET}, used to showcase "
             "the performance of linear atomic cluster expansion (ACE) force fields "
@@ -98,7 +101,7 @@ def main(argv):
             "of organic molecules.",
         ],
         [
-            f"{DATASET}-test-300K",
+            f"{DATASET}_test_300K",
             "test_300K.xyz",
             "Test configurations with MD simulations performed at 300K from "
             f"{DATASET}, used to showcase the performance of linear atomic "
@@ -106,7 +109,7 @@ def main(argv):
             "to predict the potential energy surfaces of organic molecules.",
         ],
         [
-            f"{DATASET}-test-600K",
+            f"{DATASET}_test_600K",
             "test_600K.xyz",
             "Test configurations with MD simulations performed at 600K from "
             f"{DATASET}, used to showcase the performance of linear atomic "
@@ -114,7 +117,7 @@ def main(argv):
             "to predict the potential energy surfaces of organic molecules.",
         ],
         [
-            f"{DATASET}-test-1200K",
+            f"{DATASET}_test_1200K",
             "test_1200K.xyz",
             "Test configurations with MD simulations performed at 1200K from "
             f"{DATASET}, used to showcase the performance of linear atomic "
@@ -122,7 +125,7 @@ def main(argv):
             "to predict the potential energy surfaces of organic molecules.",
         ],
         [
-            f"{DATASET}-train-300K",
+            f"{DATASET}_train_300K",
             "train_300K.xyz",
             "Training configurations with MD simulations performed at 300K from "
             f"{DATASET}, used to showcase the performance of linear atomic "
@@ -130,7 +133,7 @@ def main(argv):
             "to predict the potential energy surfaces of organic molecules.",
         ],
         [
-            f"{DATASET}-train-mixed",
+            f"{DATASET}_train_mixed",
             "train_mixedT.xyz",
             "Training configurations with MD simulation performed at 300K, 600K and "
             f"1200K from {DATASET} dataset, used to showcase the performance of linear "
@@ -138,7 +141,7 @@ def main(argv):
             "to predict the potential energy surfaces of organic molecules.",
         ],
         [
-            f"{DATASET}-test-dih-beta120",
+            f"{DATASET}_test_dih_beta120",
             "test_dih_beta120.xyz",
             "Test configurations with fixed value for dihedral beta in alpha-gamma "
             f" plane of 120 degreesfrom {DATASET} dataset. Used to showcase the "
@@ -147,7 +150,7 @@ def main(argv):
             "organic molecules.",
         ],
         [
-            f"{DATASET}-test-dih-beta150",
+            f"{DATASET}_test_dih_beta150",
             "test_dih_beta150.xyz",
             "Test configurations with fixed value for dihedral beta in alpha-gamma "
             f" plane of 150 degreesfrom {DATASET} dataset. Used to showcase the "
@@ -156,7 +159,7 @@ def main(argv):
             "organic molecules.",
         ],
         [
-            f"{DATASET}-test-dih-beta180",
+            f"{DATASET}_test_dih_beta180",
             "test_dih_beta180.xyz",
             "Test configurations with fixed value for dihedral beta in alpha-gamma "
             f" plane of 180 degreesfrom {DATASET} dataset. Used to showcase the "

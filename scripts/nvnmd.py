@@ -26,7 +26,7 @@ change ELEM_KEY if necessary
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
@@ -40,13 +40,18 @@ DATASET_FP = Path(
     "nvnmd-master/examples/data/GeTe"
 )
 # DATASET_FP = Path("data/nvnmd-master")  # remove
-DATASET = "NVNMD-GeTe"
+DATASET = "NVNMD_GeTe"
 
-SOFTWARE = "FHI-aims"
-METHODS = "DeepMD"
+SOFTWARE = "SIESTA"
+METHODS = "DFT-GGA"
+
+PUBLICATION = "https://doi.org/10.1038/s41524-022-00773-z"
+DATA_LINK = "https://github.com/LiuGroupHNU/nvnmd"
+OTHER_LINKS = ["https://doi.org/10.1109/LED.2020.2964779"]
 LINKS = [
     "https://github.com/LiuGroupHNU/nvnmd",
     "https://doi.org/10.1038/s41524-022-00773-z",
+    "https://doi.org/10.1109/LED.2020.2964779",
 ]
 AUTHORS = [
     "Pinghui Mo",
@@ -113,7 +118,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -122,9 +127,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
@@ -142,6 +150,7 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
+        "encut": {"value": "100 Ry"},
     }
     co_md_map = {
         "dipole": {"field": "dipole"},
@@ -161,9 +170,11 @@ def main(argv):
             }
         ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
@@ -172,41 +183,10 @@ def main(argv):
     )
 
     all_co_ids, all_do_ids = list(zip(*ids))
-    # cs_regexes = [
-    #     [
-    #         f"{DATASET}_train",
-    #         ".*train.*",
-    #         f"Training configurations from {DATASET} dataset",
-    #     ]
-    # ]
-
-    # cs_ids = []
-
-    # for i, (name, regex, desc) in enumerate(cs_regexes):
-    #     co_ids = client.get_data(
-    #         "configurations",
-    #         fields="hash",
-    #         query={
-    #             "hash": {"$in": all_co_ids},
-    #             "names": {"$regex": regex},
-    #         },
-    #         ravel=True,
-    #     ).tolist()
-
-    #     print(
-    #         f"Configuration set {i}",
-    #         f"({name}):".rjust(22),
-    #         f"{len(co_ids)}".rjust(7),
-    #     )
-    #     if len(co_ids) > 0:
-    #         cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
-
-    #         cs_ids.append(cs_id)
-    #     else:
-    #         pass
 
     client.insert_dataset(
         do_hashes=all_do_ids,
+        ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,

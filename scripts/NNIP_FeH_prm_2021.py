@@ -33,7 +33,7 @@ https://compphysvienna.github.io/n2p2/topics/cfg_file.html
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     potential_energy_pd,
@@ -43,8 +43,14 @@ import re
 import sys
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/nnip")
+# DATASET_FP = Path().cwd().parent / "data/nnip"  # local
 DATASET = "NNIP_FeH_PRM_2021"
-
+PUBLICATION = "https://doi.org/10.1103/PhysRevMaterials.5.113606"
+DATA_LINK = "https://github.com/mengfsou/NNIP-FeH"
+LINKS = [
+    "https://github.com/mengfsou/NNIP-FeH",
+    "https://doi.org/10.1103/PhysRevMaterials.5.113606",
+]
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
 
@@ -107,7 +113,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -116,9 +122,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
@@ -136,6 +145,10 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
+        "kspacing": {"value": "0.03/Ang"},
+        "encut": {"value": "360 eV"},
+        "sigma": {"value": 0.1},
+        "nelm": {"value": "10^-5 eV"},
     }
     property_map = {
         # According to N2P2 docs, energy value represents "total potential
@@ -155,9 +168,11 @@ def main(argv):
             }
         ],
     }
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             verbose=True,
@@ -167,17 +182,17 @@ def main(argv):
     all_co_ids, all_do_ids = list(zip(*ids))
     cs_regexes = [
         [
-            f"{DATASET}-Fe",
+            f"{DATASET}_Fe",
             ["Fe"],
             f"alpha-iron-only configurations from {DATASET} dataset",
         ],
         [
-            f"{DATASET}-H",
+            f"{DATASET}_H",
             ["H"],
             f"Hydrogen-only configurations from {DATASET} dataset",
         ],
         [
-            f"{DATASET}-Fe",
+            f"{DATASET}_Fe",
             ["Fe", "H"],
             "Configurations containing alpha-iron with hydrogen "
             f"from {DATASET} dataset",
@@ -187,30 +202,19 @@ def main(argv):
     cs_ids = []
 
     for i, (name, elem, desc) in enumerate(cs_regexes):
-        co_ids = client.get_data(
-            "configurations",
-            fields="hash",
-            query={
-                "hash": {"$in": all_co_ids},
-                "elements": {"$eq": elem},
-            },
-            ravel=True,
-        ).tolist()
-
-        print(
-            f"Configuration set {i}",
-            f"({name}):".rjust(22),
-            f"{len(co_ids)}".rjust(7),
+        cs_id = client.query_and_insert_configuration_set(
+            co_hashes=all_co_ids,
+            ds_id=ds_id,
+            name=name,
+            description=desc,
+            query={"elements": {"$eq": elem}},
         )
-        if len(co_ids) > 0:
-            cs_id = client.insert_configuration_set(co_ids, description=desc, name=name)
 
-            cs_ids.append(cs_id)
-        else:
-            pass
+        cs_ids.append(cs_id)
 
     client.insert_dataset(
         cs_ids=cs_ids,
+        ds_id=ds_id,
         do_hashes=all_do_ids,
         name=DATASET,
         authors=[
@@ -223,10 +227,7 @@ def main(argv):
             "Nobuyuki Ishikawa",
             "Shigenobu Ogata",
         ],
-        links=[
-            "https://github.com/mengfsou/NNIP-FeH",
-            "https://doi.org/10.1103/PhysRevMaterials.5.113606",
-        ],
+        links=LINKS,
         description="Approximately 20,000 configurations from a dataset of "
         "alpha-iron and hydrogen. Properties include forces and potential "
         "energy, calculated using VASP at the DFT level using the GGA-PBE "

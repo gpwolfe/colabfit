@@ -40,9 +40,10 @@ C   1.32592800e+01  2.37400000e-01  1.14220900e+01 -5.76856000e-01 \
 """
 from argparse import ArgumentParser
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
+    cauchy_stress_pd,
     potential_energy_pd,
 )
 import numpy as np
@@ -53,11 +54,13 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/nep_qhpf/data"
 )
-# DATASET_FP = Path("data/nep_qhpf")
-DATASET = "NEP-qHPF"
+# DATASET_FP = Path().cwd().parent / "data/nep_qhpf"
+DATASET = "NEP_qHPF"
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
+PUBLICATION = "https://doi.org/10.1016/j.eml.2022.101929"
+DATA_LINK = "https://doi.org/10.5281/zenodo.7018572"
 LINKS = [
     "https://doi.org/10.5281/zenodo.7018572",
     "https://doi.org/10.1016/j.eml.2022.101929",
@@ -106,7 +109,11 @@ def reader(filepath):
                             symbols=["C" for x in coords],
                             cell=cell,
                         )
-                        config.info["virial"] = virial
+                        config.info["virial"] = [
+                            [virial[0], virial[5], virial[4]],
+                            [virial[5], virial[1], virial[3]],
+                            [virial[4], virial[3], virial[2]],
+                        ]
                         config.info["energy"] = energy
                         config.info["name"] = f"{filepath.stem}_{config_no}"
                         config.info["forces"] = force
@@ -133,7 +140,7 @@ def main(argv):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -142,21 +149,27 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
+    client.insert_property_definition(cauchy_stress_pd)
 
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
+        "encut": {"value": "520 eV"},
+        "kpoints": {"value": "0.25/Ang"},
     }
-    co_md_map = {
-        "virial": {"field": "virial"},
-    }
+    # co_md_map = {
+    #     "virial": {"field": "virial"},
+    # }
     property_map = {
         "potential-energy": [
             {
@@ -168,6 +181,13 @@ def main(argv):
         "atomic-forces": [
             {
                 "forces": {"field": "forces", "units": "eV/A"},
+                "_metadata": metadata,
+            }
+        ],
+        "cauchy-stress": [
+            {
+                "stress": {"field": "virial", "units": "eV/atom"},
+                "volume-normalized": {"value": True, "units": None},
                 "_metadata": metadata,
             }
         ],
@@ -183,10 +203,11 @@ def main(argv):
             glob_string=f"{glob_ds}.in",
             generator=False,
         )
+        ds_id = generate_ds_id()
         ids = list(
             client.insert_data(
                 configurations,
-                co_md_map=co_md_map,
+                ds_id=ds_id,
                 property_map=property_map,
                 generator=False,
                 verbose=True,
@@ -194,49 +215,10 @@ def main(argv):
         )
 
         all_co_ids, all_do_ids = list(zip(*ids))
-        # cs_regexes = [
-        #     [
-        #         DATASET,
-        #         "test.*",
-        #         f"All configurations from {DATASET} dataset",
-        #     ],
-        #     [
-        #         DATASET,
-        #         "train.*",
-        #         f"All configurations from {DATASET} dataset",
-        #     ],
-        # ]
-
-        # cs_ids = []
-
-        # for i, (name, regex, desc) in enumerate(cs_regexes):
-        #     co_ids = client.get_data(
-        #         "configurations",
-        #         fields="hash",
-        #         query={
-        #             "hash": {"$in": all_co_ids},
-        #             "names": {"$regex": regex},
-        #         },
-        #         ravel=True,
-        #     ).tolist()
-
-        #     print(
-        #         f"Configuration set {i}",
-        #         f"({name}):".rjust(22),
-        #         f"{len(co_ids)}".rjust(7),
-        #     )
-        #     if len(co_ids) > 0:
-        #         cs_id = client.insert_configuration_set(co_ids, description=desc,
-        #                                                 name=name)
-
-        #         cs_ids.append(cs_id)
-        #     else:
-        #         pass
-
         client.insert_dataset(
-            # cs_ids=cs_ids,
             do_hashes=all_do_ids,
-            name=f"{DATASET}-{glob_ds}",
+            ds_id=ds_id,
+            name=f"{DATASET}_{glob_ds}",
             authors=AUTHORS,
             links=LINKS,
             description=(
