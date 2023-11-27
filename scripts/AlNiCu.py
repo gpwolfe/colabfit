@@ -18,7 +18,7 @@ from colabfit.tools.property_definitions import (
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets")
 
-DATASET_NAME = "AlNiCu_AIP2020"
+DATASET_NAME = "AlNiCu_AIP_2020"
 AUTHORS = [
     "Berk Onat",
     "Christoph Ortner",
@@ -81,68 +81,17 @@ def main(argv):
         generator=False,
     )
 
-    # client.insert_property_definition('/home/ubuntu/notebooks/potential-energy.json')
-    # client.insert_property_definition('/homei/ubuntu/notebooks/atomic-forces.json')
-    # client.insert_property_definition('/home/ubuntu/notebooks/cauchy-stress.json')
-
-    # TODO this description is specific to the nomad encyclopedia description
-    # for total and free energy. Eric you said you were going through and
-    # checking property definitions we were writing, I dont
-    # know what to write for a general description of total and free energy,
-    # this might be something that needs to be edited.
-    """
-    total_energy_property_definition = {
-        "property-id": "total-energy",
-        "property-name": "total-energy",
-        "property-title": "total energy",
-        "property-description": "The energies are extracted from a "
-        "representative calculation:"
-        "for geometry optimization it is the last step of the optimization",
-        "energy": {
-            "type": "float",
-            "has-unit": True,
-            "extent": [],
-            "required": True,
-            "description": "total energy (not sure if per atom or unit cell)",
-        },
-    }
-
-    client.insert_property_definition(total_energy_property_definition)
-
-    free_energy_property_definition = {
-        "property-id": "free-energy",
-        "property-name": "free-energy",
-        "property-title": "free energy",
-        "property-description": "The energies are extracted from a "
-        "representative calculation:"
-        "for geometry optimization it is the last step of the optimization",
-        "energy": {
-            "type": "float",
-            "has-unit": True,
-            "extent": [],
-            "required": True,
-            "description": "free energy (not sure if per atom or unit cell)",
-        },
-    }
-    """
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(free_energy_pd)
 
     property_map = {  # TODO finish
-        #    'potential-energy': [{
-        #        'energy':   {'field': 'nomad_potential_energy',
-        #                     'units': 'eV'},
-        #        'per-atom': {'field': 'per-atom', 'units': None},
-        #        '_metadata': {
-        #            'software': {'field':'nomad_program_name'},
-        #        }
-        #    }],
         "potential-energy": [
             {
                 "energy": {"field": "nomad_total_energy", "units": "eV"},
                 "per-atom": {"field": "per-atom", "units": None},
                 "_metadata": {
                     "software": {"field": "nomad_program_name"},
+                    "method": {"value": "DFT"},
                 },
             }
         ],
@@ -152,6 +101,7 @@ def main(argv):
                 "per-atom": {"field": "per-atom", "units": None},
                 "_metadata": {
                     "software": {"field": "nomad_program_name"},
+                    "method": {"value": "DFT"},
                 },
             }
         ],

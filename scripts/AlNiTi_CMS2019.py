@@ -7,7 +7,7 @@ import sys
 from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/data/")
-DATASET = "AlNiTi_CMS2019"
+DATASET = "AlNiTi_CMS_2019"
 
 PUBLICATION = "https://doi.org/10.1016/j.commatsci.2018.09.031"
 DATA_LINK = (
@@ -56,9 +56,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(

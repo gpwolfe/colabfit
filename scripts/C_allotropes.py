@@ -12,7 +12,7 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/colabfit_data/"
     "new_raw_datasets/C_allotropes_MingjianEllad/carbon_energies_forces/"
 )
-DATASET = "C_npj2020"
+DATASET = "C_NPJ2020"
 PUBLICATION = "https://doi.org/10.1038/s41524-020-00390-8"
 DATA_LINK = "https://doi.org/10.6084/m9.figshare.12649811.v1"
 
@@ -60,9 +60,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
@@ -87,9 +90,8 @@ def main(argv):
                 "per-atom": {"field": "per-atom", "units": None},
                 "_metadata": {
                     "software": {"value": "VASP"},
-                    "method": {
-                        "value": "DFT-PBE+MDB"
-                    },  # where i left off energy is in eV
+                    "method": {"value": "DFT-PBE+MDB"},
+                    "encut": {"value": "500 eV"},
                 },
             }
         ],
@@ -99,6 +101,7 @@ def main(argv):
                 "_metadata": {
                     "software": {"value": "VASP"},
                     "method": {"value": "DFT-PBE+MDB"},
+                    "encut": {"value": "500 eV"}
                     # The dataset is generated from DFT calculations using the Vienna
                     # Ab initio Simulation Package51. The exchange-correlation energy
                     # of the electrons is treated within the generalized gradient
