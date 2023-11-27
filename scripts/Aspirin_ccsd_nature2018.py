@@ -39,6 +39,11 @@ DESCRIPTION = (
     "The Dunning correlation-consistent basis set CCSD/cc-pVDZ was used "
     "for aspirin. All calculations were performed with the Psi4 software suite."
 )
+PI_MD = {
+    "software": {"value": "Psi4"},
+    "method": {"value": "CCSD"},
+    "basis": {"value": "cc-pVDZ"},
+}
 
 
 def reader_sGDML(filepath):
@@ -85,10 +90,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
-
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     client.insert_property_definition(potential_energy_pd)
@@ -99,21 +106,13 @@ def main(argv):
             {
                 "energy": {"field": "energy", "units": "kcal/mol"},
                 "per-atom": {"field": "per-atom", "units": None},
-                "_metadata": {
-                    "software": {"value": "Psi4"},
-                    "method": {"value": "CCSD"},
-                    "basis": {"value": "cc-pVDZ"},
-                },
+                "_metadata": PI_MD,
             }
         ],
         "atomic-forces": [
             {
                 "forces": {"field": "forces", "units": "kcal/molAng"},
-                "_metadata": {
-                    "software": {"value": "Psi4"},
-                    "method": {"value": "CCSD"},
-                    "basis": {"value": "cc-pVDZ"},
-                },
+                "_metadata": PI_MD,
             }
         ],
     }
@@ -145,27 +144,10 @@ def main(argv):
         )
         all_co_ids, all_pr_ids = list(zip(*ids))
 
-        # cs_regexes = {
-        #     "train": "Configurations used in training",
-        #     "test": "Configurations used for testing",
-        # }
-        # cs_names = ["train", "test"]
-
-        # cs_ids = []
-
-        # for i, (regex, desc) in enumerate(cs_regexes.items()):
-        #     cs_id = client.query_and_insert_configuration_set(
-        #         co_hashes=all_co_ids,
-        #         name=cs_names[i],
-        #         description=desc,
-        #         query={"names": {"$regex": regex}},
-        #     )
-        #     cs_ids.append(cs_id)
-
         client.insert_dataset(
             # cs_ids=cs_ids,
             do_hashes=all_pr_ids,
-            name=f"{DATASET_NAME}-{train_test}",
+            name=f"{DATASET_NAME}_{train_test}",
             ds_id=ds_id,
             authors=AUTHORS,
             links=LINKS,

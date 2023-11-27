@@ -9,7 +9,7 @@ Uses atomization-energy property imported from original script directory
 from argparse import ArgumentParser
 from pathlib import Path
 import sys
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import potential_energy_pd
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets")
@@ -70,10 +70,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
-
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
@@ -122,10 +124,11 @@ def main(argv):
             }
         ],
     }
-
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             co_md_map={"lattice_type": {"field": "lattice"}},
             generator=False,
@@ -181,7 +184,7 @@ def main(argv):
         )
 
         cs_id = client.insert_configuration_set(
-            co_ids, description=desc, name=cs_names[i]
+            co_ids, ds_id=ds_id, description=desc, name=cs_names[i]
         )
 
         cs_ids.append(cs_id)
@@ -189,6 +192,7 @@ def main(argv):
     client.insert_dataset(
         cs_ids=cs_ids,
         do_hashes=all_pr_ids,
+        ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
         links=LINKS,

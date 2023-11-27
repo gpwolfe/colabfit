@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 import sys
 
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from ase.atoms import Atoms
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets/sGDML")
@@ -84,9 +84,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     property_map = {
@@ -125,10 +128,11 @@ def main(argv):
             verbose=True,
             generator=False,
         )
-
+        ds_id = generate_ds_id()
         ids = list(
             client.insert_data(
                 configurations,
+                ds_id=ds_id,
                 property_map=property_map,
                 generator=False,
                 transform=tform,
@@ -138,28 +142,11 @@ def main(argv):
 
         all_co_ids, all_pr_ids = list(zip(*ids))
 
-        # cs_regexes = {
-        #     "train": "Configurations used in training",
-        #     "test": "Configurations used for testing",
-        # }
-
-        # cs_names = ["train", "test"]
-
-        # cs_ids = []
-
-        # for i, (regex, desc) in enumerate(cs_regexes.items()):
-        #     cs_id = client.query_and_insert_configuration_set(
-        #         co_hashes=all_co_ids,
-        #         name=cs_names[i],
-        #         description=desc,
-        #         query={"names": {"$regex": regex}},
-        #     )
-        #     cs_ids.append(cs_id)
-
         client.insert_dataset(
             # cs_ids=cs_ids,
             do_hashes=all_pr_ids,
-            name=f"{DATASET}-{train_test}",
+            ds_id=ds_id,
+            name=f"{DATASET}_{train_test}",
             authors=AUTHORS,
             links=LINKS,
             description=(
