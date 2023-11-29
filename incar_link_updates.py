@@ -1610,40 +1610,33 @@ updates = {
         "pub_link": "https://doi.org/10.1038/s41524-022-00807-6",
         "other_links": None,
     },
+    ########
     "QM9x": {
         "new_name": "QM9x",
         "colabfit_id": "DS_xucp4zl589wx_0",
         "incar": None,
         "outcar": None,
-        "data_link": None,
-        "pub_link": None,
-        "other_links": [
-            "https://doi.org/10.1038/s41597-022-01870-whttps://doi.org/10.6084/m9.figshare.20449701.v2"
-        ],
+        "data_link": "https://doi.org/10.6084/m9.figshare.20449701.v2",
+        "pub_link": "https://doi.org/10.1038/s41597-022-01870-w",
+        "other_links": None,
     },
     "Si_PRX_GAP": {
         "new_name": "Si_PRX_GAP",
         "colabfit_id": "DS_y23xph41frx2_0",
         "incar": None,
         "outcar": None,
-        "data_link": None,
-        "pub_link": None,
-        "other_links": [
-            "https://doi.org/10.1103/PhysRevX.8.041048",
-            "https://doi.org/10.17863/CAM.65004",
-        ],
+        "data_link": "https://doi.org/10.17863/CAM.65004",
+        "pub_link": "https://doi.org/10.1103/PhysRevX.8.041048",
+        "other_links": None,
     },
     "Ta_Linear_JCP2015": {
         "new_name": "Ta_Linear_JCP2015",
         "colabfit_id": "DS_zc8ca32nd45o_0",
         "incar": None,
         "outcar": None,
-        "data_link": None,
-        "pub_link": None,
-        "other_links": [
-            "https://doi.org/10.1016/j.jcp.2014.12.018",
-            "https://github.com/FitSNAP/FitSNAP/tree/master/examples/Ta_Linear_JCP2014",
-        ],
+        "data_link": "https://github.com/FitSNAP/FitSNAP/tree/master/examples/Ta_Linear_JCP2014",
+        "pub_link": "https://doi.org/10.1016/j.jcp.2014.12.018",
+        "other_links": None,
     },
     "Ta_PINN_2021": {
         "new_name": "Ta_PINN_2021",

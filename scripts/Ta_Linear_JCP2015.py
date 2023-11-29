@@ -8,16 +8,23 @@ from pathlib import Path
 import sys
 
 from ase import Atoms
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
+from colabfit.tools.property_definitions import (
+    atomic_forces_pd,
+    cauchy_stress_pd,
+    potential_energy_pd,
+)
 
-DATASET = "Ta_Linear_JCP2015"
+DATASET = "Ta_Linear_JCP2014"
 
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/colabfit_data/data/"
     "FitSNAP/examples/Ta_Linear_JCP2014/JSON/"
 )
+DATASET_FP = Path().cwd().parent / "data/FitSNAP-master/examples/Ta_Linear_JCP2014/JSON"
 
-
+PUBLICATION = "https://doi.org/10.1016/j.jcp.2014.12.018"
+DATA_LINK = "https://github.com/FitSNAP/FitSNAP/tree/master/examples/Ta_Linear_JCP2014"
 LINKS = [
     "https://doi.org/10.1016/j.jcp.2014.12.018",
     "https://github.com/FitSNAP/FitSNAP/tree/master/examples/Ta_Linear_JCP2014",
@@ -34,6 +41,35 @@ DS_DESC = (
     "linear SNAP potential for solid and liquid tantalum as published in "
     "Thompson, A.P. et. al, J. Comp. Phys. 285 (2015) 316-330."
 )
+
+PI_MD = {
+    "software": {"value": "VASP"},
+    "method": {"value": "DFT-PBE"},
+    "encut": {"value": 500},
+    "k-point-scheme": {"value": "Monkhorst-Pack"},
+}
+property_map = {
+    "potential-energy": [
+        {
+            "energy": {"field": "energy", "units": "eV"},
+            "per-atom": {"field": "per-atom", "units": None},
+            "_metadata": PI_MD,
+        }
+    ],
+    "atomic-forces": [
+        {
+            "forces": {"field": "forces", "units": "eV/Ang"},
+            "_metadata": PI_MD,
+        }
+    ],
+    "cauchy-stress": [
+        {
+            "stress": {"field": "stress", "units": "bar"},
+            "volume-normalized": {"value": True, "units": None},
+            "_metadata": PI_MD,
+        }
+    ],
+}
 
 
 def reader(file_path, **kwargs):
@@ -81,10 +117,16 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+    client.insert_property_definition(atomic_forces_pd)
+    client.insert_property_definition(cauchy_stress_pd)
+    client.insert_property_definition(potential_energy_pd)
 
     configurations = list(
         load_data(
@@ -100,50 +142,18 @@ def main(argv):
         )
     )
 
-    # TODO
-    property_map = {
-        "potential-energy": [
-            {
-                "energy": {"field": "energy", "units": "eV"},
-                "per-atom": {"field": "per-atom", "units": None},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-PBE"},
-                },
-            }
-        ],
-        "atomic-forces": [
-            {
-                "forces": {"field": "forces", "units": "eV/Ang"},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-PBE"},
-                },
-            }
-        ],
-        "cauchy-stress": [
-            {
-                "stress": {"field": "virial", "units": "bar"},
-                "volume-normalized": {"value": True, "units": None},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-PBE"},
-                },
-            }
-        ],
-    }
-
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
-            configurations, property_map=property_map, generator=False, verbose=True
+            configurations,
+            ds_id=ds_id,
+            property_map=property_map,
+            generator=False,
+            verbose=True,
         )
     )
 
     all_co_ids, all_pr_ids = list(zip(*ids))
-
-    len(set(all_co_ids))
-
-    len(set(all_pr_ids))
 
     cs_regexes = {
         "Displaced_A15": "A15 configurations with random displacement of atomic "
@@ -186,6 +196,7 @@ def main(argv):
             co_hashes=all_co_ids,
             name=cs_names[i],
             description=desc,
+            ds_id=ds_id,
             query={"names": {"$regex": regex}},
         )
         cs_ids.append(cs_id)
@@ -193,6 +204,7 @@ def main(argv):
     client.insert_dataset(
         cs_ids=cs_ids,
         do_hashes=all_pr_ids,
+        ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,
