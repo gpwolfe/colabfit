@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 
 
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from ase.io.vasp import read_vasp
 
 DATASET_FP = Path(
@@ -14,7 +14,8 @@ DATASET_FP = Path(
 )
 DATASET = "TiMoS_alloys_CMS2021"
 
-
+PUBLICATION = "https://doi.org/10.1016/j.commatsci.2020.110044"
+DATA_LINK = "https://eprints.soton.ac.uk/443461/"
 LINKS = [
     "https://doi.org/10.1016/j.commatsci.2020.110044",
     "https://eprints.soton.ac.uk/443461/",
@@ -27,6 +28,22 @@ DS_DESC = (
     "calculations are performed using VASP 5.4.3, compiled with intel "
     "MPI and Intel MKL support."
 )
+
+property_map = {
+    "potential-energy": [
+        {
+            "energy": {"field": "energy", "units": "eV"},
+            "per-atom": {"field": "per-atom", "units": None},
+            "_metadata": {
+                "software": {"value": "VASP 5.4.3"},
+                "method": {"value": "DFT-SCAN+rVV10"},
+                "kpoints": {"value": "11x11x11"},
+                "encut": {"value": "800 eV"},
+                "ediff": {"value": 0.0005},
+            },
+        }
+    ],
+}
 
 
 # TiMo
@@ -78,25 +95,11 @@ def main(argv):
         verbose=True,
         generator=False,
     )
-
-    property_map = {
-        "potential-energy": [
-            {
-                "energy": {"field": "energy", "units": "eV"},
-                "per-atom": {"field": "per-atom", "units": None},
-                "_metadata": {
-                    "software": {"value": "VASP 5.4.3"},
-                    "method": {"value": "DFT-SCAN+rVV10"},
-                    "kpoint": {"value": "11x11x11"},
-                    "ecut": {"value": "800 eV"},
-                },
-            }
-        ],
-    }
-
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             transform=tform,
@@ -131,7 +134,7 @@ def main(argv):
         )
 
         cs_id = client.insert_configuration_set(
-            co_ids, description=desc, name=cs_names[i]
+            co_ids, description=desc, ds_id=ds_id, name=cs_names[i]
         )
 
         cs_ids.append(cs_id)
@@ -139,6 +142,7 @@ def main(argv):
     client.insert_dataset(
         cs_ids=cs_ids,
         do_hashes=all_pr_ids,
+        ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,

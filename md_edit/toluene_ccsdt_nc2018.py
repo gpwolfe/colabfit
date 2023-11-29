@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 
 from ase.atoms import Atoms
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import potential_energy_pd, atomic_forces_pd
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets/sGDML")
@@ -13,6 +13,8 @@ DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets/
 
 DATASET = "Toluene_ccsdt_NC2018"
 
+PUBLICATION = "https://doi.org/10.1038/s41467-018-06169-2"
+DATA_LINK = "http://sgdml.org/"
 LINKS = [
     "https://doi.org/10.1038/s41467-018-06169-2",
     "http://sgdml.org/",
@@ -34,6 +36,26 @@ DS_DESC = (
     "used for malonaldehyde. All calculations were performed with the Psi4 software "
     "suite."
 )
+PI_MD = {
+    "software": {"value": "Psi4"},
+    "method": {"value": "CCSD(T)"},
+    "basis-set": {"value": "cc-pVDZ"},
+}
+property_map = {
+    "potential-energy": [
+        {
+            "energy": {"field": "energy", "units": "kcal/mol"},
+            "per-atom": {"field": "per-atom", "units": None},
+            "_metadata": PI_MD,
+        }
+    ],
+    "atomic-forces": [
+        {
+            "forces": {"field": "forces", "units": "kcal/molAng"},
+            "_metadata": PI_MD,
+        }
+    ],
+}
 
 
 def tform(c):
@@ -85,36 +107,17 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
 
-    property_map = {
-        "potential-energy": [
-            {
-                "energy": {"field": "energy", "units": "kcal/mol"},
-                "per-atom": {"field": "per-atom", "units": None},
-                "_metadata": {
-                    "software": {"value": "Psi4"},
-                    "method": {"value": "CCSD(T)"},
-                    "basis": {"value": "cc-pVDZ"},
-                },
-            }
-        ],
-        "atomic-forces": [
-            {
-                "forces": {"field": "forces", "units": "kcal/molAng"},
-                "_metadata": {
-                    "software": {"value": "Psi4"},
-                    "method": {"value": "CCSD(T)"},
-                    "basis": {"value": "cc-pVDZ"},
-                },
-            }
-        ],
-    }
     for train_test in ["train", "test"]:
         configurations = load_data(
             file_path=DATASET_FP,
@@ -127,10 +130,11 @@ def main(argv):
             verbose=True,
             generator=False,
         )
-
+        ds_id = generate_ds_id()
         ids = list(
             client.insert_data(
                 configurations,
+                ds_id=ds_id,
                 property_map=property_map,
                 generator=False,
                 transform=tform,
@@ -161,8 +165,9 @@ def main(argv):
         client.insert_dataset(
             # cs_ids=cs_ids,
             do_hashes=all_pr_ids,
-            name=f"{DATASET}-{train_test}",
+            name=f"{DATASET}_{train_test}",
             authors=AUTHORS,
+            ds_id=ds_id,
             links=LINKS,
             description=(
                 f"The {train_test} set of a train/test pair from the "

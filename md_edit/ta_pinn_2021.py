@@ -6,14 +6,16 @@ import sys
 
 import numpy as np
 
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.configuration import AtomicConfiguration
-
+from colabfit.tools.property_definitions import potential_energy_pd
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/data/mishin/")
+DATASET_FP = Path().cwd().parent / "data/mishin"
 DATASET = "Ta_PINN_2021"
 
-
+PUBLICATION = "https://doi.org/10.1016/j.commatsci.2021.111180"
+DATA_LINK = "https://doi.org/10.1016/j.commatsci.2021.111180"
 LINKS = ["https://doi.org/10.1016/j.commatsci.2021.111180"]
 AUTHORS = ["Yi-Shen Lin", "Ganga P. Purja Pun", "Yuri Mishin"]
 DS_DESC = (
@@ -29,6 +31,23 @@ DS_DESC = (
     "structure was sampled in the greatest detail, including a wide range of "
     "isotropic and uniaxial deformations."
 )
+
+property_map = {
+    "potential-energy": [
+        {
+            "energy": {"field": "energy", "units": "eV"},
+            "per-atom": {"field": "per-atom", "units": None},
+            "_metadata": {
+                "software": {"value": "VASP"},
+                "method": {"value": "DFT-PBE"},
+                "ismear": {"value": 1},
+                "sigma": {"value": 0.1},
+                "k-point-scheme": {"value": "Monkhorst-Pack"},
+                "encut": {"value": 410},
+            },
+        }
+    ],
+}
 
 
 def reader(file_path):
@@ -99,9 +118,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = list(
@@ -118,26 +140,17 @@ def main(argv):
         )
     )
 
-    property_map = {
-        "potential-energy": [
-            {
-                "energy": {"field": "energy", "units": "eV"},
-                "per-atom": {"field": "per-atom", "units": None},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-PBE"},
-                },
-            }
-        ],
-    }
-
-    # client.insert_property_definition('potential-energy.json')
+    client.insert_property_definition(potential_energy_pd)
     # client.insert_property_definition('atomic-forces.json')
     # client.insert_property_definition('cauchy-stress.json')
-
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
-            configurations, property_map=property_map, generator=False, verbose=True
+            configurations,
+            ds_id=ds_id,
+            property_map=property_map,
+            generator=False,
+            verbose=True,
         )
     )
 
@@ -231,6 +244,7 @@ def main(argv):
         cs_id = client.query_and_insert_configuration_set(
             co_hashes=all_co_ids,
             name=cs_names[i],
+            ds_id=ds_id,
             description=desc,
             query={"names": {"$regex": regex}},
         )
@@ -238,6 +252,7 @@ def main(argv):
 
     client.insert_dataset(
         cs_ids=cs_ids,
+        ds_id=ds_id,
         do_hashes=all_pr_ids,
         name=DATASET,
         authors=AUTHORS,

@@ -5,7 +5,12 @@ from pathlib import Path
 import sys
 
 
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
+from colabfit.tools.property_definitions import (
+    atomic_forces_pd,
+    cauchy_stress_pd,
+    potential_energy_pd,
+)
 
 
 import os
@@ -14,11 +19,14 @@ import numpy as np
 from ase import Atoms
 
 DATASET_FP = Path(
-    "/persistent/colabfit_raw_data/colabfit_data/data/FitSNAP/"
-    "examples/WBe_PRB2019/JSON/"
+    "/persistent/colabfit_raw_data/colabfit_data/data/"
+    "FitSNAP/examples/WBe_PRB2019/JSON/"
 )
+DATASET_FP = Path().cwd().parent / "data/fitsnap/examples/WBe_PRB2019/JSON"
 DATASET = "WBe_PRB2019"
 
+PUBLICATION = "https://doi.org/10.1103/PhysRevB.99.184305"
+DATA_LINK = "https://github.com/FitSNAP/FitSNAP/tree/master/examples/WBe_PRB2019"
 LINKS = [
     "https://doi.org/10.1103/PhysRevB.99.184305",
     "https://github.com/FitSNAP/FitSNAP/tree/master/examples/WBe_PRB2019",
@@ -36,6 +44,32 @@ DS_DESC = (
     "data set was developed for the purpose of studying plasma material "
     "interactions in fusion reactors."
 )
+PI_MD = {
+    "software": {"value": "VASP"},
+    "method": {"value": "DFT-PBE"},
+    "encut": {"value": 600},
+}
+property_map = {
+    "potential-energy": [
+        {
+            "energy": {"field": "energy", "units": "eV"},
+            "per-atom": {"field": "per-atom", "units": None},
+            "_metadata": PI_MD,
+        }
+    ],
+    "atomic-forces": [
+        {
+            "forces": {"field": "forces", "units": "eV/Ang"},
+            "_metadata": PI_MD,
+        }
+    ],
+    "cauchy-stress": [
+        {
+            "stress": {"field": "stress", "units": "GPa"},
+            "_metadata": PI_MD,
+        }
+    ],
+}
 
 
 def reader(file_path, **kwargs):
@@ -82,10 +116,17 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+
+    client.insert_property_definition(atomic_forces_pd)
+    client.insert_property_definition(cauchy_stress_pd)
+    client.insert_property_definition(potential_energy_pd)
 
     configurations = list(
         load_data(
@@ -101,42 +142,14 @@ def main(argv):
         )
     )
 
-    # TODO
-
-    property_map = {
-        "potential-energy": [
-            {
-                "energy": {"field": "energy", "units": "eV"},
-                "per-atom": {"field": "per-atom", "units": None},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-PBE"},
-                },
-            }
-        ],
-        "atomic-forces": [
-            {
-                "forces": {"field": "forces", "units": "eV/Ang"},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-PBE"},
-                },
-            }
-        ],
-        "cauchy-stress": [
-            {
-                "stress": {"field": "stress", "units": "GPa"},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-PBE"},
-                },
-            }
-        ],
-    }
-
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
-            configurations, property_map=property_map, generator=False, verbose=True
+            configurations,
+            ds_id=ds_id,
+            property_map=property_map,
+            generator=False,
+            verbose=True,
         )
     )
 
@@ -196,14 +209,16 @@ def main(argv):
         cs_id = client.query_and_insert_configuration_set(
             co_hashes=all_co_ids,
             name=cs_names[i],
+            ds_id=ds_id,
             description=desc,
             query={"names": {"$regex": regex}},
         )
         cs_ids.append(cs_id)
 
-    ds_id = client.insert_dataset(
+    client.insert_dataset(
         cs_ids=cs_ids,
         do_hashes=all_pr_ids,
+        ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,
@@ -211,7 +226,6 @@ def main(argv):
         resync=True,
         verbose=True,
     )
-    ds_id
 
 
 """
