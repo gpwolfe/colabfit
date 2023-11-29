@@ -6,15 +6,27 @@ import sys
 
 import numpy as np
 
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
+from colabfit.tools.property_definitions import (
+    atomic_forces_pd,
+    cauchy_stress_pd,
+    potential_energy_pd,
+)
 
 
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/colabfit_data/data/"
     "acclab_helsinki/tabGAP_2b+3b_MoNbTaVW/db_HEA_reduced.xyz"
 )
+DATASET_FP = (
+    Path().cwd().parent
+    / "data/monbtavw_prb_2021/tabGAP_2b+3b_MoNbTaVW/db_HEA_reduced.xyz"
+)
 DATASET = "MoNbTaVW_PRB2021"
 
+
+PUBLICATION = "https://doi.org/10.1103/PhysRevB.104.104101"
+DATA_LINK = "https://doi.org/10.23729/1b845398-5291-4447-b417-1345acdd2eae"
 LINKS = [
     "https://doi.org/10.1103/PhysRevB.104.104101",
     "https://doi.org/10.23729/1b845398-5291-4447-b417-1345acdd2eae",
@@ -30,6 +42,13 @@ DS_DESC = (
     "segregation and defects in the body-centered-cubic refractory "
     "high-entropy alloy MoNbTaVW."
 )
+PI_MD = {
+    "software": {"value": "VASP"},
+    "method": {"value": "DFT-PBE"},
+    "encut": {"value": 500},
+    "kspacing": {"value": 0.15},
+    "sigma": {"value": 0.1},
+}
 
 
 def tform(c):
@@ -39,6 +58,30 @@ def tform(c):
         c.info["virial"] = (
             c.info["virial"] / np.abs(np.linalg.det(np.array(c.cell)))
         ) * -160.21766208
+
+
+property_map = {
+    "potential-energy": [
+        {
+            "energy": {"field": "energy", "units": "eV"},
+            "per-atom": {"field": "per-atom", "units": None},
+            "_metadata": PI_MD,
+        }
+    ],
+    "atomic-forces": [
+        {
+            "forces": {"field": "force", "units": "eV/Ang"},
+            "_metadata": PI_MD,
+        }
+    ],
+    "cauchy-stress": [
+        {
+            "stress": {"field": "virial", "units": "GPa"},
+            "volume-normalized": {"value": True, "units": None},
+            "_metadata": PI_MD,
+        }
+    ],
+}
 
 
 def main(argv):
@@ -58,11 +101,17 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
+    client.insert_property_definition(atomic_forces_pd)
+    client.insert_property_definition(cauchy_stress_pd)
+    client.insert_property_definition(potential_energy_pd)
     configurations = list(
         load_data(
             file_path=DATASET_FP,
@@ -74,43 +123,12 @@ def main(argv):
         )
     )
 
-    # TODO fix
-    property_map = {
-        "potential-energy": [
-            {
-                "energy": {"field": "energy", "units": "eV"},
-                "per-atom": {"field": "per-atom", "units": None},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "GAP"},
-                },
-            }
-        ],
-        "atomic-forces": [
-            {
-                "forces": {"field": "force", "units": "eV/Ang"},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "GAP"},
-                },
-            }
-        ],
-        "cauchy-stress": [
-            {
-                "stress": {"field": "virial", "units": "GPa"},
-                "volume-normalized": {"value": True, "units": None},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "GAP"},
-                },
-            }
-        ],
-    }
-
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
             property_map=property_map,
+            ds_id=ds_id,
             co_md_map={"configuration_type": {"field": "config_type"}},
             generator=False,
             transform=tform,
@@ -201,12 +219,14 @@ def main(argv):
             co_hashes=all_co_ids,
             name=cs_names[i],
             description=desc,
+            ds_id=ds_id,
             query={"names": {"$regex": regex}},
         )
         cs_ids.append(cs_id)
 
     client.insert_dataset(
         cs_ids=cs_ids,
+        ds_id=ds_id,
         do_hashes=all_pr_ids,
         name=DATASET,
         authors=AUTHORS,

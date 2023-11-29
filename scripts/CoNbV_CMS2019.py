@@ -6,7 +6,16 @@ import sys
 
 from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 
-DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/data/")
+from colabfit.tools.property_definitions import (
+    cauchy_stress_pd,
+    atomic_forces_pd,
+    potential_energy_pd,
+)
+
+DATASET_FP = Path(
+    "/persistent/colabfit_raw_data/colabfit_data/data/gubaev/CoNbV/train.cfg"
+)
+DATASET_FP = Path().cwd().parent / "data/CoNbV/train.cfg"
 DATASET = "CoNbV_CMS2019"
 PUBLICATION = "https://doi.org/10.1016/j.commatsci.2018.09.031"
 DATA_LINK = (
@@ -60,13 +69,16 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
-        file_path=DATASET_FP / "gubaev/CoNbV/train.cfg",
+        file_path=DATASET_FP,
         file_format="cfg",
         name_field=None,
         elements=["Co", "Nb", "V"],
@@ -75,9 +87,9 @@ def main(argv):
         generator=False,
     )
 
-    # client.insert_property_definition('potential-energy.json')
-    # client.insert_property_definition('atomic-forces.json')
-    # client.insert_property_definition('cauchy-stress.json')
+    client.insert_property_definition(potential_energy_pd)
+    client.insert_property_definition(atomic_forces_pd)
+    client.insert_property_definition(cauchy_stress_pd)
 
     property_map = {
         "potential-energy": [

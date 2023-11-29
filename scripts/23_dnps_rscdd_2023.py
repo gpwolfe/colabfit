@@ -9,6 +9,49 @@ virial
 
 File notes
 ----------
+INCAR file contents:
+# Saidi Group University of Pittsburgh INCAR file for
+# generating VASP training data at variable temperatures 2020.
+PREC=A
+ENCUT=400
+ISYM=0
+ALGO=fast
+EDIFF=1E-8
+LREAL=F
+NPAR=8
+KPAR=16
+NELM=200
+NELMIN=4
+ISTART=0
+ICHARG=0
+ISIF=2
+ISMEAR=1
+SIGMA=0.15
+MAXMIX=50
+IBRION=0
+NBLOCK=1
+KBLOCK=10
+SMASS=-1
+POTIM=2
+TEBEG=XXX  # Set initial temperature for NVT
+TEEND=XXX  # Set final temperature for NVT	
+NSW=20     # Adjust to change the number of structures
+
+#opt
+# ISIF =0 ! relax ions only do not calculated stress tensor 
+# ISIF =3 ! relax ions and vol
+# potim = 0.1 ! relax ions and volume as needed   
+# NSW = 1000 
+# IBRION = 2 !use CG  
+
+LWAVE=F
+LCHARG=T
+PSTRESS=0
+
+KSPACING=0.24
+KGAMMA=F
+#ispin=2 
+--------------
 Tested locally. Kubernetes files should  have same changes described below
 
 the file for coordinates at:
@@ -35,8 +78,8 @@ import sys
 # DATASET_FP = Path(
 #     "/persistent/colabfit_raw_data/new_raw_datasets_2.0/saidi_23_dnps"
 # )  # HSRN K8s pod location
-DATASET_FP = Path("data/saidi_23_dnps/Training_Data")
-DATASET = "23-DNPs-RSCDD-2023"
+DATASET_FP = Path().cwd().parent / "data/saidi_23_dnps/Training_Data"
+DATASET = "23-Single-Element-DNPs_RSCDD_2023"
 
 PUBLICATION = "https://doi.org/10.1039/D3DD00046J"
 DATA_LINK = "https://github.com/saidigroup/23-Single-Element-DNPs"
@@ -83,6 +126,66 @@ ELEMENTS = [
 GLOB_STR = "box.npy"
 METHODS = "DFT-PBE"
 SOFTWARE = "VASP"
+PI_MD = {
+    "software": {"value": SOFTWARE},
+    "method": {"value": METHODS},
+    "INCAR": {
+        "value": {
+            "PREC": "A",
+            "ENCUT": "400",
+            "ISYM": "0",
+            "ALGO": "fast",
+            "EDIFF": "1E-8",
+            "LREAL": "F",
+            "NPAR": "8",
+            "KPAR": "16",
+            "NELM": "200",
+            "NELMIN": "4",
+            "ISTART": "0",
+            "ICHARG": "0",
+            "ISIF": "2",
+            "ISMEAR": "1",
+            "SIGMA": "0.15",
+            "MAXMIX": "50",
+            "IBRION": "0",
+            "NBLOCK": "1",
+            "KBLOCK": "10",
+            "SMASS": "-1",
+            "POTIM": "2",
+            "LWAVE": "F",
+            "LCHARG": "T",
+            "PSTRESS": "0",
+            "KSPACING": "0.24",
+            "KGAMMA": "F",
+        }
+    },
+}
+co_md_map = {
+    "materials-project-id": {"field": "mp_id"},
+    "temperature": {"field": "temp"},
+}
+property_map = {
+    "potential-energy": [
+        {
+            "energy": {"field": "energy", "units": "eV"},
+            "per-atom": {"value": False, "units": None},
+            "_metadata": PI_MD,
+        }
+    ],
+    "atomic-forces": [
+        {
+            "forces": {"field": "forces", "units": "eV/A"},
+            "_metadata": PI_MD,
+        }
+    ],
+    "cauchy-stress": [
+        {
+            "stress": {"field": "virial", "units": "eV"},
+            "volume-normalized": {"value": True, "units": None},
+            "_metadata": PI_MD,
+        }
+    ],
+}
 
 
 def assemble_props(filepath: Path, element: str):
@@ -170,37 +273,6 @@ def main(argv):
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(cauchy_stress_pd)
 
-    metadata = {
-        "software": {"value": SOFTWARE},
-        "method": {"value": METHODS},
-        "encut": {"value": "400 eV"},
-    }
-    co_md_map = {
-        "materials-project-id": {"field": "mp_id"},
-        "temperature": {"field": "temp"},
-    }
-    property_map = {
-        "potential-energy": [
-            {
-                "energy": {"field": "energy", "units": "eV"},
-                "per-atom": {"value": False, "units": None},
-                "_metadata": metadata,
-            }
-        ],
-        "atomic-forces": [
-            {
-                "forces": {"field": "forces", "units": "eV/A"},
-                "_metadata": metadata,
-            }
-        ],
-        "cauchy-stress": [
-            {
-                "stress": {"field": "virial", "units": "eV"},
-                "volume-normalized": {"value": True, "units": None},
-                "_metadata": metadata,
-            }
-        ],
-    }
     for element in ELEMENTS:
         ds_id = generate_ds_id()
         elem_fp = next(DATASET_FP.glob(element))

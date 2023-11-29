@@ -24,10 +24,13 @@ from pathlib import Path
 import sys
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets/md_22")  # HSRN
-# DATASET_FP = Path().cwd() / "data/md22"  # local
+DATASET_FP = Path().cwd().parent / "data/md22"  # local
 
 SOFTWARE = "FHI-aims"
 METHODS = "DFT-PBE+MBE"
+
+PUBLICATION = "https://doi.org/10.1126/sciadv.adf0873"
+DATA_LINK = "http://sgdml.org/"
 LINKS = ["https://doi.org/10.1126/sciadv.adf0873", "http://sgdml.org/"]
 AUTHORS = [
     "Stefan Chmiela",
@@ -55,6 +58,8 @@ ELEMENTS = None
 PI_METADATA = {
     "software": {"value": SOFTWARE},
     "method": {"value": METHODS},
+    "basis-set": {"field": "basis-set"},
+    "thermostat": {"field": "thermostat"},
 }
 
 PROPERTY_MAP = {
@@ -72,12 +77,26 @@ PROPERTY_MAP = {
         },
     ],
 }
+basis_dict = {
+    "md22_Ac-Ala3-NHMe": ("tight", "Global Langevin, friction coefficient=2 fs"),
+    "md22_AT-AT-CG-CG": ("tight", "Global Langevin, friction coefficient=2 fs"),
+    "md22_AT-AT": ("tight", "Global Langevin, friction coefficient=2 fs"),
+    "md22_buckyball-catcher": ("light", "Nosé-Hoover, effective mass=1700/cm"),
+    "md22_DHA": ("tight", "Nosé-Hoover, effective mass=1700/cm"),
+    "md22_double-walled_nanotube": ("light", "Nosé-Hoover, effective mass=1700/cm"),
+    "md22_stachyose": ("tight", "Nosé-Hoover, effective mass=1700/cm"),
+}
+
+
+def get_basis(stem):
+    return basis_dict[stem]
 
 
 def reader(fp):
     configs = read(fp, index=":")
     for i, config in enumerate(configs):
         config.info["name"] = f"{fp.stem}_{i}"
+        config.info["basis-set"], config.info["thermostat"] = get_basis(fp.stem)
     return configs
 
 
@@ -98,9 +117,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)

@@ -1,20 +1,44 @@
 #!/usr/bin/env python
 # coding: utf-8
+"""
+File notes
+----------
+Incar contents:
+# Main INCAR tags used for bulk training structures
+# (same for surfaces but only 1 k-point along surface normal)
+# POTCAR version used: PAW_PBE Mo_sv 02Feb2006
+ KSPACING = 0.150000
+ SIGMA = 0.100000
+ ENCUT = 500.000000
+ EDIFF = 1.00e-06
+ GGA = PE
+ PREC = Accurate
+ LASPH = .TRUE.
+ NELMIN = 4
+ ISMEAR = 1
+ """
 from argparse import ArgumentParser
 from pathlib import Path
 import sys
 
 import numpy as np
 
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
+from colabfit.tools.property_definitions import (
+    atomic_forces_pd,
+    cauchy_stress_pd,
+    potential_energy_pd,
+)
 
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/colabfit_data/data/"
     "acclab_helsinki/Mo/training-data/db_Mo.xyz"
 )
+DATASET_FP = Path().cwd().parent / "data/mo_prm_2019/db_Mo.xyz"
 DATASET = "Mo_PRM2019"
 
-
+PUBLICATION = "https://doi.org/10.1103/PhysRevMaterials.4.093802"
+DATA_LINK = "https://gitlab.com/acclab/gap-data/-/tree/master/Mo"
 LINKS = [
     "https://doi.org/10.1103/PhysRevMaterials.4.093802",
     "https://gitlab.com/acclab/gap-data/-/tree/master/Mo",
@@ -33,6 +57,24 @@ DS_DESC = (
     "configurations to the correct lattice spacing and adding in gamma "
     "surface configurations."
 )
+PI_MD = {
+    "software": {"value": "VASP"},
+    "method": {"value": "DFT-PBE"},
+    "POTCAR": {"PAW_PBE Mo_sv 02Feb2006"},
+    "INCAR": {
+        "value": {
+            "KSPACING": "bulk: 0.150000; surface: 1 k-point along surface normal",
+            "SIGMA": "0.100000",
+            "ENCUT": "500.000000",
+            "EDIFF": "1.00e-06",
+            "GGA": "PE",
+            "PREC": "Accurate",
+            "LASPH": ".TRUE.",
+            "NELMIN": 4,
+            "ISMEAR": 1,
+        },
+    },
+}
 
 
 def tform(c):
@@ -61,20 +103,24 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
-    configurations = list(
-        load_data(
-            file_path=DATASET_FP,
-            file_format="xyz",
-            name_field="config_type",
-            elements=["Mo"],
-            default_name=DATASET,
-            verbose=True,
-        )
+    client.insert_property_definition(atomic_forces_pd)
+    client.insert_property_definition(cauchy_stress_pd)
+    client.insert_property_definition(potential_energy_pd)
+    configurations = load_data(
+        file_path=DATASET_FP,
+        file_format="xyz",
+        name_field="config_type",
+        elements=["Mo"],
+        default_name=DATASET,
+        verbose=True,
     )
 
     property_map = {
@@ -82,36 +128,28 @@ def main(argv):
             {
                 "energy": {"field": "energy", "units": "eV"},
                 "per-atom": {"field": "per-atom", "units": None},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-PBE"},
-                },
+                "_metadata": PI_MD,
             }
         ],
         "atomic-forces": [
             {
-                "forces": {"field": "forces", "units": "eV/Ang"},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-PBE"},
-                },
+                "forces": {"field": "force", "units": "eV/Ang"},
+                "_metadata": PI_MD,
             }
         ],
         "cauchy-stress": [
             {
                 "stress": {"field": "virial", "units": "GPa"},
                 "volume-normalized": {"value": True, "units": None},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-PBE"},
-                },
+                "_metadata": PI_MD,
             }
         ],
     }
-
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             co_md_map={"configuration_type": {"field": "config_type"}},
             generator=False,
@@ -121,10 +159,6 @@ def main(argv):
     )
 
     all_co_ids, all_pr_ids = list(zip(*ids))
-
-    len(set(all_co_ids))
-
-    len(set(all_pr_ids))
 
     cs_regexes = {
         "^liquid": "Liquid with densities around the experimental density of 17.6 g/"
@@ -192,6 +226,7 @@ def main(argv):
             co_hashes=all_co_ids,
             name=cs_names[i],
             description=desc,
+            ds_id=ds_id,
             query={"names": {"$regex": regex}},
         )
         cs_ids.append(cs_id)
@@ -201,6 +236,7 @@ def main(argv):
         do_hashes=all_pr_ids,
         name=DATASET,
         authors=AUTHORS,
+        ds_id=ds_id,
         links=LINKS,
         description=DS_DESC,
         resync=True,

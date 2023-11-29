@@ -1,5 +1,22 @@
 #!/usr/bin/env python
 # coding: utf-8
+
+"""
+'nomad_XC_functionals',
+ 'nomad_calculation_uri',
+ 'nomad_converged',
+ 'nomad_electronic_structure_method',
+ 'nomad_free_energy',
+ 'nomad_metadata_type',
+ 'nomad_potential_energy',
+ 'nomad_program_name',
+ 'nomad_program_version',
+ 'nomad_run_gIndex',
+ 'nomad_system_gIndex',
+ 'nomad_total_energy',
+ 'nomad_uri'
+
+"""
 from argparse import ArgumentParser
 from pathlib import Path
 import sys
@@ -11,7 +28,8 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/colabfit_data/"
     "new_raw_datasets/CHON_berk/CHON.extxyz"
 )
-DATASET = "CHON_JCP2020"
+DATASET_FP = Path().cwd().parent / "data/chon_jcp_2020/CHON.extxyz"
+DATASET = "CHON_JCP_2020"
 PUBLICATION = "https://doi.org/10.1063/5.0016005"
 DATA_LINK = (
     "https://github.com/DescriptorZoo/sensitivity-dimensionality-results/tree"
@@ -31,6 +49,45 @@ DS_DESC = (
     "8.81% O and includes 96 804 atomic environments in 5217 structures."
 )
 
+PI_MD = {
+    "potential-energy": [
+        {
+            "energy": {"field": "nomad_total_energy", "units": "eV"},
+            "per-atom": {"value": False, "units": None},
+            "_metadata": {
+                "software": {"field": "nomad_program_name"},
+                "method": {"field": "nomad_electronic_structure_method"},
+                "method_functional": {"field": "nomad_XC_functionals"},
+            },
+        }
+    ],
+    "free-energy": [
+        {
+            "energy": {"field": "nomad_free_energy", "units": "eV"},
+            "per-atom": {"value": False, "units": None},
+            "_metadata": {
+                "software": {"field": "nomad_program_name"},
+                "software-version": {"field": "nomad_program_version"},
+                "method": {"field": "nomad_electronic_structure_method"},
+                "method_functional": {"field": "nomad_XC_functionals"},
+            },
+        }
+    ],
+}
+CO_MD = {
+    key: {"field": key}
+    for key in [
+        "nomad_XC_functionals",
+        "nomad_calculation_uri",
+        "nomad_converged",
+        "nomad_metadata_type",
+        "nomad_potential_energy",
+        "nomad_run_gIndex",
+        "nomad_system_gIndex",
+        "nomad_uri",
+    ]
+}
+
 
 def main(argv):
     parser = ArgumentParser()
@@ -49,9 +106,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
@@ -64,36 +124,12 @@ def main(argv):
         generator=False,
     )
 
-    property_map = {
-        "potential-energy": [
-            {
-                "energy": {"field": "nomad_total_energy", "units": "eV"},
-                "per-atom": {"value": False, "units": None},
-                "_metadata": {
-                    "software": {"field": "nomad_program_name"},
-                    "method": {"field": "nomad_electronic_structure_method"},
-                    "method_functional": {"field": "nomad_XC_functionals"},
-                },
-            }
-        ],
-        "free-energy": [
-            {
-                "energy": {"field": "nomad_free_energy", "units": "eV"},
-                "per-atom": {"value": False, "units": None},
-                "_metadata": {
-                    "software": {"field": "nomad_program_name"},
-                    "method": {"field": "nomad_electronic_structure_method"},
-                    "method_functional": {"field": "nomad_XC_functionals"},
-                },
-            }
-        ],
-    }
     ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
             ds_id=ds_id,
-            property_map=property_map,
+            property_map=PI_MD,
             generator=False,
             verbose=True,
         )
