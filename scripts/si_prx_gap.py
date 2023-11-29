@@ -1,19 +1,96 @@
 #!/usr/bin/env python
 # coding: utf-8
+
+"""
+Possible keys
+--------------
+"acc",
+"avg-ke",
+"avgpos",
+"calculate-stress",
+"castep-file-name",
+"castep-run-time",
+"continuation",  # input
+"cut-off-energy",  # input
+"cutoff",  # input
+"cutoff-factor",  # input
+"damp-mask",
+"data-distribution",  # input
+"elec-energy-tol",  # input
+"enthalpy",
+"fine-grid-scale",  # input
+"finite-basis-corr",  # input
+"fix-occupancy",  # input
+"force-ewald",
+"force-locpot",
+"force-nlpot",
+"frac-pos",
+"grid-scale",  # input
+"hamiltonian",
+"i-step",
+"in-file",
+"iprint",  # input
+"kpoints-mp-grid",  # input
+"map-shift",
+"mass",
+"masses",
+"max-charge-amp",  # input
+"max-scf-cycles",  # input
+"md-cell-t",  # input
+"md-delta-t",  # input
+"md-ensemble",  # input
+"md-ion-t",  # inpu
+"md-num-iter",  # input
+"md-temperature",  # input
+"md-thermostat",  # input
+"minim-constant-volume",  # input
+"minim-hydrostatic-strain",  # input
+"minim-lattice-fix",  # input
+"mix-history-length",  # input
+"mixing-scheme",  # input
+"momenta",
+"n-neighb",
+"nextra-bands",  # input
+"nneightol",  # input
+"num-dump-cycles",  # input
+"oldpos",
+"opt-strategy",  # input
+"opt-strategy-bias",  # input
+"popn-calculate",  # input
+"pressure",
+"reuse",  # input
+"smearing-width",  # input
+"spin-polarized",  # input
+"task",  # input
+"temperature",  # input
+"thermostat-region",  # input
+"time",
+"travel",
+"velo",
+"virial",
+"xc-functional"
+"""
 from argparse import ArgumentParser
 from pathlib import Path
 import sys
 
-from colabfit.tools.database import MongoDatabase
-from colabfit.tools.database import load_data
 
-
-DATASET_FP = Path(
-    "/persistent/colabfit_raw_data/colabfit_data/data/gap_si/gp_iter6_sparse9k.xml.xyz"
+from ase.io import iread
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
+from colabfit.tools.property_definitions import (
+    atomic_forces_pd,
+    cauchy_stress_pd,
+    potential_energy_pd,
 )
+import numpy as np
+
+DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/data/gap_si/")
+DATASET_FP = Path().cwd().parent / "data/Si_PRX_GAP"
+
 DATASET = "Si_PRX_GAP"
 
-
+PUBLICATION = "https://doi.org/10.1103/PhysRevX.8.041048"
+DATA_LINK = "https://doi.org/10.17863/CAM.65004"
 LINKS = [
     "https://doi.org/10.1103/PhysRevX.8.041048",
     "https://doi.org/10.17863/CAM.65004",
@@ -27,42 +104,198 @@ DS_DESC = (
     "to obtain good coverage pertaining to a range of properties."
 )
 
+units = {
+    "energy": "eV",
+    "forces": "eV/Ang",
+    "virial": "GPa",
+    "oldpos": "Ang",
+    "md-temperature": "K",
+    "positions": "Ang",
+    "avg-ke": "eV",
+    "force-nlpot": "eV/Ang",
+    "castep-run-time": "s",
+    "avgpos": "Ang",
+    "md-cell-t": "ps",
+    "time": "s",
+    "temperature": "K",
+    "gap-force": "eV/Ang",
+    "gap-energy": "eV",
+    "cutoff": "Ang",
+    "smearing-width": "eV",
+    "pressure": "GPa",
+    "gap-virial": "GPa",
+    "masses": "_amu",
+    "enthalpy": "eV",
+    "force-ewald": "eV/Ang",
+    "velo": "Ang/s",
+    "md-delta-t": "fs",
+    "md-ion-t": "ps",
+    "force-locpot": "eV/Ang",
+    "mass": "g",
+    "cut-off-energy": "eV",
+    "virial": "GPa",
+}
 
-def tform(img):
-    img.info["per-atom"] = False
-    # Renaming some fields to be consistent
-    info_items = list(img.info.items())
-    for key, v in info_items:
-        if key in ["_name", "_labels", "_constraints"]:
-            continue
+PI_MD_DFT = {
+    "software": {"value": "CASTEP"},
+    "method": {"field": "method"},
+    "input": {"field": "input"},
+}
+PI_MD_GAP = {"method": {"value": "GAP"}}
 
-        del img.info[key]
-        img.info[key.replace("_", "-").lower()] = v
-    arrays_items = list(img.arrays.items())
-    for key, v in arrays_items:
-        del img.arrays[key]
-        img.arrays[key.replace("_", "-").lower()] = v
-    # Converting some string values to floats
-    for k in [
-        "md-temperature",
-        "md-cell-t",
-        "smearing-width",
-        "md-delta-t",
-        "md-ion-t",
-        "cut-off-energy",
-        "elec-energy-tol",
-    ]:
-        if k in img.info:
-            try:
-                img.info[k] = float(img.info[k].split(" ")[0])
-            except:  # noqa: E722
-                pass
-    # Reshaping shape (9,) stress vector to (3, 3) to match definition
-    if "dft-virial" in img.info:
-        img.info["dft-virial"] = img.info["dft-virial"].reshape((3, 3))
+property_map = {
+    "potential-energy": [
+        {
+            "energy": {"field": "dft-energy", "units": "eV"},
+            "per-atom": {"field": "per-atom", "units": None},
+            "_metadata": PI_MD_DFT,
+        },
+        {
+            "energy": {"field": "gap-energy", "units": "eV"},
+            "per-atom": {"field": "per-atom", "units": None},
+            "_metadata": PI_MD_GAP,
+        },
+    ],
+    "atomic-forces": [
+        {
+            "forces": {"field": "dft-force", "units": "eV/Ang"},
+            "_metadata": PI_MD_DFT,
+        },
+        {
+            "forces": {"field": "gap-force", "units": "eV/Ang"},
+            "_metadata": PI_MD_GAP,
+        },
+    ],
+    "cauchy-stress": [
+        {
+            "stress": {"field": "dft-virial", "units": "GPa"},
+            "volume-normalized": {"value": True, "units": None},
+            "_metadata": PI_MD_DFT,
+        },
+        {
+            "stress": {"field": "gap-virial", "units": "GPa"},
+            "volume-normalized": {"value": True, "units": None},
+            "_metadata": PI_MD_GAP,
+        },
+    ],
+}
 
-    if "gap-virial" in img.info:
-        img.info["gap-virial"] = img.info["gap-virial"].reshape((3, 3))
+INPUT = [
+    "calculate-stress",
+    "continuation",
+    "cut-off-energy",
+    "cutoff",
+    "cutoff-factor",
+    "data-distribution",
+    "elec-energy-tol",
+    "fine-grid-scale",
+    "finite-basis-corr",
+    "fix-occupancy",
+    "grid-scale",
+    "iprint",
+    "kpoints-mp-grid",
+    "max-charge-amp",
+    "max-scf-cycles",
+    "md-cell-t",
+    "md-delta-t",
+    "md-ensemble",
+    "md-ion-t",
+    "md-num-iter",
+    "md-temperature",
+    "md-thermostat",
+    "minim-constant-volume",
+    "minim-hydrostatic-strain",
+    "minim-lattice-fix",
+    "mix-history-length",
+    "mixing-scheme",
+    "nextra-bands",
+    "nneightol",
+    "num-dump-cycles",
+    "opt-strategy",
+    "opt-strategy-bias",
+    "popn-calculate",
+    "reuse",
+    "smearing-width",
+    "spin-polarized",
+    "task",
+    "temperature",
+    "thermostat-region",
+    "xc-functional",
+]
+CO_MD = {
+    key: {"field": key}
+    for key in [
+        "acc",
+        "avg-ke",
+        "avgpos",
+        "castep-file-name",
+        "castep-run-time",
+        "damp-mask",
+        "enthalpy",
+        "force-ewald",
+        "force-locpot",
+        "force-nlpot",
+        "frac-pos",
+        "hamiltonian",
+        "i-step",
+        "in-file",
+        "map-shift",
+        "mass",
+        "masses",
+        "momenta",
+        "n-neighb",
+        "oldpos",
+        "pressure",
+        "time",
+        "travel",
+        "velo",
+        "virial",
+    ]
+}
+
+
+def reader(fp):
+    for atom in iread(fp, index=":"):
+        atom.info = {
+            key.replace("_", "-").lower(): val for key, val in atom.info.items()
+        }
+        input = dict()
+        for key, val in atom.info.items():
+            if isinstance(val, np.int64):
+                val = int(val)
+            if key == "dft-virial" or key == "gap-virial":
+                atom.info[key] = val.reshape((3, 3)).tolist()
+            if isinstance(val, np.ndarray):
+                val = val.tolist()
+            elif key in [
+                "md-temperature",
+                "md-cell-t",
+                "smearing-width",
+                "md-delta-t",
+                "md-ion-t",
+                "cut-off-energy",
+                "elec-energy-tol",
+            ]:
+                if isinstance(val, str) and all(
+                    [x.isdigit() or x in ["-", "."] for x in val.split()[0]]
+                ):
+                    atom.info[key] = float(val.split()[0])
+
+            if key in INPUT:
+                if key in units:
+                    input[key] = {key: val, "unit": units.get(key)}
+                else:
+                    input[key] = {key: val}
+        if len(input) > 0:
+            atom.info["input"] = input
+        atom.info["per-atom"] = False
+        atom.info["method"] = f"DFT-{atom.info.get('xc-functional', 'PW91')}"
+        name = atom.info.get("config-type")
+        if name is not None:
+            atom.info["name"] = name
+        else:
+            atom.info["name"] = "si_prx_gap"
+        yield atom
 
 
 def main(argv):
@@ -82,183 +315,38 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+
+    client.insert_property_definition(atomic_forces_pd)
+    client.insert_property_definition(cauchy_stress_pd)
+    client.insert_property_definition(potential_energy_pd)
 
     images = list(
         load_data(
             file_path=DATASET_FP,
-            file_format="xyz",
-            name_field="config_type",
+            file_format="folder",
+            name_field="name",
             elements=["Si"],
-            default_name="Si_PRX_GAP",
+            reader=reader,
+            glob_string="gp_iter6_sparse9k.xml.xyz",
             verbose=True,
         )
     )
-
-    settings_keys = [
-        "mix-history-length",
-        "castep-file-name",
-        "grid-scale",
-        "popn-calculate",
-        "n-neighb",
-        "oldpos",
-        "i-step",
-        "md-temperature",
-        # 'positions',
-        "task",
-        "data-distribution",
-        "avg-ke",
-        "force-nlpot",
-        "continuation",
-        "castep-run-time",
-        "calculate-stress",
-        "minim-hydrostatic-strain",
-        "avgpos",
-        "frac-pos",
-        "hamiltonian",
-        "md-cell-t",
-        "cutoff-factor",
-        "momenta",
-        "elec-energy-tol",
-        "mixing-scheme",
-        "minim-lattice-fix",
-        "in-file",
-        "travel",
-        "thermostat-region",
-        "time",
-        "temperature",
-        "kpoints-mp-grid",
-        "cutoff",
-        "xc-functional",
-        "smearing-width",
-        "pressure",
-        "reuse",
-        "fix-occupancy",
-        "map-shift",
-        "md-num-iter",
-        "damp-mask",
-        "opt-strategy",
-        "spin-polarized",
-        "nextra-bands",
-        "fine-grid-scale",
-        "masses",
-        "iprint",
-        "finite-basis-corr",
-        "enthalpy",
-        "opt-strategy-bias",
-        "force-ewald",
-        "num-dump-cycles",
-        "velo",
-        "md-delta-t",
-        "md-ion-t",
-        "force-locpot",
-        # 'numbers',
-        "max-scf-cycles",
-        "mass",
-        "minim-constant-volume",
-        "cut-off-energy",
-        "virial",
-        "nneightol",
-        "max-charge-amp",
-        "md-thermostat",
-        "md-ensemble",
-        "acc",
-    ]
-
-    units = {
-        "energy": "eV",
-        "forces": "eV/Ang",
-        "virial": "GPa",
-        "oldpos": "Ang",
-        "md-temperature": "K",
-        "positions": "Ang",
-        "avg-ke": "eV",
-        "force-nlpot": "eV/Ang",
-        "castep-run-time": "s",
-        "avgpos": "Ang",
-        "md-cell-t": "ps",
-        "time": "s",
-        "temperature": "K",
-        "gap-force": "eV/Ang",
-        "gap-energy": "eV",
-        "cutoff": "Ang",
-        "smearing-width": "eV",
-        "pressure": "GPa",
-        "gap-virial": "GPa",
-        "masses": "_amu",
-        "enthalpy": "eV",
-        "force-ewald": "eV/Ang",
-        "velo": "Ang/s",
-        "md-delta-t": "fs",
-        "md-ion-t": "ps",
-        "force-locpot": "eV/Ang",
-        "mass": "g",
-        "cut-off-energy": "eV",
-        "virial": "GPa",
-    }
-
-    dft_settings_map = {
-        k: {"field": k, "units": units[k] if k in units else None}
-        for k in settings_keys
-    }
-
-    dft_settings_map["software"] = "CASTEP"
-
-    property_map = {
-        "potential-energy": [
-            {
-                "energy": {"field": "dft-energy", "units": "eV"},
-                "per-atom": {"field": "per-atom", "units": None},
-                "_metadata": dft_settings_map,
-            },
-            {
-                "energy": {"field": "gap-energy", "units": "eV"},
-                "per-atom": {"field": "per-atom", "units": None},
-                "_metadata": {
-                    "method": {"value": "GAP"},
-                },
-            },
-        ],
-        "atomic-forces": [
-            {
-                "forces": {"field": "dft-force", "units": "eV/Ang"},
-                "_metadata": dft_settings_map,
-            },
-            {
-                "forces": {"field": "gap-force", "units": "eV/Ang"},
-                "_metadata": {
-                    "method": {"value": "GAP"},
-                },
-            },
-        ],
-        "cauchy-stress": [
-            {
-                "stress": {"field": "dft-virial", "units": "GPa"},
-                "volume-normalized": {"value": True, "units": None},
-                "_metadata": dft_settings_map,
-            },
-            {
-                "stress": {"field": "gap-virial", "units": "GPa"},
-                "volume-normalized": {"value": True, "units": None},
-                "_metadata": {
-                    "method": {"value": "GAP"},
-                },
-            },
-        ],
-    }
-
+    ds_id = generate_ds_id()
     ids = client.insert_data(
         images,
+        ds_id=ds_id,
         property_map=property_map,
-        co_md_map={"configuration_type": {"field": "config_type"}},
-        transform=tform,
+        co_md_map=CO_MD,
         verbose=True,
     )
 
-    # Used for building groups of configurations for easier analysis/exploration
     configuration_set_regexes = {
         "isolated_atom": "Reference atom",
         "bt": "Beta-tin",
@@ -302,7 +390,9 @@ def main(argv):
             f"Configuration set {i}", f"({regex}):".rjust(22), f"{len(co_ids)}".rjust(7)
         )
 
-        cs_id = client.insert_configuration_set(co_ids, description=desc, name=regex)
+        cs_id = client.insert_configuration_set(
+            co_ids, ds_id=ds_id, description=desc, name=f"si_prx_gap_{regex}"
+        )
 
         cs_ids.append(cs_id)
 
@@ -311,6 +401,7 @@ def main(argv):
     client.insert_dataset(
         cs_ids=cs_ids,
         do_hashes=all_pr_ids,
+        ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
         links=LINKS,
