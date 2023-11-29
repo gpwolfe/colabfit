@@ -28,7 +28,7 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/new_raw_datasets_2.0/benzene_succinic_acid_glycine"
 )
 # comment out below, local path
-# DATASET_FP = Path().cwd().parent / "data/benzene_succinic_acid_glycine"
+DATASET_FP = Path().cwd().parent / "data/benzene_succinic_acid_glycine"
 DS_NAME = "benzene_succinic_acid_glycine_TS_PNAS_2022"
 DS_DESC_PBE = (
     "DFT reference energies and forces were calculated using "
@@ -54,7 +54,6 @@ LINKS = [
     "https://doi.org/10.24435/materialscloud:vp-jf",
     "https://github.com/venkatkapil24/data_molecular_fluctuations",
 ]
-GLOB = "*.xyzdat"
 
 PI_MD_PBE = {
     "software": {"value": "Quantum ESPRESSO v6.3"},
@@ -112,6 +111,136 @@ property_map_mbd = {
         }
     ],
 }
+dss = (
+    # PBE datasets
+    (
+        "DFT_polymorphs_PNAS_2022_PBE_TS_benzene_test",
+        "benzene_test_QE_PBE_TS.xyz",
+        'Benzene test PBE-TS dataset from "Semi-local and hybrid functional '
+        "DFT data for thermalised snapshots of polymorphs of benzene, succinic "
+        'acid, and glycine". ' + DS_DESC_PBE,
+    ),
+    (
+        "DFT_polymorphs_PNAS_2022_PBE_TS_benzene_train",
+        "benzene_train_FPS_QE_PBE_TS.xyz",
+        'Benzene training PBE-TS dataset from "Semi-local and hybrid functional '
+        "DFT data for thermalised snapshots of polymorphs of benzene, succinic "
+        'acid, and glycine". ' + DS_DESC_PBE,
+    ),
+    (
+        "DFT_polymorphs_PNAS_2022_PBE_TS_benzene_validation",
+        "benzene_val_QE_PBE_TS.xyz",
+        'Benzene validation PBE-TS dataset from "Semi-local and hybrid '
+        "functional DFT data for thermalised snapshots of polymorphs of "
+        'benzene, succinic acid, and glycine". ' + DS_DESC_PBE,
+    ),
+    (
+        "DFT_polymorphs_PNAS_2022_PBE_TS_glycine_test",
+        "glycine_test_QE_PBE_TS.xyz",
+        'Glycine test PBE-TS dataset from "Semi-local and hybrid functional '
+        "DFT data for thermalised snapshots of polymorphs of benzene, "
+        'succinic acid, and glycine". ' + DS_DESC_PBE,
+    ),
+    (
+        "DFT_polymorphs_PNAS_2022_PBE_TS_glycine_train",
+        "glycine_train_FPS_QE_PBE_TS.xyz",
+        'Glycine training PBE-TS dataset from "Semi-local and hybrid '
+        "functional DFT data for thermalised snapshots of polymorphs of "
+        'benzene, succinic acid, and glycine". ' + DS_DESC_PBE,
+    ),
+    (
+        "DFT_polymorphs_PNAS_2022_PBE_TS_glycine_validation",
+        "glycine_val_QE_PBE_TS.xyz",
+        'Glycine validation PBE-TS dataset from "Semi-local and hybrid '
+        "functional DFT data for thermalised snapshots of polymorphs of benzene, "
+        'succinic acid, and glycine". ' + DS_DESC_PBE,
+    ),
+    (
+        "DFT_polymorphs_PNAS_2022_PBE_TS_succinic_acid_test",
+        "succinic_acid_test_QE_PBE_TS.xyz",
+        'Succinic acid test PBE-TS dataset from "Semi-local and hybrid '
+        "functional DFT data for thermalised snapshots of polymorphs of benzene, "
+        'succinic acid, and glycine". ' + DS_DESC_PBE,
+    ),
+    (
+        "DFT_polymorphs_PNAS_2022_PBE_TS_succinic_acid_train",
+        "succinic_acid_train_FPS_QE_PBE_TS.xyz",
+        'Succinic acid training PBE-TS dataset from "Semi-local and '
+        "hybrid functional DFT data for thermalised snapshots of polymorphs "
+        'of benzene, succinic acid, and glycine". ' + DS_DESC_PBE,
+    ),
+    (
+        "DFT_polymorphs_PNAS_2022_PBE_TS_succinic_acid_validation",
+        "succinic_acid_val_QE_PBE_TS.xyz",
+        'Succinic acid validation PBE-TS dataset from "Semi-local and hybrid '
+        "functional DFT data for thermalised snapshots of polymorphs of benzene, "
+        'succinic acid, and glycine". ' + DS_DESC_PBE,
+    ),
+    # MBD datasets
+    (
+        "DFT_polymorphs_PNAS_2022_PBE0_MBD_benzene_test",
+        "benzene_test_AIMS_PBE0_MBD.xyz",
+        'Benzene test PBE0-MBD dataset from "Semi-local and hybrid '
+        "functional DFT data for thermalised snapshots of polymorphs of "
+        'benzene, succinic acid, and glycine". ' + DS_DESC_PBE,
+    ),
+    (
+        "DFT_polymorphs_PNAS_2022_PBE0_MBD_benzene_train",
+        "benzene_train_FPS_AIMS_PBE0_MBD.xyz",
+        'Benzene training PBE0-MBD dataset from "Semi-local and hybrid '
+        "functional DFT data for thermalised snapshots of polymorphs of "
+        'benzene, succinic acid, and glycine". ' + DS_DESC_PBE,
+    ),
+    (
+        "DFT_polymorphs_PNAS_2022_PBE0_MBD_benzene_validation",
+        "benzene_val_AIMS_PBE0_MBD.xyz",
+        'Benzene validation PBE0-MBD dataset from "Semi-local and hybrid '
+        "functional DFT data for thermalised snapshots of polymorphs of "
+        'benzene, succinic acid, and glycine". ' + DS_DESC_PBE,
+    ),
+    (
+        "DFT_polymorphs_PNAS_2022_PBE0_MBD_glycine_test",
+        "glycine_test_AIMS_PBE0_MBD.xyz",
+        'Glycine test PBE0-MBD dataset from "Semi-local and hybrid functional '
+        "DFT data for thermalised snapshots of polymorphs of benzene, succinic "
+        'acid, and glycine". ' + DS_DESC_PBE,
+    ),
+    (
+        "DFT_polymorphs_PNAS_2022_PBE0_MBD_glycine_train",
+        "glycine_train_FPS_AIMS_PBE0_MBD.xyz",
+        'Glycine training PBE0-MBD dataset from "Semi-local and hybrid functional '
+        "DFT data for thermalised snapshots of polymorphs of benzene, succinic "
+        'acid, and glycine". ' + DS_DESC_PBE,
+    ),
+    (
+        "DFT_polymorphs_PNAS_2022_PBE0_MBD_glycine_validation",
+        "glycine_val_AIMS_PBE0_MBD.xyz",
+        'Glycine validation PBE0-MBD dataset from "Semi-local and hybrid '
+        "functional DFT data for thermalised snapshots of polymorphs of "
+        'benzene, succinic acid, and glycine". ' + DS_DESC_PBE,
+    ),
+    (
+        "DFT_polymorphs_PNAS_2022_PBE0_MBD_succinic_acid_test",
+        "succinic_acid_test_AIMS_PBE0_MBD.xyz",
+        'Succinic acid test PBE0-MBD dataset from "Semi-local and hybrid '
+        "functional DFT data for thermalised snapshots of polymorphs of "
+        'benzene, succinic acid, and glycine". ' + DS_DESC_PBE,
+    ),
+    (
+        "DFT_polymorphs_PNAS_2022_PBE0_MBD_succinic_acid_train",
+        "succinic_acid_train_FPS_AIMS_PBE0_MBD.xyz",
+        'Succinic acid training PBE0-MBD dataset from "Semi-local and hybrid '
+        "functional DFT data for thermalised snapshots of polymorphs of benzene, "
+        'succinic acid, and glycine". ' + DS_DESC_PBE,
+    ),
+    (
+        "DFT_polymorphs_PNAS_2022_PBE0_MBD_succinic_acid_validation",
+        "succinic_acid_val_AIMS_PBE0_MBD.xyz",
+        'Succinic acid validation PBE0-MBD dataset from "Semi-local and hybrid '
+        "functional DFT data for thermalised snapshots of polymorphs of benzene, "
+        'succinic acid, and glycine". ' + DS_DESC_PBE,
+    ),
+)
 
 
 def reader(fp):
@@ -140,145 +269,17 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(cauchy_stress_pd)
-
-    dss = (
-        # PBE datasets
-        (
-            "DFT_polymorphs_PNAS_2022_PBE_TS_benzene_test",
-            "benzene_test_QE_PBE_TS.xyz",
-            'Benzene test PBE-TS dataset from "Semi-local and hybrid functional '
-            "DFT data for thermalised snapshots of polymorphs of benzene, succinic "
-            'acid, and glycine". ' + DS_DESC_PBE,
-        ),
-        (
-            "DFT_polymorphs_PNAS_2022_PBE_TS_benzene_train",
-            "benzene_train_FPS_QE_PBE_TS.xyz",
-            'Benzene training PBE-TS dataset from "Semi-local and hybrid functional '
-            "DFT data for thermalised snapshots of polymorphs of benzene, succinic "
-            'acid, and glycine". ' + DS_DESC_PBE,
-        ),
-        (
-            "DFT_polymorphs_PNAS_2022_PBE_TS_benzene_validation",
-            "benzene_val_QE_PBE_TS.xyz",
-            'Benzene validation PBE-TS dataset from "Semi-local and hybrid '
-            "functional DFT data for thermalised snapshots of polymorphs of "
-            'benzene, succinic acid, and glycine". ' + DS_DESC_PBE,
-        ),
-        (
-            "DFT_polymorphs_PNAS_2022_PBE_TS_glycine_test",
-            "glycine_test_QE_PBE_TS.xyz",
-            'Glycine test PBE-TS dataset from "Semi-local and hybrid functional '
-            "DFT data for thermalised snapshots of polymorphs of benzene, "
-            'succinic acid, and glycine". ' + DS_DESC_PBE,
-        ),
-        (
-            "DFT_polymorphs_PNAS_2022_PBE_TS_glycine_train",
-            "glycine_train_FPS_QE_PBE_TS.xyz",
-            'Glycine training PBE-TS dataset from "Semi-local and hybrid '
-            "functional DFT data for thermalised snapshots of polymorphs of "
-            'benzene, succinic acid, and glycine". ' + DS_DESC_PBE,
-        ),
-        (
-            "DFT_polymorphs_PNAS_2022_PBE_TS_glycine_validation",
-            "glycine_val_QE_PBE_TS.xyz",
-            'Glycine validation PBE-TS dataset from "Semi-local and hybrid '
-            "functional DFT data for thermalised snapshots of polymorphs of benzene, "
-            'succinic acid, and glycine". ' + DS_DESC_PBE,
-        ),
-        (
-            "DFT_polymorphs_PNAS_2022_PBE_TS_succinic_acid_test",
-            "succinic_acid_test_QE_PBE_TS.xyz",
-            'Succinic acid test PBE-TS dataset from "Semi-local and hybrid '
-            "functional DFT data for thermalised snapshots of polymorphs of benzene, "
-            'succinic acid, and glycine". ' + DS_DESC_PBE,
-        ),
-        (
-            "DFT_polymorphs_PNAS_2022_PBE_TS_succinic_acid_train",
-            "succinic_acid_train_FPS_QE_PBE_TS.xyz",
-            'Succinic acid training PBE-TS dataset from "Semi-local and '
-            "hybrid functional DFT data for thermalised snapshots of polymorphs "
-            'of benzene, succinic acid, and glycine". ' + DS_DESC_PBE,
-        ),
-        (
-            "DFT_polymorphs_PNAS_2022_PBE_TS_succinic_acid_validation",
-            "succinic_acid_val_QE_PBE_TS.xyz",
-            'Succinic acid validation PBE-TS dataset from "Semi-local and hybrid '
-            "functional DFT data for thermalised snapshots of polymorphs of benzene, "
-            'succinic acid, and glycine". ' + DS_DESC_PBE,
-        ),
-        # MBD datasets
-        (
-            "DFT_polymorphs_PNAS_2022_PBE0_MBD_benzene_test",
-            "benzene_test_AIMS_PBE0_MBD.xyz",
-            'Benzene test PBE0-MBD dataset from "Semi-local and hybrid '
-            "functional DFT data for thermalised snapshots of polymorphs of "
-            'benzene, succinic acid, and glycine". ' + DS_DESC_PBE,
-        ),
-        (
-            "DFT_polymorphs_PNAS_2022_PBE0_MBD_benzene_train",
-            "benzene_train_FPS_AIMS_PBE0_MBD.xyz",
-            'Benzene training PBE0-MBD dataset from "Semi-local and hybrid '
-            "functional DFT data for thermalised snapshots of polymorphs of "
-            'benzene, succinic acid, and glycine". ' + DS_DESC_PBE,
-        ),
-        (
-            "DFT_polymorphs_PNAS_2022_PBE0_MBD_benzene_validation",
-            "benzene_val_AIMS_PBE0_MBD.xyz",
-            'Benzene validation PBE0-MBD dataset from "Semi-local and hybrid '
-            "functional DFT data for thermalised snapshots of polymorphs of "
-            'benzene, succinic acid, and glycine". ' + DS_DESC_PBE,
-        ),
-        (
-            "DFT_polymorphs_PNAS_2022_PBE0_MBD_glycine_test",
-            "glycine_test_AIMS_PBE0_MBD.xyz",
-            'Glycine test PBE0-MBD dataset from "Semi-local and hybrid functional '
-            "DFT data for thermalised snapshots of polymorphs of benzene, succinic "
-            'acid, and glycine". ' + DS_DESC_PBE,
-        ),
-        (
-            "DFT_polymorphs_PNAS_2022_PBE0_MBD_glycine_train",
-            "glycine_train_FPS_AIMS_PBE0_MBD.xyz",
-            'Glycine training PBE0-MBD dataset from "Semi-local and hybrid functional '
-            "DFT data for thermalised snapshots of polymorphs of benzene, succinic "
-            'acid, and glycine". ' + DS_DESC_PBE,
-        ),
-        (
-            "DFT_polymorphs_PNAS_2022_PBE0_MBD_glycine_validation",
-            "glycine_val_AIMS_PBE0_MBD.xyz",
-            'Glycine validation PBE0-MBD dataset from "Semi-local and hybrid '
-            "functional DFT data for thermalised snapshots of polymorphs of "
-            'benzene, succinic acid, and glycine". ' + DS_DESC_PBE,
-        ),
-        (
-            "DFT_polymorphs_PNAS_2022_PBE0_MBD_succinic_acid_test",
-            "succinic_acid_test_AIMS_PBE0_MBD.xyz",
-            'Succinic acid test PBE0-MBD dataset from "Semi-local and hybrid '
-            "functional DFT data for thermalised snapshots of polymorphs of "
-            'benzene, succinic acid, and glycine". ' + DS_DESC_PBE,
-        ),
-        (
-            "DFT_polymorphs_PNAS_2022_PBE0_MBD_succinic_acid_train",
-            "succinic_acid_train_FPS_AIMS_PBE0_MBD.xyz",
-            'Succinic acid training PBE0-MBD dataset from "Semi-local and hybrid '
-            "functional DFT data for thermalised snapshots of polymorphs of benzene, "
-            'succinic acid, and glycine". ' + DS_DESC_PBE,
-        ),
-        (
-            "DFT_polymorphs_PNAS_2022_PBE0_MBD_succinic_acid_validation",
-            "succinic_acid_val_AIMS_PBE0_MBD.xyz",
-            'Succinic acid validation PBE0-MBD dataset from "Semi-local and hybrid '
-            "functional DFT data for thermalised snapshots of polymorphs of benzene, "
-            'succinic acid, and glycine". ' + DS_DESC_PBE,
-        ),
-    )
 
     for i, (name, reg, desc) in enumerate(dss):
         ds_id = generate_ds_id()

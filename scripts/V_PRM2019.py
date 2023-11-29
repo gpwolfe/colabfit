@@ -6,15 +6,22 @@ import sys
 
 import numpy as np
 
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
+from colabfit.tools.property_definitions import (
+    atomic_forces_pd,
+    cauchy_stress_pd,
+    potential_energy_pd,
+)
 
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/colabfit_data/data/"
     "acclab_helsinki/V/training-data/db_V.xyz"
 )
+DATASET_FP = Path().cwd().parent / "data/v_prm_2019/db_V.xyz"
 DATASET = "V_PRM2019"
 
-
+PUBLICATION = "https://doi.org/10.1103/PhysRevMaterials.4.093802"
+DATA_LINK = "https://gitlab.com/acclab/gap-data/-/tree/master"
 LINKS = [
     "https://doi.org/10.1103/PhysRevMaterials.4.093802",
     "https://gitlab.com/acclab/gap-data/-/tree/master",
@@ -33,6 +40,46 @@ DS_DESC = (
     "configurations to the correct lattice spacing and adding in gamma "
     "surface configurations."
 )
+
+PI_MD = {
+    "software": {"value": "VASP"},
+    "method": {"value": "DFT-PBE"},
+    "POTCAR": {"value": "PAW_PBE V_sv 02Aug2007"},
+    "INCAR": {
+        "value": {
+            "KSPACING": "bulk: 0.150000; surface: 1 k-point along surface normal",
+            "SIGMA": "0.100000",
+            "ENCUT": "500.000000",
+            "EDIFF": "1.00e-06",
+            "GGA": "PE",
+            "PREC": "Accurate",
+            "LASPH": ".TRUE.",
+            "NELMIN": 4,
+            "ISMEAR": 1,
+        },
+    },
+}
+property_map = {
+    "potential-energy": [
+        {
+            "energy": {"field": "energy", "units": "eV"},
+            "per-atom": {"field": "per-atom", "units": None},
+            "_metadata": PI_MD,
+        }
+    ],
+    "atomic-forces": [
+        {
+            "forces": {"field": "force", "units": "eV/Ang"},
+            "_metadata": PI_MD,
+        }
+    ],
+    "cauchy-stress": [
+        {
+            "stress": {"field": "virial", "units": "GPa"},
+            "_metadata": PI_MD,
+        }
+    ],
+}
 
 
 def tform(c):
@@ -61,10 +108,17 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+
+    client.insert_property_definition(atomic_forces_pd)
+    client.insert_property_definition(cauchy_stress_pd)
+    client.insert_property_definition(potential_energy_pd)
 
     configurations = list(
         load_data(
@@ -77,40 +131,11 @@ def main(argv):
         )
     )
 
-    property_map = {
-        "potential-energy": [
-            {
-                "energy": {"field": "energy", "units": "eV"},
-                "per-atom": {"field": "per-atom", "units": None},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-PBE"},
-                },
-            }
-        ],
-        "atomic-forces": [
-            {
-                "forces": {"field": "forces", "units": "eV/Ang"},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-PBE"},
-                },
-            }
-        ],
-        "cauchy-stress": [
-            {
-                "stress": {"field": "virial", "units": "GPa"},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-PBE"},
-                },
-            }
-        ],
-    }
-
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             co_md_map={"configuration_type": {"field": "config_type"}},
             generator=False,
@@ -190,6 +215,7 @@ def main(argv):
         cs_id = client.query_and_insert_configuration_set(
             co_hashes=all_co_ids,
             name=cs_names[i],
+            ds_id=ds_id,
             description=desc,
             query={"names": {"$regex": regex}},
         )
@@ -200,6 +226,7 @@ def main(argv):
         do_hashes=all_pr_ids,
         name=DATASET,
         authors=AUTHORS,
+        ds_id=ds_id,
         links=LINKS,
         description=DS_DESC,
         resync=True,

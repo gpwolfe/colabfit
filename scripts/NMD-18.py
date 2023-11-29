@@ -7,14 +7,21 @@ Check whether custom properties imported here should be used as properties or ad
 metadata (possibly uncomment definitions in this file to avoid imports)
 """
 from argparse import ArgumentParser
+import json
 from pathlib import Path
 import sys
 
+from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 
-from colabfit.tools.database import MongoDatabase, load_data
+# from colabfit.tools.property_definitions import (
+#     atomic_forces_pd,
+#     cauchy_stress_pd,
+#     potential_energy_pd,
+# )
 
 DATASET = "NMD-18"
 DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets/NMD_18")
+DATASET_FP = Path().cwd().parent / "data/NMD_18"
 
 AUTHORS = [
     "Christopher Sutton",
@@ -28,6 +35,9 @@ AUTHORS = [
     "Angelo Ziletti",
     "Matthias Scheffler",
 ]
+
+PUBLICATION = "https://doi.org/10.1038/s41524-019-0239-3"
+DATA_LINK = "https://qmml.org/datasets.html"
 LINKS = [
     "https://doi.org/10.1038/s41524-019-0239-3",
     "https://qmml.org/datasets.html",
@@ -41,6 +51,11 @@ DS_DESC = (
     "functional with the all-electron electronic structure code FHI-aims with "
     "tight setting."
 )
+PI_MD = {
+    "software": {"value": "FHI-aims"},
+    "method": {"value": "DFT-PBE"},
+    "band-gap": {"value": "tight"},
+}
 
 
 def tform(c):
@@ -64,10 +79,20 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+    with open("formation_energy.json", "r") as f:
+        formation_energy_pd = json.load(f)
+    with open("band_gap.json", "r") as f:
+        band_gap_pd = json.load(f)
+
+    client.insert_property_definition(formation_energy_pd)
+    client.insert_property_definition(band_gap_pd)
 
     configurations = load_data(
         file_path=DATASET_FP / "NMD-18r-reformatted.xyz",
@@ -89,9 +114,9 @@ def main(argv):
         generator=False
     )
     """
-    cs_list = set()
-    for c in configurations:
-        cs_list.add(*c.info["_name"])
+    # cs_list = set()
+    # for c in configurations:
+    #     cs_list.add(*c.info["_name"])
     """
     formation_property_definition = {
         "property-id": "formation-energy",
@@ -121,33 +146,26 @@ def main(argv):
         },
     }
     """
-    # client.insert_property_definition('/home/ubuntu/calc_notebook/formation-energy.json')
-    # client.insert_property_definition('/home/ubuntu/calc_notebook/band-gap.json')
 
     property_map = {
         "formation-energy": [
             {
                 "energy": {"field": "fe", "units": "eV"},
-                "_metadata": {
-                    "software": {"value": "FHI-aims"},
-                    "method": {"value": "DFT-PBE"},
-                },
+                "_metadata": PI_MD,
             }
         ],
         "band-gap": [
             {
                 "energy": {"field": "bg", "units": "eV"},
-                "_metadata": {
-                    "software": {"value": "FHI-aims"},
-                    "method": {"value": "DFT-PBE"},
-                },
+                "_metadata": PI_MD,
             }
         ],
     }
-
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             transform=tform,
@@ -160,6 +178,7 @@ def main(argv):
     client.insert_dataset(
         do_hashes=all_pr_ids,
         name=DATASET,
+        ds_id=ds_id,
         authors=AUTHORS,
         links=LINKS,
         description=DS_DESC,

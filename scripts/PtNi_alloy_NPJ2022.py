@@ -13,13 +13,20 @@ import sys
 
 from ase.db import connect
 from tqdm import tqdm
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
+from colabfit.tools.property_definitions import (
+    atomic_forces_pd,
+    free_energy_pd,
+    potential_energy_pd,
+)
 
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets/PtNi_alloy_dft_Han")
+DATASET_FP = Path().cwd().parent / "data/ptni_alloy_npj_2022"
 DATASET = "PtNi_alloy_NPJ2022"
 
-
+PUBLICATION = "https://doi.org/10.1038/s41524-022-00807-6"
+DATA_LINK = "https://zenodo.org/record/5645281#.Y2CPkeTMJEa"
 LINKS = [
     "https://doi.org/10.1038/s41524-022-00807-6",
     "https://zenodo.org/record/5645281#.Y2CPkeTMJEa",
@@ -41,6 +48,37 @@ DS_DESC = (
     "Simulation Package (VASP) with the spin-polarized revised Perdew-Burke-Ernzerhof "
     "(rPBE) exchange-correlation functional."
 )
+PI_MD = {
+    "software": {"value": "VASP"},
+    "method": {"value": "DFT-rPBE"},
+    "encut": {"value": "500 eV"},
+    "ismear": {"value": 0},
+    "sigma": {"value": 0.1},
+    "ediff": {"value": "1x10e^-6"},
+    "k-points": {"value": "500/Ang^-3 of reciprocal cell, Monkhorst-Pack"},
+}
+property_map = {
+    "potential-energy": [
+        {
+            "energy": {"field": "potential_energy", "units": "eV"},
+            "per-atom": {"field": "per-atom", "units": None},
+            "_metadata": PI_MD,
+        }
+    ],
+    "atomic-forces": [
+        {
+            "forces": {"field": "forces", "units": "eV/Ang"},
+            "_metadata": PI_MD,
+        }
+    ],
+    "free-energy": [
+        {
+            "energy": {"field": "free_energy", "units": "eV"},
+            "per-atom": {"field": "per-atom", "units": None},
+            "_metadata": PI_MD,
+        }
+    ],
+}
 
 
 def tform(c):
@@ -79,11 +117,16 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
-
+    client.insert_property_definition(atomic_forces_pd)
+    client.insert_property_definition(free_energy_pd)
+    client.insert_property_definition(potential_energy_pd)
     configurations = load_data(
         file_path=DATASET_FP,
         file_format="folder",
@@ -115,44 +158,11 @@ def main(argv):
     """
     # client.insert_property_definition(free_property_definition)
 
-    property_map = {
-        "potential-energy": [
-            {
-                "energy": {"field": "potential_energy", "units": "eV"},
-                "per-atom": {"field": "per-atom", "units": None},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-rPBE"},
-                    "ecut": {"value": "500 eV"},
-                },
-            }
-        ],
-        "atomic-forces": [
-            {
-                "forces": {"field": "forces", "units": "eV/Ang"},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-rPBE"},
-                    "ecut": {"value": "500 eV"},
-                },
-            }
-        ],
-        "free-energy": [
-            {
-                "energy": {"field": "free_energy", "units": "eV"},
-                "per-atom": {"field": "per-atom", "units": None},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-rPBE"},
-                    "ecut": {"value": "500 eV"},
-                },
-            }
-        ],
-    }
-
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             transform=tform,
@@ -165,6 +175,7 @@ def main(argv):
     client.insert_dataset(
         do_hashes=all_pr_ids,
         name=DATASET,
+        ds_id=ds_id,
         authors=AUTHORS,
         links=LINKS,
         description=DS_DESC,

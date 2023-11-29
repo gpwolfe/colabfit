@@ -16,7 +16,7 @@ from pymatgen.core.structure import Structure
 from pymatgen.io.ase import AseAtomsAdaptor
 
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import (
     potential_energy_pd,
     cauchy_stress_pd,
@@ -24,7 +24,7 @@ from colabfit.tools.property_definitions import (
 )
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/data/mlearn")
-# DATASET_FP = Path.cwd().parents[1] / "data/mlearn/mlearn-master/data"
+DATASET_FP = Path.cwd().parent / "data/mlearn/mlearn-master/data"
 LINKS = [
     "https://doi.org/10.1021/acs.jpca.9b08723",
     "https://github.com/materialsvirtuallab/mlearn",
@@ -120,9 +120,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     # TODO
@@ -161,6 +164,7 @@ def main(argv):
         "cauchy-stress": [
             {
                 "stress": {"field": "stress", "units": "kilobar"},
+                "volume-normalized": {"value": True, "units": None},
                 "_metadata": {
                     "software": {"value": "VASP"},
                     "method": {"value": "DFT-PBE"},
@@ -205,19 +209,21 @@ def main(argv):
     ]
 
     for elem in elements:
-        images = list(
-            load_data(
-                file_path=DATASET_FP / elem,
-                file_format="folder",
-                name_field="_name",
-                elements=[f"{elem}"],
-                default_name="mlearn",
-                reader=reader,
-                glob_string="test.json",
-                verbose=False,
-            )
+        images = load_data(
+            file_path=DATASET_FP / elem,
+            file_format="folder",
+            name_field="_name",
+            elements=[f"{elem}"],
+            default_name="mlearn",
+            reader=reader,
+            glob_string="test.json",
+            verbose=False,
         )
-        ids = client.insert_data(images, property_map=property_map, verbose=False)
+
+        ds_id = generate_ds_id()
+        ids = client.insert_data(
+            images, ds_id=ds_id, property_map=property_map, verbose=False
+        )
 
         all_co_ids, all_pr_ids = list(zip(*ids))
 
@@ -244,13 +250,14 @@ def main(argv):
                 )
 
                 cs_id = client.insert_configuration_set(
-                    co_ids, description=desc, name=f"{elem}_{cs_names[i]}"
+                    co_ids, description=desc, ds_id=ds_id, name=f"{elem}_{cs_names[i]}"
                 )
 
                 cs_ids.append(cs_id)
 
         client.insert_dataset(
             cs_ids=cs_ids,
+            ds_id=ds_id,
             do_hashes=all_pr_ids,
             name="mlearn_" + elem + "_test",
             authors=AUTHORS,

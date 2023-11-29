@@ -7,10 +7,16 @@ import sys
 
 from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 
+from colabfit.tools.property_definitions import (
+    cauchy_stress_pd,
+    potential_energy_pd,
+    atomic_forces_pd,
+)
 
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/colabfit_data/data/gubaev/CuPd/train.cfg"
 )
+DATASET_FP = Path().cwd().parent / "data/CuPd/train.cfg"
 DATASET = "CuPd_CMS2019"
 PUBLICATION = "https://doi.org/10.1016/j.commatsci.2018.09.031"
 DATA_LINK = (
@@ -40,8 +46,6 @@ DS_DESC = (
     "40,000 unrelaxed configurations with BCC, FCC, and HCP lattices."
 )
 
-name = "CuPd_CMS2019"
-
 
 def tform(c):
     c.info["per-atom"] = False
@@ -64,17 +68,23 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+    client.insert_property_definition(atomic_forces_pd)
+    client.insert_property_definition(cauchy_stress_pd)
+    client.insert_property_definition(potential_energy_pd)
 
     configurations = load_data(
         file_path=DATASET_FP,
         file_format="cfg",
         name_field=None,
         elements=["Cu", "Pd"],
-        default_name=name,
+        default_name=DATASET,
         verbose=True,
     )
 

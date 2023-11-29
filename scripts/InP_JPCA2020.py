@@ -9,15 +9,26 @@ import sys
 import numpy as np
 
 from ase import Atoms
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
+
+from colabfit.tools.property_definitions import (
+    cauchy_stress_pd,
+    atomic_forces_pd,
+    potential_energy_pd,
+)
 
 
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/colabfit_data/data/FitSNAP/"
     "examples/InP_JPCA2020/JSON"
 )
+DATASET_FP = Path(
+    "/Users/piper/Code/colabfit/data/FitSNAP-master/examples/InP_JPCA2020/JSON"
+)
 DATASET = "InP_JPCA2020"
 
+PUBLICATION = "https://doi.org/10.1021/acs.jpca.0c02450"
+DATA_LINK = "https://github.com/FitSNAP/FitSNAP/tree/master/examples/InP_JPCA2020"
 LINKS = [
     "https://doi.org/10.1021/acs.jpca.0c02450",
     "https://github.com/FitSNAP/FitSNAP/tree/master/examples/InP_JPCA2020",
@@ -31,6 +42,12 @@ DS_DESC = (
     "indium phosphide capable of capturing high-energy defects that result "
     "from radiation damage cascades."
 )
+
+PI_MD = {
+    "software": {"value": "VASP"},
+    "method": {"value": "DFT-LDA"},
+    "encut": {"value": "500 eV"},
+}
 
 
 def reader(file_path, **kwargs):
@@ -79,10 +96,16 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+    client.insert_property_definition(atomic_forces_pd)
+    client.insert_property_definition(cauchy_stress_pd)
+    client.insert_property_definition(potential_energy_pd)
 
     configurations = list(
         load_data(
@@ -93,12 +116,10 @@ def main(argv):
             default_name=DATASET,
             reader=reader,
             glob_string="*.json",
-            # verbose=True,
             header_lines=2,
         )
     )
 
-    print(configurations[0])
     property_map = {
         "potential-energy": [
             {
@@ -106,10 +127,7 @@ def main(argv):
                 "energy": {"field": "energy", "units": "eV"},
                 "per-atom": {"field": "per-atom", "units": None},
                 "reference-energy": {"field": "reference-energy", "units": "eV"},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-LDA"},
-                },
+                "_metadata": PI_MD,
             }
         ],
         "atomic-forces": [
@@ -131,10 +149,14 @@ def main(argv):
             }
         ],
     }
-
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
-            configurations, property_map=property_map, generator=False, verbose=True
+            configurations,
+            ds_id=ds_id,
+            property_map=property_map,
+            generator=False,
+            verbose=True,
         )
     )
 
@@ -179,23 +201,24 @@ def main(argv):
     for i, (regex, desc) in enumerate(cs_regexes.items()):
         cs_id = client.query_and_insert_configuration_set(
             co_hashes=all_co_ids,
+            ds_id=ds_id,
             name=cs_names[i],
             description=desc,
             query={"names": {"$regex": regex}},
         )
         cs_ids.append(cs_id)
 
-    ds_id = client.insert_dataset(
+    client.insert_dataset(
         cs_ids=cs_ids,
         do_hashes=all_pr_ids,
         name=DATASET,
+        ds_id=ds_id,
         authors=AUTHORS,
         links=LINKS,
         description=DS_DESC,
         resync=True,
         verbose=True,
     )
-    ds_id
 
 
 """

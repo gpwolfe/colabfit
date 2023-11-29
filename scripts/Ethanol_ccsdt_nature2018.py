@@ -9,9 +9,11 @@ from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import potential_energy_pd, atomic_forces_pd
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets/sGDML")
-# DATASET_FP = Path().cwd().parents[1] / "scripts/data/ethanol_ccsd_t" # remove
+DATASET_FP = Path().cwd().parent / "data/ethanol_ccsd_t"  # local
 DATASET = "Ethanol_ccsdt_NC2018"
 
+PUBLICATION = "https://doi.org/10.1038/s41467-018-06169-2"
+DATA_LINK = "http://sgdml.org/"
 LINKS = [
     "https://doi.org/10.1038/s41467-018-06169-2",
     "http://sgdml.org/",
@@ -83,10 +85,14 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
     property_map = {
@@ -121,7 +127,7 @@ def main(argv):
             elements=["O", "H", "C"],
             reader=reader_sGDML,
             glob_string=f"ethanol_ccsd_t-{train_test}.xyz",
-            default_name=f"ethanol_ccsd_t-{train_test}",
+            default_name=f"ethanol_ccsd_t_{train_test}",
             verbose=True,
             generator=False,
         )
@@ -139,26 +145,7 @@ def main(argv):
 
         all_co_ids, all_pr_ids = list(zip(*ids))
 
-        # cs_regexes = {
-        #     "train": "Configurations used in training",
-        #     "test": "Configurations used for testing",
-        # }
-
-        # cs_names = ["train", "test"]
-
-        # cs_ids = []
-
-        # for i, (regex, desc) in enumerate(cs_regexes.items()):
-        #     cs_id = client.query_and_insert_configuration_set(
-        #         co_hashes=all_co_ids,
-        #         name=cs_names[i],
-        #         description=desc,
-        #         query={"names": {"$regex": regex}},
-        #     )
-        #     cs_ids.append(cs_id)
-
         client.insert_dataset(
-            # cs_ids=cs_ids,
             do_hashes=all_pr_ids,
             name=f"{DATASET}-{train_test}",
             authors=AUTHORS,
