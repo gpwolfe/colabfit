@@ -5,14 +5,20 @@ from pathlib import Path
 import sys
 
 
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
+from colabfit.tools.property_definitions import atomic_forces_pd, potential_energy_pd
 
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets/TiO2_Berk/TiO2.extxyz"
 )
+DATASET_FP = Path().cwd().parent / "data/tio2_cms_2016/TiO2.extxyz"
 DATASET = "TiO2_CMS2016"
 
-
+PUBLICATION = "https://doi.org/10.1016/j.commatsci.2015.11.047"
+DATA_LINK = (
+    "https://github.com/DescriptorZoo/sensitivity-"
+    "dimensionality-results/tree/master/datasets/TiO2"
+)
 LINKS = [
     "https://doi.org/10.1016/j.commatsci.2015.11.047",
     "https://github.com/DescriptorZoo/sensitivity-"
@@ -26,6 +32,32 @@ DS_DESC = (
     "inito calculations. The dataset includes 7815 structures with 165,229 atomic "
     "environments in the stochiometric ratio of 66% O to 34% Ti."
 )
+PI_MD = {
+    "software": {"value": "Quantum ESPRESSO"},
+    "method": {"value": "DFT-PBE"},
+    "plane-wave-cutoff": {"value": "40 Ry"},
+    "electron-density-cutoff": {"value": "200 Ry"},
+    "pseudopotential": {"value": "GBRV ultrasoft"},
+    "k-point-scheme": {"value": "gamma-centered mesh"},
+    "k-point-density": {"value": "8x8x8 / 6-atom unit cell"},
+    "scf-energy-convergence": {"value": "1 x 10^-6 Ry"},
+    "variable-cell-opt-threshold": {"value": "0.5 kbar"},
+}
+property_map = {
+    "potential-energy": [
+        {
+            "energy": {"field": "energy", "units": "eV"},
+            "per-atom": {"field": "per-atom", "units": None},
+            "_metadata": PI_MD,
+        }
+    ],
+    "atomic-forces": [
+        {
+            "forces": {"field": "forces", "units": "eV/Ang"},
+            "_metadata": PI_MD,
+        }
+    ],
+}
 
 
 def tform(c):
@@ -49,10 +81,15 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+    client.insert_property_definition(potential_energy_pd)
+    client.insert_property_definition(atomic_forces_pd)
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -64,31 +101,11 @@ def main(argv):
         generator=False,
     )
 
-    property_map = {
-        "potential-energy": [
-            {
-                "energy": {"field": "energy", "units": "eV"},
-                "per-atom": {"field": "per-atom", "units": None},
-                "_metadata": {
-                    "software": {"value": "Quantum ESPRESSO"},
-                    "method": {"value": "DFT-PBE"},
-                },
-            }
-        ],
-        "atomic-forces": [
-            {
-                "forces": {"field": "forces", "units": "eV/Ang"},
-                "_metadata": {
-                    "software": {"value": "Quantum ESPRESSO"},
-                    "method": {"value": "DFT-PBE"},
-                },
-            }
-        ],
-    }
-
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             transform=tform,
@@ -101,6 +118,7 @@ def main(argv):
     client.insert_dataset(
         do_hashes=all_pr_ids,
         name=DATASET,
+        ds_id=ds_id,
         authors=AUTHORS,
         links=LINKS,
         description=DS_DESC,

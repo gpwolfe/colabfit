@@ -5,14 +5,21 @@ from pathlib import Path
 import sys
 
 
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
+from colabfit.tools.property_definitions import (
+    potential_energy_pd,
+    atomic_forces_pd,
+    cauchy_stress_pd,
+)
 
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets/W-14/w-14.xyz"
 )
+DATASET_FP = Path().cwd().parent / "data/w_14/w-14.xyz"
 DATASET = "W-14"
 
-
+PUBLICATION = "https://doi.org/10.1103/PhysRevB.90.104108"
+DATA_LINK = "https://qmml.org/datasets.html"
 LINKS = [
     "https://doi.org/10.1103/PhysRevB.90.104108",
     "https://qmml.org/datasets.html",
@@ -25,6 +32,42 @@ DS_DESC = (
     "128-atom bcc cell, vacancies, low index surfaces, gamma-surfaces, and "
     "dislocation cores."
 )
+PI_MD = {
+    "software": {"value": "CASTEP 6.01"},
+    "method": {"value": "DFT-PBE"},
+    "input": {
+        "value": {
+            "pseudopotential": "Ultrasoft (valence 5[s^2]5[p^6]5[d^4]6[s^2])",
+            "encut": "600 eV",
+            "kspacing": "0.015/Ang",
+            "smearing": "Gaussian",
+            "smearing-width": "0.1 eV",
+        }
+    },
+}
+
+property_map = {
+    "potential-energy": [
+        {
+            "energy": {"field": "energy", "units": "eV"},
+            "per-atom": {"field": "per-atom", "units": None},
+            "_metadata": PI_MD,
+        }
+    ],
+    "atomic-forces": [
+        {
+            "forces": {"field": "force", "units": "eV/Ang"},
+            "_metadata": PI_MD,
+        }
+    ],
+    "cauchy-stress": [
+        {
+            "stress": {"field": "virial", "units": "eV"},
+            "volume-normalized": {"value": True, "units": None},
+            "_metadata": PI_MD,
+        }
+    ],
+}
 
 
 def tform(c):
@@ -48,11 +91,17 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
+    client.insert_property_definition(potential_energy_pd)
+    client.insert_property_definition(atomic_forces_pd)
+    client.insert_property_definition(cauchy_stress_pd)
     configurations = load_data(
         file_path=DATASET_FP,
         file_format="xyz",
@@ -63,44 +112,11 @@ def main(argv):
         generator=False,
     )
 
-    property_map = {
-        "potential-energy": [
-            {
-                "energy": {"field": "energy", "units": "eV"},
-                "per-atom": {"field": "per-atom", "units": None},
-                "_metadata": {
-                    "software": {"value": "CASTEP"},
-                    "method": {"value": "DFT-PBE"},
-                    "ecut": {"value": "600 eV"},
-                },
-            }
-        ],
-        "atomic-forces": [
-            {
-                "forces": {"field": "force", "units": "eV/Ang"},
-                "_metadata": {
-                    "software": {"value": "CASTEP"},
-                    "method": {"value": "DFT-PBE"},
-                    "ecut": {"value": "600 eV"},
-                },
-            }
-        ],
-        "cauchy-stress": [
-            {
-                "stress": {"field": "virial", "units": "eV"},
-                "volume-normalized": {"value": True, "units": None},
-                "_metadata": {
-                    "software": {"value": "CASTEP"},
-                    "method": {"value": "DFT-PBE"},
-                    "ecut": {"value": "600 eV"},
-                },
-            }
-        ],
-    }
-
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             transform=tform,
@@ -135,6 +151,7 @@ def main(argv):
         cs_id = client.query_and_insert_configuration_set(
             co_hashes=all_co_ids,
             name=cs_names[i],
+            ds_id=ds_id,
             description=desc,
             query={"names": {"$regex": regex}},
         )
@@ -142,6 +159,7 @@ def main(argv):
 
     client.insert_dataset(
         cs_ids=cs_ids,
+        ds_id=ds_id,
         do_hashes=all_pr_ids,
         name=DATASET,
         authors=AUTHORS,

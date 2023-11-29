@@ -5,15 +5,23 @@ from pathlib import Path
 import sys
 
 
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
+from colabfit.tools.property_definitions import (
+    atomic_forces_pd,
+    cauchy_stress_pd,
+    potential_energy_pd,
+)
 
 
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/colabfit_data/data/gubaev/TiZrHfTa_APS2021/train.cfg"
 )
+
+DATASET_FP = Path().cwd().parent / "data/tizrhfta_aps2021/train.cfg"
 DATASET = "TiZrHfTa_APS2021"
 
-
+PUBLICATION = "https://doi.org/10.1103/PhysRevMaterials.5.073801"
+DATA_LINK = None
 LINKS = [
     "https://doi.org/10.1103/PhysRevMaterials.5.073801",
 ]
@@ -32,6 +40,13 @@ DS_DESC = (
     "the disordered body-centered cubic (bcc) TiZrHfTax system with varying Ta "
     "concentration. "
 )
+PI_MD = {
+    "software": {"value": "VASP"},
+    "method": {"value": "DFT-PBE"},
+    "incar": {
+        "value": {"kpoints": "3 x 3 x 3", "ismear": 1, "sigma": 0.1, "encut": 250}
+    },
+}
 
 
 def tform(c):
@@ -55,10 +70,16 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+    client.insert_property_definition(atomic_forces_pd)
+    client.insert_property_definition(cauchy_stress_pd)
+    client.insert_property_definition(potential_energy_pd)
 
     configurations = list(
         load_data(
@@ -76,39 +97,27 @@ def main(argv):
             {
                 "energy": {"field": "energy", "units": "eV"},
                 "per-atom": {"field": "per-atom", "units": None},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-PBE"},
-                },
+                "_metadata": PI_MD,
             }
         ],
         "atomic-forces": [
             {
                 "forces": {"field": "forces", "units": "eV/Ang"},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-PBE"},
-                },
+                "_metadata": PI_MD,
             }
         ],
         "cauchy-stress": [
             {
                 "stress": {"field": "virial", "units": "GPa"},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-PBE"},
-                },
+                "_metadata": PI_MD,
             }
         ],
     }
-
-    # client.insert_property_definition('potential-energy.json')
-    # client.insert_property_definition('atomic-forces.json')
-    # client.insert_property_definition('cauchy-stress.json')
-
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
+            ds_id=ds_id,
             property_map=property_map,
             generator=False,
             transform=tform,
@@ -118,13 +127,10 @@ def main(argv):
 
     all_co_ids, all_pr_ids = list(zip(*ids))
 
-    len(set(all_co_ids))
-
-    len(set(all_pr_ids))
-
     client.insert_dataset(
         do_hashes=all_pr_ids,
         name=DATASET,
+        ds_id=ds_id,
         authors=AUTHORS,
         links=LINKS,
         description=DS_DESC,
