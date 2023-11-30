@@ -220,7 +220,7 @@ def main(argv):
             ds_id=ds_id,
             name=f"{DATASET}_{glob_ds}",
             authors=AUTHORS,
-            links=LINKS,
+            links=[PUBLICATION, DATA_LINK],
             description=(
                 f"The {glob_ds} set of a train and test set pair."
                 "The combined datasets comprise approximately 275 configurations "

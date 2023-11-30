@@ -205,7 +205,7 @@ def main(argv):
             "Ansgar Schafer",
             "Gabor Csanyi",
         ],
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description="Training and simulation data from machine learning"
         " force field model applied to steps of the hydrogenation of carbon"
         " dioxide to methanol over an indium oxide catalyst, with and"

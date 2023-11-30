@@ -7,8 +7,9 @@ Publications do not list software used, obtained from Dr. Gasteiger.
 
 
 from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
-from colabfit.tools.property_definitions import potential_energy_pd
+from colabfit.tools.property_definitions import potential_energy_pd, atomic_forces_pd
 
+import json
 from argparse import ArgumentParser
 from pathlib import Path
 import sys
@@ -33,7 +34,7 @@ DS_DESC = (
     "including D3 dispersion corrections"
 )
 DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/COLL")
-# DATASET_FP = Path("data/COLL") # remove
+DATASET_FP = Path().cwd().parent / ("data/COLL")
 DS_NAME = "COLL"
 
 
@@ -41,41 +42,45 @@ def tform(c):
     c.info["per-atom"] = False
 
 
-atomization_property_definition = {
-    "property-id": "atomization-energy",
-    "property-name": "atomization-energy",
-    "property-title": "Energy required to break a molecule into separate atoms",
-    "property-description": "Energy required to break a molecule into separate atoms",
-    "energy": {
-        "type": "float",
-        "has-unit": True,
-        "extent": [],
-        "required": True,
-        "description": "The atomization energy of the molecule",
-    },
+with open("atomization_energy.json", "r") as f:
+    atomization_energy_pd = json.load(f)
+# atomization_property_definition = {
+#     "property-id": "atomization-energy",
+#     "property-name": "atomization-energy",
+#     "property-title": "Energy required to break a molecule into separate atoms",
+#     "property-description": "Energy required to break a molecule into separate atoms",
+#     "energy": {
+#         "type": "float",
+#         "has-unit": True,
+#         "extent": [],
+#         "required": True,
+#         "description": "The atomization energy of the molecule",
+#     },
+# }
+PI_MD = {
+    "software": {"value": "ORCA"},
+    "method": {"value": "DFT-revPBE+D3"},
+    "basis-set": {"value": "def2-TZVP"},
 }
-
 property_map = {
     "potential-energy": [
         {
             "energy": {"field": "energy", "units": "eV"},
             "per-atom": {"field": "per-atom", "units": None},
-            "_metadata": {
-                "software": {"value": "ORCA"},
-                "method": {"value": "DFT"},
-                "basis-set": {"value": "def2-TZVP"},
-            },
+            "_metadata": PI_MD,
         }
     ],
     "atomization-energy": [
         {
             "energy": {"field": "atomization_energy", "units": "eV"},
-            "_metadata": {
-                "software": {"value": "ORCA"},
-                "method": {"value": "DFT"},
-                "basis-set": {"value": "def2-TZVP"},
-            },
+            "_metadata": PI_MD,
         }
+    ],
+    "atomic-forces": [
+        {
+            "forces": {"field": "forces", "units": "eV/A"},
+            "_metadata": PI_MD,
+        },
     ],
 }
 
@@ -97,15 +102,18 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
-    args = parser.parse_args(argv)
-
-    client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
     )
+    args = parser.parse_args(argv)
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
+    )
+
     fn_name_desc = [
-        ("test", "COLL-test", "Test set from COLL. "),
-        ("train", "COLL-train", "Training set from COLL. "),
-        ("val", "COLL-validation", "Validation set from COLL. "),
+        ("test", "COLL_test", "Test set from COLL. "),
+        ("train", "COLL_train", "Training set from COLL. "),
+        ("val", "COLL_validation", "Validation set from COLL. "),
     ]
     for fn, ds_name, desc in fn_name_desc:
         configurations = load_data(
@@ -117,11 +125,9 @@ def main(argv):
             verbose=False,
             generator=False,
         )
-
+        client.insert_property_definition(atomic_forces_pd)
         client.insert_property_definition(potential_energy_pd)
-
-        client.insert_property_definition(atomization_property_definition)
-
+        client.insert_property_definition(atomization_energy_pd)
         ds_id = generate_ds_id()
 
         ids = list(
@@ -141,7 +147,7 @@ def main(argv):
             do_hashes=all_pr_ids,
             name=ds_name,
             authors=AUTHORS,
-            links=LINKS,
+            links=[PUBLICATION, DATA_LINK],
             description=desc + DS_DESC,
             resync=True,
             verbose=False,

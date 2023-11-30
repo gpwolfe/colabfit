@@ -35,8 +35,9 @@ from colabfit.tools.property_definitions import potential_energy_pd, atomic_forc
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/new_raw_datasets_2.0/flexible_molecules/Datasets/"
 )
-# DATASET_FP = Path("data/flexible_molecules/Datasets")  # comment out--local testing
+DATASET_FP = Path().cwd().parent / ("data/flexible_molecules/Datasets")  # local
 DS_NAME = "flexible_molecules_JCP2021"
+
 PUBLICATION = "https://doi.org/10.1063/5.0038516"
 # Data in supplementary materials
 DATA_LINK = "https://doi.org/10.1063/5.0038516"
@@ -67,6 +68,7 @@ DS_DESC = (
 PI_MD = {
     "software": {"value": "FHI-aims"},
     "method": {"value": "DFT-PBE"},
+    "input": {"value": {"use_climb": True, "force_thres": 0.2, "climb_thres": 0.02}},
 }
 
 
@@ -95,10 +97,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
-
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
     ds_id = generate_ds_id()
 
@@ -190,7 +194,7 @@ def main(argv):
         ds_id=ds_id,
         name=DS_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         resync=True,
         verbose=True,

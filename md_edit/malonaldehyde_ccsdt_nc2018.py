@@ -148,7 +148,7 @@ def main(argv):
             do_hashes=all_pr_ids,
             name=f"{DATASET}_{train_test}",
             authors=AUTHORS,
-            links=LINKS,
+            links=[PUBLICATION, DATA_LINK],
             description=(
                 f"The {train_test} set of a train/test pair from the "
                 f"malonaldehyde dataset from sGDML. {DS_DESC}"

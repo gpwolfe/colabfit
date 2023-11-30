@@ -325,7 +325,7 @@ def main(argv):
             ds_id=ds_id,
             name=f"{DATASET}-{element}",
             authors=AUTHORS,
-            links=LINKS,
+            links=[PUBLICATION, DATA_LINK],
             description=(
                 f"Configurations of {element} from Andolina & Saidi, 2023. {DS_DESC}"
             ),

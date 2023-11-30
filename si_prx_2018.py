@@ -1,6 +1,6 @@
 """
 author: Gregory Wolfe, Alexander Tao
-
+Duplicate of si_prx_gap
 Properties
 ----------
 
@@ -139,7 +139,7 @@ from colabfit.tools.property_definitions import (
 )
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets/Si_Berk/Si.extxyz")
-# DATASET_FP = Path().cwd().parent / "data/berk_si"
+DATASET_FP = Path().cwd().parent / "data/Si_PRX_GAP"
 DS_NAME = "Si_PRX_2018"
 DS_DESC = (
     "This dataset was intended to allow accurate energy estimates for a "
@@ -347,7 +347,7 @@ CO_MD = {
         "i_step",
         "in_file",
         "iprint",
-        #  'kinetic_energy',
+        "kinetic_energy",
         "kpoints_mp_grid",
         "max_scf_cycles",
         "md_cell_t",

@@ -217,7 +217,7 @@ def main(argv):
         do_hashes=all_do_ids,
         name=DS_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
         description=DS_DESC,
         verbose=True,
     )

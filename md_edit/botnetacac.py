@@ -230,7 +230,7 @@ def main(argv):
             name=f"{DATASET_NAME}_{glob_ds[2]}",
             ds_id=ds_id,
             authors=AUTHORS,
-            links=LINKS,
+            links=[PUBLICATION, DATA_LINK],
             description=glob_ds[1],
             resync=True,
             verbose=True,

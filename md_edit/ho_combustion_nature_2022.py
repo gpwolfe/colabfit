@@ -45,6 +45,13 @@ METHODS = "DFT-ωB97X-V"
 SOFTWARE = "Q-CHEM"
 DATASET = "H_nature_2022"
 
+PUBLICATION = "https://doi.org/10.1038/s41597-022-01330-5"
+DATA_LINK = "https://doi.org/10.6084/m9.figshare.19601689.v3"
+LINKS = [
+    "https://doi.org/10.6084/m9.figshare.19601689.v3",
+    "https://doi.org/10.1038/s41597-022-01330-5",
+]
+
 
 def read_npz(filepath):
     data = defaultdict(list)
@@ -193,10 +200,7 @@ def main(argv):
             "Martin Head-Gordon",
             "Teresa Head-Gordon",
         ],
-        links=[
-            "https://doi.org/10.6084/m9.figshare.19601689.v3",
-            "https://doi.org/10.1038/s41597-022-01330-5",
-        ],
+        links=[PUBLICATION, DATA_LINK],
         description="Over 300,000 configurations in an expanded "
         "dataset of 19 hydrogen combustion reaction "
         "channels. Intrinsic reaction coordinate calculations (IRC) are "

@@ -294,7 +294,7 @@ def main(argv):
         ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         # for the description I just put the abstract...
         # TODO I want to change this to something associated with the data
         description=DESCRIPTION,
