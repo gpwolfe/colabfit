@@ -249,7 +249,7 @@ def main(argv):
             "Matthias Rupp",
             "O. Anatole von Lilienfeld",
         ],
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description="6095 isomers of C7O2H10. Energetics were calculated"
         " at the G4MP2 level of theory.",
         verbose=True,

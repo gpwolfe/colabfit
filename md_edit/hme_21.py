@@ -210,7 +210,7 @@ def main(argv):
             ds_id=ds_id,
             name=name,
             authors=AUTHORS,
-            links=LINKS,
+            links=[PUBLICATION, DATA_LINK],
             description=f"{desc}{DS_DESC}",
             verbose=True,
             # cs_ids=cs_ids,

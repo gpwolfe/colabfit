@@ -45,6 +45,9 @@ DS_PATH = Path().cwd().parent / "data/silica_npjcm_2022/database/"
 GLOB_STR = "dataset.scan.2.xyz"
 DS_NAME = "Silica_NPJCM_2022"
 AUTHORS = ["Linus C. Erhard", "Jochen Rohrer", "Karsten Albe", "Volker L. Deringer"]
+
+PUBLICATION = "https://doi.org/10.1038/s41524-022-00768-w"
+DATA_LINK = "https://doi.org/10.5281/zenodo.6353683"
 LINKS = [
     "https://doi.org/10.1038/s41524-022-00768-w",
     "https://doi.org/10.5281/zenodo.6353683",
@@ -60,7 +63,7 @@ DS_DESC = (
 PI_MD = {
     "software": {"value": "VASP"},
     "method": {"value": "SCAN"},
-    "ecut": {"value": "900 eV"},
+    "incar": {"value": {"encut": 900, "kspacing": 0.23}},
 }
 
 PI_MAP = {
@@ -101,11 +104,8 @@ CO_MD = {
     key: {"field": key}
     for key in [
         "config_type",
-        "stress",
         "simulation_state",
         "sub_simulation_type",
-        "6-virial",
-        "6-stress",
     ]
 }
 
@@ -117,12 +117,22 @@ def reader(fp):
             if len(config.info["virials"]) == 9:
                 config.info["virials"] = config.info["virials"].reshape((3, 3))
             else:
-                config.info["6-virial"] = config.info.pop("virials")
+                virials = config.info["virials"]
+                config.info["virials"] = [
+                    [virials[0], virials[5], virials[4]],
+                    [virials[5], virials[1], virials[3]],
+                    [virials[4], virials[3], virials[2]],
+                ]
         if config.arrays.get("stress") is not None:
             config.info["stress"] = config.arrays.pop("stress")
         if config.info.get("stress") is not None:
             if config.info["stress"].shape != (3, 3):
-                config.info["6-stress"] = config.info.pop("stress")
+                stress = config.info["stress"]
+                config.info["stress"] = [
+                    [stress[0], stress[5], stress[4]],
+                    [stress[5], stress[1], stress[3]],
+                    [stress[4], stress[3], stress[2]],
+                ]
     return configs
 
 
@@ -222,7 +232,7 @@ def main(argv):
         do_hashes=all_pr_ids,
         name=DS_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         resync=True,
         verbose=True,

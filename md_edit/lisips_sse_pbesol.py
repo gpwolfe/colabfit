@@ -39,6 +39,12 @@ DATASET = "LiSiPS-SSE-PBEsol"
 
 SOFTWARE = "VASP 5.4.4"
 METHODS = "DFT-PBEsol"
+
+PUBLICATION = "https://doi.org/10.1063/5.0041849"
+DATA_LINK = (
+    "https://www.aissquare.com/datasets/detail?pageType="
+    "datasets&name=LiSiPS-SSE-PBEsol"
+)
 LINKS = [
     "https://www.aissquare.com/datasets/detail?pageType="
     "datasets&name=LiSiPS-SSE-PBEsol",
@@ -196,7 +202,7 @@ def main(argv):
         ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         verbose=True,
     )

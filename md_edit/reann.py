@@ -44,6 +44,9 @@ DATASET = "REANN_CO2_Ni100"
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
+
+PUBLICATION = "https://doi.org/10.1021/acs.jpclett.9b00085"
+DATA_LINK = "https://github.com/zhangylch/REANN"
 LINKS = [
     "https://github.com/zhangylch/REANN",
     "https://doi.org/10.1021/acs.jpclett.9b00085",
@@ -200,7 +203,7 @@ def main(argv):
         name=DATASET,
         ds_id=ds_id,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         verbose=True,
     )

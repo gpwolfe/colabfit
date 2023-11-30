@@ -227,7 +227,7 @@ def main(argv):
             "Nobuyuki Ishikawa",
             "Shigenobu Ogata",
         ],
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description="Approximately 20,000 configurations from a dataset of "
         "alpha-iron and hydrogen. Properties include forces and potential "
         "energy, calculated using VASP at the DFT level using the GGA-PBE "

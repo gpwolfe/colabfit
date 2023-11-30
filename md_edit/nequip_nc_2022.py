@@ -45,6 +45,8 @@ SOFT_METH = {
     "fcu": ("DFT", "CP2K"),
 }
 
+PUBLICATION = "https://doi.org/10.1038/s41467-022-29939-5"
+DATA_LINK = "https://doi.org/10.24435/materialscloud:s0-5n"
 LINKS = [
     "https://doi.org/10.24435/materialscloud:s0-5n",
     "https://doi.org/10.1038/s41467-022-29939-5",
@@ -194,7 +196,7 @@ def main(argv):
         ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         verbose=True,
         cs_ids=cs_ids,

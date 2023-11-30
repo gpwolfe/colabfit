@@ -132,7 +132,7 @@ def main(argv):
         name=DATASET,
         ds_id=ds_id,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         resync=True,
         verbose=True,

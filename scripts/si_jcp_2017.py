@@ -39,7 +39,7 @@ from colabfit.tools.property_definitions import (
 )
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets/Si_Berk/")
-# DATASET_FP = Path().cwd().parent / "data/berk_si"
+DATASET_FP = Path().cwd().parent / "data/si_jcp_2017"
 DS_NAME = "Si_JCP_2017"
 DS_DESC = (
     "A dataset of 64-atom silicon configurations in four phases: cubic-diamond, "
@@ -60,6 +60,9 @@ AUTHORS = [
     "Amos Waterland",
     "Efthimios Kaxiras",
 ]
+
+PUBLICATION = "https://doi.org/10.1063/1.4990503"
+DATA_LINK = "https://doi.org/10.1063/1.4990503"
 LINKS = [
     "https://doi.org/10.1063/1.4990503",
 ]
@@ -85,12 +88,6 @@ property_map = {
             "_metadata": PI_MD,
         }
     ],
-    # "kinetic-energy": [
-    #     {
-    #         "energy": {"field": "kinetic_energy", "units": "eV"},
-    #         "_metadata": PI_MD,
-    #     }
-    # ],
     "free-energy": [
         {
             "energy": {"field": "free_energy", "units": "eV"},
@@ -127,9 +124,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     ds_id = generate_ds_id()
@@ -144,8 +144,6 @@ def main(argv):
         generator=False,
         glob_string=GLOB,
     )
-
-    # kinetic_energy, energy, forces, free_energy
 
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
@@ -185,7 +183,7 @@ def main(argv):
         ds_id=ds_id,
         name=DS_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         resync=True,
         verbose=True,

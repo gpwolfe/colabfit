@@ -250,7 +250,7 @@ def main(argv):
             name=glob_ds[0],
             ds_id=ds_id,
             authors=AUTHORS,
-            links=LINKS,
+            links=[PUBLICATION, DATA_LINK],
             description=glob_ds[2],
             verbose=True,
         )

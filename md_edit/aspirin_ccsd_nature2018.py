@@ -150,7 +150,7 @@ def main(argv):
             name=f"{DATASET_NAME}_{train_test}",
             ds_id=ds_id,
             authors=AUTHORS,
-            links=LINKS,
+            links=[PUBLICATION, DATA_LINK],
             description=(
                 f"The {train_test} set of a train/test pair from the "
                 f"aspirin dataset from sGDML. {DESCRIPTION}"

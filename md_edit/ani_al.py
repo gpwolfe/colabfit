@@ -220,7 +220,7 @@ def main(argv):
             ds_id=ds_id,
             name=f"{DATASET}-{glob_ds[1]}",
             authors=AUTHORS,
-            links=LINKS,
+            links=[PUBLICATION, DATA_LINK],
             description=(
                 f"Approximately 2800 configurations from a {glob_ds[1]} dataset–one of "
                 "a pair of train/test datasets of aluminum in crystal and melt "

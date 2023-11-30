@@ -33,6 +33,9 @@ DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/mispr
 DATASET = "MISPR"
 
 SOFTWARE = "Gaussian 16"
+
+PUBLICATION = "https://github.com/rashatwi/mispr-dataset"
+DATA_LINK = "https://doi.org/10.1038/s41598-022-20009-w"
 LINKS = [
     "https://github.com/rashatwi/mispr-dataset",
     "https://doi.org/10.1038/s41598-022-20009-w",
@@ -173,7 +176,7 @@ def main(argv):
         ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         verbose=True,
     )

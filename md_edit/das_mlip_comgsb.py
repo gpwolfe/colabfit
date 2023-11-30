@@ -51,7 +51,7 @@ SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
 PUBLICATION = "https://doi.org/10.1103/PhysRevB.104.094310"
 # Data download from supplemental materials section
-DATA_FILE = "https://doi.org/10.1103/PhysRevB.104.094310"
+DATA_LINK = "https://doi.org/10.1103/PhysRevB.104.094310"
 LINKS = ["https://doi.org/10.1103/PhysRevB.104.094310"]
 AUTHORS = [
     "Hongliang Yang",
@@ -247,7 +247,7 @@ def main(argv):
         ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         verbose=True,
     )

@@ -25,6 +25,9 @@ from colabfit.tools.property_definitions import (
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/data/mlearn")
 DATASET_FP = Path.cwd().parent / "data/mlearn/mlearn-master/data"
+
+PUBLICATION = "https://doi.org/10.1021/acs.jpca.9b08723"
+DATA_LINK = "https://github.com/materialsvirtuallab/mlearn"
 LINKS = [
     "https://doi.org/10.1021/acs.jpca.9b08723",
     "https://github.com/materialsvirtuallab/mlearn",
@@ -261,7 +264,7 @@ def main(argv):
             do_hashes=all_pr_ids,
             name="mlearn_" + elem + "_test",
             authors=AUTHORS,
-            links=LINKS,
+            links=[PUBLICATION, DATA_LINK],
             description=(
                 "A comprehensive DFT data set was generated for six "
                 "elements - Li, Mo, Ni, Cu, Si, and Ge. These elements "

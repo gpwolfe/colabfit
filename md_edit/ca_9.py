@@ -287,7 +287,7 @@ def main(argv):
             name=ds_name,
             ds_id=ds_id,
             authors=AUTHORS,
-            links=LINKS,
+            links=[PUBLICATION, DATA_LINK],
             description=description,
             verbose=False,
         )

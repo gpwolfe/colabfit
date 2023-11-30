@@ -35,7 +35,7 @@ import sys
 DATASET_FP = Path(
     " /persistent/colabfit_raw_data/new_raw_datasets_2.0/nenci2021/nenci2021/xyzfiles/"
 )
-# DATASET_FP = Path("data/nenci2021/xyzfiles")  # remove
+DATASET_FP = Path().cwd().parent / ("data/nenci2021/xyzfiles")  # local
 
 DS_NAME = "NENCI-2021"
 AUTHORS = [
@@ -45,6 +45,11 @@ AUTHORS = [
     "Ka Un Lao",
     "Robert A. DiStasio, Jr",
 ]
+
+PUBLICATION = "https://doi.org/10.1063/5.0068862"
+DATA_LINK = (
+    "https://pubs.aip.org/jcp/article-supplement/199609/zip/184303_1_supplements/"
+)
 LINKS = [
     "https://doi.org/10.1063/5.0068862",
 ]
@@ -143,10 +148,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
-
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
     ds_id = generate_ds_id()
     client.insert_property_definition(potential_energy_pd)
@@ -219,7 +226,7 @@ def main(argv):
         do_hashes=all_pr_ids,
         name=DS_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         resync=True,
         verbose=True,

@@ -138,7 +138,7 @@ def main(argv):
         ds_id=ds_id,
         name="GFN-xTB_JCIM_2021",
         authors=["Leonid Komissarov", "Toon Verstraelen"],
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description="10,000 configurations of organosilicon compounds "
         "with energies predicted by an improved GFN-xTB Hamiltonian "
         "parameterization, using revPBE.",

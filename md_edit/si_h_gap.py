@@ -224,7 +224,7 @@ def main(argv):
             do_hashes=all_do_ids,
             name=f"{DATASET}_{glob_ds[1]}",
             authors=AUTHORS,
-            links=LINKS,
+            links=[PUBLICATION, DATA_LINK],
             description=glob_ds[2],
             verbose=True,
         )

@@ -231,7 +231,7 @@ def main(argv):
             "Matthias Rupp",
             "O. Anatole von Lilienfeld",
         ],
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description="133,855 configurations of stable small organic molecules"
         " composed of CHONF. A subset of GDB-17, with calculations of energies"
         ", dipole moment, polarizability and enthalpy. Calculations performed"
