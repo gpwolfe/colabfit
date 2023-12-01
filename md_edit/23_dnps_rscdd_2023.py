@@ -129,8 +129,9 @@ SOFTWARE = "VASP"
 PI_MD = {
     "software": {"value": SOFTWARE},
     "method": {"value": METHODS},
-    "INCAR": {
+    "input": {
         "value": {
+            "file-type": "INCAR",
             "PREC": "A",
             "ENCUT": "400",
             "ISYM": "0",

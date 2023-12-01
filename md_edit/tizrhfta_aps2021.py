@@ -43,8 +43,13 @@ DS_DESC = (
 PI_MD = {
     "software": {"value": "VASP"},
     "method": {"value": "DFT-PBE"},
-    "incar": {
-        "value": {"kpoints": "3 x 3 x 3", "ismear": 1, "sigma": 0.1, "encut": 250}
+    "input": {
+        "value": {
+            "encut": {"value": 250, "units": "eV"},
+            "kpoints": "3 x 3 x 3",
+            "ismear": 1,
+            "sigma": 0.1,
+        }
     },
 }
 

@@ -47,7 +47,7 @@ DS_DESC_MBD = (
 )
 AUTHORS = ["Venkat Kapil", "Edgar A. Engel"]
 PUBLICATION = "https://doi.org/10.1073/pnas.2111769119"
-DATA_LINKS = "https://doi.org/10.24435/materialscloud:vp-jf"
+DATA_LINK = "https://doi.org/10.24435/materialscloud:vp-jf"
 OTHER_LINKS = "https://github.com/venkatkapil24/data_molecular_fluctuations"
 LINKS = [
     "https://doi.org/10.1073/pnas.2111769119",
@@ -58,14 +58,12 @@ LINKS = [
 PI_MD_PBE = {
     "software": {"value": "Quantum ESPRESSO v6.3"},
     "method": {"value": "DFT-PBE-TS"},
-    "ecut": {"value": "100 Ry"},
-    "kpoints": {"field": "kpoints"},
+    "input": {"field": "input"},
 }
 PI_MD_MBD = {
     "software": {"value": "FHI-aims"},
     "method": {"value": "DFT-PBE0-MBD"},
-    "ecut": {"value": "100 Ry"},
-    "kpoints": {"field": "kpoints"},
+    "input": {"field": "input"},
 }
 
 property_map_pbe = {
@@ -248,7 +246,8 @@ def reader(fp):
     configs = read(fp, index=":", format="extxyz")
     for config in configs:
         config.info["name"] = name
-        config.info["kpoints"] = "x".join(config.info["kpts"].astype(str))
+        kpoints = "x".join(config.info["kpts"].astype(str))
+        config.info["input"] = {"encut": "100 Ry", "kpoints": kpoints}
     return configs
 
 

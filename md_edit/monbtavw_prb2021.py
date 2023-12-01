@@ -45,9 +45,11 @@ DS_DESC = (
 PI_MD = {
     "software": {"value": "VASP"},
     "method": {"value": "DFT-PBE"},
-    "encut": {"value": 500},
-    "kspacing": {"value": 0.15},
-    "sigma": {"value": 0.1},
+    "input": {
+        "value": {"encut": {"value": 500, "units": "eV"}},
+        "kspacing": {"value": 0.15, "units": "Ang^-1"},
+        "sigma": "0.1",
+    },
 }
 
 

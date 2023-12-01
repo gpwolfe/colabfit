@@ -72,8 +72,9 @@ PI_MD = {
     "software": {"value": "VASP"},
     "method": {"value": "DFT-PBE"},
     "POTCAR": {"value": "PAW_PBE Nb_sv 25May2007"},
-    "INCAR": {
+    "input": {
         "value": {
+            "file-type": "INCAR",
             "KSPACING": "bulk: 0.150000; surface: 1 k-point along surface normal",
             "SIGMA": "0.100000",
             "ENCUT": "500.000000",

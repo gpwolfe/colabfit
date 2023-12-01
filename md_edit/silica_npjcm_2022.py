@@ -63,7 +63,12 @@ DS_DESC = (
 PI_MD = {
     "software": {"value": "VASP"},
     "method": {"value": "SCAN"},
-    "incar": {"value": {"encut": 900, "kspacing": 0.23}},
+    "input": {
+        "value": {
+            "encut": {"value": 900, "unit": "eV"},
+            "kspacing": {"value": 0.23, "unit": "Ang^-1"},
+        }
+    },
 }
 
 PI_MAP = {

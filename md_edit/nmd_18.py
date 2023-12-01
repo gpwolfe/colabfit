@@ -54,7 +54,11 @@ DS_DESC = (
 PI_MD = {
     "software": {"value": "FHI-aims"},
     "method": {"value": "DFT-PBE"},
-    "band-gap": {"value": "tight"},
+    "input": {
+        "value": {
+            "band-gap": {"value": "tight"},
+        }
+    },
 }
 
 

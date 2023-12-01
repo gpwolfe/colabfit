@@ -97,7 +97,7 @@ def main(argv):
     client.insert_property_definition(atomic_forces_pd)
     metadata = {
         "software": {"value": "CP2K"},
-        "method": {"value": "DFT-revPBE0-D3"},
+        "method": {"value": "DFT-revPBE0+D3"},
     }
     property_map = {
         "potential-energy": [

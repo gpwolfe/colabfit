@@ -173,8 +173,12 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        "encut": {"value": "700 eV"},
-        "kspacing": {"value": "0.3/Ang"}
+        "input": {
+            "value": {
+                "encut": {"value": 700, "units": "eV"},
+                "kspacing": {"value": 0.3, "units": "Ang^-1"},
+            }
+        }
         # "": {"field": ""}
     }
     property_map = {

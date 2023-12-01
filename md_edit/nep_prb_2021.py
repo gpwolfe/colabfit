@@ -53,20 +53,26 @@ SOFT_METH = {
     "PbTe_Fan_2021": {
         "software": "VASP",
         "methods": "DFT-PBE",
-        "kpoints": "1 x 1 x 1",
-        "encut": "400 eV",
+        "input": {
+            "value": {"encut": {"value": 400, "units": "eV"}},
+            "kpoints": "1 x 1 x 1",
+        },
     },
     "Si_Fan_2021": {
         "software": "CASTEP",
         "methods": "DFT-PW91",
-        "kspacing": "0.03/Ang",
-        "encut": "250 eV",
+        "input": {
+            "value": {"encut": {"value": 250, "units": "eV"}},
+            "kspacing": {"value": 0.03, "units": "Ang^-1"},
+        },
     },
     "Silicene_Fan_2021": {
         "software": "Quantum ESPRESSO",
         "methods": "DFT-PBE",
-        "kpoints": "3 x 3 x 1",
-        "encut": "40 Ry",
+        "input": {
+            "value": {"encut": {"value": 40, "units": "Ry"}},
+            "kpoints": "3 x 3 x 1",
+        },
     },
 }
 DATA_LINK = "https://doi.org/10.5281/zenodo.5109599"

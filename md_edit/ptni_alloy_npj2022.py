@@ -3,8 +3,6 @@
 """
 File notes
 -------------
-Script uses 'ecut' argument in property definitions. If this is not generally
-implemented, consider moving to metadata
 """
 from argparse import ArgumentParser
 from pathlib import Path
@@ -51,11 +49,16 @@ DS_DESC = (
 PI_MD = {
     "software": {"value": "VASP"},
     "method": {"value": "DFT-rPBE"},
-    "encut": {"value": "500 eV"},
-    "ismear": {"value": 0},
-    "sigma": {"value": 0.1},
-    "ediff": {"value": "1x10e^-6"},
-    "k-points": {"value": "500/Ang^-3 of reciprocal cell, Monkhorst-Pack"},
+    "input": {
+        "value": {
+            "encut": {"value": 500, "units": "eV"},
+            "kpoints": {"value": 500, "units": "Ang^-3"},
+            "kpoints-scheme": "Monkhorst-Pack, reciprocal cell",
+            "sigma": 0.1,
+            "ismear": 0,
+            "ediff": 1 * 10e-6,
+        }
+    },
 }
 property_map = {
     "potential-energy": [

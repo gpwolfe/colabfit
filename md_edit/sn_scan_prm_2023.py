@@ -171,12 +171,15 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        "encut": {"value": "650 eV"},
-        "ismear": {"value": "0"},
-        "sigma": {"value": "0.2"},
-        "kspacing": {"value": "0.1/Ang"},
-        "ediff": {"value": "10^-6 eV"}
-        # "": {"field": ""}
+        "input": {
+            "value": {
+                "encut": {"value": 650, "units": "eV"},
+                "kspacing": {"value": 0.1, "units": "Ang^-1"},
+                "sigma": 0.2,
+                "ismear": 0,
+                "ediff": 10e-6,
+            }
+        },
     }
     property_map = {
         "potential-energy": [

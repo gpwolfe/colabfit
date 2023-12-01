@@ -40,10 +40,14 @@ property_map = {
             "_metadata": {
                 "software": {"value": "VASP"},
                 "method": {"value": "DFT-PBE"},
-                "ismear": {"value": 1},
-                "sigma": {"value": 0.1},
-                "k-point-scheme": {"value": "Monkhorst-Pack"},
-                "encut": {"value": 410},
+                "input": {
+                    "value": {
+                        "encut": {"value": 410, "units": "eV"},
+                        "k-point-scheme": "Monkhorst-Pack",
+                        "sigma": 0.1,
+                        "ismear": 1,
+                    }
+                },
             },
         }
     ],

@@ -15,10 +15,7 @@ Change database name as appropriate
 Properties:
 forces
 energy
-
-Other properties added to metadata:
-stress (a stress tensor of length 6, which does not fit
-the 3x3 of our Cauchy stress property definition)
+stress
 
 File notes
 ----------
@@ -142,12 +139,12 @@ def main(argv):
     metadata = {
         "software": {"value": "VASP 5.4.4"},
         "method": {"value": "DFT"},
-        "encut": {"value": "550 eV"},
-        "kpoints": {"value": "27 x 27 x 27"},
-    }
-    co_md_map = {
-        # this is a stress tensor of size 6, not 9 or 3x3
-        "stress": {"field": "stress"},
+        "input": {
+            "value": {
+                "encut": {"value": 550, "units": "eV"},
+                "kpoints": "27 x 27 x 27",
+            },
+        },
     }
 
     property_map = {
@@ -156,8 +153,6 @@ def main(argv):
                 "energy": {
                     "field": "energy",
                     "units": {"value": "eV"},
-                    "k-point-mesh": {"value": "27x27x27"},
-                    "ecut": {"value": "550 eV"},
                 },
                 "per-atom": {"value": False, "units": None},
                 "_metadata": metadata,
@@ -182,7 +177,6 @@ def main(argv):
         client.insert_data(
             configurations,
             ds_id=ds_id,
-            co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
             verbose=True,

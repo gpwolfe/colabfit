@@ -147,9 +147,11 @@ def main(argv):
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
         "basis-set": {"value": "TZVP"},
-        "pseudopotentials": {"value": "GTH"},
-        "encut": {"value": "800 Ry"},
-        "k-points": {"value": "gamma-point"},
+        "input": {
+            "pseudopotentials": "GTH",
+            "encut": {"value": 800, "units": "Ry"},
+            "k-points": "gamma-point",
+        },
     }
     property_map = {
         "potential-energy": [

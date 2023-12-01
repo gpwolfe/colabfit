@@ -47,7 +47,11 @@ DS_DESC = (
 PI_MD = {
     "software": {"value": "VASP"},
     "method": {"value": "DFT-PBE"},
-    "encut": {"value": 600},
+    "input": {
+        "value": {
+            "encut": {"value": 600, "units": "eV"},
+        }
+    },
 }
 property_map = {
     "potential-energy": [

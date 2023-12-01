@@ -156,7 +156,9 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        "encut": {"value": "650 eV"},
+        "input": {
+            "value": {"encut": {"value": 650, "units": "eV"}},
+        },
     }
     property_map = {
         "potential-energy": [

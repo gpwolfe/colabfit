@@ -99,15 +99,25 @@ def reader(path):
             atoms.info["stress"] = stress
 
             # Add DFT settings
-            atoms.info["ke_cutoff"] = 520  # eV
+            # Add DFT settings
 
             if "Li" in atoms.get_chemical_symbols():
-                atoms.info["k-point-mesh"] = "3x3x3"
+                kpoints = "3x3x3"
             else:
-                atoms.info["k-point-mesh"] = "4x4x4"
+                kpoints = "4x4x4"
 
-            atoms.info["energy-convergence"] = 1e-5  # eV
-            atoms.info["forces-convergence"] = 0.02  # eV/Ang
+            atoms.info["input"] = {
+                "kinetic-energy-cutoff": {"value": 520, "units": "eV"},
+                "k-point-mesh": kpoints,
+                "energy-convergence": {
+                    "value": 1e-5,
+                    "units": "eV",
+                },
+                "forces-convergence": {
+                    "value": 0.02,
+                    "units": "eV/Ang",
+                },
+            }
 
             yield AtomicConfiguration.from_ase(atoms)
 
@@ -145,12 +155,7 @@ def main(argv):
                 "_metadata": {
                     "software": {"value": "VASP"},
                     "method": {"value": "DFT-PBE"},
-                    "kinetic-energy-cutoff": {"field": "ke_cutoff", "units": "eV"},
-                    "k-point-mesh": {"field": "k-point-mesh", "units": None},
-                    "energy-convergence": {
-                        "field": "energy-convergence",
-                        "units": "eV",
-                    },
+                    "input": {"field": "input"},
                 },
             }
         ],
@@ -160,23 +165,18 @@ def main(argv):
                 "_metadata": {
                     "software": {"value": "VASP"},
                     "method": {"value": "DFT-PBE"},
-                    "kinetic-energy-cutoff": {"field": "ke_cutoff", "units": "eV"},
-                    "k-point-mesh": {"field": "k-point-mesh", "units": None},
-                    "forces-convergence": {
-                        "field": "forces-convergence",
-                        "units": "eV/Ang",
-                    },
+                    "input": {"field": "input"},
                 },
             }
         ],
         "cauchy-stress": [
             {
                 "stress": {"field": "stress", "units": "kilobar"},
+                "volume-normalized": {"value": True, "units": None},
                 "_metadata": {
                     "software": {"value": "VASP"},
                     "method": {"value": "DFT-PBE"},
-                    "kinetic-energy-cutoff": {"field": "ke_cutoff", "units": "eV"},
-                    "k-point-mesh": {"field": "k-point-mesh", "units": None},
+                    "input": {"field": "input"},
                 },
             }
         ],

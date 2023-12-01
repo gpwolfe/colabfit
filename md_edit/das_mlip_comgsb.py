@@ -164,7 +164,11 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        "k-point": {"value": "2 x 2 x 2"},
+        "input": {
+            "value": {
+                "kpoints": "2 x 2 x 2",
+            }
+        },
     }
     co_md_map = {"virial": {"field": "virial"}}
     property_map = {

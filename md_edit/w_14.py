@@ -37,11 +37,11 @@ PI_MD = {
     "method": {"value": "DFT-PBE"},
     "input": {
         "value": {
+            "encut": {"value": 600, "units": "eV"},
             "pseudopotential": "Ultrasoft (valence 5[s^2]5[p^6]5[d^4]6[s^2])",
-            "encut": "600 eV",
-            "kspacing": "0.015/Ang",
+            "kspacing": {"value": 0.015, "units": "Ang^-1"},
             "smearing": "Gaussian",
-            "smearing-width": "0.1 eV",
+            "smearing-width": {"value": 0.1, "units": "eV"},
         }
     },
 }

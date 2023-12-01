@@ -57,8 +57,7 @@ ELEMENTS = None
 PI_MD = {
     "software": {"value": "VASP"},
     "method": {"DFT-PBE"},
-    "prec": {"value": "Accurate"},
-    "ediff": {"value": "1e-8"},
+    "input": {"value": {"prec": "Accurate", "ediff": "1e-8"}},
 }
 
 

@@ -105,8 +105,10 @@ def main(argv):
     metadata = {
         "software": {"value": "CASTEP"},
         "method": {"value": "DFT"},
-        "encut": {"value": "520 eV"},
-        "kspacing": {"value": "0.012/A"},
+        "input": {
+            "value": {"encut": {"value": 520, "units": "eV"}},
+            "kspacing": {"value": 0.012, "units": "Ang^-1"},
+        },
     }
     co_md = {"config_type": {"field": "config_type"}}
     property_map = {

@@ -35,13 +35,17 @@ DS_DESC = (
 PI_MD = {
     "software": {"value": "Quantum ESPRESSO"},
     "method": {"value": "DFT-PBE"},
-    "plane-wave-cutoff": {"value": "40 Ry"},
-    "electron-density-cutoff": {"value": "200 Ry"},
-    "pseudopotential": {"value": "GBRV ultrasoft"},
-    "k-point-scheme": {"value": "gamma-centered mesh"},
-    "k-point-density": {"value": "8x8x8 / 6-atom unit cell"},
-    "scf-energy-convergence": {"value": "1 x 10^-6 Ry"},
-    "variable-cell-opt-threshold": {"value": "0.5 kbar"},
+    "input": {
+        "value": {
+            "plane-wave-cutoff": "40 Ry",
+            "electron-density-cutoff": "200 Ry",
+            "pseudopotential": "GBRV ultrasoft",
+            "k-point-scheme": "gamma-centered mesh",
+            "k-point-density": "8x8x8 per 6-atom unit cell",
+            "scf-energy-convergence": "1 x 10^-6 Ry",
+            "variable-cell-opt-threshold": "0.5 kbar",
+        }
+    },
 }
 property_map = {
     "potential-energy": [

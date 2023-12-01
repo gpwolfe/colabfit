@@ -244,8 +244,12 @@ def main(argv):
                 "_metadata": {
                     "software": {"value": "VASP 5.2.2"},
                     "method": {"value": "DFT-PBE"},
-                    "kpoint": {"value": "3 x 3 x 3"},
-                    "encut": {"value": "600 eV"},
+                    "input": {
+                        "value": {
+                            "kpoints": "3 x 3 x 3",
+                            "encut": {"value": 600, "unit": "eV"},
+                        },
+                    },
                 },
             }
         ]

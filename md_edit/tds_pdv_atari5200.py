@@ -175,9 +175,13 @@ def main(argv):
     metadata = {
         "software": {"value": "VASP"},
         "method": {"value": "DFT"},
-        "encut": {"value": "520 eV"},
-        "kspacing": {"value": "0.24/Ang"},
-        "ediff": {"value": "10^-8"},
+        "input": {
+            "value": {
+                "encut": {"value": 520, "units": "eV"},
+                "kspacing": {"value": 0.24, "units": "Ang^-1"},
+                "ediff": 10e-8,
+            }
+        },
     }
     property_map = {
         "potential-energy": [

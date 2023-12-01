@@ -151,7 +151,9 @@ def main(argv):
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
         "k-point": {"value": "2 x 2 x 2"},
-        "encut": {"value": "600 eV"}
+        "input": {
+            "value": {"encut": {"value": 600, "units": "eV"}},
+        },
         # "": {"field": ""}
     }
     property_map = {

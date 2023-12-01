@@ -164,11 +164,14 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        "encut": {"value": "400 eV"},
-        "kpoints": {"value": "3 x 3 x 1"},
-        "ismear": {"value": -1},
-        "sigma": {"value": "0.1 eV"}
-        # "": {"field": "", "units": ""}
+        "input": {
+            "value": {
+                "encut": {"value": 400, "units": "eV"},
+                "kpoints": "3 x 3 x 3",
+                "sigma": 0.1,
+                "ismear": -1,
+            }
+        },
     }
     property_map = {
         "potential-energy": [

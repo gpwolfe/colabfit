@@ -129,18 +129,18 @@ def main(argv):
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
 
-    metadata = {"software": {"value": SOFTWARE}, "method": {"value": METHODS}}
+    metadata = {
+        "software": {"value": SOFTWARE},
+        "method": {"value": METHODS},
+        "input": {"value": {"kpoints": "3x3x3"}},
+    }
     co_md_map = {"fermi": {"field": "fermi"}}
     property_map = {
         "potential-energy": [
             {
                 "energy": {"field": "energy", "units": "eV"},
                 "per-atom": {"field": "per-atom", "units": None},
-                "_metadata": {
-                    "software": {"value": "Quantum ESPRESSO"},
-                    "method": {"value": "DFT-PBE"},
-                    "kpoint": {"value": "3x3x3 grid"},
-                },
+                "_metadata": metadata,
             }
         ],
         "atomic-forces": [
