@@ -120,7 +120,7 @@ def main(argv):
         name_field=None,
         elements=["C", "H", "O", "N"],
         default_name="CHON",
-        verbose=True,
+        verbose=False,
         generator=False,
     )
 
@@ -131,7 +131,7 @@ def main(argv):
             ds_id=ds_id,
             property_map=PI_MD,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -145,7 +145,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         resync=True,
-        verbose=True,
+        verbose=False,
     )
 
 

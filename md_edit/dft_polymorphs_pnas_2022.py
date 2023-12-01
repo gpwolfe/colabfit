@@ -48,7 +48,7 @@ DS_DESC_MBD = (
 AUTHORS = ["Venkat Kapil", "Edgar A. Engel"]
 PUBLICATION = "https://doi.org/10.1073/pnas.2111769119"
 DATA_LINK = "https://doi.org/10.24435/materialscloud:vp-jf"
-OTHER_LINKS = "https://github.com/venkatkapil24/data_molecular_fluctuations"
+OTHER_LINKS = ["https://github.com/venkatkapil24/data_molecular_fluctuations"]
 LINKS = [
     "https://doi.org/10.1073/pnas.2111769119",
     "https://doi.org/10.24435/materialscloud:vp-jf",
@@ -292,7 +292,7 @@ def main(argv):
             file_format="folder",
             name_field="name",
             elements=None,
-            verbose=True,
+            verbose=False,
             reader=reader,
             generator=False,
             glob_string=reg,
@@ -304,7 +304,7 @@ def main(argv):
                 ds_id=ds_id,
                 property_map=property_map,
                 generator=False,
-                verbose=True,
+                verbose=False,
             )
         )
 
@@ -316,7 +316,7 @@ def main(argv):
             authors=AUTHORS,
             links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
             description=desc,
-            verbose=True,
+            verbose=False,
         )
 
 

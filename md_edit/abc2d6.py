@@ -213,7 +213,7 @@ def main(argv):
         default_name="ElpasoliteIIItoVI",
         reader=reader_ABC,
         glob_string="ElpasoliteIIItoVI.pkl",
-        verbose=True,
+        verbose=False,
         generator=False,
     )
 
@@ -225,7 +225,7 @@ def main(argv):
         default_name="TrainingSet",
         reader=reader_ABC,
         glob_string="TrainingSet.pkl",
-        verbose=True,
+        verbose=False,
         generator=False,
     )
 
@@ -262,7 +262,7 @@ def main(argv):
             property_map=property_map,
             generator=False,
             transform=tform,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -303,7 +303,7 @@ def main(argv):
         # TODO I want to change this to something associated with the data
         description=DESCRIPTION,
         resync=True,
-        verbose=True,
+        verbose=False,
     )
 
 

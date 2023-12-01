@@ -167,7 +167,7 @@ def main(argv):
             name_field=None,
             elements=ELEMENTS,
             default_name=glob_ds[2],
-            verbose=True,
+            verbose=False,
             generator=False,
         )
         ds_id = generate_ds_id()
@@ -179,7 +179,7 @@ def main(argv):
                 property_map=property_map,
                 generator=False,
                 transform=tform,
-                verbose=True,
+                verbose=False,
             )
         )
 
@@ -233,7 +233,7 @@ def main(argv):
             links=[PUBLICATION, DATA_LINK],
             description=glob_ds[1],
             resync=True,
-            verbose=True,
+            verbose=False,
         )
 
 

@@ -35,12 +35,13 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/hdnnp_h2o_np"
     "/training-data_H2O"
 )
+DATASET_FP = Path().cwd().parent / "data/hdnnp_h2o_np"
 DATASET = "HDNNP_H2O"
 
 SOFTWARE = "FHI-aims"
 PUBLICATION = "https://doi.org/10.1073/pnas.1602375113"
 DATA_LINK = "https://doi.org/10.5281/zenodo.2634097"
-OTHER_LINKS = "https://doi.org/10.1103/PhysRevLett.98.146401"
+OTHER_LINKS = ["https://doi.org/10.1103/PhysRevLett.98.146401"]
 LINKS = [
     "https://doi.org/10.5281/zenodo.2634097",
     "https://doi.org/10.1103/PhysRevLett.98.146401",
@@ -168,7 +169,7 @@ def main(argv):
             co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -230,7 +231,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
         description=DS_DESC,
-        verbose=True,
+        verbose=False,
         cs_ids=cs_ids,
     )
 

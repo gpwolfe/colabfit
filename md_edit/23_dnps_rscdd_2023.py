@@ -330,7 +330,7 @@ def main(argv):
             description=(
                 f"Configurations of {element} from Andolina & Saidi, 2023. {DS_DESC}"
             ),
-            verbose=True,
+            verbose=False,
         )
 
 

@@ -37,7 +37,7 @@ LICENSE = "Creative Commons Attribution-ShareAlike 4.0 International"
 SOFTWARE = "CP2K"
 PUBLICATION = "https://doi.org/10.1073/pnas.2110077118"
 DATA_LINK = "https://doi.org/10.5281/zenodo.5235246"
-OTHER_LINKS = "https://github.com/water-ice-group/simple-MLP"
+OTHER_LINKS = ["https://github.com/water-ice-group/simple-MLP"]
 LINKS = [
     "https://doi.org/10.1073/pnas.2110077118",
     "https://doi.org/10.5281/zenodo.5235246",

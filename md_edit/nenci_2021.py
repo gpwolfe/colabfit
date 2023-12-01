@@ -229,7 +229,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         resync=True,
-        verbose=True,
+        verbose=False,
     )
 
 

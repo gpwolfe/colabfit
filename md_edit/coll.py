@@ -137,7 +137,7 @@ def main(argv):
                 property_map=property_map,
                 generator=False,
                 transform=tform,
-                verbose=True,
+                verbose=False,
             )
         )
 

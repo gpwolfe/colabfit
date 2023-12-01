@@ -33,6 +33,8 @@ from pathlib import Path
 import sys
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/deepmd-se")
+DATASET_FP = Path().cwd().parent / "data/deepmd-se"
+
 DATASET = "DeePMD_SE"
 PUBLICATION = "https://doi.org/10.48550/arXiv.1805.09003"
 DATA_LINK = (
@@ -218,7 +220,7 @@ def main(argv):
             ds_id=ds_id,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -302,7 +304,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
-        verbose=True,
+        verbose=False,
     )
 
 

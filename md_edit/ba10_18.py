@@ -12,7 +12,11 @@ import sys
 from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import potential_energy_pd
 
-DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets")
+DATASET_FP = Path(
+    "/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets/"
+    "BA10-18/ba10-18-reformatted.xyz"
+)
+DATASET_FP = Path().cwd().parent / "data/ba10-18/ba10-18-reformatted.xyz"
 
 DATASET_NAME = "BA10-18"
 PUBLICATION = "https://doi.org/10.1038/s41524-019-0189-9"
@@ -79,12 +83,12 @@ def main(argv):
     )
 
     configurations = load_data(
-        file_path=DATASET_FP / "BA10-18/ba10-18-reformatted.xyz",
+        file_path=DATASET_FP,
         file_format="xyz",
         name_field="name",
         elements=["Ag", "Cu", "Al", "Fe", "Mg", "Ni", "Ti", "Co", "V", "Nb"],
         default_name="BA10-18",
-        verbose=True,
+        verbose=False,
         generator=False,
     )
 
@@ -137,7 +141,7 @@ def main(argv):
             co_md_map={"lattice_type": {"field": "lattice"}},
             generator=False,
             transform=tform,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -202,7 +206,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DESCRIPTION,
         resync=True,
-        verbose=True,
+        verbose=False,
     )
 
 

@@ -36,6 +36,8 @@ import sys
 
 
 DB_PATH = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/iso17")
+DB_PATH = Path().cwd().parent / "data/iso17"
+
 DS_NAME = "ISO17_NC_2017"
 PUBLICATION = (
     "https://proceedings.neurips.cc/paper/2017/hash/"
@@ -148,7 +150,7 @@ def main(argv):
             ds_id=ds_id,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -161,7 +163,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
         description=DS_DESC,
-        verbose=True,
+        verbose=False,
     )
 
 

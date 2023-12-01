@@ -54,7 +54,7 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/nep_qhpf/data"
 )
-# DATASET_FP = Path().cwd().parent / "data/nep_qhpf"
+DATASET_FP = Path().cwd().parent / "data/nep_qhpf"
 DATASET = "NEP_qHPF"
 
 SOFTWARE = "VASP"
@@ -212,7 +212,7 @@ def main(argv):
                 ds_id=ds_id,
                 property_map=property_map,
                 generator=False,
-                verbose=True,
+                verbose=False,
             )
         )
 
@@ -229,7 +229,7 @@ def main(argv):
                 "of monolayer quasi-hexagonal-phase fullerene (qHPF) membrane used "
                 "to train and test an NEP model."
             ),
-            verbose=True,
+            verbose=False,
         )
 
 

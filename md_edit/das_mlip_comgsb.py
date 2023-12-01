@@ -45,6 +45,7 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/das_mlip_comgsb"
 )
+DATASET_FP = Path().cwd().parent / "data/das_mlip_comgsb"
 DATASET = "DAS_MLIP_CoSb_MgSb"
 
 SOFTWARE = "VASP"
@@ -200,7 +201,7 @@ def main(argv):
             co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -253,7 +254,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
-        verbose=True,
+        verbose=False,
     )
 
 

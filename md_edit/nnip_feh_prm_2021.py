@@ -43,7 +43,7 @@ import re
 import sys
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/nnip")
-# DATASET_FP = Path().cwd().parent / "data/nnip"  # local
+DATASET_FP = Path().cwd().parent / "data/nnip"  # local
 DATASET = "NNIP_FeH_PRM_2021"
 PUBLICATION = "https://doi.org/10.1103/PhysRevMaterials.5.113606"
 DATA_LINK = "https://github.com/mengfsou/NNIP-FeH"
@@ -179,7 +179,7 @@ def main(argv):
             ds_id=ds_id,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -236,7 +236,7 @@ def main(argv):
         "alpha-iron and hydrogen. Properties include forces and potential "
         "energy, calculated using VASP at the DFT level using the GGA-PBE "
         "functional.",
-        verbose=True,
+        verbose=False,
     )
 
 

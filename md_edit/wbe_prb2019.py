@@ -22,7 +22,7 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/colabfit_data/data/"
     "FitSNAP/examples/WBe_PRB2019/JSON/"
 )
-DATASET_FP = Path().cwd().parent / "data/fitsnap/examples/WBe_PRB2019/JSON"
+DATASET_FP = Path().cwd().parent / "data/FitSNAP-master/examples/WBe_PRB2019/JSON"
 DATASET = "WBe_PRB2019"
 
 PUBLICATION = "https://doi.org/10.1103/PhysRevB.99.184305"
@@ -141,7 +141,7 @@ def main(argv):
             default_name=DATASET,
             reader=reader,
             glob_string="*.json",
-            verbose=True,
+            verbose=False,
             header_lines=1,
         )
     )
@@ -153,7 +153,7 @@ def main(argv):
             ds_id=ds_id,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -228,7 +228,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         resync=True,
-        verbose=True,
+        verbose=False,
     )
 
 
@@ -254,7 +254,7 @@ for regex, labels in configuration_label_regexes.items():
         collection_name='configurations',
         query={'hash': {'$in': all_co_ids}, 'names': {'$regex': regex}},
         labels=labels,
-        verbose=True
+        verbose=False
     )
 """
 

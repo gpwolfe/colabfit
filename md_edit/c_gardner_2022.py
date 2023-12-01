@@ -51,6 +51,8 @@ DATASET = "C_Gardner_2022"
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/c_gardner_2022"
 )
+DATASET_FP = Path().cwd().parent / "data/c_gardner_2022"
+
 AUTHORS = ["John L. A. Gardner", "Zoé Faure Beaulieu", "Volker L. Deringer"]
 PUBLICATION = "https://doi.org/10.48550/arXiv.2211.16443"
 DATA_LINK = "https://github.com/jla-gardner/carbon-data"
@@ -138,7 +140,7 @@ def main(argv):
             co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -151,7 +153,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK],
         description=DESCRIPTION,
-        verbose=True,
+        verbose=False,
     )
 
 

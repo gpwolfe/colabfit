@@ -33,7 +33,7 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/hpt_nc_2022/training"
 )
 
-# DATASET_FP = Path().cwd().parent / "data/hpt_nc_2022" # local
+DATASET_FP = Path().cwd().parent / "data/hpt_nc_2022"
 DS_NAME = "HPt_NC_2022"
 DATA_LINK = "https://doi.org/10.24435/materialscloud:r0-84"
 PUBLICATION = "https://doi.org/10.1038/s41467-022-32294-0"
@@ -139,7 +139,7 @@ def main(argv):
             ds_id=ds_id,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -187,7 +187,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
-        verbose=True,
+        verbose=False,
     )
 
 

@@ -58,7 +58,7 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/forces_are_not_enough"
 )
-
+DATASET_FP = Path().cwd().parent / "data/forces_are_not_enough"
 ALA_FP = DATASET_FP / "mdsim_data/ala/40k/DP/test/set.000/"
 WATER_FP = DATASET_FP / "mdsim_data/water"
 LIPS_FP = DATASET_FP / "mdsim_data/lips"
@@ -257,7 +257,7 @@ def main(argv):
             ds_id=ds_id,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
     ala_ids = list(
@@ -266,7 +266,7 @@ def main(argv):
             ds_id=ds_id,
             property_map=ala_property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
     ids.extend(ala_ids)
@@ -319,7 +319,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
         description=DS_DESC,
-        verbose=True,
+        verbose=False,
     )
 
 

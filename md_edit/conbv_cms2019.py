@@ -83,7 +83,7 @@ def main(argv):
         name_field=None,
         elements=["Co", "Nb", "V"],
         default_name=DATASET,
-        verbose=True,
+        verbose=False,
         generator=False,
     )
 
@@ -130,7 +130,7 @@ def main(argv):
             property_map=property_map,
             generator=False,
             transform=tform,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -144,7 +144,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         resync=True,
-        verbose=True,
+        verbose=False,
     )
 
 
@@ -154,12 +154,12 @@ client.apply_labels(
     collection_name='configurations',
     query={'hash': {'$in': all_co_ids}},
     labels='active_learning',
-    verbose=True
+    verbose=False
 )
 
 ds_id = 'DS_911472907883_000'
 
-dataset = client.get_dataset(ds_id, resync=True, verbose=True)['dataset']
+dataset = client.get_dataset(ds_id, resync=True, verbose=False)['dataset']
 
 for k,v in dataset.aggregated_info.items():
     print(k,v)

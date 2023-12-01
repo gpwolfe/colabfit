@@ -190,7 +190,7 @@ def main(argv):
                 ds_id=ds_id,
                 property_map=PROPERTY_MAP,
                 generator=False,
-                verbose=True,
+                verbose=False,
             )
         )
 
@@ -203,7 +203,7 @@ def main(argv):
             authors=AUTHORS,
             links=[PUBLICATION, DATA_LINK],
             description=desc,
-            verbose=True,
+            verbose=False,
         )
 
 

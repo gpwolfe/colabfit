@@ -85,7 +85,7 @@ def main(argv):
         name_field=None,
         elements=["Cu", "Pd"],
         default_name=DATASET,
-        verbose=True,
+        verbose=False,
     )
 
     property_map = {
@@ -127,7 +127,7 @@ def main(argv):
             property_map=property_map,
             generator=False,
             transform=tform,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -141,7 +141,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         resync=True,
-        verbose=True,
+        verbose=False,
     )
 
 

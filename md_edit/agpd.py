@@ -78,10 +78,14 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(cauchy_stress_pd)
     client.insert_property_definition(potential_energy_pd)
@@ -92,7 +96,7 @@ def main(argv):
         name_field=None,
         elements=ELEMENTS,
         default_name="bcc",
-        verbose=True,
+        verbose=False,
         generator=False,
     )
     configurations += load_data(
@@ -101,7 +105,7 @@ def main(argv):
         name_field=None,
         elements=ELEMENTS,
         default_name="fcc",
-        verbose=True,
+        verbose=False,
         generator=False,
     )
     configurations += load_data(
@@ -110,7 +114,7 @@ def main(argv):
         name_field=None,
         elements=ELEMENTS,
         default_name="pathway",
-        verbose=True,
+        verbose=False,
         generator=False,
     )
     configurations += load_data(
@@ -119,7 +123,7 @@ def main(argv):
         name_field=None,
         elements=ELEMENTS,
         default_name="relaxed",
-        verbose=True,
+        verbose=False,
         generator=False,
     )
     configurations += load_data(
@@ -128,7 +132,7 @@ def main(argv):
         name_field=None,
         elements=ELEMENTS,
         default_name="unrelaxed",
-        verbose=True,
+        verbose=False,
         generator=False,
     )
 
@@ -187,7 +191,7 @@ def main(argv):
             property_map=property_map,
             generator=False,
             # transform=tform,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -235,7 +239,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DESCRIPTION,
         resync=True,
-        verbose=True,
+        verbose=False,
     )
 
 

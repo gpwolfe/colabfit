@@ -79,7 +79,7 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/mbgdml"
     "/mbgdml-h2o-meoh-mecn-md/"
 )
-
+DATASET_FP = Path().cwd().parent / "data/mbgdml"
 DS_NAME = "mbGDML_maldonado_2023"
 
 AUTHORS = ["Alex M. Maldonado"]
@@ -212,7 +212,7 @@ def main(argv):
             ds_id=ds_id,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -266,7 +266,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
-        verbose=True,
+        verbose=False,
     )
 
 

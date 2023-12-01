@@ -40,6 +40,7 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/fitsnap/"
     "examples/Fe_Linear_NPJ2021/JSON"
 )
+DATASET_FP = Path().cwd().parent / "data/FitSNAP-master/examples/Fe_Linear_NPJ2021/JSON"
 DATASET = "FitSNAP_Fe_NPJ_2021"
 
 SOFTWARE = "VASP"
@@ -176,7 +177,7 @@ def main(argv):
             co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -189,7 +190,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
-        verbose=True,
+        verbose=False,
     )
 
 

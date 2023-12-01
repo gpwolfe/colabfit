@@ -335,7 +335,7 @@ def main(argv):
             elements=["Si"],
             reader=reader,
             glob_string="gp_iter6_sparse9k.xml.xyz",
-            verbose=True,
+            verbose=False,
         )
     )
     ds_id = generate_ds_id()
@@ -344,7 +344,7 @@ def main(argv):
         ds_id=ds_id,
         property_map=property_map,
         co_md_map=CO_MD,
-        verbose=True,
+        verbose=False,
     )
 
     configuration_set_regexes = {
@@ -406,7 +406,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
-        verbose=True,
+        verbose=False,
     )
 
 
@@ -449,7 +449,7 @@ for regex, labels in configuration_label_regexes.items():
         collection_name='configurations',
         query={'names': {'$regex': regex}},
         labels=labels,
-        verbose=True
+        verbose=False
     )
 """
 

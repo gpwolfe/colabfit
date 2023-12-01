@@ -45,6 +45,7 @@ import re
 import sys
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/c7h10o2")
+DATASET_FP = Path().cwd().parent / "data/c7h10o2"
 DATASET = "C7H10O2"
 LINKS = [
     "https://doi.org/10.6084/m9.figshare.c.978904.v5",
@@ -233,7 +234,7 @@ def main(argv):
             co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -252,7 +253,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description="6095 isomers of C7O2H10. Energetics were calculated"
         " at the G4MP2 level of theory.",
-        verbose=True,
+        verbose=False,
     )
 
 

@@ -128,7 +128,7 @@ def main(argv):
             name_field="config_type",
             elements=["V"],
             default_name=DATASET,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -141,7 +141,7 @@ def main(argv):
             co_md_map={"configuration_type": {"field": "config_type"}},
             generator=False,
             transform=tform,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -231,7 +231,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         resync=True,
-        verbose=True,
+        verbose=False,
     )
 
 
@@ -265,7 +265,7 @@ for regex, labels in configuration_label_regexes.items():
         collection_name='configurations',
         query={'hash': {'$in': all_co_ids}, 'names': {'$regex': regex}},
         labels=labels,
-        verbose=True
+        verbose=False
     )
 """
 if __name__ == "__main__":
