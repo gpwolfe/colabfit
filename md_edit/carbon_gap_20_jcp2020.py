@@ -202,7 +202,7 @@ def main(argv):
             name_field="config_type",
             elements=["C"],
             default_name=None,
-            verbose=True,
+            verbose=False,
             reader=reader,
             glob_string=ds_glob,
             generator=True,
@@ -216,7 +216,7 @@ def main(argv):
                 property_map=PROPERTY_MAP,
                 generator=False,
                 transform=tform,
-                verbose=True,
+                verbose=False,
             )
         )
 
@@ -242,7 +242,7 @@ def main(argv):
             links=[PUBLICATION, DATA_LINK],
             description=ds_desc,
             resync=True,
-            verbose=True,
+            verbose=False,
         )
 
 

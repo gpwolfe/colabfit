@@ -52,7 +52,7 @@ AUTHORS = [
 ]
 PUBLICATION = "https://doi.org/10.1038/s41597-019-0157-8"
 DATA_LINK = "https://doi.org/10.24435/materialscloud:2019.0002/v3"
-OTHER_LINKS = "http://doi.org/10.1073/pnas.1816132116"
+OTHER_LINKS = ["http://doi.org/10.1073/pnas.1816132116"]
 LINKS = [
     "https://doi.org/10.24435/materialscloud:2019.0002/v3",
     "https://doi.org/10.1038/s41597-019-0157-8",
@@ -204,7 +204,7 @@ def load_data_wrapper(
                 property_map=energy_map,
                 generator=False,
                 ds_id=ds_id,
-                verbose=True,
+                verbose=False,
             )
         )
     else:
@@ -214,7 +214,7 @@ def load_data_wrapper(
                 property_map=energy_map,
                 generator=False,
                 ds_id=ds_id,
-                verbose=True,
+                verbose=False,
             )
         )
 
@@ -386,7 +386,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
         description=DS_DESC,
-        verbose=True,
+        verbose=False,
     )
 
 

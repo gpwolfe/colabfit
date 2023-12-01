@@ -39,6 +39,7 @@ from pathlib import Path
 import sys
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/cg_schnet")
+DATASET_FP = Path().cwd().parent / "data/cg_schnet"
 DATASET = "cG-SchNet"
 
 SOFTWARE = "ORCA"
@@ -304,7 +305,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
-        verbose=True,
+        verbose=False,
     )
 
 

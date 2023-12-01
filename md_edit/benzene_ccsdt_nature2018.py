@@ -8,7 +8,7 @@ from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from ase.atoms import Atoms
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets/sGDML")
-# DATASET_FP = Path().cwd().parents[1] / "scripts/data/benzene_ccsd_t"  # remove
+DATASET_FP = Path().cwd().parents / "data/benzene_ccsd_t"
 DATASET = "Benzene_ccsdt_NC2018"
 
 PUBLICATION = "https://doi.org/10.1038/s41467-018-06169-2"
@@ -125,7 +125,7 @@ def main(argv):
             reader=reader_sGDML,
             glob_string=f"benzene_ccsd_t-{train_test}.xyz",
             default_name=f"benzene_ccsd_t-{train_test}",
-            verbose=True,
+            verbose=False,
             generator=False,
         )
         ds_id = generate_ds_id()
@@ -136,7 +136,7 @@ def main(argv):
                 property_map=property_map,
                 generator=False,
                 transform=tform,
-                verbose=True,
+                verbose=False,
             )
         )
 
@@ -154,7 +154,7 @@ def main(argv):
                 f"dataset from sGDML. {DS_DESC}"
             ),
             resync=True,
-            verbose=True,
+            verbose=False,
         )
 
 

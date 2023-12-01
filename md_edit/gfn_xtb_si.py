@@ -39,6 +39,7 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/gfn_xtb_si/gfn_data/npz/"
 )
+DATASET_FP = Path().cwd.parent / "data/gfn_xtb_si"
 PUBLICATION = "https://doi.org/10.1021/acs.jcim.1c01170"
 DATA_LINK = "https://doi.org/10.24435/materialscloud:14-4m"
 LINKS = [
@@ -127,7 +128,7 @@ def main(argv):
             co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -142,7 +143,7 @@ def main(argv):
         description="10,000 configurations of organosilicon compounds "
         "with energies predicted by an improved GFN-xTB Hamiltonian "
         "parameterization, using revPBE.",
-        verbose=True,
+        verbose=False,
     )
 
 

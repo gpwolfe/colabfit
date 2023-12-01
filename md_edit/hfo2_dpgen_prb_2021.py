@@ -35,6 +35,8 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/hfo2_dpgen_prb_2021"
 )
+DATASET_FP = Path().cwd().parent / "data/hfo2_dpgen_prb_2021"
+
 DATASET = "HfO2_DPGEN_PRB_2021"
 
 SOFTWARE = "VASP"
@@ -185,7 +187,7 @@ def main(argv):
             ds_id=ds_id,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -198,7 +200,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
-        verbose=True,
+        verbose=False,
     )
 
 

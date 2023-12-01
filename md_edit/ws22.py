@@ -210,7 +210,7 @@ def main(argv):
             # default_name=f"ws22_{glob}",
             reader=reader_ws22,
             glob_string=ds_reg,
-            verbose=True,
+            verbose=False,
             generator=False,
         )
 

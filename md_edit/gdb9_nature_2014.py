@@ -47,6 +47,7 @@ import re
 import sys
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/gdb9")
+DATASET_FP = Path().cwd().parent / "data/gdb9"
 
 PUBLICATION = "https://doi.org/10.1038/sdata.2014.22"
 DATA_LINK = "https://doi.org/10.6084/m9.figshare.c.978904.v5"
@@ -215,7 +216,7 @@ def main(argv):
             co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -236,7 +237,7 @@ def main(argv):
         " composed of CHONF. A subset of GDB-17, with calculations of energies"
         ", dipole moment, polarizability and enthalpy. Calculations performed"
         " at B3LYP/6-31G(2df,p) level of theory.",
-        verbose=True,
+        verbose=False,
     )
 
 

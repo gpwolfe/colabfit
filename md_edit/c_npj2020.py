@@ -12,6 +12,7 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/colabfit_data/"
     "new_raw_datasets/C_allotropes_MingjianEllad/carbon_energies_forces/"
 )
+DATASET_FP = Path().cwd().parent / ""
 DATASET = "C_NPJ2020"
 PUBLICATION = "https://doi.org/10.1038/s41524-020-00390-8"
 DATA_LINK = "https://doi.org/10.6084/m9.figshare.12649811.v1"
@@ -88,7 +89,7 @@ def main(argv):
         # idk if this is right I copied the format off of InP_JPCA2020.py <-Eric
         # changed from *.extxyz to *.xyz since all files in this case have a .xyz
         # extension
-        verbose=True,
+        verbose=False,
         generator=False,
     )
 
@@ -134,7 +135,7 @@ def main(argv):
             property_map=property_map,
             generator=False,
             transform=tform,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -183,7 +184,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         resync=True,
-        verbose=True,
+        verbose=False,
     )
 
 

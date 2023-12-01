@@ -101,7 +101,7 @@ def main(argv):
         name_field=None,
         elements=["Ti", "O"],
         default_name="TiO2",
-        verbose=True,
+        verbose=False,
         generator=False,
     )
 
@@ -113,7 +113,7 @@ def main(argv):
             property_map=property_map,
             generator=False,
             transform=tform,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -127,7 +127,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         resync=True,
-        verbose=True,
+        verbose=False,
     )
 
 

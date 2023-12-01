@@ -61,7 +61,7 @@ BASIS_SET = "def2-TZVPPD"
 
 PUBLICATION = "https://doi.org/10.1038/s41597-022-01882-6"
 DATA_LINK = "https://doi.org/10.5281/zenodo.8222043"
-OTHER_LINKS = "https://github.com/openmm/spice-dataset"
+OTHER_LINKS = ["https://github.com/openmm/spice-dataset"]
 LINKS = [
     "https://doi.org/10.1038/s41597-022-01882-6",
     "https://doi.org/10.5281/zenodo.8222043",

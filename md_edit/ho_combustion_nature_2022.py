@@ -40,6 +40,7 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/ho_combustion/"
     "H2COMBUSTION_DATA-main-2"
 )
+DATASET_FP = Path().cwd().parent / "data/ho_combustion"
 
 METHODS = "DFT-ωB97X-V"
 SOFTWARE = "Q-CHEM"
@@ -146,7 +147,7 @@ def main(argv):
             co_md_map=co_md_map,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -206,7 +207,7 @@ def main(argv):
         "channels. Intrinsic reaction coordinate calculations (IRC) are "
         "combined with ab initio simulations (AIMD) and normal mode "
         "displacement (NM) calculations.",
-        verbose=True,
+        verbose=False,
     )
 
 

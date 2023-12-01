@@ -29,6 +29,7 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/ho_pnas_2019/training-set"
 )
+DATASET_FP = Path().cwd().parent / "data/ho_pnas_2019"
 DS_NAME = "HO_PNAS_2019"
 DATA_LINK = "https://archive.materialscloud.org/record/2018.0020/v1"
 PUBLICATION = "https://doi.org/10.1073/pnas.1815117116"
@@ -120,7 +121,7 @@ def main(argv):
             property_map=property_map,
             ds_id=ds_id,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -133,7 +134,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
-        verbose=True,
+        verbose=False,
     )
 
 

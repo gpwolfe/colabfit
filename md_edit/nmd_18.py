@@ -104,7 +104,7 @@ def main(argv):
         name_field="sg",
         elements=["Al", "Ga", "In", "O"],
         default_name="NMD-18r",
-        verbose=True,
+        verbose=False,
         generator=False,
     )
     """
@@ -114,7 +114,7 @@ def main(argv):
         name_field='sg',
         elements=['Al', 'Ga', 'In','O'],
         default_name='NMD-18u',
-        verbose=True,
+        verbose=False,
         generator=False
     )
     """
@@ -173,7 +173,7 @@ def main(argv):
             property_map=property_map,
             generator=False,
             transform=tform,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -187,7 +187,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         resync=True,
-        verbose=True,
+        verbose=False,
     )
 
 

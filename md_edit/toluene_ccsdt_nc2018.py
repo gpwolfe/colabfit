@@ -9,7 +9,7 @@ from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.property_definitions import potential_energy_pd, atomic_forces_pd
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets/sGDML")
-# DATASET_FP = Path().cwd().parents[1] / "scripts/data/toluene_ccsd_t"  # remove
+DATASET_FP = Path().cwd().parent / "data/toluene_ccsd_t"  # remove
 
 DATASET = "Toluene_ccsdt_NC2018"
 
@@ -127,7 +127,7 @@ def main(argv):
             reader=reader_sGDML,
             glob_string=f"toluene_ccsd_t-{train_test}.xyz",
             default_name=f"toluene_ccsd_t-{train_test}",
-            verbose=True,
+            verbose=False,
             generator=False,
         )
         ds_id = generate_ds_id()
@@ -138,7 +138,7 @@ def main(argv):
                 property_map=property_map,
                 generator=False,
                 transform=tform,
-                verbose=True,
+                verbose=False,
             )
         )
 
@@ -174,7 +174,7 @@ def main(argv):
                 f"toluene dataset from sGDML. {DS_DESC}"
             ),
             resync=True,
-            verbose=True,
+            verbose=False,
         )
 
 

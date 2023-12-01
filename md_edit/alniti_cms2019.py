@@ -6,7 +6,8 @@ import sys
 
 from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 
-DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/data/")
+DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/data/gubaev/AlNiTi/")
+DATASET_FP = Path().cwd().parent / "data/alniti"
 DATASET = "AlNiTi_CMS_2019"
 
 PUBLICATION = "https://doi.org/10.1016/j.commatsci.2018.09.031"
@@ -65,22 +66,22 @@ def main(argv):
     )
 
     configurations = load_data(
-        file_path=DATASET_FP / "gubaev/AlNiTi/train_1st_stage.cfg",
+        file_path=DATASET_FP / "train_1st_stage.cfg",
         file_format="cfg",
         name_field=None,
         elements=["Al", "Ni", "Ti"],
         default_name="train_1st_stage",
-        verbose=True,
+        verbose=False,
         generator=False,
     )
 
     configurations += load_data(
-        file_path=DATASET_FP / "gubaev/AlNiTi/train_2nd_stage.cfg",
+        file_path=DATASET_FP / "train_2nd_stage.cfg",
         file_format="cfg",
         name_field=None,
         elements=["Al", "Ni", "Ti"],
         default_name="train_2nd_stage",
-        verbose=True,
+        verbose=False,
         generator=False,
     )
 
@@ -126,7 +127,7 @@ def main(argv):
             ds_id=ds_id,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -170,7 +171,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         resync=True,
-        verbose=True,
+        verbose=False,
     )
 
 

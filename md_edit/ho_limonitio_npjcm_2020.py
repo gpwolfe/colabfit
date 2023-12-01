@@ -34,7 +34,7 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/ho_limonitio"
 )
-# DATASET_FP = Path("data/limoniti")  # comment
+DATASET_FP = Path().cwd().parent / "data/ho_limonitio"
 DATASET = "HO_LiMoNiTi_NPJCM_2020"
 
 SOFTWARE = "VASP"

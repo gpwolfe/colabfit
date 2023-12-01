@@ -197,7 +197,7 @@ def main(argv):
             name_field="formula",
             elements=["C", "H", "O", "N", "F"],
             default_name="QM9x",
-            verbose=True,
+            verbose=False,
             reader=reader,
             glob_string="*.h5",
         )
@@ -230,7 +230,7 @@ def main(argv):
             property_map=property_map,
             generator=False,
             transform=tform,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -244,7 +244,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         resync=True,
-        verbose=True,
+        verbose=False,
     )
 
 

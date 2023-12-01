@@ -177,7 +177,7 @@ def main(argv):
         file_format="folder",
         name_field="config_type",
         elements=["Si", "O"],
-        verbose=True,
+        verbose=False,
         reader=reader,
         generator=False,
         glob_string=GLOB_STR,
@@ -190,7 +190,7 @@ def main(argv):
             co_md_map=CO_MD,
             property_map=PI_MAP,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -240,7 +240,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         resync=True,
-        verbose=True,
+        verbose=False,
     )
 
 

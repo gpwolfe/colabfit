@@ -8,7 +8,9 @@ from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from ase.atoms import Atoms
 
 
-DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets")
+DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets/sGDML")
+DATASET_FP = Path().cwd().parent / "data/benzene_dft_2018"
+
 DATASET = "Benzene_DFT_NC2018"
 PUBLICATION = "https://doi.org/10.1126/sciadv.1603015"
 DATA_LINK = "http://sgdml.org/"
@@ -103,7 +105,7 @@ def main(argv):
         reader=reader_sGDML,
         glob_string="benzene2018_dft_FHI-aims.xyz",
         default_name="benzene2018_dft_FHI-aims",
-        verbose=True,
+        verbose=False,
         generator=False,
     )
 
@@ -136,7 +138,7 @@ def main(argv):
             property_map=property_map,
             generator=False,
             transform=tform,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -150,7 +152,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
         description=DS_DESC,
         resync=True,
-        verbose=True,
+        verbose=False,
     )
 
 

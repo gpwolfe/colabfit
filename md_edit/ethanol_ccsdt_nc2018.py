@@ -128,7 +128,7 @@ def main(argv):
             reader=reader_sGDML,
             glob_string=f"ethanol_ccsd_t-{train_test}.xyz",
             default_name=f"ethanol_ccsd_t_{train_test}",
-            verbose=True,
+            verbose=False,
             generator=False,
         )
         ds_id = generate_ds_id()
@@ -139,7 +139,7 @@ def main(argv):
                 property_map=property_map,
                 generator=False,
                 transform=tform,
-                verbose=True,
+                verbose=False,
             )
         )
 
@@ -156,7 +156,7 @@ def main(argv):
                 f"ethanol dataset from sGDML. {DS_DESC}"
             ),
             resync=True,
-            verbose=True,
+            verbose=False,
         )
 
 

@@ -12,6 +12,7 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets"
     "/Ti:Mo_alloys_SilvaAndrea/"
 )
+DATASET_FP = Path().cwd().parent / "data/timos_alloys_cms2021"
 DATASET = "TiMoS_alloys_CMS2021"
 
 PUBLICATION = "https://doi.org/10.1016/j.commatsci.2020.110044"
@@ -83,9 +84,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     configurations = load_data(
@@ -96,7 +100,7 @@ def main(argv):
         default_name="TiMo",
         reader=reader_TiMo,
         glob_string="*/*/CONTCAR",
-        verbose=True,
+        verbose=False,
         generator=False,
     )
     ds_id = generate_ds_id()
@@ -107,7 +111,7 @@ def main(argv):
             property_map=property_map,
             generator=False,
             transform=tform,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -152,7 +156,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         resync=True,
-        verbose=True,
+        verbose=False,
     )
 
 

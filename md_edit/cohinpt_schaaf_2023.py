@@ -54,7 +54,7 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/cohinpt_schaaf"
 )
-# DATASET_FP = Path("data/reaction-barriers-mlffs-main") # remove
+DATASET_FP = Path().cwd().parent / "data/cohinpt_schaaf"
 METHOD = "DFT"
 SOFTWARE = "Quantum ESPRESSO"
 PUBLICATION = "https://doi.org/10.48550/arXiv.2301.09931"
@@ -152,7 +152,7 @@ def main(argv):
             ds_id=ds_id,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -210,7 +210,7 @@ def main(argv):
         " force field model applied to steps of the hydrogenation of carbon"
         " dioxide to methanol over an indium oxide catalyst, with and"
         " without platinum doping.",
-        verbose=True,
+        verbose=False,
     )
 
 

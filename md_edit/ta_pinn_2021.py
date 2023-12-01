@@ -140,7 +140,7 @@ def main(argv):
             reader=reader,
             glob_string="*.dat",
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -154,7 +154,7 @@ def main(argv):
             ds_id=ds_id,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -263,7 +263,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         resync=True,
-        verbose=True,
+        verbose=False,
     )
 
 
@@ -311,7 +311,7 @@ for regex, labels in configuration_label_regexes.items():
         collection_name='configurations',
         query={'names': {'$regex': regex}},
         labels=labels,
-        verbose=True
+        verbose=False
     )
 """
 

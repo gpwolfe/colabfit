@@ -16,7 +16,10 @@ from colabfit.tools.property_definitions import (
     potential_energy_pd,
 )
 
-DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets")
+DATASET_FP = Path(
+    "/persistent/colabfit_raw_data/new_raw_datasets/AlNiCu_Berk/AlNiCu_pruned.extxyz"
+)
+DATASET_FP = Path().cwd().parent / "data/alnicu_2020/AlNiCu_pruned.extxyz"
 
 DATASET_NAME = "AlNiCu_AIP_2020"
 AUTHORS = [
@@ -65,19 +68,22 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     # Loads data, specify reader function if not "usual" file format
     configurations = load_data(
-        file_path=DATASET_FP / "AlNiCu_Berk/AlNiCu_pruned.extxyz",
+        file_path=DATASET_FP,
         file_format="extxyz",
         name_field=None,
         elements=["Al", "Ni", "Cu"],
         default_name="AlNiCuData",
-        verbose=True,
+        verbose=False,
         generator=False,
     )
 
@@ -117,7 +123,7 @@ def main(argv):
             ds_id=ds_id,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -131,7 +137,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DESCRIPTION,
         resync=True,
-        verbose=True,
+        verbose=False,
     )
 
 

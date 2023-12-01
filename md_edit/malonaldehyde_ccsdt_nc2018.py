@@ -128,7 +128,7 @@ def main(argv):
             reader=reader_sGDML,
             glob_string=f"malonaldehyde_ccsd_t-{train_test}.xyz",
             default_name=f"malonaldehyde_ccsd_t-{train_test}",
-            verbose=True,
+            verbose=False,
             generator=False,
         )
 
@@ -138,7 +138,7 @@ def main(argv):
                 property_map=property_map,
                 generator=False,
                 transform=tform,
-                verbose=True,
+                verbose=False,
             )
         )
 
@@ -154,7 +154,7 @@ def main(argv):
                 f"malonaldehyde dataset from sGDML. {DS_DESC}"
             ),
             resync=True,
-            verbose=True,
+            verbose=False,
         )
 
 

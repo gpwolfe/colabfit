@@ -57,7 +57,7 @@ import h5py
 import os
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/ani_al")
-# DATASET_FP = Path().cwd().parent / "data/Al-data"  # remove
+DATASET_FP = Path().cwd().parent / "data/Al-data"
 DATASET = "ANI-Al_NC2021"
 
 SOFTWARE = "Quantum ESPRESSO"
@@ -170,7 +170,7 @@ def main(argv):
                 co_md_map=co_md_map,
                 property_map=property_map,
                 generator=False,
-                verbose=True,
+                verbose=False,
             )
         )
 
@@ -226,7 +226,7 @@ def main(argv):
                 "a pair of train/test datasets of aluminum in crystal and melt "
                 "phases, used for training and testing an ANI neural network model."
             ),
-            verbose=True,
+            verbose=False,
         )
 
 

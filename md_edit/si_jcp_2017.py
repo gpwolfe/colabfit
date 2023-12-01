@@ -144,7 +144,7 @@ def main(argv):
         name_field="name",
         reader=reader,
         elements=["Si"],
-        verbose=True,
+        verbose=False,
         generator=False,
         glob_string=GLOB,
     )
@@ -176,7 +176,7 @@ def main(argv):
             ds_id=ds_id,
             property_map=property_map,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -190,7 +190,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         resync=True,
-        verbose=True,
+        verbose=False,
     )
 
 

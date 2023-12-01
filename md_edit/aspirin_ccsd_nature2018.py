@@ -12,7 +12,7 @@ from colabfit.tools.property_definitions import (
 from ase.atoms import Atoms
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets/sGDML")
-# DATASET_FP = Path().cwd().parents[1] / "data/aspirin_ccsd"  # remove
+DATASET_FP = Path().cwd().parent / "data/aspirin_ccsd"  # remove
 
 DATASET_NAME = "Aspirin_ccsd_NC2018"
 AUTHORS = [
@@ -125,7 +125,7 @@ def main(argv):
             reader=reader_sGDML,
             glob_string=f"aspirin_ccsd-{train_test}.xyz",
             default_name=f"aspirin_ccsd-{train_test}",
-            verbose=True,
+            verbose=False,
             generator=False,
         )
         ds_id = generate_ds_id()
@@ -139,7 +139,7 @@ def main(argv):
                 ds_id=ds_id,
                 property_map=property_map,
                 generator=False,
-                verbose=True,
+                verbose=False,
             )
         )
         all_co_ids, all_pr_ids = list(zip(*ids))
@@ -156,7 +156,7 @@ def main(argv):
                 f"aspirin dataset from sGDML. {DESCRIPTION}"
             ),
             resync=True,
-            verbose=True,
+            verbose=False,
         )
 
 
