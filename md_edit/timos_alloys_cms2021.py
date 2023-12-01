@@ -37,9 +37,13 @@ property_map = {
             "_metadata": {
                 "software": {"value": "VASP 5.4.3"},
                 "method": {"value": "DFT-SCAN+rVV10"},
-                "kpoints": {"value": "11x11x11"},
-                "encut": {"value": "800 eV"},
-                "ediff": {"value": 0.0005},
+                "input": {
+                    "value": {
+                        "encut": {"value": 800, "units": "eV"},
+                        "kpoints": "11x11x11",
+                        "ediff": 0.0005,
+                    }
+                },
             },
         }
     ],

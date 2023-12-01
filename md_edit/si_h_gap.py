@@ -124,8 +124,12 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        "encut": {"value": "42 Ry"},
-        "kspacing": {"value": "0.2/Ang"},
+        "input": {
+            "value": {
+                "encut": {"value": 42, "units": "Ry"},
+                "kspacing": {"value": 0.2, "units": "Ang^-1"},
+            }
+        },
     }
     co_md_map = {
         "energy-sigma": {"field": "energy_sigma"},

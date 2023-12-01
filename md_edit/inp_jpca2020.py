@@ -46,7 +46,9 @@ DS_DESC = (
 PI_MD = {
     "software": {"value": "VASP"},
     "method": {"value": "DFT-LDA"},
-    "encut": {"value": "500 eV"},
+    "input": {
+        "value": {"encut": {"value": 500, "units": "eV"}},
+    },
 }
 
 

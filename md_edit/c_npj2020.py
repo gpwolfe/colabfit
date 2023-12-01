@@ -43,6 +43,15 @@ def reader(file_path):
     yield atom
 
 
+PI_MD = {
+    "software": {"value": "VASP"},
+    "method": {"value": "DFT-PBE+MDB"},
+    "input": {
+        "value": {"encut": {"value": 500, "units": "eV"}},
+    },
+}
+
+
 def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
@@ -88,40 +97,32 @@ def main(argv):
             {
                 "energy": {"field": "Energy", "units": "eV"},
                 "per-atom": {"field": "per-atom", "units": None},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-PBE+MDB"},
-                    "encut": {"value": "500 eV"},
-                },
+                "_metadata": PI_MD,
             }
         ],
         "atomic-forces": [
             {
                 "forces": {"field": "force", "units": "eV/Ang"},
-                "_metadata": {
-                    "software": {"value": "VASP"},
-                    "method": {"value": "DFT-PBE+MDB"},
-                    "encut": {"value": "500 eV"}
-                    # The dataset is generated from DFT calculations using the Vienna
-                    # Ab initio Simulation Package51. The exchange-correlation energy
-                    # of the electrons is treated within the generalized gradient
-                    # approximated functional of Perdew, Burke, and Ernzerhof (PBE)52.
-                    # To capture van der Waals effects (a crucial aspect of interlayer
-                    # interactions in bilayer graphene and graphite), the semiempirical
-                    # many-body dispersion (MBD) method53 is applied. MBD accurately
-                    # reproduces many results from more advanced calculations and
-                    # experiments54. For monolayer graphene, a vacuum of 30 Å in the
-                    # direction perpendicular to the plane is chosen to minimize the
-                    # interaction between periodic images (similar for bilayer
-                    # graphene). An energy cutoff of 500 eV is employed for the
-                    # plane wave basis, and reciprocal space is sampled using a
-                    # Γ-centered Monkhorst Pack55 grid. The number of grid points
-                    # is set to 16 × 16 × 1 for the smallest supercell in the dataset
-                    # (monolayer graphene with two atoms) and to 4 × 4 × 4 for the
-                    # largest supercell (diamond with 64 atoms). For other structures,
-                    #  the number of grid points is selected to ensure that the energy
-                    #  is converged.
-                },
+                "_metadata": PI_MD
+                # The dataset is generated from DFT calculations using the Vienna
+                # Ab initio Simulation Package51. The exchange-correlation energy
+                # of the electrons is treated within the generalized gradient
+                # approximated functional of Perdew, Burke, and Ernzerhof (PBE)52.
+                # To capture van der Waals effects (a crucial aspect of interlayer
+                # interactions in bilayer graphene and graphite), the semiempirical
+                # many-body dispersion (MBD) method53 is applied. MBD accurately
+                # reproduces many results from more advanced calculations and
+                # experiments54. For monolayer graphene, a vacuum of 30 Å in the
+                # direction perpendicular to the plane is chosen to minimize the
+                # interaction between periodic images (similar for bilayer
+                # graphene). An energy cutoff of 500 eV is employed for the
+                # plane wave basis, and reciprocal space is sampled using a
+                # Γ-centered Monkhorst Pack55 grid. The number of grid points
+                # is set to 16 × 16 × 1 for the smallest supercell in the dataset
+                # (monolayer graphene with two atoms) and to 4 × 4 × 4 for the
+                # largest supercell (diamond with 64 atoms). For other structures,
+                #  the number of grid points is selected to ensure that the energy
+                #  is converged.
             }
         ],
     }

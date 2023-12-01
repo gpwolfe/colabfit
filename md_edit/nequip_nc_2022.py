@@ -125,10 +125,14 @@ def main(argv):
     metadata = {
         "software": {"field": "software"},
         "method": {"field": "method"},
-        "encut": {"value": "520 eV"},
-        "sigma": {"value": 0.1},
-        "ismear": {"value": 0},
-        "kspacing": {"value": "0.25/Ang"},
+        "input": {
+            "value": {
+                "encut": {"value": 520, "units": "eV"},
+                "kspacing": {"value": 0.25, "units": "Ang^-1"},
+                "sigma": 0.1,
+                "ismear": 0,
+            }
+        },
     }
     property_map = {
         "potential-energy": [

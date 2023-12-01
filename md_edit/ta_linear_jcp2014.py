@@ -45,8 +45,12 @@ DS_DESC = (
 PI_MD = {
     "software": {"value": "VASP"},
     "method": {"value": "DFT-PBE"},
-    "encut": {"value": 500},
-    "k-point-scheme": {"value": "Monkhorst-Pack"},
+    "input": {
+        "value": {
+            "encut": {"value": 500, "units": "eV"},
+            "k-point-scheme": {"value": "Monkhorst-Pack"},
+        }
+    },
 }
 property_map = {
     "potential-energy": [

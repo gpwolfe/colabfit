@@ -157,7 +157,11 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        "encut": {"value": "520 eV"},
+        "input": {
+            "value": {
+                "encut": {"value": 520, "units": "eV"},
+            }
+        }
         # "": {"field": ""}
     }
     property_map = {

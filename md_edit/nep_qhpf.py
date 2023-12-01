@@ -164,8 +164,10 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        "encut": {"value": "520 eV"},
-        "kpoints": {"value": "0.25/Ang"},
+        "input": {
+            "value": {"encut": {"value": 520, "units": "eV"}},
+            "kspacing": {"value": 0.25, "units": "Ang^-1"},
+        },
     }
     # co_md_map = {
     #     "virial": {"field": "virial"},

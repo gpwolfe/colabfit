@@ -150,7 +150,7 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        "encut": {"value": "100 Ry"},
+        "input": {"encut": {"value": 100, "units": "Ry"}},
     }
     co_md_map = {
         "dipole": {"field": "dipole"},

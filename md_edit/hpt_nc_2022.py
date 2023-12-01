@@ -104,7 +104,11 @@ def main(argv):
     metadata = {
         "software": {"value": "VASP"},
         "method": {"value": "DFT-PBE"},
-        "encut": {"value": "450 eV"},
+        "input": {
+            "value": {
+                "encut": {"value": 450, "units": "eV"},
+            }
+        },
     }
 
     property_map = {

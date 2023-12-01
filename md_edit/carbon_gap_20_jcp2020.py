@@ -12,6 +12,7 @@ from pathlib import Path
 import sys
 
 from ase.io import iread
+import numpy as np
 
 from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 
@@ -49,47 +50,30 @@ DS_DESC = (
 )
 
 PI_MD = {
+    "software": {"value": "VASP"},
+    "method": {"value": "DFT/optB88-vdW"},
+    "input": {"field": "input"},
+}
+
+PROPERTY_MAP = {
     "potential-energy": [
         {
             "energy": {"field": "energy", "units": "eV"},
             "per-atom": {"field": "per-atom", "units": None},
-            "_metadata": {
-                "software": {"value": "VASP"},
-                "method": {"value": "DFT-optB88-vdW"},
-                "kpoint": {"field": "kpoints"},
-                "ismear": {"value": 0},
-                "sigma": {"value": 0.1},
-                # 'k-points-density':{'field':'kpoints_density'},
-                # 'cutoff':{'field':'cutoff'},
-                "encut": {"value": "600 eV"},
-            },
+            "_metadata": PI_MD,
         }
     ],
     "atomic-forces": [
         {
             "forces": {"field": "force", "units": "eV/Ang"},
-            "_metadata": {
-                "software": {"value": "VASP"},
-                "method": {"value": "DFT/optB88-vdW"},
-                "kpoint": {"field": "kpoints"},
-                # 'k-points-density':{'field':'kpoints_density'},
-                # 'cutoff':{'field':'cutoff'},
-                "encut": {"value": "600 eV"},
-            },
+            "_metadata": PI_MD,
         }
     ],
     "cauchy-stress": [
         {
             "stress": {"field": "virial", "units": "eV"},
             "volume-normalized": {"value": True, "units": None},
-            "_metadata": {
-                "software": {"value": "VASP"},
-                "method": {"value": "DFT-optB88-vdW"},
-                "kpoint": {"field": "kpoints"},
-                # 'k-points-density':{'field':'kpoints_density'},
-                # 'cutoff':{'field':'cutoff'},
-                "ecut": {"value": "600 eV"},
-            },
+            "_metadata": PI_MD,
         }
     ],
 }
@@ -163,6 +147,18 @@ CO_MD = {key: {"field": key} for key in ["cutoff", "nneightol"]}
 def reader(fp):
     atoms = []
     for atom in iread(fp, index=":"):
+        input = {"encut": {"value": 600, "units": "eV"}}
+        kpoints = atom.info.get("kpoints")
+        if kpoints is not None:
+            if isinstance(kpoints, np.ndarray):
+                kpoints = kpoints.tolist()
+            input["kpoints"] = kpoints
+        k_density = atom.info.get("kpoints_density")
+        if k_density is not None:
+            if isinstance(k_density, np.ndarray):
+                k_density = k_density.tolist()
+            input["kpoints-density"] = k_density
+        atom.info["input"] = input
         atoms.append(atom)
     return atoms
 
@@ -217,7 +213,7 @@ def main(argv):
                 configurations,
                 ds_id=ds_id,
                 co_md_map=CO_MD,
-                property_map=PI_MD,
+                property_map=PROPERTY_MAP,
                 generator=False,
                 transform=tform,
                 verbose=True,

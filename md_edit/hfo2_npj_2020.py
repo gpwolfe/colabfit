@@ -111,8 +111,9 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        "encut": {"value": "520 eV"},
-        "k-point": {"value": "2 x 2 x 2"},
+        "input": {
+            "value": {"encut": {"value": 520, "units": "eV"}, "kpoints": "2 x 2 x 2"},
+        },
     }
     # co_md_map = {
     #     "free-energy": {"field": "free_energy"}

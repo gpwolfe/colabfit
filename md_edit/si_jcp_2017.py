@@ -71,8 +71,7 @@ GLOB = "Si_md.extxyz"
 PI_MD = {
     "software": {"value": "VASP"},
     "method": {"value": "DFT-PBE"},
-    "energy-cutoff": {"value": "300 eV"},
-    "temperature": {"field": "temperature"},
+    "input": {"field": "input"},
 }
 property_map = {
     "potential-energy": [
@@ -104,6 +103,11 @@ def reader(fp):
     configs = read(fp, index=":")
     for i, config in enumerate(configs):
         config.info["name"] = f"{name}_{i}"
+
+        config.info["input"] = {
+            "encut": {"value": 300, "units": "eV"},
+            "temperature": {"value": config.info["temperature"]},
+        }
     return configs
 
 

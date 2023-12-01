@@ -100,7 +100,11 @@ def main(argv):
                 "_metadata": {
                     "software": {"value": "VASP"},
                     "method": {"value": "DFT-PBE"},
-                    "kpoint": {"value": "generalized regular grids"},
+                    "input": {
+                        "value": {
+                            "kpoint-schema": {"value": "generalized regular grids"},
+                        }
+                    },
                 },
             }
         ],

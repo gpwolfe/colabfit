@@ -38,7 +38,7 @@ from pathlib import Path
 import sys
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/3bpa")
-# DATASET_FP = Path("data/dataset_3BPA")  # remove
+DATASET_FP = Path().cwd().parent / ("data/dataset_3BPA")  # remove
 DATASET = "3BPA"
 
 SOFTWARE = "ORCA"

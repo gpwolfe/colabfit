@@ -145,10 +145,14 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        "kspacing": {"value": "0.03/Ang"},
-        "encut": {"value": "360 eV"},
-        "sigma": {"value": 0.1},
-        "nelm": {"value": "10^-5 eV"},
+        "input": {
+            "value": {
+                "encut": {"value": 360, "units": "eV"},
+                "kspacing": {"value": 0.03, "units": "Ang^-1"},
+                "sigma": 0.1,
+                "nelm": {"value": 10e-5, "units": "eV"},
+            }
+        },
     }
     property_map = {
         # According to N2P2 docs, energy value represents "total potential
