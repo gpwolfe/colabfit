@@ -39,10 +39,11 @@ import pymongo
 import sys
 import time
 
-DATASET_FP = Path(
-    "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/rmd17"
-)  # Kubernetes
-DATASET_FP = Path().cwd().parent / "data/rmd17"
+# DATASET_FP = Path(
+#     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/rmd17"
+# )  # Kubernetes
+# DATASET_FP = Path().cwd().parent / "data/rmd17"  # local
+DATASET_FP = Path("data")  # Greene
 DATASET_NAME = "rMD17"
 ELEMENTS = ["C", "H", "O", "N"]
 

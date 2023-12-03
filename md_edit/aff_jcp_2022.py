@@ -166,22 +166,22 @@ def main(argv):
     all_co_ids, all_do_ids = list(zip(*ids))
     cs_regexes = [
         [
-            f"{DATASET}-aspirin",
+            f"{DATASET}_aspirin",
             "aspirin",
             f"Aspirin configurations from {DATASET} dataset",
         ],
         [
-            f"{DATASET}-uracil",
+            f"{DATASET}_uracil",
             "uracil",
             f"Uracil configurations from {DATASET} dataset",
         ],
         [
-            f"{DATASET}-alkane",
+            f"{DATASET}_alkane",
             "alkane",
             f"Alkane configurations from {DATASET} dataset",
         ],
         [
-            f"{DATASET}-alpha-glucose",
+            f"{DATASET}_alpha-glucose",
             "alpha-glucose",
             f"alpha-glucose configurations from {DATASET} dataset",
         ],
