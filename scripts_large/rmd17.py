@@ -31,11 +31,17 @@ from colabfit.tools.property_definitions import (
     potential_energy_pd,
     atomic_forces_pd,
 )
+import functools
+import logging
 import numpy as np
 from pathlib import Path
+import pymongo
 import sys
+import time
 
-DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/rmd17")
+DATASET_FP = Path(
+    "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/rmd17"
+)  # Kubernetes
 DATASET_FP = Path().cwd().parent / "data/rmd17"
 DATASET_NAME = "rMD17"
 ELEMENTS = ["C", "H", "O", "N"]
@@ -79,6 +85,28 @@ property_map = {
     ],
 }
 
+MAX_AUTO_RECONNECT_ATTEMPTS = 100
+
+
+def auto_reconnect(mongo_func):
+    """Gracefully handle a reconnection event."""
+
+    @functools.wraps(mongo_func)
+    def wrapper(*args, **kwargs):
+        for attempt in range(MAX_AUTO_RECONNECT_ATTEMPTS):
+            try:
+                return mongo_func(*args, **kwargs)
+            except pymongo.errors.AutoReconnect as e:
+                wait_t = 0.5 * pow(2, attempt)  # exponential back off
+                logging.warning(
+                    "PyMongo auto-reconnecting... %s. Waiting %.1f seconds.",
+                    str(e),
+                    wait_t,
+                )
+                time.sleep(wait_t)
+
+    return wrapper
+
 
 def reader(file):
     atoms = []
@@ -105,6 +133,7 @@ def reader(file):
     return atoms
 
 
+@auto_reconnect
 def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
