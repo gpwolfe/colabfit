@@ -15,12 +15,16 @@ from colabfit.tools.property_definitions import (
     cauchy_stress_pd,
     free_energy_pd,
 )
+import functools
 import itertools
+import logging
 from multiprocessing import Pool
 import numpy as np
 from pathlib import Path
+import pymongo
 import sys
 from datetime import datetime
+import time
 
 BATCH_SIZE = 100
 START_IX = 0  # for testing, in case of errors causing script stop
@@ -155,10 +159,11 @@ ELEMENTS = [
     "Pu",
 ]
 
-
+MAX_AUTO_RECONNECT_ATTEMPTS = 100
 metadata = {
     "software": {"value": "VASP"},
     "method": {"field": "calc_type"},
+    "input": {"field": "input"},
 }
 # excluded keys are included under other names or in property_map
 exclude = {"calc_type", "e_fr_energy", "forces", "stress", "material_id"}
@@ -172,7 +177,7 @@ KEYS = [
     "e_0_energy",
     "e_fr_energy",
     "e_wo_entrp",
-    "incar",
+    # "incar",  # including as input in PI MD
     "material_id",
     "name",
     "outcar",
@@ -244,13 +249,33 @@ def reconstruct_nested(info: dict, superkey: str):
     return in_out_car
 
 
+def auto_reconnect(mongo_func):
+    """Gracefully handle a reconnection event."""
+
+    @functools.wraps(mongo_func)
+    def wrapper(*args, **kwargs):
+        for attempt in range(MAX_AUTO_RECONNECT_ATTEMPTS):
+            try:
+                return mongo_func(*args, **kwargs)
+            except pymongo.errors.AutoReconnect as e:
+                wait_t = 0.5 * pow(2, attempt)  # exponential back off
+                logging.warning(
+                    "PyMongo auto-reconnecting... %s. Waiting %.1f seconds.",
+                    str(e),
+                    wait_t,
+                )
+                time.sleep(wait_t)
+
+    return wrapper
+
+
 def reader(file_path):
     configs = read(file_path, index=":")
     for i, config in enumerate(configs):
         info = dict()
         info["outcar"] = reconstruct_nested(config.info, "outcar")
         info["output"] = reconstruct_nested(config.info, "output")
-        # info["incar"] = reconstruct_nested(config.info, "incar")
+        info["input"] = reconstruct_nested(config.info, "incar")
         for key, val in config.info.items():
             if not any([match in key for match in ["outcar", "incar", "output"]]):
                 if isinstance(val, str) and "=" in val:
@@ -306,6 +331,7 @@ def get_configs(fpaths):
     return configs
 
 
+@auto_reconnect
 def main(ip, port, db_name, nprocs):
     # client = MongoDatabase(db_name, nprocs=nprocs, uri=f"mongodb://{ip}:27017")
     client = MongoDatabase(db_name, nprocs=nprocs, uri=f"mongodb://{ip}:{port}")
@@ -352,7 +378,7 @@ def main(ip, port, db_name, nprocs):
         ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         verbose=True,
     )

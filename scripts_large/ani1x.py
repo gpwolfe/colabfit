@@ -53,12 +53,15 @@ https://www.nature.com/articles/s41597-020-0473-z/tables/2
 """
 from argparse import ArgumentParser
 from collections import namedtuple
+import functools
 import h5py
+import logging
 from pathlib import Path
-import subprocess
 import sys
+import time
 
 import numpy as np
+import pymongo
 
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
@@ -69,7 +72,7 @@ from colabfit.tools.property_definitions import (
 )
 
 
-DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/ani1x/")  # HSRN
+# DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/ani1x/")  # HSRN
 DATASET_FP = Path("data/ani1x")  # local and Greene
 DATASET_NAME = "ANI-1x"
 
@@ -197,6 +200,28 @@ PROPERTY_MAP = {
     ],
 }
 
+MAX_AUTO_RECONNECT_ATTEMPTS = 100
+
+
+def auto_reconnect(mongo_func):
+    """Gracefully handle a reconnection event."""
+
+    @functools.wraps(mongo_func)
+    def wrapper(*args, **kwargs):
+        for attempt in range(MAX_AUTO_RECONNECT_ATTEMPTS):
+            try:
+                return mongo_func(*args, **kwargs)
+            except pymongo.errors.AutoReconnect as e:
+                wait_t = 0.5 * pow(2, attempt)  # exponential back off
+                logging.warning(
+                    "PyMongo auto-reconnecting... %s. Waiting %.1f seconds.",
+                    str(e),
+                    wait_t,
+                )
+                time.sleep(wait_t)
+
+    return wrapper
+
 
 def read_h5(h5filename):
     """
@@ -232,6 +257,7 @@ def reader(filepath: Path):
     return configs
 
 
+@auto_reconnect
 def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
@@ -249,7 +275,13 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
+    )
 
     ds_id = generate_ds_id()
 
@@ -262,15 +294,7 @@ def main(argv):
         glob_string=GLOB_STR,
         generator=False,
     )
-    # For forwarding from Greene
-    subprocess.run("kubectl port-forward svc/mongo 5000:27017 &", shell=True)
-    client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:5000"
-    )
-    # For running locally
-    # client = MongoDatabase(
-    #     args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
-    # )
+
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
     # client.insert_property_definition(cauchy_stress_pd)
@@ -314,7 +338,7 @@ def main(argv):
         ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
         description=DATASET_DESC,
         verbose=True,
         # cs_ids=cs_ids,  # remove line if no configuration sets to insert
