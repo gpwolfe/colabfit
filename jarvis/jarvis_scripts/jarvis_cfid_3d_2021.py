@@ -89,13 +89,14 @@ keys:
  'xml_data_link']
 """
 
-from argparse import ArgumentParser
+
 import json
 from pathlib import Path
 import sys
 
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
+from colabfit.tools.database import generate_ds_id, load_data
+from colabfit_utilities import get_client
 from colabfit.tools.property_definitions import potential_energy_pd
 
 DATASET_FP = Path().cwd().parent / "jarvis_json/"
@@ -108,6 +109,9 @@ DS_DESC = (
     "tools and datasets built to meet current materials design challenges."
 )
 
+PUBLICATION = "https://doi.org/10.1038/s41524-020-00440-1"
+DATA_LINK = "https://doi.org/10.6084/m9.figshare.6815699"
+OTHER_LINKS = ["https://jarvis.nist.gov/"]
 LINKS = [
     "https://doi.org/10.1038/s41524-020-00440-1",
     "https://jarvis.nist.gov/",
@@ -154,7 +158,7 @@ PROPERTY_MAP = {
             "_metadata": {
                 "software": {"value": "VASP"},
                 "method": {"field": "method"},
-                "ecut": {"field": "encut"},
+                "input": {"field": "input"},
             },
         }
     ],
@@ -181,7 +185,7 @@ PROPERTY_MAP = {
             "_metadata": {
                 "software": {"value": "VASP"},
                 "method": {"value": "DFT-OptB88vdW"},
-                "ecut": {"field": "encut"},
+                "input": {"field": "input"},
             },
         }
     ],
@@ -214,14 +218,21 @@ def reader(fp):
             )
         config.info["name"] = f"{fp.stem}_{i}"
         config.info["method"] = f"DFT-{row.pop('func')}"
+        encut = config.info.get("encut")
+        if encut is not None:
+            config.info["input"] = {
+                "encut": {"value": encut, "units": "eV"},
+                "ediff": {"value": 10e-7, "units": "eV"},
+                "ediffg": {"value": 0.0001, "units": "eV/A"},
+            }
         for key, val in row.items():
-            if type(val) == str and val != "na" and len(val) > 0:
+            if isinstance(val, str) and val != "na" and len(val) > 0:
                 config.info[key] = val
-            elif type(val) == list and len(val) > 0 and any([x != "" for x in val]):
+            elif isinstance(val, list) and len(val) > 0 and any([x != "" for x in val]):
                 config.info[key] = val
-            elif type(val) == dict and all([v != "na" for v in val.values()]):
+            elif isinstance(val, dict) and all([v != "na" for v in val.values()]):
                 config.info[key] = val
-            elif type(val) == float or type(val) == int:
+            elif isinstance(val, float) or isinstance(val, int):
                 config.info[key] = val
             else:
                 pass
@@ -230,26 +241,7 @@ def reader(fp):
 
 
 def main(argv):
-    parser = ArgumentParser()
-    parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
-    parser.add_argument(
-        "-d",
-        "--db_name",
-        type=str,
-        help="Name of MongoDB database to add dataset to",
-        default="cf-test",
-    )
-    parser.add_argument(
-        "-p",
-        "--nprocs",
-        type=int,
-        help="Number of processors to use for job",
-        default=4,
-    )
-    args = parser.parse_args(argv)
-    client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
-    )
+    client = get_client(argv)
 
     ds_id = generate_ds_id()
 
@@ -285,7 +277,7 @@ def main(argv):
         do_hashes=all_do_ids,
         name=DS_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
         description=DS_DESC,
         verbose=True,
     )

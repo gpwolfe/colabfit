@@ -21,7 +21,7 @@ oqmd_no_cfid
 
 """
 
-from argparse import ArgumentParser
+
 from datetime import datetime
 import os
 from pathlib import Path

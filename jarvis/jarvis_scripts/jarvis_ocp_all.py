@@ -27,13 +27,14 @@ keys:
 'relaxed_energy']
 """
 
-from argparse import ArgumentParser
+
 import json
 from pathlib import Path
 import sys
 
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
+from colabfit.tools.database import generate_ds_id, load_data
+from colabfit_utilities import get_client
 from colabfit.tools.property_definitions import potential_energy_pd
 
 DATASET_FP = Path().cwd().parent / "jarvis_json/"
@@ -131,33 +132,7 @@ def reader(fp):
 
 
 def main(argv):
-    parser = ArgumentParser()
-    parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
-    parser.add_argument(
-        "-d",
-        "--db_name",
-        type=str,
-        help="Name of MongoDB database to add dataset to",
-        default="cf-test",
-    )
-    parser.add_argument(
-        "-p",
-        "--nprocs",
-        type=int,
-        help="Number of processors to use for job",
-        default=4,
-    )
-    parser.add_argument(
-        "-r",
-        "--port",
-        type=int,
-        help="Port to use for MongoDB client",
-        default=27017,
-    )
-    args = parser.parse_args(argv)
-    client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
-    )
+    client = get_client(argv)
 
     ds_id = generate_ds_id()
 
@@ -193,7 +168,7 @@ def main(argv):
         do_hashes=all_do_ids,
         name=DS_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
         description=DS_DESC,
         verbose=True,
     )
