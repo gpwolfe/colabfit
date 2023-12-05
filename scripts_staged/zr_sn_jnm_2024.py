@@ -67,8 +67,15 @@ GLOB_STR = "ZrSn.cfg"
 PI_METADATA = {
     "software": {"value": SOFTWARE},
     "method": {"value": METHODS},
-    "kpoints": {"value": "gamma-centered"},
-    "energy-cutoff": {"value": "400 eV"},
+    "input": {
+        "value": {
+            "kpoint-scheme": "gamma-centered",
+            "encut": {"value": 400, "units": "eV"},
+            "ediff": 10e-6,
+            "ediffg": 10e-2,
+            "kspacing": {"value": 0.03, "units": "2*pi/Ang"},
+        }
+    },
 }
 
 PROPERTY_MAP = {
@@ -215,9 +222,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
@@ -252,7 +262,7 @@ def main(argv):
         ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description=DATASET_DESC,
         verbose=True,
     )

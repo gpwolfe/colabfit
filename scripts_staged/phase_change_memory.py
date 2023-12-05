@@ -49,7 +49,13 @@ ELEMENTS = None
 PI_METADATA = {
     "software": {"value": SOFTWARE},
     "method": {"field": "method"},
-    "energy-cutoff": {"value": "600 eV"},
+    "input": {
+        "value": {
+            "energy-cutoff": {"value": 600, "units": "eV"},
+            "scf-convergence": {"value": 10e-7, "units": "eV"},
+            "pseudopotential": "ultrasoft",
+        }
+    },
 }
 
 PROPERTY_MAP = {
@@ -142,9 +148,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
@@ -180,7 +189,7 @@ def main(argv):
             ds_id=ds_id,
             name=ds_name,
             authors=AUTHORS,
-            links=LINKS,
+            links=[PUBLICATION, DATA_LINK],
             description=ds_desc,
             verbose=True,
         )

@@ -60,7 +60,7 @@ from colabfit.tools.property_definitions import (
 )
 
 
-DATASET_FP = Path("data/aCdataset-zenodo")
+DATASET_FP = Path("data/ac_jcp_2023")
 DATASET_NAME = "aC_JCP_2023"
 
 SOFTWARE = "VASP"
@@ -207,10 +207,14 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(free_energy_pd)
@@ -247,7 +251,7 @@ def main(argv):
             ds_id=ds_id,
             name=ds_name,
             authors=AUTHORS,
-            links=LINKS,
+            links=[PUBLICATION, DATA_LINK],
             description=desc,
             verbose=True,
         )
@@ -299,7 +303,7 @@ def main(argv):
         ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description=DATASET_DESC,
         verbose=True,
         cs_ids=cs_ids,  # remove line if no configuration sets to insert

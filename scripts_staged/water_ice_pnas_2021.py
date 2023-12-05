@@ -30,7 +30,7 @@ from colabfit.tools.property_definitions import (
 )
 
 
-DATASET_FP = Path("data/water-ice-group-simple-MLP-8bcaedd_pnas_2021/training-sets")
+DATASET_FP = Path("data/water_ice_pnas_2021/training-sets")
 DATASET_NAME = "water_ice_PNAS_2021"
 LICENSE = "Creative Commons Attribution-ShareAlike 4.0 International"
 
@@ -65,8 +65,12 @@ CSS = {
         "metadata": {
             "software": {"value": SOFTWARE},
             "method": {"value": "DFT-PBE-D3"},
-            "energy-cutoff": {"value": "460 Ry"},
-            "basis-set": {"value": "DZVP"},
+            "input": {
+                "value": {
+                    "energy-cutoff": {"value": 460, "units": "Ry"},
+                    "basis-set": {"value": "DZVP"},
+                },
+            },
         },
     },
     "cnt-h2o": {
@@ -75,8 +79,12 @@ CSS = {
         "metadata": {
             "software": {"value": SOFTWARE},
             "method": {"value": "DFT-PBE-D3"},
-            "energy-cutoff": {"value": "460 Ry"},
-            "basis-set": {"value": "DZVP"},
+            "input": {
+                "value": {
+                    "energy-cutoff": {"value": 460, "units": "Ry"},
+                    "basis-set": {"value": "DZVP"},
+                }
+            },
         },
     },
     "f-h2o": {
@@ -85,8 +93,12 @@ CSS = {
         "metadata": {
             "software": {"value": SOFTWARE},
             "method": {"value": "DFT-revPBE0-D3"},
-            "energy-cutoff": {"value": "400 Ry"},
-            "basis-set": {"value": "TZV2P"},
+            "input": {
+                "value": {
+                    "energy-cutoff": {"value": 400, "units": "Ry"},
+                    "basis-set": {"value": "TZV2P"},
+                }
+            },
         },
     },
     "mos2-h2o": {
@@ -95,8 +107,12 @@ CSS = {
         "metadata": {
             "software": {"value": SOFTWARE},
             "method": {"value": "DFT-optB88-vdW"},
-            "energy-cutoff": {"value": "550 Ry"},
-            "basis-set": {"value": "DZVP"},
+            "input": {
+                "value": {
+                    "energy-cutoff": {"value": 550, "units": "Ry"},
+                    "basis-set": {"value": "DZVP"},
+                }
+            },
         },
     },
     "so4-h2o": {
@@ -105,8 +121,12 @@ CSS = {
         "metadata": {
             "software": {"value": SOFTWARE},
             "method": {"value": "DFT-BLYP-D3"},
-            "energy-cutoff": {"value": "280 Ry"},
-            "basis-set": {"value": "TZV2P"},
+            "input": {
+                "value": {
+                    "energy-cutoff": {"value": 280, "units": "Ry"},
+                    "basis-set": {"value": "TZV2P"},
+                }
+            },
         },
     },
     "tio2-h2o": {
@@ -115,8 +135,12 @@ CSS = {
         "metadata": {
             "software": {"value": SOFTWARE},
             "method": {"value": "DFT-optB88-vdW"},
-            "energy-cutoff": {"value": "400 Ry"},
-            "basis-set": {"value": "DZVP"},
+            "input": {
+                "value": {
+                    "energy-cutoff": {"value": 400, "units": "Ry"},
+                    "basis-set": {"value": "DZVP"},
+                }
+            },
         },
     },
 }
@@ -193,10 +217,14 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
 
@@ -257,7 +285,7 @@ def main(argv):
         ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
         description=DATASET_DESC,
         verbose=True,
         cs_ids=cs_ids,

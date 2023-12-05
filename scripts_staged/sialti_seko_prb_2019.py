@@ -31,7 +31,7 @@ from colabfit.tools.property_definitions import (
 )
 
 
-DATASET_FP = Path().cwd() / "data/seko_si_al_ti/"
+DATASET_FP = Path("data/sialti_seko_prb_2019")
 DATASET_NAME = "Si_Al_Ti_Seko_PRB_2019"
 
 SOFTWARE = "VASP"
@@ -39,7 +39,7 @@ METHODS = "DFT-PBE"
 
 PUBLICATION = "https://doi.org/10.1103/PhysRevB.99.214108"
 # data downloaded from custom link sent by Dr. Seko
-DATA_LINK = None
+DATA_LINK = "None"
 OTHER_LINKS = [
     "https://doi.org/10.1063/5.0129045",
     "https://sekocha.github.io/",
@@ -63,8 +63,14 @@ ELEMENTS = None
 PI_METADATA = {
     "software": {"value": SOFTWARE},
     "method": {"value": METHODS},
-    "energy-cutoff": {"value": "400 eV"}
-    # "basis-set": {"field": "basis_set"}
+    "input": {
+        "value": {
+            "energy-cutoff": {"value": "400 eV"},
+            "ediff": 10e-3,
+            "ediffg": 10e-2
+            # "basis-set": {"field": "basis_set"}
+        }
+    },
 }
 GLOB_STR = "vasprun.xml.12242"
 
@@ -143,9 +149,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
@@ -225,7 +234,7 @@ def main(argv):
             ds_id=ds_id,
             name=ds_name,
             authors=AUTHORS,
-            links=LINKS,
+            links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
             description=ds_desc + DATASET_DESC,
             verbose=True,
             cs_ids=cs_ids,

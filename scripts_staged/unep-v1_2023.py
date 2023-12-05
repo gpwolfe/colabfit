@@ -89,8 +89,21 @@ GLOB_STR = "*.xyz"
 PI_METADATA = {
     "software": {"value": SOFTWARE},
     "method": {"value": METHODS},
-    "energy-cutoff": {"value": "600eV"},
-    "k-point": {"value": "gamma-centered 0.2/Ang"},
+    "input": {
+        "value": {
+            "GGA": "PE",  # Default is POTCAR
+            "ENCUT": 600,  # Default is POTCAR
+            "KSPACING": 0.2,  # Default is 0.5
+            "KGAMMA": ".TRUE.",  # This is the default
+            "NELM": 120,  # Default is 60
+            "ALGO": "Normal",  # This is the default
+            "EDIFF": 1e-06,  # Default is 1E-4
+            "SIGMA": 0.02,  # Default is 0.2
+            "ISMEAR": 0,  # Default is 1
+            "PREC": "Accurate",  # Default is Normal
+            "LREAL": "A",
+        }
+    },
 }
 
 PROPERTY_MAP = {
@@ -203,7 +216,7 @@ def main(argv):
         ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description=DATASET_DESC,
         verbose=True,
         cs_ids=cs_ids,  # remove line if no configuration sets to insert
