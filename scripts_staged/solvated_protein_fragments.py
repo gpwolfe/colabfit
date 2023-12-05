@@ -27,7 +27,7 @@ from colabfit.tools.property_definitions import (
 #     "/persistent/colabfit_raw_data/new_raw_datasets/Solvated_protein_UnkeOliverMeuwly"
 # ) #  Kubernetes pod
 DATASET_FP = Path("solvated_protein")  # Greene
-# DATASET_FP = Path().cwd().parent / "data/solvated_protein"  # local
+DATASET_FP = Path("data/solvated_protein")  # local
 DATASET_NAME = "solvated_protein_fragments"
 
 SOFTWARE = "ORCA 4.0.1"
@@ -140,14 +140,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
-    # Local
-    # client = MongoDatabase(
-    #     args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
-    # )
-    # Greene
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:30007"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     ds_id = generate_ds_id()
@@ -184,7 +182,7 @@ def main(argv):
         ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description=DATASET_DESC,
         verbose=True,
     )

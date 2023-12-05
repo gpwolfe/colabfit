@@ -69,9 +69,7 @@ from colabfit.tools.property_definitions import (
 )
 
 
-DATASET_FP = Path(
-    "data/Silicon_MLIP_datasets-main_discrepencies_and_error_metrics_npj2023"
-)
+DATASET_FP = Path("data/discrepencies_error_metrics_npj2023")
 DATASET_NAME = "discrepencies_and_error_metrics_NPJ_2023"
 
 SOFTWARE = "VASP 5.4.4"
@@ -101,20 +99,32 @@ GLOB_STR = "0.POSCAR.vasp"
 PI_METADATA_K1 = {
     "software": {"value": SOFTWARE},
     "method": {"value": METHODS},
-    "kpoint": {"value": "single gamma-point"},
-    "energy-cutoff": {"value": "520 eV"},
+    "input": {
+        "value": {
+            "kpoints": {"value": "single gamma-point"},
+            "encut": {"value": 520, "units": "eV"},
+        }
+    },
 }
 PI_METADATA_K2 = {
     "software": {"value": SOFTWARE},
     "method": {"value": METHODS},
-    "kpoint": {"value": "2x2x2"},
-    "energy-cutoff": {"value": "520 eV"},
+    "input": {
+        "value": {
+            "kpoints": {"value": "2x2x2"},
+            "encut": {"value": 520, "units": "eV"},
+        }
+    },
 }
 PI_METADATA_K4 = {
     "software": {"value": SOFTWARE},
     "method": {"value": METHODS},
-    "kpoint": {"value": "4x4x4"},
-    "energy-cutoff": {"value": "520 eV"},
+    "input": {
+        "value": {
+            "kpoints": {"value": "4x4x4"},
+            "encut": {"value": 520, "units": "eV"},
+        }
+    },
 }
 
 
@@ -279,9 +289,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
@@ -330,7 +343,7 @@ def main(argv):
             ds_id=ds_id,
             name=name,
             authors=AUTHORS,
-            links=LINKS,
+            links=[PUBLICATION, DATA_LINK],
             description=desc,
             verbose=True,
             # cs_ids=cs_ids,  # remove line if no configuration sets to insert

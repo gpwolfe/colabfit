@@ -24,7 +24,7 @@ DS_NAME = "Co_dimer_JPCA_2022"
 # DS_PATH = Path(
 #     "/persistent/colabfit_raw_data/new_raw_datasets_2.0/Co_dimer/Co_dimer_data/"
 # )
-DS_PATH = Path().cwd() / "data/Co_dimer_data"  # Local
+DS_PATH = Path("data/co_dimer_jpca_2022")  # Local
 XYZ_PATH = DS_PATH / "structures_xyz"
 
 PUBLICATION = "https://doi.org/10.1021/acs.jpca.1c08950"
@@ -105,9 +105,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     client.insert_property_definition(potential_energy_pd)
@@ -176,7 +179,7 @@ def main(argv):
             ds_id=ds_id,
             name=name,
             authors=AUTHORS,
-            links=LINKS,
+            links=[PUBLICATION, DATA_LINK],
             description=desc,
             resync=True,
             verbose=True,

@@ -31,8 +31,8 @@ from colabfit.tools.property_definitions import (
     potential_energy_pd,
 )
 
-DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/a-AlOx/")
-# DATASET_FP = Path().cwd().parent / "data/a-AlOx"  # comment out, local path
+# DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/a-AlOx/")
+DATASET_FP = Path("data/alox_jcp_2020")  # local
 DS_NAME = "a-AlOx_JCP_2020"
 DS_DESC = (
     "This dataset was used for the training of an MLIP for amorphous alumina (a-AlOx). "
@@ -61,8 +61,7 @@ GLOB = "*.xyzdat"
 PI_MD = {
     "software": {"value": "VASP"},
     "method": {"value": "DFT-PBE"},
-    "energy-cutoff": {"value": "550 eV"},
-    "kpoints": {"field": "kpoint"},
+    "input": {"value": "input"},
 }
 
 property_map = {
@@ -89,17 +88,21 @@ def reader(fp):
         symbols = str(config.symbols)
         config.info["name"] = f"{fp.stem}_{i}"
         if "Al12" in symbols:
-            config.info["kpoint"] = "5x5x2"
+            kpoint = "5x5x2"
         elif "Al24" in symbols:
-            config.info["kpoint"] = "5x3x2"
+            kpoint = "5x3x2"
         elif "Al48" in symbols:
-            config.info["kpoint"] = "3x3x2"
+            kpoint = "3x3x2"
         elif "Al" not in symbols:
-            config.info["kpoint"] = "5x3x2"
+            kpoint = "5x3x2"
         elif "Al192" in symbols:
-            config.info["kpoint"] = "single gamma k-point"
+            kpoint = "single gamma k-point"
         else:
             pass
+        config.info["input"] = {
+            "energy-cutoff": {"value": 550, "units": "eV"},
+            "kpoints": kpoint,
+        }
 
     return configs
 
@@ -121,9 +124,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     ds_id = generate_ds_id()
@@ -183,7 +189,7 @@ def main(argv):
         cs_ids=cs_ids,
         name=DS_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         verbose=True,
     )

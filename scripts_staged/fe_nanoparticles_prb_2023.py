@@ -36,7 +36,7 @@ from colabfit.tools.property_definitions import (
 )
 
 DS_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/Iron_nanoparticle/")
-# DS_FP = Path().cwd().parent / "data/fe_nano"  # local
+DS_FP = Path("data/fe_nanoparticles_prb_2023")  # local
 DS_NAME = "Fe_nanoparticles_PRB_2023"
 AUTHORS = ["Richard Jana", "Miguel A. Caro"]
 
@@ -76,53 +76,49 @@ CO_MD = {
     ]
 }
 
+PI_MD = {
+    "method": {"value": "DFT-PBE"},
+    "software": {"value": "VASP"},
+    "input": {
+        "value": {
+            "encut": {"value": 400, "units": "eV"},
+            "ediff": 10e-7,
+            "ispin": 2,
+        }
+    },
+}
+
 property_map = {
     "potential-energy": [
         {
             "energy": {"field": "energy", "units": "eV"},
             "per-atom": {"value": False, "units": None},
-            "_metadata": {
-                "method": {"value": "DFT-PBE"},
-                "software": {"value": "VASP"},
-                "ecut": {"value": "400 eV"},
-            },
+            "_metadata": PI_MD,
         }
     ],
     "atomic-forces": [
         {
             "forces": {"field": "forces", "units": "eV/Ang"},
-            "_metadata": {
-                "method": {"value": "DFT-PBE"},
-                "software": {"value": "VASP"},
-                "ecut": {"value": "400 eV"},
-            },
+            "_metadata": PI_MD,
         }
     ],
     "free-energy": [
         {
             "energy": {"field": "free_energy", "units": "eV"},
             "per-atom": {"value": False, "units": None},
-            "_metadata": {
-                "method": {"value": "DFT-PBE"},
-                "software": {"value": "VASP"},
-                "ecut": {"value": "400 eV"},
-            },
+            "_metadata": PI_MD,
         }
     ],
     "cauchy-stress": [
         {
             "stress": {"field": "stress", "units": "kB"},
             "volume-normalized": {"value": False, "units": None},
-            "_metadata": {
-                "software": {"value": "VASP"},
-            },
+            "_metadata": PI_MD,
         },
         {
             "stress": {"field": "virial", "units": "kB"},
             "volume-normalized": {"value": True, "units": None},
-            "_metadata": {
-                "software": {"value": "VASP"},
-            },
+            "_metadata": PI_MD,
         },
     ],
 }
@@ -156,9 +152,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     ds_id = generate_ds_id()
@@ -197,7 +196,7 @@ def main(argv):
         ds_id=ds_id,
         name=DS_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         resync=True,
         verbose=True,

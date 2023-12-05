@@ -32,7 +32,7 @@ from colabfit.tools.property_definitions import (
 )
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets_2.0/LML-retrain/")
-DATASET_FP = Path("").cwd().parent / "data/lml_retrain"
+DATASET_FP = Path("data/lml_retrain")
 
 PUBLICATION = "https://doi.org/10.1016/j.actamat.2023.118734"
 DATA_LINK = "https://github.com/marseille-matmol/LML-retrain"
@@ -63,8 +63,7 @@ GLOB_STR = "*.xyz"
 PI_METADATA = {
     "software": {"value": "VASP"},
     "method": {"value": "DFT-PBE"},
-    "temperature": {"field": "Temperature"},
-    "energy-cutoff": {"550 eV"},
+    "input": {"field": "input"},
 }
 PROPERTY_MAP = {
     "potential-energy": [
@@ -101,6 +100,10 @@ def reader(fp: Path):
     configs = read(fp, index=":")
     for i, config in enumerate(configs):
         config.info["name"] = f"{fp.stem}_{i}"
+        config.info["input"] = {
+            "temperature": {"field": "Temperature"},
+            "energy-cutoff": {"value": 550, "units": "eV"},
+        }
 
     return configs
 
@@ -122,9 +125,12 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(cauchy_stress_pd)
@@ -187,7 +193,7 @@ def main(argv):
             ds_id=ds_id,
             name=name,
             authors=AUTHORS,
-            links=LINKS,
+            links=[PUBLICATION, DATA_LINK],
             description=desc + DATASET_DESC,
             verbose=True,
         )

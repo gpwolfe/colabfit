@@ -56,7 +56,7 @@ DATASET_NAME = "SPICE_2023"
 LICENSE = "Creative Commons 0"
 
 SOFTWARE = "Psi4 1.4.1"
-METHODS = "DFT-ωB97M-D3BJ"
+METHODS = "DFT-ωB97M-D3(BJ)"
 BASIS_SET = "def2-TZVPPD"
 
 PUBLICATION = "https://doi.org/10.1038/s41597-022-01882-6"
@@ -299,7 +299,7 @@ def main(argv):
         ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
         description=DATASET_DESC,
         verbose=True,
         cs_ids=cs_ids,
