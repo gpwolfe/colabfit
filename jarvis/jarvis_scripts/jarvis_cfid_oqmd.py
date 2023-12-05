@@ -50,6 +50,10 @@ DS_DESC = (
     "design challenges."
 )
 
+PUBLICATION = "https://doi.org/10.1038/npjcompumats.2015.10"
+DATA_LINK = "https://ndownloader.figshare.com/files/24981170"
+OTHER_LINKS = ["https://jarvis.nist.gov/"]
+
 LINKS = [
     "https://doi.org/10.1038/npjcompumats.2015.10",
     "https://jarvis.nist.gov/",
@@ -84,6 +88,17 @@ PROPERTY_MAP = {
             "_metadata": {
                 "software": {"value": "VASP"},
                 "method": {"value": "DFT-PBE"},
+                "input": {
+                    "value": {
+                        "ediff": {"value": 10e-4, "units": "eV/atom"},
+                        "kpoint-scheme": "gamma-centered",
+                        "encut": {"value": 520, "units": "eV"},
+                        "ismear": {"relaxation": -1, "static": -5},
+                        "sigma": 0.2,
+                        "ibrion": 1,
+                        "ediffg": {"value": 10e-3, "units": "eV/atom"},
+                    }
+                },
             },
         },
     ],

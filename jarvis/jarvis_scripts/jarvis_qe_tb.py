@@ -63,6 +63,9 @@ DS_DESC = (
     "challenges."
 )
 
+PUBLICATION = "https://doi.org/10.1103/PhysRevMaterials.7.044603"
+DATA_LINK = "https://ndownloader.figshare.com/files/29070555"
+OTHER_LINKS = ["https://jarvis.nist.gov/", "https://arxiv.org/abs/2112.11585"]
 LINKS = [
     "https://arxiv.org/abs/2112.11585",
     "https://doi.org/10.1103/PhysRevMaterials.7.044603",
@@ -74,7 +77,15 @@ ELEMENTS = None
 PI_MD = {
     "software": {"value": "Quantum ESPRESSO"},
     "method": {"value": "DFT-PBEsol"},
-    "ecut": {"value": "45 Ry"},
+    "input": {
+        "value": {
+            "encut": {"value": "45 Ry"},
+            "pseudopotentials": "GBRV",
+            "k-point-grid-density": {"value": 29, "units": "Ang^-1"},
+            "smearing": "Gaussian",
+            "smearing-energy": {"value": 0.01, "units": "Ry"},
+        }
+    },
 }
 
 PROPERTY_MAP = {

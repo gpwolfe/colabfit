@@ -85,6 +85,13 @@ DS_DESC = (
     "design challenges."
 )
 
+PUBLICATION = "https://doi.org/10.1038/sdata.2014.22"
+DATA_LINK = "https://ndownloader.figshare.com/files/28541196"
+OTHER_LINKS = [
+    "https://jarvis.nist.gov/",
+    "http://quantum-machine.org/datasets/",
+    "https://docs.dgl.ai/en/0.8.x/generated/dgl.data.QM9Dataset.html",
+]
 LINKS = [
     "https://doi.org/10.1038/sdata.2014.22",
     "https://jarvis.nist.gov/",

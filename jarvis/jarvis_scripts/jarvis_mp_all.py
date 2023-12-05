@@ -77,6 +77,10 @@ DS_DESC = (
     "tools and datasets built to meet current materials design challenges."
 )
 
+
+PUBLICATION = "https://doi.org/10.1063/1.4812323"
+DATA_LINK = "https://ndownloader.figshare.com/files/26791259"
+OTHER_LINKS = ["https://jarvis.nist.gov/"]
 LINKS = [
     "https://doi.org/10.1063/1.4812323",
     "https://jarvis.nist.gov/",
@@ -105,7 +109,7 @@ PROPERTY_MAP = {
             "per-atom": {"value": True, "units": None},
             "_metadata": {
                 "software": {"value": "VASP"},
-                # "method": {"field": "method"},
+                "method": {"value": "DFT"},
                 # "ecut": {"field": "encut"},
             },
         }
@@ -114,7 +118,7 @@ PROPERTY_MAP = {
         {
             "energy": {"field": "band_gap", "units": "eV"},
             "_metadata": {
-                # "method": {"value": "DFT-TBmBJ"},
+                "method": {"value": "DFT"},
                 "software": {"value": "VASP"},
             },
         },
@@ -125,7 +129,7 @@ PROPERTY_MAP = {
             "per-atom": {"value": False, "units": None},
             "_metadata": {
                 "software": {"value": "VASP"},
-                # "method": {"value": "DFT-OptB88vdW"},
+                "method": {"value": "DFT"},
                 # "ecut": {"field": "encut"},
             },
         },
@@ -134,7 +138,7 @@ PROPERTY_MAP = {
             "per-atom": {"value": True, "units": None},
             "_metadata": {
                 "software": {"value": "VASP"},
-                # "method": {"value": "DFT-OptB88vdW"},
+                "method": {"value": "DFT"},
                 # "ecut": {"field": "encut"},
             },
         },

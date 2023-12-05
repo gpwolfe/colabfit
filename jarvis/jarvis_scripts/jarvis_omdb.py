@@ -57,6 +57,10 @@ DS_DESC = (
     "design challenges."
 )
 
+
+PUBLICATION = "https://doi.org/10.1002/qute.201900023"
+DATA_LINK = "https://ndownloader.figshare.com/files/28501761"
+OTHER_LINKS = ["https://jarvis.nist.gov/"]
 LINKS = [
     "https://doi.org/10.1002/qute.201900023",
     "https://jarvis.nist.gov/",
@@ -78,7 +82,7 @@ PROPERTY_MAP = {
             "_metadata": {
                 "software": {"value": "VASP"},
                 "method": {"value": "DFT-PBE"},
-                "k-point": {"value": "6x6x6"},
+                "input": {"value": {"kpoints": "6x6x6"}},
             },
         },
     ],

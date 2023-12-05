@@ -86,8 +86,11 @@ DS_DESC = (
     "design challenges."
 )
 
+PUBLICATION = "https://doi.org/10.1038/sdata.2016.12"
+DATA_LINK = "https://ndownloader.figshare.com/files/28682010"
+OTHER_LINKS = ["https://jarvis.nist.gov/"]
 LINKS = [
-    "https://doi.org/10.1088/2053-1583/aacfc1",
+    "https://doi.org/10.1038/sdata.2016.12",
     "https://jarvis.nist.gov/",
     "https://ndownloader.figshare.com/files/28682010",
 ]
@@ -103,9 +106,36 @@ ELEMENTS = None
 PI_MD = {
     "software": {"value": "VASP"},
     "method": {"value": "DFT-rPW86"},
-    "ecut": {"value": "400 eV"},
+    "input": {
+        "value": {"encut": {"value": 400, "units": "eV"}},
+        "prec": "Accurate",
+        "kspacing": {"value": 0.25, "units": "Ang^-1"},
+        "kpoints-scheme": "Monkhorst-Pack",
+        "ediffg": {"value": 0.01, "units": "eV/Ang"},
+    },
 }
-BG_HSE_MD = {"software": {"value": "VASP"}, "method": {"value": "DFT-HSE06"}}
+BAND_PI_MD = {
+    "software": {"value": "VASP"},
+    "method": {"value": "DFT-rPW86"},
+    "input": {
+        "value": {"encut": {"value": 400, "units": "eV"}},
+        "prec": "Accurate",
+        "kspacing": {"value": 0.20, "units": "Ang^-1"},
+        "kpoints-scheme": "Monkhorst-Pack",
+        "ediffg": {"value": 0.01, "units": "eV/Ang"},
+    },
+}
+BG_HSE_MD = {
+    "software": {"value": "VASP"},
+    "method": {"value": "DFT-HSE06"},
+    "input": {
+        "value": {"encut": {"value": 400, "units": "eV"}},
+        "prec": "Accurate",
+        "kspacing": {"value": 0.20, "units": "Ang^-1"},
+        "kpoints-scheme": "Monkhorst-Pack",
+        "ediffg": {"value": 0.01, "units": "eV/Ang"},
+    },
+}
 
 PROPERTY_MAP = {
     "atomization-energy": [
@@ -118,7 +148,7 @@ PROPERTY_MAP = {
     "band-gap": [
         {
             "energy": {"field": "gga_gap", "units": "eV"},
-            "_metadata": PI_MD,
+            "_metadata": BAND_PI_MD,
         },
         {
             "energy": {"field": "hse_gap", "units": "eV"},

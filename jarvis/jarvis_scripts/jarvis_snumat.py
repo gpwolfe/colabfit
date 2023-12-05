@@ -66,6 +66,9 @@ DS_DESC = (
     "design challenges."
 )
 
+PUBLICATION = "https://doi.org/10.1038/s41597-020-00723-8"
+DATA_LINK = "https://ndownloader.figshare.com/files/38521736"
+OTHER_LINKS = ["https://jarvis.nist.gov/", "https://www.snumat.com/"]
 LINKS = [
     "https://doi.org/10.1038/s41597-020-00723-8",
     "https://jarvis.nist.gov/",
@@ -107,7 +110,7 @@ PROPERTY_MAP = {
                 "method": {"value": "DFT-PBE"},
                 "fundamental_optical": {"value": "optical"},
                 "direct_indirect": {"field": "Direct_or_indirect"},
-                "SOC": {"field": "SOC"},
+                "spin-orbit-coupling": {"field": "SOC"},
             },
         },
         {
@@ -117,7 +120,7 @@ PROPERTY_MAP = {
                 "method": {"value": "DFT-HSE06"},
                 "fundamental_optical": {"value": "fundamental"},
                 "direct_indirect": {"field": "Direct_or_indirect_HSE"},
-                "SOC": {"field": "SOC"},
+                "spin-orbit-coupling": {"field": "SOC"},
             },
         },
         {
@@ -127,7 +130,7 @@ PROPERTY_MAP = {
                 "method": {"value": "DFT-HSE06"},
                 "fundamental_optical": {"value": "optical"},
                 "direct_indirect": {"field": "Direct_or_indirect_HSE"},
-                "SOC": {"field": "SOC"},
+                "spin-orbit-coupling": {"field": "SOC"},
             },
         },
     ],

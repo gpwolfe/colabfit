@@ -41,6 +41,12 @@ DS_DESC = (
     "design challenges."
 )
 
+PUBLICATION = "https://doi.org/10.1038/s41467-021-25639-8"
+DATA_LINK = "https://figshare.com/ndownloader/files/40934285"
+OTHER_LINKS = [
+    "https://jarvis.nist.gov/",
+    "https://github.com/hlxin/tinnet/tree/master",
+]
 LINKS = [
     "https://figshare.com/ndownloader/files/40934285",
     "https://jarvis.nist.gov/",
@@ -59,8 +65,13 @@ ELEMENTS = None
 PI_MD = {
     "software": {"value": "Quantum ESPRESSO"},
     "method": {"value": "DFT-PBE"},
-    "mp-mesh": {"value": "6 x 6 x 1"},
-    "cutoff": {"value": "500 eV"},
+    "input": {
+        "value": {
+            "kpoints": "6 x 6 x 1",
+            "kpoints-scheme": "Monkhorst-Pack",
+            "cutoff": {"value": 500, "units": "eV"},
+        }
+    },
 }
 
 PROPERTY_MAP = {

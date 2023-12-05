@@ -168,6 +168,7 @@ PROPERTY_MAP = {
             "_metadata": {
                 "method": {"value": "DFT-TBmBJ"},
                 "software": {"value": "VASP"},
+                "input": {"field": "input"},
             },
         },
         # {

@@ -108,6 +108,9 @@ DS_DESC = (
     "tools and datasets built to meet current materials design challenges."
 )
 
+PUBLICATION = "https://doi.org/10.1038/s41524-020-00440-1"
+DATA_LINK = "https://doi.org/10.6084/m9.figshare.6815699"
+OTHER_LINKS = ["https://jarvis.nist.gov/"]
 LINKS = [
     "https://doi.org/10.1038/s41524-020-00440-1",
     "https://jarvis.nist.gov/",
@@ -164,6 +167,7 @@ PROPERTY_MAP = {
             "_metadata": {
                 "method": {"value": "DFT-TBmBJ"},
                 "software": {"value": "VASP"},
+                "input": {"field": "input"},
             },
         },
         {
@@ -171,6 +175,7 @@ PROPERTY_MAP = {
             "_metadata": {
                 "method": {"value": "DFT-OptB88vdW"},
                 "software": {"value": "VASP"},
+                "input": {"field": "input"},
             },
         },
     ],

@@ -84,8 +84,24 @@ DS_DESC = (
     "capacity), cal/mol K. Units for all other properties are eV. "
     "JARVIS is a set of tools and collected datasets built to meet current materials "
     "design challenges."
+    "For the first iteration of DFT calculations, Gaussian 09’s default electronic "
+    "and geometry thresholds have been used for all molecules. For those molecules "
+    "which failed to reach SCF convergence ultrafine grids have been invoked within "
+    "a second iteration for evaluating the XC energy contributions. Within a third "
+    "iteration on the remaining unconverged molecules, we identified those which "
+    "had relaxed to saddle points, and further tightened the SCF criteria using "
+    "the keyword scf(maxcycle=200, verytight). All those molecules which still "
+    "featured imaginary frequencies entered the fourth iteration using keywords, "
+    "opt(calcfc, maxstep=5, maxcycles=1000). calcfc constructs a Hessian in the "
+    "first step of the geometry relaxation for eigenvector following. Within the "
+    "fifth and final iteration, all molecules which still failed to reach "
+    "convergence, have subsequently been converged using opt(calcall, maxstep=1, "
+    "maxcycles=1000)"
 )
 
+PUBLICATION = "https://doi.org/10.1038/sdata.2014.22"
+DATA_LINK = "https://ndownloader.figshare.com/files/28715319"
+OTHER_LINKS = ["https://jarvis.nist.gov/", "http://quantum-machine.org/datasets/"]
 LINKS = [
     "https://doi.org/10.1038/sdata.2014.22",
     "https://jarvis.nist.gov/",
@@ -99,7 +115,6 @@ AUTHORS = [
     "O. Anatole von Lilienfeld",
 ]
 ELEMENTS = None
-
 
 PROPERTY_MAP = {
     "potential-energy": [
