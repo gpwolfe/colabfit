@@ -65,6 +65,12 @@ DS_DESC = (
     "design challenges."
 )
 
+PUBLICATION = "https://doi.org/10.1021/acs.jpca.9b08723"
+DATA_LINK = "https://figshare.com/ndownloader/files/40424156"
+OTHER_LINKS = [
+    "https://jarvis.nist.gov/",
+    "https://github.com/materialsvirtuallab/mlearn",
+]
 LINKS = [
     "https://figshare.com/ndownloader/files/40424156",
     "https://jarvis.nist.gov/",
@@ -89,8 +95,7 @@ ELEMENTS = None
 PI_MD = {
     "software": {"value": "VASP 5.4.1"},
     "method": {"value": "DFT-PBE"},
-    "k-point-mesh": {"field": "kpoint"},
-    "cutoff": {"value": "520 eV"},
+    "input": {"field": "input"},
 }
 
 PROPERTY_MAP = {
@@ -148,7 +153,14 @@ def reader(fp):
         else:
             kpoint = "4 x 4 x 4"
         config.info["name"] = f"mlearn_{elements[0]}_{i}"
-        config.info["kpoint"] = kpoint
+        # input
+        input = {
+            "encut": {"value": 520, "units": "eV"},
+            "ediff": {"value": 10e-5, "units": "eV"},
+            "ediffg": {"value": 0.02, "units": "eV/Ang"},
+            "kpoints": kpoint,
+        }
+        config.info["input"] = input
         for key, val in row.items():
             if isinstance(val, str) and val != "na" and len(val) > 0:
                 config.info[key.replace(" ", "-")] = val

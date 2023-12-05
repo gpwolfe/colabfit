@@ -58,6 +58,10 @@ DS_DESC = (
     "tools and datasets built to meet current materials design challenges."
 )
 
+PUBLICATION = "https://doi.org/10.1021/acs.chemmater.9b01294"
+DATA_LINK = "https://ndownloader.figshare.com/files/26724977"
+OTHER_LINKS = ["https://jarvis.nist.gov/"]
+
 LINKS = [
     "https://doi.org/10.1021/acs.chemmater.9b01294",
     "https://jarvis.nist.gov/",

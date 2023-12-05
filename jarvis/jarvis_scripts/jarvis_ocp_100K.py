@@ -49,10 +49,16 @@ DS_DESC = (
     "tools and datasets built to meet current materials design challenges."
 )
 
+PUBLICATION = "https://doi.org/10.1021/acscatal.0c04525"
+DATA_LINK = "https://figshare.com/ndownloader/files/40902845"
+OTHER_LINKS = [
+    "https://jarvis.nist.gov/",
+    "https://github.com/Open-Catalyst-Project/ocp",
+]
 LINKS = [
     "https://github.com/Open-Catalyst-Project/ocp",
     "https://jarvis.nist.gov/",
-    "https://figshare.com/ndownloader/files/40566122",
+    "https://figshare.com/ndownloader/files/40902845",
     "https://doi.org/10.1021/acscatal.0c04525",
 ]
 AUTHORS = [

@@ -8,7 +8,7 @@ having this as a dependency.
 
 Properties key:
 spg = space group
-fund = functional
+func = functional
 slme = spectroscopic limited maximum efficiency
 encut = ecut/energy cutoff
 kpoint_length_unit -> want?
@@ -37,19 +37,19 @@ dft 2d 2021 property keys
  'efg',
  'ehull',
  'elastic_tensor',
- 'encut',
+ 'encut',           # input
  'epsx',
  'epsy',
  'epsz',
  'exfoliation_energy',
  'formation_energy_peratom',
  'formula',
- 'func',
+ 'func',            # input/MD
  'hse_gap',
  'icsd',
  'jid',
- 'kpoint_length_unit',
- 'kpoints_array',
+ 'kpoint_length_unit', # input
+ 'kpoints_array',       # input
  'magmom_oszicar',
  'magmom_outcar',
  'max_ir_mode',
@@ -91,6 +91,8 @@ import json
 from pathlib import Path
 import sys
 
+import numpy as np
+
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import generate_ds_id, load_data
 from colabfit_utilities import get_client
@@ -105,6 +107,10 @@ DS_DESC = (
     "configurations of 2D materials. JARVIS is a set of "
     "tools and datasets built to meet current materials design challenges."
 )
+
+PUBLICATION = "https://doi.org/10.1038/s41524-020-00440-1"
+DATA_LINK = "https://ndownloader.figshare.com/files/26808917"
+OTHER_LINKS = ["https://jarvis.nist.gov/"]
 
 LINKS = [
     "https://doi.org/10.1038/s41524-020-00440-1",
@@ -151,7 +157,7 @@ PROPERTY_MAP = {
             "_metadata": {
                 "software": {"value": "VASP"},
                 "method": {"field": "method"},
-                "ecut": {"field": "encut"},
+                "input": {"field": "input"},
             },
         }
     ],
@@ -161,6 +167,7 @@ PROPERTY_MAP = {
             "_metadata": {
                 "method": {"value": "DFT-TBmBJ"},
                 "software": {"value": "VASP"},
+                "input": {"field": "input"},
             },
         },
         {
@@ -168,6 +175,7 @@ PROPERTY_MAP = {
             "_metadata": {
                 "method": {"value": "DFT-OptB88vdW"},
                 "software": {"value": "VASP"},
+                "input": {"field": "input"},
             },
         },
     ],
@@ -178,6 +186,7 @@ PROPERTY_MAP = {
             "_metadata": {
                 "software": {"value": "VASP"},
                 "method": {"value": "DFT-OptB88vdW"},
+                "input": {"field": "input"},
             },
         }
     ],
@@ -210,6 +219,22 @@ def reader(fp):
             )
         config.info["name"] = f"{fp.stem}_{i}"
         config.info["method"] = f"DFT-{row.pop('func')}"
+        # input
+        input = dict()
+        if config.info.get("kpoint_length_unit") is not None:
+            input["kpoint_length_unit"] = config.info.pop("kpoint_length_unit")
+        if (
+            config.info.get("kpoints_array") is not None
+            and config.info["kpoints_array"] != "na"
+        ):
+            kpoints = config.info.pop("kpoints_array")
+            if isinstance(kpoints, np.ndarray):
+                kpoints = kpoints.tolist()
+            input["kpoints"] = kpoints
+        if config.info.get("encut") is not None:
+            input["encut"] = config.pop("encut")
+        config.info["input"] = input
+
         for key, val in row.items():
             if isinstance(val, str) and val != "na" and len(val) > 0:
                 config.info[key] = val

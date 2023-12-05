@@ -37,20 +37,21 @@ from tqdm import tqdm
 
 BATCH_SIZE = 100
 
-DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts_large/oc_22/")  # HSRN
-# DATASET_FP = Path("/scratch/work/martiniani/for_gregory/oc22/oc22")  # Greene
+# DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts_large/oc_22/")  # HSRN
+DATASET_FP = Path("/scratch/work/martiniani/for_gregory/oc22/oc22")  # Greene
 # DATASET_FP = Path("data/oc22/")  # remove
 TXT_FP = DATASET_FP / "oc22_trajectories/trajectories/oc22/"
 DATASET = "OC22"
 
 SOFTWARE = "VASP"
-METHODS = "DFT-PBE"
+METHODS = "DFT-PBE+U"
 
 PUBLICATION = "https://doi.org/10.1021/acscatal.2c05426"
 DATA_LINK = (
     "https://github.com/Open-Catalyst-Project/ocp/blob/main/DATASET.md#"
     "open-catalyst-2022-oc22"
 )
+OTHER_LINKS = ["https://opencatalystproject.org/"]
 LINKS = [
     "https://github.com/Open-Catalyst-Project/ocp/blob/main/DATASET.md#"
     "open-catalyst-2022-oc22",
@@ -159,6 +160,16 @@ ds_name_path_desc = (
 metadata = {
     "software": {"value": SOFTWARE},
     "method": {"value": METHODS},
+    "input": {
+        "value": {
+            "encut": {"value": 500, "units": "eV"},
+            "ediff": 1 * 10e-4,
+            "ediffg": 0.05,
+            "kpoint-scheme": "gamma-centered",
+            "kpoints": {"bulk": "50/a x 50/b x 50/c", "slab": "30/a x 30/b x 1"},
+            "ismear": 0,
+        }
+    },
 }
 
 property_map = {
@@ -207,7 +218,7 @@ def main(argv, dataset):
         "--db_name",
         type=str,
         help="Name of MongoDB database to add dataset to",
-        default="----",
+        default="cf-test",
     )
     parser.add_argument(
         "-p",
@@ -216,10 +227,14 @@ def main(argv, dataset):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
     ds_id = generate_ds_id()
@@ -275,7 +290,7 @@ def main(argv, dataset):
         do_hashes=all_do_ids,
         name=ds_name,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
         description=f"{desc}{DS_DESC}",
         verbose=True,
     )

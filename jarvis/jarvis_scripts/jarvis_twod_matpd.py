@@ -61,6 +61,9 @@ DS_DESC = (
     "current materials design challenges."
 )
 
+PUBLICATION = "https://doi.org/10.1038/s41597-019-0097-3"
+DATA_LINK = "https://ndownloader.figshare.com/files/26789006"
+OTHER_LINKS = ["https://jarvis.nist.gov/"]
 LINKS = [
     "https://doi.org/10.1038/s41597-019-0097-3",
     "https://jarvis.nist.gov/",
@@ -82,7 +85,13 @@ ELEMENTS = None
 PI_MD = {
     "software": {"value": "VASP"},
     "method": {"value": "DFT-vdW-optB88"},
-    "ecut": {"value": "520 eV"},
+    "input": {
+        "value": {
+            "encut": {"value": 520, "units": "eV"},
+            "ediffg": 1 * 10e-4,
+            "isif": 3,
+        }
+    },
 }
 
 PROPERTY_MAP = {

@@ -83,6 +83,10 @@ DS_DESC = (
     "design challenges."
 )
 
+PUBLICATION = "https://doi.org/10.1038/sdata.2016.86"
+DATA_LINK = "https://ndownloader.figshare.com/files/28814184"
+OTHER_LINKS = ["https://jarvis.nist.gov/"]
+
 LINKS = [
     "https://doi.org/10.1038/sdata.2016.86",
     "https://jarvis.nist.gov/",

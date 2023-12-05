@@ -51,6 +51,10 @@ DS_DESC = (
     "tools and datasets built to meet current materials design challenges."
 )
 
+PUBLICATION = "https://doi.org/10.1021/acs.nanolett.2c04420"
+DATA_LINK = "https://figshare.com/ndownloader/files/38950433"
+OTHER_LINKS = ["https://jarvis.nist.gov/"]
+
 LINKS = [
     "https://figshare.com/ndownloader/files/38950433",
     "https://jarvis.nist.gov/",
@@ -74,7 +78,7 @@ PROPERTY_MAP = {
             "_metadata": {
                 "software": {"value": "Quantum ESPRESSO"},
                 "method": {"value": "PBEsol"},
-                "ecut": {"field": "610 eV"},
+                "input": {"encut": {"value": 610, "units": "eV"}},
             },
         }
     ],
@@ -173,7 +177,7 @@ CO_KEYS = [
     "cfid",
     "dos_info",
     #  'formation_energy_peratom',
-    "formula",
+    # "formula",
     "jid",
     "lamb",
     "press",

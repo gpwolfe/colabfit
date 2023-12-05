@@ -93,6 +93,8 @@ import json
 from pathlib import Path
 import sys
 
+import numpy as np
+
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import generate_ds_id, load_data
 from colabfit_utilities import get_client
@@ -108,6 +110,9 @@ DS_DESC = (
     "tools and datasets built to meet current materials design challenges."
 )
 
+PUBLICATION = "https://doi.org/10.1038/s41524-020-00440-1"
+DATA_LINK = "https://doi.org/10.6084/m9.figshare.6815699"
+OTHER_LINKS = ["https://jarvis.nist.gov/"]
 LINKS = [
     "https://doi.org/10.1038/s41524-020-00440-1",
     "https://jarvis.nist.gov/",
@@ -154,7 +159,7 @@ PROPERTY_MAP = {
             "_metadata": {
                 "software": {"value": "VASP"},
                 "method": {"field": "method"},
-                "ecut": {"field": "encut"},
+                "input": {"field": "input"},
             },
         }
     ],
@@ -164,6 +169,7 @@ PROPERTY_MAP = {
             "_metadata": {
                 "method": {"value": "DFT-TBmBJ"},
                 "software": {"value": "VASP"},
+                "input": {"field": "input"},
             },
         },
         {
@@ -171,6 +177,7 @@ PROPERTY_MAP = {
             "_metadata": {
                 "method": {"value": "DFT-OptB88vdW"},
                 "software": {"value": "VASP"},
+                "input": {"field": "input"},
             },
         },
     ],
@@ -181,7 +188,7 @@ PROPERTY_MAP = {
             "_metadata": {
                 "software": {"value": "VASP"},
                 "method": {"value": "DFT-OptB88vdW"},
-                "ecut": {"field": "encut"},
+                "input": {"field": "input"},
             },
         }
     ],
@@ -214,6 +221,23 @@ def reader(fp):
             )
         config.info["name"] = f"{fp.stem}_{i}"
         config.info["method"] = f"DFT-{row.pop('func')}"
+
+        # input
+        input = dict()
+        if config.info.get("kpoint_length_unit") is not None:
+            input["kpoint_length_unit"] = config.info.pop("kpoint_length_unit")
+        if (
+            config.info.get("kpoints_array") is not None
+            and config.info["kpoints_array"] != "na"
+        ):
+            kpoints = config.info.pop("kpoints_array")
+            if isinstance(kpoints, np.ndarray):
+                kpoints = kpoints.tolist()
+            input["kpoints"] = kpoints
+        if config.info.get("encut") is not None:
+            input["encut"] = config.pop("encut")
+        config.info["input"] = input
+
         for key, val in row.items():
             if isinstance(val, str) and val != "na" and len(val) > 0:
                 config.info[key] = val
