@@ -380,7 +380,7 @@ def main(ip, port, db_name, nprocs):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
-        verbose=True,
+        verbose=False,
     )
 
 

@@ -186,7 +186,7 @@ def main(argv):
         ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description=DATASET_DESC,
         verbose=True,
         cs_ids=cs_ids,  # remove line if no configuration sets to insert

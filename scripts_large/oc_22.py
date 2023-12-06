@@ -292,7 +292,7 @@ def main(argv, dataset):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
         description=f"{desc}{DS_DESC}",
-        verbose=True,
+        verbose=False,
     )
 
 

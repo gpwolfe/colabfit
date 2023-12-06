@@ -226,7 +226,7 @@ def main(argv):
             co_md_map=CO_METADATA,
             property_map=PROPERTY_MAP,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -239,7 +239,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
         description=DS_DESC,
-        verbose=True,
+        verbose=False,
     )
 
 

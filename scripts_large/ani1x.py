@@ -306,7 +306,7 @@ def main(argv):
             ds_id=ds_id,
             property_map=PROPERTY_MAP,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -340,7 +340,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
         description=DATASET_DESC,
-        verbose=True,
+        verbose=False,
         # cs_ids=cs_ids,  # remove line if no configuration sets to insert
     )
 

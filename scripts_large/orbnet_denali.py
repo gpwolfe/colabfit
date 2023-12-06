@@ -132,7 +132,7 @@ def main(argv):
         default_name="orbnet-denali",
         reader=reader_OrbNet,
         glob_string="denali_labels.csv",
-        verbose=True,
+        verbose=False,
         generator=False,
     )
     property_map = {

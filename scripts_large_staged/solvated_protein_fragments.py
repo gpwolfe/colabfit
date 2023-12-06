@@ -157,7 +157,7 @@ def main(argv):
         default_name="solvated_protein",
         reader=reader_protein,
         glob_string=GLOB_STR,
-        verbose=True,
+        verbose=False,
         generator=True,
     )
 
@@ -171,7 +171,7 @@ def main(argv):
             ds_id=ds_id,
             property_map=PROPERTY_MAP,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -184,7 +184,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK],
         description=DATASET_DESC,
-        verbose=True,
+        verbose=False,
     )
 
 

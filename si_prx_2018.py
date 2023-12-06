@@ -156,6 +156,8 @@ DS_DESC = (
     "tensor, and three force components for each atom."
 )
 AUTHORS = ["Albert P. Bartók", "James Kermode", "Noam Bernstein", "Gábor Csányi"]
+PUBLICATION = "https://doi.org/10.1063/1.4990503"
+DATA_LINK = "https://github.com/DescriptorZoo/sensitivity-dimensionality-results"
 LINKS = [
     "https://doi.org/10.1063/1.4990503",
     "https://github.com/DescriptorZoo/sensitivity-dimensionality-results",
@@ -307,7 +309,7 @@ def main(argv):
         ds_id=ds_id,
         name=DS_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         resync=True,
         verbose=True,
