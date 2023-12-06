@@ -122,7 +122,7 @@ def main(argv):
         ],
         "atomic-forces": [
             {
-                "forces": {"field": "forces", "units": "kcal/mol/Ang"},
+                "forces": {"field": "forces", "units": "kcal/mol/angstrom"},
                 "_metadata": {
                     "software": {"value": "FHI-aims"},
                     "method": {"value": "DFT-PBE+TS"},

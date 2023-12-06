@@ -199,7 +199,7 @@ def main(argv):
         ],
         "atomic-forces": [
             {
-                "forces": {"field": "F", "units": "kcal/mol Angstrom"},
+                "forces": {"field": "F", "units": "kcal/mol/angstrom"},
                 "_metadata": metadata,
             }
         ],

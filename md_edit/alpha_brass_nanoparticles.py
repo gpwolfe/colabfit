@@ -69,7 +69,7 @@ property_map = {
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "forces", "units": "meV Å^-1"},
+            "forces": {"field": "forces", "units": "eV/angstrom"},
             "_metadata": metadata,
         }
     ],

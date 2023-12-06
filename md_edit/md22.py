@@ -72,7 +72,7 @@ PROPERTY_MAP = {
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "forces", "units": "kcal/mol A"},
+            "forces": {"field": "forces", "units": "kcal/mol/angstrom"},
             "_metadata": PI_METADATA,
         },
     ],
