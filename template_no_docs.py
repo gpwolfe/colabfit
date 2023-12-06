@@ -138,7 +138,7 @@ def main(argv):
             co_md_map=CO_METADATA,
             property_map=PROPERTY_MAP,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -161,9 +161,9 @@ def main(argv):
         ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description=DATASET_DESC,
-        verbose=True,
+        verbose=False,
         cs_ids=cs_ids,  # remove line if no configuration sets to insert
     )
 

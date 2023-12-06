@@ -225,10 +225,14 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(cauchy_stress_pd)
@@ -242,7 +246,7 @@ def main(argv):
         elements=ELEMENTS,
         reader=reader,
         glob_string=GLOB_STR,
-        generator=True,
+        generator=False,
     )
 
     ids = list(
@@ -252,7 +256,7 @@ def main(argv):
             co_md_map=CO_METADATA,
             property_map=PROPERTY_MAP,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -275,7 +279,7 @@ def main(argv):
         ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description=DATASET_DESC,
         verbose=True,
         cs_ids=cs_ids,  # remove line if no configuration sets to insert

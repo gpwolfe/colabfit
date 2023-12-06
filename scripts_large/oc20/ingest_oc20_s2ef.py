@@ -35,6 +35,8 @@ AUTHORS = [
     "C. Lawrence Zitnick",
     "Zachary Ulissi",
 ]
+PUBLICATION = "https://doi.org/10.1021/acscatal.0c04525"
+DATA_LINK = "https://github.com/Open-Catalyst-Project/ocp/blob/main/DATASET.md"
 LINKS = [
     "https://doi.org/10.1021/acscatal.0c04525",
     "https://github.com/Open-Catalyst-Project/ocp/blob/main/DATASET.md",
@@ -265,7 +267,7 @@ def main(argv):
             ds_id=ds_id,
             name=dataset,
             authors=AUTHORS,
-            links=LINKS,
+            links=[PUBLICATION, DATA_LINK],
             description=ds_vals["desc"],
             verbose=True,
         )

@@ -64,6 +64,9 @@ AUTHORS = [
     "C. Lawrence Zitnick",
     "Zachary Ulissi",
 ]
+
+PUBLICATION = "https://arxiv.org/abs/2010.09990"
+DATA_LINK = "https://github.com/Open-Catalyst-Project/ocp/blob/main/DATASET.md"
 LINKS = [
     "https://arxiv.org/abs/2010.09990",
     "https://github.com/Open-Catalyst-Project/ocp/blob/main/DATASET.md",
@@ -302,9 +305,9 @@ async def main(argv):
         ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
-        verbose=True,
+        verbose=False,
     )
 
 
