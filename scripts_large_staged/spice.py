@@ -1,8 +1,10 @@
 """
-author:
+author: Gregory Wolfe
 
 Properties
 ----------
+potential energy
+formation energy
 
 Other properties added to metadata
 ----------------------------------
@@ -35,13 +37,17 @@ Iterate over zip:
 ('mbis_quadrupoles', (50, 27, 3, 3)),
 """
 from argparse import ArgumentParser
+import functools
 import h5py
 import json
+import logging
 from pathlib import Path
 import sys
+import time
 
 from ase.atoms import Atoms
 from tqdm import tqdm
+import pymongo
 from pymongo.errors import InvalidOperation
 
 # from colabfit.tools.configuration import AtomicConfiguration
@@ -202,6 +208,30 @@ def reader(fp):
                 yield config
 
 
+MAX_AUTO_RECONNECT_ATTEMPTS = 100
+
+
+def auto_reconnect(mongo_func):
+    """Gracefully handle a reconnection event."""
+
+    @functools.wraps(mongo_func)
+    def wrapper(*args, **kwargs):
+        for attempt in range(MAX_AUTO_RECONNECT_ATTEMPTS):
+            try:
+                return mongo_func(*args, **kwargs)
+            except pymongo.errors.AutoReconnect as e:
+                wait_t = 0.5 * pow(2, attempt)  # exponential back off
+                logging.warning(
+                    "PyMongo auto-reconnecting... %s. Waiting %.1f seconds.",
+                    str(e),
+                    wait_t,
+                )
+                time.sleep(wait_t)
+
+    return wrapper
+
+
+@auto_reconnect
 def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
