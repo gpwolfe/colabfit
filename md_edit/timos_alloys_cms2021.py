@@ -9,8 +9,8 @@ from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from ase.io.vasp import read_vasp
 
 DATASET_FP = Path(
-    "/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets"
-    "/Ti:Mo_alloys_SilvaAndrea/"
+    "/persistent/colabfit_raw_data/colabfit_data/"
+    "new_raw_datasets/Ti:Mo_alloys_SilvaAndrea/"
 )
 DATASET_FP = Path().cwd().parent / "data/timos_alloys_cms2021"
 DATASET = "TiMoS_alloys_CMS2021"

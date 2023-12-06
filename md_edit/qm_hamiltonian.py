@@ -41,6 +41,7 @@ from pathlib import Path
 import sys
 
 DB_PATH = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/qm_hamiltonian")
+DB_PATH = Path().cwd().parent / "data/qm_hamiltonian"
 
 DS_NAME = "QM_hamiltonian_nature_2019"
 AUTHORS = [

@@ -15,7 +15,7 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/new_raw_datasets/"
     "BOTNet/BOTNet-datasets-main/dataset_acac"
 )
-DATASET_FP = Path().cwd().parents / "data/dataset_acac"  # local
+DATASET_FP = Path().cwd().parent / "data/dataset_acac"  # local
 DATASET_NAME = "BOTnet_ACAC_2022"
 AUTHORS = [
     "Ilyes Batatia",

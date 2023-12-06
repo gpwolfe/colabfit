@@ -31,6 +31,7 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/qm_22/QM-22-main"
 )
+DATASET_FP = Path().cwd().parent / "data/qm_22"
 DATASET = "QM-22"
 
 

@@ -12,7 +12,7 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/colabfit_data/"
     "new_raw_datasets/C_allotropes_MingjianEllad/carbon_energies_forces/"
 )
-DATASET_FP = Path().cwd().parent / ""
+DATASET_FP = Path().cwd().parent / "data/c_allotropes"
 DATASET = "C_NPJ2020"
 PUBLICATION = "https://doi.org/10.1038/s41524-020-00390-8"
 DATA_LINK = "https://doi.org/10.6084/m9.figshare.12649811.v1"

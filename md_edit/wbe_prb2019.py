@@ -22,7 +22,7 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/colabfit_data/data/"
     "FitSNAP/examples/WBe_PRB2019/JSON/"
 )
-DATASET_FP = Path().cwd().parent / "data/FitSNAP-master/examples/WBe_PRB2019/JSON"
+DATASET_FP = Path().cwd().parent / "data/WBe_PRB2019/JSON"
 DATASET = "WBe_PRB2019"
 
 PUBLICATION = "https://doi.org/10.1103/PhysRevB.99.184305"

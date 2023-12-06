@@ -7,6 +7,7 @@ Uses atomization-energy property imported from original script directory
 """
 
 from argparse import ArgumentParser
+import json
 from pathlib import Path
 import sys
 from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
@@ -93,7 +94,9 @@ def main(argv):
     )
 
     client.insert_property_definition(potential_energy_pd)
-
+    with open("atomization_energy.json", "r") as f:
+        atomization_energy_pd = json.load(f)
+    client.insert_property_definition(atomization_energy_pd)
     # client.insert_property_definition('/home/ubuntu/calc_notebook/atomization-energy.json')
 
     property_map = {
@@ -146,7 +149,6 @@ def main(argv):
     )
 
     all_co_ids, all_pr_ids = list(zip(*ids))
-    print(len(all_co_ids), len(list(set(all_co_ids))))
 
     # matches to data CO "name" field
     cs_regexes = {

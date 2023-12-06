@@ -95,7 +95,10 @@ property_map = {
         }
     ],
 }
-CO_MD = {"kinetic-energy": {"field": "kinetic_energy"}}
+CO_MD = {
+    "kinetic-energy": {"field": "kinetic_energy"},
+    "temperature": {"field": "temperature"},
+}
 
 
 def reader(fp):
@@ -103,10 +106,8 @@ def reader(fp):
     configs = read(fp, index=":")
     for i, config in enumerate(configs):
         config.info["name"] = f"{name}_{i}"
-
         config.info["input"] = {
             "encut": {"value": 300, "units": "eV"},
-            "temperature": {"value": config.info["temperature"]},
         }
     return configs
 

@@ -9,7 +9,7 @@ from ase.atoms import Atoms
 
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets/sGDML")
-DATASET_FP = Path().cwd().parent / "data/benzene_dft_2018"
+DATASET_FP = Path().cwd().parent / "data/sgdml"
 
 DATASET = "Benzene_DFT_NC2018"
 PUBLICATION = "https://doi.org/10.1126/sciadv.1603015"
@@ -98,7 +98,7 @@ def main(argv):
     )
 
     configurations = load_data(
-        file_path=DATASET_FP / "sGDML",
+        file_path=DATASET_FP,
         file_format="folder",
         name_field="_name",
         elements=["C", "H"],

@@ -39,7 +39,7 @@ import sys
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/gfn_xtb_si/gfn_data/npz/"
 )
-DATASET_FP = Path().cwd.parent / "data/gfn_xtb_si"
+DATASET_FP = Path().cwd().parent / "data/gfn_xtb_si"
 PUBLICATION = "https://doi.org/10.1021/acs.jcim.1c01170"
 DATA_LINK = "https://doi.org/10.24435/materialscloud:14-4m"
 LINKS = [
