@@ -1,9 +1,35 @@
 from ase import Atoms
+from argparse import ArgumentParser
 from colabfit.tools.converters import AtomicConfiguration
+from colabfit.tools.database import MongoDatabase
 from collections import defaultdict
 import numpy as np
 from pathlib import Path
 import re
+
+
+def get_client(argv):
+    parser = ArgumentParser()
+    parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
+    parser.add_argument(
+        "-d",
+        "--db_name",
+        type=str,
+        help="Name of MongoDB database to add dataset to",
+        default="cf-test",
+    )
+    parser.add_argument(
+        "-p",
+        "--nprocs",
+        type=int,
+        help="Number of processors to use for job",
+        default=4,
+    )
+    args = parser.parse_args(argv)
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+    )
+    return client
 
 
 ####################################################################################
