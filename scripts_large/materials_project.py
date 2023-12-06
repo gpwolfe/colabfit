@@ -203,7 +203,7 @@ property_map = {
     ],
     "cauchy-stress": [
         {
-            "stress": {"field": "stress", "units": "eV/A"},
+            "stress": {"field": "stress", "units": "GPa"},
             "_metadata": metadata,
         }
     ],
