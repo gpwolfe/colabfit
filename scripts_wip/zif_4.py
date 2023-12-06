@@ -87,7 +87,7 @@ PI_METADATA = {
 PROPERTY_MAP = {
     "potential-energy": [
         {
-            "energy": {"field": "pot_en", "units": "a.u."},
+            "energy": {"field": "pot_en", "units": "hartree"},
             "per-atom": {"value": False, "units": None},
             "_metadata": PI_METADATA,
         }

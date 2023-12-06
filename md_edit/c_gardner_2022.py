@@ -127,7 +127,7 @@ def main(argv):
     property_map = {
         "atomic-forces": [
             {
-                "forces": {"field": "gap17_forces", "units": "eV/Ang"},
+                "forces": {"field": "gap17_forces", "units": "eV/angstrom"},
                 "_metadata": metadata,
             }
         ]

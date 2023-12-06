@@ -111,7 +111,7 @@ def main(argv):
         ],
         "atomic-forces": [
             {
-                "forces": {"field": "forces", "units": "kcal/molAng"},
+                "forces": {"field": "forces", "units": "kcal/mol/angstrom"},
                 "_metadata": PI_MD,
             }
         ],

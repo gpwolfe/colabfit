@@ -8,6 +8,11 @@ from pathlib import Path
 import re
 
 
+def get_client_notebook(ip, port, db_name, nprocs):
+    client = MongoDatabase(db_name, nprocs=nprocs, uri=f"mongodb://{ip}:{port}")
+    return client
+
+
 def get_client(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
@@ -25,9 +30,12 @@ def get_client(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
     return client
 

@@ -106,7 +106,7 @@ def main(argv):
         ],
         "atomic-forces": [
             {
-                "forces": {"field": "forces", "units": "kcal/molAng"},
+                "forces": {"field": "forces", "units": "kcal/mol/angstrom"},
                 "_metadata": {
                     "software": {"value": "Psi4"},
                     "method": {"value": "CCSD(T)"},

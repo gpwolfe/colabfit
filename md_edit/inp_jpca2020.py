@@ -141,7 +141,7 @@ def main(argv):
         ],
         "cauchy-stress": [
             {
-                "stress": {"field": "stress", "units": "kilobar"},
+                "stress": {"field": "stress", "units": "kbar"},
                 "_metadata": {
                     "software": {"value": "VASP"},
                     "method": {"value": "DFT-LDA"},

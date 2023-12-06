@@ -173,7 +173,7 @@ def main(argv):
             "field": "heat_capacity",
             "units": "cal/(mol K)",
         },
-        "dipole-moment": {"field": "dipole_moment", "units": "Debye"},
+        "dipole-moment": {"field": "dipole_moment", "units": "debye"},
         "enthalpy": {"field": "enthalpy", "units": "Ha"},
         "homo-energy": {"field": "homo", "units": "Ha"},
         "lumo-energy": {"field": "lumo", "units": "Ha"},

@@ -94,8 +94,8 @@ def reader_ws22(p):
 co_md = {
     "mulliken-charges": {"field": "mulliken", "units": "e"},
     "isotropic-polarizability": {"field": "iso_pol", "units": "Bohr^3"},
-    "dipole-moment": {"field": "dip_mom", "units": "Debye"},
-    "quadrupole-moment": {"field": "quad_mom", "units": "Debye-Angstrom"},
+    "dipole-moment": {"field": "dip_mom", "units": "debye"},
+    "quadrupole-moment": {"field": "quad_mom", "units": "debye-angstrom"},
     "rotational-constants": {"field": "rot_const", "units": "GHz"},
     "homo-energy": {"field": "he", "units": "eV"},
     "lumo-energy": {"field": "le", "units": "eV"},
@@ -119,7 +119,7 @@ property_map = {
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "forces", "units": "kcal/mol/A"},
+            "forces": {"field": "forces", "units": "kcal/mol/angstrom"},
             "_metadata": PI_MD,
         }
     ],

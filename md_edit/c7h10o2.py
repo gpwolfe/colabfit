@@ -191,7 +191,7 @@ def main(argv):
             "field": "alpha",
             "units": "Bohr^3",
         },
-        "dipole-moment": {"field": "mu", "units": "Debye"},
+        "dipole-moment": {"field": "mu", "debye"},
         "electronic-spatial-extent": {
             "field": "r2",
             "units": "Bohr^2",

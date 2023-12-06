@@ -125,7 +125,7 @@ def main(argv):
     client.insert_property_definition(atomic_forces_pd)
     metadata = {
         "software": {"value": "FHI-aims"},
-        "method": {"value": "DFT-PBE"},
+        "method": {"value": "DFT-PBE-TS"},
     }
 
     property_map = {
