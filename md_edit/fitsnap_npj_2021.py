@@ -40,7 +40,7 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/fitsnap/"
     "examples/Fe_Linear_NPJ2021/JSON"
 )
-DATASET_FP = Path().cwd().parent / "data/FitSNAP-master/examples/Fe_Linear_NPJ2021/JSON"
+DATASET_FP = Path().cwd().parent / "data/fitsnap/Fe_Linear_NPJ2021/JSON"
 DATASET = "FitSNAP_Fe_NPJ_2021"
 
 SOFTWARE = "VASP"

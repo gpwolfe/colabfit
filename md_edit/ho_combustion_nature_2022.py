@@ -69,7 +69,11 @@ def reader(filepath):
     rxn = data["RXN"][0]
     atoms = []
     for i, coords in enumerate(data["R"]):
-        N = int(data["N"][0])
+        N = data["N"][0]
+        if isinstance(N, np.ndarray):
+            N = int(N[0])
+        else:
+            N = int(N)
         coords = coords[:N]
         atom = AtomicConfiguration(positions=coords, numbers=data["Z"][i][:N])
         atom.info["name"] = name

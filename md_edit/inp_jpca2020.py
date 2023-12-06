@@ -22,9 +22,7 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/colabfit_data/data/FitSNAP/"
     "examples/InP_JPCA2020/JSON"
 )
-DATASET_FP = Path(
-    "/Users/piper/Code/colabfit/data/FitSNAP-master/examples/InP_JPCA2020/JSON"
-)
+DATASET_FP = Path().cwd().parent / "data/InP_JPCA2020/JSON"
 DATASET = "InP_JPCA2020"
 
 PUBLICATION = "https://doi.org/10.1021/acs.jpca.0c02450"

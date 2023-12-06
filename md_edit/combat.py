@@ -51,7 +51,6 @@ GLOB_STR = "*.json"
 
 
 def reader(filepath):
-    print(filepath)
     name = filepath.stem
     elements = []
     with open(filepath, "r") as f:

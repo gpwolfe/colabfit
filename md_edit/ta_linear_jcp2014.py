@@ -18,10 +18,10 @@ from colabfit.tools.property_definitions import (
 DATASET = "Ta_Linear_JCP2014"
 
 DATASET_FP = Path(
-    "/persistent/colabfit_raw_data/colabfit_data/data/"
-    "FitSNAP/examples/Ta_Linear_JCP2014/JSON/"
+    "/persistent/colabfit_raw_data/colabfit_data/data/FitSNAP/"
+    "examples/Ta_Linear_JCP2014/JSON/"
 )
-DATASET_FP = Path().cwd().parent / "data/FitSNAP-master/examples/Ta_Linear_JCP2014/JSON"
+DATASET_FP = Path().cwd().parent / "data/ta_linear_jcp/JSON"
 
 PUBLICATION = "https://doi.org/10.1016/j.jcp.2014.12.018"
 DATA_LINK = "https://github.com/FitSNAP/FitSNAP/tree/master/examples/Ta_Linear_JCP2014"

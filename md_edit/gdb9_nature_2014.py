@@ -208,7 +208,7 @@ def main(argv):
             }
         ],
     }
-    ds_id = generate_ds_id
+    ds_id = generate_ds_id()
     ids = list(
         client.insert_data(
             configurations,
