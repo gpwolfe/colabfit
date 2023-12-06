@@ -55,7 +55,7 @@ DATASET_FP = Path("data/cationic_complexes_yttrium")
 DATASET_NAME = "Cationic_phenoxyimine_complexes_of_yttrium"
 
 SOFTWARE = "Gaussian 09"
-METHODS = "DFT-B3PW91"
+METHODS = "DFT-B3PW91+D3(BJ)"
 
 PUBLICATION = "https://doi.org/10.1021/acs.organomet.2c00238"
 DATA_LINK = "https://doi.org/10.1021/acs.organomet.2c00238.s001"

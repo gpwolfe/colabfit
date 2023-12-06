@@ -64,12 +64,7 @@ PI_METADATA = {
     "software": {"value": SOFTWARE},
     "method": {"value": METHODS},
     "input": {
-        "value": {
-            "energy-cutoff": {"value": "400 eV"},
-            "ediff": 10e-3,
-            "ediffg": 10e-2
-            # "basis-set": {"field": "basis_set"}
-        }
+        "value": {"energy-cutoff": {"value": "400 eV"}, "ediff": 10e-3, "ediffg": 10e-2}
     },
 }
 GLOB_STR = "vasprun.xml.12242"

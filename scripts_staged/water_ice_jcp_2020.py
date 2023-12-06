@@ -33,7 +33,7 @@ from colabfit.tools.property_definitions import (
 )
 
 
-DATASET_FP = Path("data/MarsalekGroup-water-ice-jcp-2020")
+DATASET_FP = Path("data/water_ice_jcp_2020/MarsalekGroup-water-ice-jcp-2020")
 DATASET_NAME = "water_ice_JCP_2020"
 
 SOFTWARE = "CP2K"
