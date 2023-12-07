@@ -237,7 +237,7 @@ def main(argv):
         ],
         "atomic-forces": [
             {
-                "forces": {"field": "forces", "units": "eV/A"},
+                "forces": {"field": "forces", "units": "eV/angstrom"},
                 "_metadata": metadata,
             }
         ],
@@ -245,7 +245,7 @@ def main(argv):
     ala_property_map = {
         "atomic-forces": [
             {
-                "forces": {"field": "forces", "units": "eV/A"},
+                "forces": {"field": "forces", "units": "eV/angstrom"},
                 "_metadata": metadata,
             }
         ]

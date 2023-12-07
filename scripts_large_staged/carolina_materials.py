@@ -43,7 +43,7 @@ from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/new_raw_datasets_2.0/carolina_materials"
 )
-# DATASET_FP = Path("data/carolina_matdb") # local
+DATASET_FP = Path("data/carolina_matdb")  # local
 DATASET_NAME = "Carolina_Materials"
 
 SOFTWARE = "VASP"

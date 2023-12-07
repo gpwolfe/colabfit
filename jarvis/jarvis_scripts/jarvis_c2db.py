@@ -95,7 +95,7 @@ PI_MD = {
             "fermi-smearing": {"value": 0.05, "units": "eV"},
             "maximum-force": {"value": 0.01, "units": "eV/angstrom"},
             "maximum-stress": {"value": 0.002, "units": "eV/angstrom"},
-            "phonon-displacement": {"value": 0.01, "units": "A"},
+            "phonon-displacement": {"value": 0.01, "units": "angstrom"},
         },
     },
 }

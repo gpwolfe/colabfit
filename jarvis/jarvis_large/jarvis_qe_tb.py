@@ -79,11 +79,11 @@ PI_MD = {
     "method": {"value": "DFT-PBEsol"},
     "input": {
         "value": {
-            "encut": {"value": "45 Ry"},
+            "encut": {"value": "45", "units": "rydberg"},
             "pseudopotentials": "GBRV",
             "k-point-grid-density": {"value": 29, "units": "Ang^-1"},
             "smearing": "Gaussian",
-            "smearing-energy": {"value": 0.01, "units": "Ry"},
+            "smearing-energy": {"value": 0.01, "units": "rydberg"},
         }
     },
 }

@@ -56,7 +56,7 @@ DS_DESC = (
 property_map = {
     "potential-energy": [
         {
-            "energy": {"field": "energy", "units": "a.u."},
+            "energy": {"field": "energy", "units": "hartree"},
             "per-atom": {"field": "per-atom", "units": None},
             "_metadata": {
                 "software": {"value": "Gaussian 16"},

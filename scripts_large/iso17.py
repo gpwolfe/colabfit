@@ -36,7 +36,8 @@ import sys
 
 
 DB_PATH = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/iso17")
-DB_PATH = Path().cwd().parent / "data/iso17"
+DB_PATH = Path().cwd().parent / "data/iso17"  # local
+DB_PATH = Path("data/iso17")  # Greene
 
 DS_NAME = "ISO17_NC_2017"
 PUBLICATION = (
@@ -138,7 +139,7 @@ def main(argv):
         ],
         "atomic-forces": [
             {
-                "forces": {"field": "atomic_forces", "units": "eV/Ang"},
+                "forces": {"field": "atomic_forces", "units": "eV/angstrom"},
                 "_metadata": metadata,
             }
         ],

@@ -11,20 +11,21 @@ File notes
 ----------
 
 """
-# from argparse import ArgumentParser
+from argparse import ArgumentParser
 from pathlib import Path
 import sys
 
 from ase.io import read
 
 # from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import generate_ds_id, load_data  # , MongoDatabase
+from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     # cauchy_stress_pd,
     potential_energy_pd,
 )
-from colabfit_utilities import get_client
+
+# from colabfit_utilities import get_client
 
 DATASET_FP = Path("").cwd()
 DATASET_NAME = ""
@@ -93,7 +94,29 @@ def reader(filepath: Path):
 
 
 def main(argv):
-    client = get_client(argv)
+    parser = ArgumentParser()
+    parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
+    parser.add_argument(
+        "-d",
+        "--db_name",
+        type=str,
+        help="Name of MongoDB database to add dataset to",
+        default="cf-test",
+    )
+    parser.add_argument(
+        "-p",
+        "--nprocs",
+        type=int,
+        help="Number of processors to use for job",
+        default=4,
+    )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
+    args = parser.parse_args(argv)
+    client = MongoDatabase(
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
+    )
 
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)

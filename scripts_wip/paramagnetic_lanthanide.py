@@ -68,7 +68,7 @@ PROPERTY_MAP = {
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "forces", "units": "eV/A"},
+            "forces": {"field": "forces", "units": "eV/angstrom"},
             "_metadata": PI_METADATA,
         },
     ],
@@ -82,8 +82,8 @@ PROPERTY_MAP = {
 }
 
 CO_METADATA = {
-    "enthalpy": {"field": "h", "units": "Ha"},
-    "zpve": {"field": "zpve", "units": "Ha"},
+    "enthalpy": {"field": "h", "units": "hartree"},
+    "zpve": {"field": "zpve", "units": "hartree"},
 }
 
 CSS = [

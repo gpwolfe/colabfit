@@ -126,7 +126,7 @@ method = {
 PROPERTY_MAP = {
     "potential-energy": [
         {
-            "energy": {"field": "hf_dz.energy", "units": "Ha"},
+            "energy": {"field": "hf_dz.energy", "units": "hartree"},
             "per-atom": {"value": False, "units": None},
             "_metadata": {
                 "software": {"value": method["hf_dz.energy"].software},
@@ -135,7 +135,7 @@ PROPERTY_MAP = {
             },
         },
         {
-            "energy": {"field": "hf_qz.energy", "units": "Ha"},
+            "energy": {"field": "hf_qz.energy", "units": "hartree"},
             "per-atom": {"value": False, "units": None},
             "_metadata": {
                 "software": {"value": method["hf_qz.energy"].software},
@@ -144,7 +144,7 @@ PROPERTY_MAP = {
             },
         },
         {
-            "energy": {"field": "hf_tz.energy", "units": "Ha"},
+            "energy": {"field": "hf_tz.energy", "units": "hartree"},
             "per-atom": {"value": False, "units": None},
             "_metadata": {
                 "software": {"value": method["hf_tz.energy"].software},
@@ -153,7 +153,7 @@ PROPERTY_MAP = {
             },
         },
         {
-            "energy": {"field": "wb97x_dz.energy", "units": "Ha"},
+            "energy": {"field": "wb97x_dz.energy", "units": "hartree"},
             "per-atom": {"value": False, "units": None},
             "_metadata": {
                 "software": {"value": method["wb97x_dz.energy"].software},
@@ -162,7 +162,7 @@ PROPERTY_MAP = {
             },
         },
         {
-            "energy": {"field": "wb97x_tz.energy", "units": "Ha"},
+            "energy": {"field": "wb97x_tz.energy", "units": "hartree"},
             "per-atom": {"value": False, "units": None},
             "_metadata": {
                 "software": {"value": method["wb97x_tz.energy"].software},
@@ -171,7 +171,7 @@ PROPERTY_MAP = {
             },
         },
         {
-            "energy": {"field": "ccsd(t)_cbs.energy", "units": "Ha"},
+            "energy": {"field": "ccsd(t)_cbs.energy", "units": "hartree"},
             "per-atom": {"value": False, "units": None},
             "_metadata": {
                 "software": {"value": method["ccsd(t)_cbs.energy"].software},
@@ -182,7 +182,7 @@ PROPERTY_MAP = {
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "wb97x_dz.forces", "units": "Ha/A"},
+            "forces": {"field": "wb97x_dz.forces", "units": "hartree/angstrom"},
             "_metadata": {
                 "software": {"value": method["wb97x_dz.forces"].software},
                 "method": {"value": method["wb97x_dz.forces"].method},
@@ -190,7 +190,7 @@ PROPERTY_MAP = {
             },
         },
         {
-            "forces": {"field": "wb97x_tz.forces", "units": "Ha/A"},
+            "forces": {"field": "wb97x_tz.forces", "units": "hartree/angstrom"},
             "_metadata": {
                 "software": {"value": method["wb97x_tz.forces"].software},
                 "method": {"value": method["wb97x_tz.forces"].method},

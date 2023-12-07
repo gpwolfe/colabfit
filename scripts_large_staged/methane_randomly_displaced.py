@@ -45,7 +45,7 @@ AUTHORS = [
 property_map = {
     "potential-energy": [
         {
-            "energy": {"field": "energy", "units": "Ha"},
+            "energy": {"field": "energy", "units": "hartree"},
             "per-atom": {"field": False, "units": None},
             "_metadata": {
                 "software": {"value": "psi4"},
@@ -56,7 +56,7 @@ property_map = {
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "forces", "units": "Ha/Bohr"},
+            "forces": {"field": "forces", "units": "hartree/bohr"},
             "_metadata": {
                 "software": {"value": "psi4"},
                 "method": {"value": "DFT/PBE"},

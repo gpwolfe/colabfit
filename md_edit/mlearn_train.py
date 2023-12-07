@@ -115,7 +115,7 @@ def reader(path):
                 },
                 "forces-convergence": {
                     "value": 0.02,
-                    "units": "eV/Ang",
+                    "units": "eV/angstrom",
                 },
             }
 
@@ -161,7 +161,7 @@ def main(argv):
         ],
         "atomic-forces": [
             {
-                "forces": {"field": "forces", "units": "eV/Ang"},
+                "forces": {"field": "forces", "units": "eV/angstrom"},
                 "_metadata": {
                     "software": {"value": "VASP"},
                     "method": {"value": "DFT-PBE"},

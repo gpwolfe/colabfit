@@ -70,7 +70,7 @@ SOFT_METH = {
         "software": "Quantum ESPRESSO",
         "methods": "DFT-PBE",
         "input": {
-            "value": {"encut": {"value": 40, "units": "Ry"}},
+            "value": {"encut": {"value": 40, "units": "rydberg"}},
             "kpoints": "3 x 3 x 1",
         },
     },
@@ -91,7 +91,7 @@ DS_DESC = (
 )
 
 E_UNITS = "eV"
-F_UNITS = "eV/A"
+F_UNITS = "eV/angstrom"
 
 
 CONF_RE = re.compile(
@@ -314,7 +314,7 @@ def main(argv):
         ],
         "atomic-forces": [
             {
-                "forces": {"field": "forces", "units": "eV/A"},
+                "forces": {"field": "forces", "units": "eV/angstrom"},
                 "_metadata": metadata,
             }
         ],

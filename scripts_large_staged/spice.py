@@ -130,14 +130,14 @@ PI_METADATA = {
 PROPERTY_MAP = {
     "potential-energy": [
         {
-            "energy": {"field": "energy", "units": "Hartree"},
+            "energy": {"field": "energy", "units": "hartree"},
             "per-atom": {"value": False, "units": None},
             "_metadata": PI_METADATA,
         }
     ],
     "formation-energy": [
         {
-            "energy": {"field": "form_energy", "units": "Hartree"},
+            "energy": {"field": "form_energy", "units": "hartree"},
             "per-atom": {"value": False, "units": None},
             "_metadata": PI_METADATA,
         }

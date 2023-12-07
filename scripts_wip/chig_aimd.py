@@ -76,14 +76,14 @@ PI_METADATA = {
 PROPERTY_MAP = {
     "potential-energy": [
         {
-            "energy": {"field": "E_pot", "units": "Hartree"},
+            "energy": {"field": "E_pot", "units": "hartree"},
             "per-atom": {"value": False, "units": None},
             "_metadata": PI_METADATA,
         }
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "forces", "units": "Hartree/A"},
+            "forces": {"field": "forces", "units": "hartree/angstrom"},
             "_metadata": PI_METADATA,
         },
     ],
@@ -201,10 +201,14 @@ def main(argv):
         help="Number of processors to use for job",
         default=4,
     )
+    parser.add_argument(
+        "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
+    )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:27017"
+        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
 

@@ -150,7 +150,7 @@ def main(argv):
     metadata = {
         "software": {"value": SOFTWARE},
         "method": {"value": METHODS},
-        "input": {"encut": {"value": 100, "units": "Ry"}},
+        "input": {"encut": {"value": 100, "units": "rydberg"}},
     }
     co_md_map = {
         "dipole": {"field": "dipole"},
@@ -165,7 +165,7 @@ def main(argv):
         ],
         "atomic-forces": [
             {
-                "forces": {"field": "forces", "units": "eV/A"},
+                "forces": {"field": "forces", "units": "eV/angstrom"},
                 "_metadata": metadata,
             }
         ],
