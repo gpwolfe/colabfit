@@ -110,7 +110,7 @@ PROPERTY_MAP = {
     ],
     "cauchy-stress": [
         {
-            "stress": {"field": "stress", "units": "eV/A"},
+            "stress": {"field": "stress", "units": "eV/angstrom"},
             "volume-normalized": {"value": False, "units": None},
             "_metadata": PI_MD,
         }
@@ -123,7 +123,7 @@ PROPERTY_MAP = {
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "forces", "units": "eV/A"},
+            "forces": {"field": "forces", "units": "eV/angstrom"},
             "_metadata": PI_MD,
         }
     ],

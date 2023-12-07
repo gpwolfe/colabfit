@@ -224,7 +224,7 @@ def reader(fp):
             config.info["input"] = {
                 "encut": {"value": encut, "units": "eV"},
                 "ediff": {"value": 10e-7, "units": "eV"},
-                "ediffg": {"value": 0.0001, "units": "eV/A"},
+                "ediffg": {"value": 0.0001, "units": "eV/angstrom"},
             }
         for key, val in row.items():
             if isinstance(val, str) and val != "na" and len(val) > 0:

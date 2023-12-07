@@ -111,7 +111,7 @@ PI_MD = {
         "prec": "Accurate",
         "kspacing": {"value": 0.25, "units": "Ang^-1"},
         "kpoints-scheme": "Monkhorst-Pack",
-        "ediffg": {"value": 0.01, "units": "eV/Ang"},
+        "ediffg": {"value": 0.01, "units": "eV/angstrom"},
     },
 }
 BAND_PI_MD = {
@@ -122,7 +122,7 @@ BAND_PI_MD = {
         "prec": "Accurate",
         "kspacing": {"value": 0.20, "units": "Ang^-1"},
         "kpoints-scheme": "Monkhorst-Pack",
-        "ediffg": {"value": 0.01, "units": "eV/Ang"},
+        "ediffg": {"value": 0.01, "units": "eV/angstrom"},
     },
 }
 BG_HSE_MD = {
@@ -133,7 +133,7 @@ BG_HSE_MD = {
         "prec": "Accurate",
         "kspacing": {"value": 0.20, "units": "Ang^-1"},
         "kpoints-scheme": "Monkhorst-Pack",
-        "ediffg": {"value": 0.01, "units": "eV/Ang"},
+        "ediffg": {"value": 0.01, "units": "eV/angstrom"},
     },
 }
 
