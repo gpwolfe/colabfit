@@ -67,7 +67,7 @@ CSS = {
             "method": {"value": "DFT-PBE-D3"},
             "input": {
                 "value": {
-                    "energy-cutoff": {"value": 460, "units": "Ry"},
+                    "energy-cutoff": {"value": 460, "units": "rydberg"},
                     "basis-set": {"value": "DZVP"},
                 },
             },
@@ -81,7 +81,7 @@ CSS = {
             "method": {"value": "DFT-PBE-D3"},
             "input": {
                 "value": {
-                    "energy-cutoff": {"value": 460, "units": "Ry"},
+                    "energy-cutoff": {"value": 460, "units": "rydberg"},
                     "basis-set": {"value": "DZVP"},
                 }
             },
@@ -95,7 +95,7 @@ CSS = {
             "method": {"value": "DFT-revPBE0-D3"},
             "input": {
                 "value": {
-                    "energy-cutoff": {"value": 400, "units": "Ry"},
+                    "energy-cutoff": {"value": 400, "units": "rydberg"},
                     "basis-set": {"value": "TZV2P"},
                 }
             },
@@ -109,7 +109,7 @@ CSS = {
             "method": {"value": "DFT-optB88-vdW"},
             "input": {
                 "value": {
-                    "energy-cutoff": {"value": 550, "units": "Ry"},
+                    "energy-cutoff": {"value": 550, "units": "rydberg"},
                     "basis-set": {"value": "DZVP"},
                 }
             },
@@ -123,7 +123,7 @@ CSS = {
             "method": {"value": "DFT-BLYP-D3"},
             "input": {
                 "value": {
-                    "energy-cutoff": {"value": 280, "units": "Ry"},
+                    "energy-cutoff": {"value": 280, "units": "rydberg"},
                     "basis-set": {"value": "TZV2P"},
                 }
             },
@@ -137,7 +137,7 @@ CSS = {
             "method": {"value": "DFT-optB88-vdW"},
             "input": {
                 "value": {
-                    "energy-cutoff": {"value": 400, "units": "Ry"},
+                    "energy-cutoff": {"value": 400, "units": "rydberg"},
                     "basis-set": {"value": "DZVP"},
                 }
             },
@@ -253,7 +253,7 @@ def main(argv):
             ],
             "atomic-forces": [
                 {
-                    "forces": {"field": "forces", "units": "eV/A"},
+                    "forces": {"field": "forces", "units": "eV/angstrom"},
                     "_metadata": val["metadata"],
                 },
             ],

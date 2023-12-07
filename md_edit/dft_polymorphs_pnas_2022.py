@@ -76,7 +76,7 @@ property_map_pbe = {
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "forces", "units": "eV/Ang"},
+            "forces": {"field": "forces", "units": "eV/angstrom"},
             "_metadata": PI_MD_PBE,
         }
     ],
@@ -98,7 +98,7 @@ property_map_mbd = {
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "forces", "units": "eV/Ang"},
+            "forces": {"field": "forces", "units": "eV/angstrom"},
             "_metadata": PI_MD_MBD,
         }
     ],

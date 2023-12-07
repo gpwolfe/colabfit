@@ -62,7 +62,7 @@ PROPERTY_MAP = {
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "forces", "units": "eV/A"},
+            "forces": {"field": "forces", "units": "eV/angstrom"},
             "_metadata": PI_METADATA,
         },
     ],
@@ -77,8 +77,8 @@ PROPERTY_MAP = {
 
 # Define any configuration-specific metadata here.
 CO_METADATA = {
-    "enthalpy": {"field": "h", "units": "Ha"},
-    "zpve": {"field": "zpve", "units": "Ha"},
+    "enthalpy": {"field": "h", "units": "hartree"},
+    "zpve": {"field": "zpve", "units": "hartree"},
 }
 
 # If obvious configuration divisions exist, create mapping

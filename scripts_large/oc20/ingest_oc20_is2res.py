@@ -125,7 +125,7 @@ property_map = {
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "forces", "units": "eV/Ang"},
+            "forces": {"field": "forces", "units": "eV/angstrom"},
             "_metadata": {
                 "software": {"value": "VASP"},
                 "method": {"value": "DFT-PBE"},

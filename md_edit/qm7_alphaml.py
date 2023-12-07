@@ -256,7 +256,7 @@ def main(argv):
     ccsd_total_energy_map = {
         "potential-energy": [
             {
-                "energy": {"field": "total_energy", "units": "a.u."},
+                "energy": {"field": "total_energy", "units": "hartree"},
                 "per-atom": {"value": False, "units": None},
                 "_metadata": ccsd_metadata,
             }
@@ -268,14 +268,14 @@ def main(argv):
         "method": {"value": "DFT-B3LYP"},
     }
     # b3lyp_co_md_map = {
-    #     "lumo-energy": {"field": "lumo_energy", "units": "a.u."},
-    #     "homo-energy": {"field": "homo_energy", "units": "a.u."},
+    #     "lumo-energy": {"field": "lumo_energy", "units": "hartree"},
+    #     "homo-energy": {"field": "homo_energy", "units": "hartree"},
     # }
 
     b3lyp_energy_map = {
         "potential-energy": [
             {
-                "energy": {"field": "total_energy", "units": "a.u."},
+                "energy": {"field": "total_energy", "units": "hartree"},
                 "per-atom": {"value": False, "units": None},
                 "_metadata": b3lyp_metadata,
             }

@@ -108,7 +108,7 @@ PROPERTY_MAP_CASS = {
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "forces", "units": "eV/A"},
+            "forces": {"field": "forces", "units": "eV/angstrom"},
             "_metadata": PI_METADATA_CASS,
         },
     ],
@@ -123,7 +123,7 @@ PROPERTY_MAP_DFT = {
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "forces", "units": "eV/A"},
+            "forces": {"field": "forces", "units": "eV/angstrom"},
             "_metadata": PI_METADATA_DFT,
         },
     ],

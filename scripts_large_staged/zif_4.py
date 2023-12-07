@@ -94,7 +94,7 @@ PROPERTY_MAP = {
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "forces", "units": "eV/A"},
+            "forces": {"field": "forces", "units": "eV/angstrom"},
             "_metadata": PI_METADATA,
         },
     ],
@@ -108,9 +108,9 @@ PROPERTY_MAP = {
 }
 
 CO_METADATA = {
-    "kinetic_energy": {"field": "kin_en", "units": "a.u."},
+    "kinetic_energy": {"field": "kin_en", "units": "hartree"},
     "temperature": {"field": "temp", "units": "K"},
-    "elastic_const_qty": {"field": "elast_const", "units": "a.u."},
+    "elastic_const_qty": {"field": "elast_const", "units": "hartree/bohr^3"},
     "time": {"field": "time", "units": "fs"},
 }
 

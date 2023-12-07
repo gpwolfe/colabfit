@@ -161,7 +161,7 @@ def main(argv):
         ],
         "atomic-forces": [
             {
-                "forces": {"field": "vasp_force", "units": "eV/Ang"},
+                "forces": {"field": "vasp_force", "units": "eV/angstrom"},
                 "_metadata": PI_MD,
             }
         ],

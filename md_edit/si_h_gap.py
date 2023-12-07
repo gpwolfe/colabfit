@@ -126,7 +126,7 @@ def main(argv):
         "method": {"value": METHODS},
         "input": {
             "value": {
-                "encut": {"value": 42, "units": "Ry"},
+                "encut": {"value": 42, "units": "rydberg"},
                 "kspacing": {"value": 0.2, "units": "Ang^-1"},
             }
         },
@@ -156,7 +156,7 @@ def main(argv):
         ],
         "atomic-forces": [
             {
-                "forces": {"field": "dft_force", "units": "eV/A"},
+                "forces": {"field": "dft_force", "units": "eV/angstrom"},
                 "_metadata": metadata,
             }
         ],

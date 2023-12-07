@@ -152,7 +152,7 @@ def main(argv):
         "basis-set": {"value": "TZVP"},
         "input": {
             "pseudopotentials": "GTH",
-            "encut": {"value": 800, "units": "Ry"},
+            "encut": {"value": 800, "units": "rydberg"},
             "k-points": "gamma-point",
         },
     }
@@ -166,7 +166,7 @@ def main(argv):
         ],
         "atomic-forces": [
             {
-                "forces": {"field": "forces", "units": "eV/A"},
+                "forces": {"field": "forces", "units": "eV/angstrom"},
                 "_metadata": metadata,
             }
         ],

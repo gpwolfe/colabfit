@@ -103,7 +103,7 @@ def main(argv):
         ],
         "atomic-forces": [
             {
-                "forces": {"field": "force", "units": "eV/Ang"},
+                "forces": {"field": "force", "units": "eV/angstrom"},
                 "_metadata": PI_MD
                 # The dataset is generated from DFT calculations using the Vienna
                 # Ab initio Simulation Package51. The exchange-correlation energy

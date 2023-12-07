@@ -171,7 +171,7 @@ def main(argv):
     property_map = {
         "potential-energy": [
             {
-                "energy": {"field": "energy", "units": "Hartree"},
+                "energy": {"field": "energy", "units": "hartree"},
                 "per-atom": {"value": False, "units": None},
                 "_metadata": metadata,
             }
@@ -238,7 +238,7 @@ def main(argv):
             property_map = {
                 "potential-energy": [
                     {
-                        "energy": {"field": "energy", "units": "Hartree"},
+                        "energy": {"field": "energy", "units": "hartree"},
                         "per-atom": {"value": False, "units": None},
                         "_metadata": metadata,
                     }

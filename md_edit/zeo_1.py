@@ -152,14 +152,14 @@ def main(argv):
     property_map = {
         "potential-energy": [
             {
-                "energy": {"field": "potential_energy", "units": "a.u."},
+                "energy": {"field": "potential_energy", "units": "hartree"},
                 "per-atom": {"value": False, "units": None},
                 "_metadata": metadata,
             }
         ],
         "cauchy-stress": [
             {
-                "stress": {"field": "cauchy_stress", "units": "a.u."},
+                "stress": {"field": "cauchy_stress", "units": "hartree/bohr^3"},
                 "_metadata": metadata,
             }
         ],

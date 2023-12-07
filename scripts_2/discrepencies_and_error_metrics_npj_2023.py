@@ -143,15 +143,15 @@ PROPERTY_MAP = {
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "forces_k1", "units": "eV/A"},
+            "forces": {"field": "forces_k1", "units": "eV/angstrom"},
             "_metadata": PI_METADATA_K1,
         },
         {
-            "forces": {"field": "forces_k2", "units": "eV/A"},
+            "forces": {"field": "forces_k2", "units": "eV/angstrom"},
             "_metadata": PI_METADATA_K2,
         },
         {
-            "forces": {"field": "forces_k4", "units": "eV/A"},
+            "forces": {"field": "forces_k4", "units": "eV/angstrom"},
             "_metadata": PI_METADATA_K4,
         },
     ],

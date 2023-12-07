@@ -174,10 +174,10 @@ def main(argv):
             "units": "cal/(mol K)",
         },
         "dipole-moment": {"field": "dipole_moment", "units": "debye"},
-        "enthalpy": {"field": "enthalpy", "units": "Ha"},
-        "homo-energy": {"field": "homo", "units": "Ha"},
-        "lumo-energy": {"field": "lumo", "units": "Ha"},
-        "homo-lumo-gap": {"field": "homo_lumo_gap", "units": "Ha"},
+        "enthalpy": {"field": "enthalpy", "units": "hartree"},
+        "homo-energy": {"field": "homo", "units": "hartree"},
+        "lumo-energy": {"field": "lumo", "units": "hartree"},
+        "homo-lumo-gap": {"field": "homo_lumo_gap", "units": "hartree"},
         "isotropic-polarizability": {
             "field": "isotropic_polarizability",
             "units": "Bohr^3",
@@ -186,23 +186,23 @@ def main(argv):
             "field": "elect_spatial_extent",
             "units": "Bohr^2",
         },
-        "zpve": {"field": "zpve", "units": "Ha"},
+        "zpve": {"field": "zpve", "units": "hartree"},
         "internal-energy-298K": {
             "field": "internal_energy_298",
-            "units": "Ha",
+            "units": "hartree",
         },
     }
     property_map = {
         "free-energy": [
             {
-                "energy": {"field": "free_energy", "units": "Ha"},
+                "energy": {"field": "free_energy", "units": "hartree"},
                 "per-atom": {"value": False, "units": None},
                 "_metadata": metadata,
             }
         ],
         "potential-energy": [
             {
-                "energy": {"field": "internal_energy_0", "units": "Ha"},
+                "energy": {"field": "internal_energy_0", "units": "hartree"},
                 "per-atom": {"value": False, "units": None},
                 "_metadata": metadata,
             }

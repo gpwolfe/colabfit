@@ -193,7 +193,7 @@ def main(argv):
         ],
         "atomic-forces": [
             {
-                "forces": {"field": "force", "units": "eV/A"},
+                "forces": {"field": "force", "units": "eV/angstrom"},
                 "_metadata": metadata,
             }
         ],

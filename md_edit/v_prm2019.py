@@ -70,7 +70,7 @@ property_map = {
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "force", "units": "eV/Ang"},
+            "forces": {"field": "force", "units": "eV/angstrom"},
             "_metadata": PI_MD,
         }
     ],
