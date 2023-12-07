@@ -108,7 +108,7 @@ PROPERTY_MAP = {
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "forces", "units": "eV/A"},
+            "forces": {"field": "forces", "units": "eV/angstrom"},
             "_metadata": PI_MD,
         },
     ],
@@ -157,7 +157,7 @@ def reader(fp):
         input = {
             "encut": {"value": 520, "units": "eV"},
             "ediff": {"value": 10e-5, "units": "eV"},
-            "ediffg": {"value": 0.02, "units": "eV/Ang"},
+            "ediffg": {"value": 0.02, "units": "eV/angstrom"},
             "kpoints": kpoint,
         }
         config.info["input"] = input

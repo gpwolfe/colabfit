@@ -13,28 +13,28 @@ def main():
     results = []
     query_update = [
         # Energy
-        (
-            {"potential-energy.energy.source-unit": {"$in": ["Ha", "a.u.", "Hartree"]}},
-            {"$set": {"potential-energy.energy.source-unit": "hartree"}},
-            "energy: a.u. to hartree",
-        ),
+        # (
+        #     {"potential-energy.energy.source-unit": {"$in": ["Ha", "a.u.", "Hartree"]}},
+        #     {"$set": {"potential-energy.energy.source-unit": "hartree"}},
+        #     "energy: a.u. to hartree",
+        # ),
         #  Forces
-        (
-            {
-                "atomic-forces.forces.source-unit": {
-                    "$in": [
-                        "kcal/mol/A",
-                        "kcal/mol angstrom",
-                        "kcal/mol Angstrom",
-                        "kcal/mol A",
-                        "kcal/mol/Ang",
-                        "kcal/molAng",
-                    ]
-                }
-            },
-            {"$set": {"atomic-forces.forces.source-unit": "kcal/mol/angstrom"}},
-            "forces: kcal/mol/A etc. to kcal/mol/angstrom",
-        ),
+        # (
+        #     {
+        #         "atomic-forces.forces.source-unit": {
+        #             "$in": [
+        #                 "kcal/mol/A",
+        #                 "kcal/mol angstrom",
+        #                 "kcal/mol Angstrom",
+        #                 "kcal/mol A",
+        #                 "kcal/mol/Ang",
+        #                 "kcal/molAng",
+        #             ]
+        #         }
+        #     },
+        #     {"$set": {"atomic-forces.forces.source-unit": "kcal/mol/angstrom"}},
+        #     "forces: kcal/mol/A etc. to kcal/mol/angstrom",
+        # ),
         (
             {
                 "atomic-forces.forces.source-unit": {
@@ -52,7 +52,7 @@ def main():
         # Stress
         (
             {"cauchy-stress.stress.source-unit": {"$in": ["eV/Ang^3"]}},
-            {"$set": {"atomic-forces.forces.source-unit": "eV/angstrom^3"}},
+            {"$set": {"cauchy-stress.stress.source-unit": "eV/angstrom^3"}},
             "stress eV/Ang^3 to eV/angstrom^3",
         ),
     ]

@@ -99,7 +99,7 @@ PROPERTY_MAP = {
                         "kpoints-scheme": "Monkhorst-Pack",
                         "kpoints": "4 x 4 x 1",
                         "ediff": {"value": 1 * 10e-5, "units": "eV"},
-                        "ediffg": {"value": 0.02, "units": "eV/A"},
+                        "ediffg": {"value": 0.02, "units": "eV/angstrom"},
                     },
                 },
             },
