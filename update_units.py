@@ -5,7 +5,6 @@ from datetime import datetime
 
 
 def main():
-    # db = get_client_notebook(db_name='zif4', ip='10.32.250.13', port=30007, nprocs=8)
     client = MongoClient(host="mongodb://10.32.250.13:30007")
     db = client["cf-update-2023-11-30"]
     # db = client['zif4']
@@ -14,10 +13,30 @@ def main():
     query_update = [
         # Energy
         # (
-        #     {"potential-energy.energy.source-unit": {"$in": ["Ha", "a.u.", "Hartree"]}},
+        # {"potential-energy.energy.source-unit": {"$in": ["Ha", "a.u.",
+        #                                                  "Hartree"]}},
         #     {"$set": {"potential-energy.energy.source-unit": "hartree"}},
         #     "energy: a.u. to hartree",
         # ),
+        (
+            {
+                "atomization-energy.energy.source-unit": {
+                    "$in": ["Ha", "a.u.", "Hartree"]
+                }
+            },
+            {"$set": {"atomization-energy.energy.source-unit": "hartree"}},
+            "atomization energy: a.u. to hartree",
+        ),
+        (
+            {"formation-energy.energy.source-unit": {"$in": ["Ha", "a.u.", "Hartree"]}},
+            {"$set": {"formation-energy.energy.source-unit": "hartree"}},
+            "formation energy: a.u. to hartree",
+        ),
+        (
+            {"free-energy.energy.source-unit": {"$in": ["Ha", "a.u.", "Hartree"]}},
+            {"$set": {"free-energy.energy.source-unit": "hartree"}},
+            "free energy: a.u. to hartree",
+        ),
         #  Forces
         # (
         #     {
@@ -34,27 +53,27 @@ def main():
         #     },
         #     {"$set": {"atomic-forces.forces.source-unit": "kcal/mol/angstrom"}},
         #     "forces: kcal/mol/A etc. to kcal/mol/angstrom",
+        # # ),
+        # (
+        #     {
+        #         "atomic-forces.forces.source-unit": {
+        #             "$in": ["eV/A", "eV/Ang", "meV Å^-1"]
+        #         }
+        #     },
+        #     {"$set": {"atomic-forces.forces.source-unit": "eV/angstrom"}},
+        #     "forces eV/A, Ang to eV/angstrom",
         # ),
-        (
-            {
-                "atomic-forces.forces.source-unit": {
-                    "$in": ["eV/A", "eV/Ang", "meV Å^-1"]
-                }
-            },
-            {"$set": {"atomic-forces.forces.source-unit": "eV/angstrom"}},
-            "forces eV/A, Ang to eV/angstrom",
-        ),
-        (
-            {"atomic-forces.forces.source-unit": {"$in": ["Hartree/A", "Ha/A"]}},
-            {"$set": {"atomic-forces.forces.source-unit": "hartree/angstrom"}},
-            "forces Hartree(Ha)/A to hartree/angstrom",
-        ),
-        # Stress
-        (
-            {"cauchy-stress.stress.source-unit": {"$in": ["eV/Ang^3"]}},
-            {"$set": {"cauchy-stress.stress.source-unit": "eV/angstrom^3"}},
-            "stress eV/Ang^3 to eV/angstrom^3",
-        ),
+        # (
+        #     {"atomic-forces.forces.source-unit": {"$in": ["Hartree/A", "Ha/A"]}},
+        #     {"$set": {"atomic-forces.forces.source-unit": "hartree/angstrom"}},
+        #     "forces Hartree(Ha)/A to hartree/angstrom",
+        # ),
+        # # Stress
+        # (
+        #     {"cauchy-stress.stress.source-unit": {"$in": ["eV/Ang^3"]}},
+        #     {"$set": {"cauchy-stress.stress.source-unit": "eV/angstrom^3"}},
+        #     "stress eV/Ang^3 to eV/angstrom^3",
+        # ),
     ]
     with open("update_units_results.txt", "a") as f:
         timestamp = time.time()
