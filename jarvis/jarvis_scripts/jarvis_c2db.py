@@ -48,7 +48,7 @@ from colabfit.tools.property_definitions import potential_energy_pd
 
 DATASET_FP = Path().cwd().parent / "jarvis_json/"
 GLOB = "c2db_atoms.json"
-DS_NAME = "JARVIS-C2DB"
+DS_NAME = "JARVIS_C2DB"
 DS_DESC = (
     "The JARVIS-C2DB dataset is part of the joint automated repository for "
     "various integrated simulations (JARVIS) database. This subset contains "
