@@ -42,7 +42,7 @@ from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 
 DATASET_FP = Path().cwd().parent / "jarvis_json/"
 GLOB = "megnet-mp-2019-04-01.json"
-DS_NAME = "JARVIS-MEGNet2"
+DS_NAME = "JARVIS_MEGNet2"
 DS_DESC = (
     "The JARVIS-MEGNet2 dataset is part of the joint automated repository for "
     "various integrated simulations (JARVIS) database. This subset contains 133K "

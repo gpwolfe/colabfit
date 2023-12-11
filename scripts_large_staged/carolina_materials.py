@@ -81,6 +81,7 @@ LICENSE = "Creative Commons Attribution 4.0 International License"
 PI_METADATA = {
     "software": {"value": SOFTWARE},
     "method": {"value": METHODS},
+    "input": {"value": {"IBRION": 6, "NFREE": 4}},
 }
 
 PROPERTY_MAP = {

@@ -287,6 +287,16 @@ def reader(file_path):
                             pass
                 info[key] = val
         # yield config
+        if info.get("stress") is not None and len(info["stress"]) != 9:
+            if len(info["stress"]) == 6:
+                stress = info["stress"]
+                info["stress"] = [
+                    [stress[0], stress[5], stress[4]],
+                    [stress[5], stress[1], stress[3]],
+                    [stress[4], stress[3], stress[2]],
+                ]
+            else:
+                info.pop("stress")
         atoms = AtomicConfiguration(
             numbers=config.numbers,
             positions=config.positions,
