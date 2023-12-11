@@ -37,6 +37,8 @@ DATASET_FP = Path(
 )
 DATASET_FP = Path().cwd().parent / "data/au_pbe_msmse_2021"
 DATASET = "Au-PBE_MSMSE_2021"
+LICENSE = "https://www.gnu.org/licenses/lgpl-3.0-standalone.html"
+
 
 SOFTWARE = "VASP, DP-GEN"
 METHODS = "DFT-PBE-D3"
@@ -195,6 +197,7 @@ def main(argv):
         name=DATASET,
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK],
+        data_license=LICENSE,
         description=DS_DESC,
         verbose=False,
     )

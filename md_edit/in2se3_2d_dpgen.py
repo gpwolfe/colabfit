@@ -37,6 +37,8 @@ DATASET_FP = Path(
 )
 DATASET_FP = Path().cwd().parent / "data/in2se3_2d_dpgen"  # local
 DATASET = "In2Se3_2D_DPGEN"
+LICENSE = "https://www.gnu.org/licenses/lgpl-3.0-standalone.html"
+
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
@@ -223,6 +225,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         verbose=False,
+        data_license=LICENSE,
     )
 
 

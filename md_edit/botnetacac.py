@@ -28,6 +28,7 @@ AUTHORS = [
     "Boris Kozinsky",
     "Gábor Csányi",
 ]
+LICENSE = "https://opensource.org/licenses/MIT"
 PUBLICATION = "https://doi.org/10.48550/arXiv.2205.06643"
 DATA_LINK = "https://github.com/davkovacs/BOTNet-datasets"
 LINKS = [
@@ -234,6 +235,7 @@ def main(argv):
             description=glob_ds[1],
             resync=True,
             verbose=False,
+            data_license=LICENSE,
         )
 
 

@@ -46,6 +46,7 @@ SOFTWARE = "ORCA"
 METHODS = "DFT"
 PUBLICATION = "https://doi.org/10.1038/s41467-022-28526-y"
 DATA_LINK = "https://github.com/atomistic-machine-learning/cG-SchNet/"
+LICENSE = "https://opensource.org/licenses/MIT"
 LINKS = [
     "https://doi.org/10.1038/s41467-022-28526-y",
     "https://github.com/atomistic-machine-learning/cG-SchNet/",
@@ -306,6 +307,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         verbose=False,
+        data_license=LICENSE,
     )
 
 

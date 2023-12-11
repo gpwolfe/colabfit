@@ -10,7 +10,7 @@ from colabfit.tools.property_definitions import potential_energy_pd, atomic_forc
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets/sGDML")
 DATASET_FP = Path().cwd().parent / "data/ethanol_ccsd_t"  # local
-DATASET = "Ethanol_ccsdt_NC2018"
+DATASET = "sGDML_Ethanol_ccsdt_NC2018"
 
 PUBLICATION = "https://doi.org/10.1038/s41467-018-06169-2"
 DATA_LINK = "http://sgdml.org/"

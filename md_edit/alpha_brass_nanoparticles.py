@@ -30,6 +30,7 @@ import sys
 # local
 DATASET_FP = Path().cwd().parent / "data/alpha_brass_nanoparticles/brass_DFT_data"
 DS_NAME = "alpha_brass_nanoparticles"
+LICENSE = "https://creativecommons.org/licenses/by/4.0/"
 
 PUBLICATION = "https://doi.org/10.1021/acs.jpcc.1c02314"
 DATA_LINK = "https://doi.org/10.24435/materialscloud:94-aq"
@@ -221,6 +222,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
         description=DS_DESC,
+        data_license=LICENSE,
         verbose=False,
     )
 

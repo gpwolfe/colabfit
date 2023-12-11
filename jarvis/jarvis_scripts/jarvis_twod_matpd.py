@@ -61,6 +61,8 @@ DS_DESC = (
     "current materials design challenges."
 )
 
+LICENSE = "https://creativecommons.org/licenses/by/4.0/"
+
 PUBLICATION = "https://doi.org/10.1038/s41597-019-0097-3"
 DATA_LINK = "https://ndownloader.figshare.com/files/26789006"
 OTHER_LINKS = ["https://jarvis.nist.gov/"]
@@ -205,6 +207,7 @@ def main(argv):
         ds_id=ds_id,
         do_hashes=all_do_ids,
         name=DS_NAME,
+        data_license=LICENSE,
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
         description=DS_DESC,

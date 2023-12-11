@@ -42,11 +42,12 @@ DATASET_FP = Path(
 )
 DATASET_FP = Path().cwd().parent / "data/fitsnap/Fe_Linear_NPJ2021/JSON"
 DATASET = "FitSNAP_Fe_NPJ_2021"
+LICENSE = "https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html"
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
-PUBLICATION = "https://github.com/FitSNAP"
-DATA_LINK = "https://doi.org/10.1038/s41524-021-00617-2"
+PUBLICATION = "https://doi.org/10.1038/s41524-021-00617-2"
+DATA_LINK = "https://github.com/FitSNAP"
 LINKS = [
     "https://github.com/FitSNAP",
     "https://doi.org/10.1038/s41524-021-00617-2",
@@ -191,6 +192,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         verbose=False,
+        data_license=LICENSE,
     )
 
 

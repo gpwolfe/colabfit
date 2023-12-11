@@ -215,6 +215,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
         description=DATASET_DESC,
+        data_license=LICENSE,
         verbose=True,
     )
 

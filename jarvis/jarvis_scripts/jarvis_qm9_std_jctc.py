@@ -99,6 +99,8 @@ DS_DESC = (
     "maxcycles=1000)"
 )
 
+LICENSE = "https://creativecommons.org/licenses/by/4.0/"
+
 PUBLICATION = "https://doi.org/10.1038/sdata.2014.22"
 DATA_LINK = "https://ndownloader.figshare.com/files/28715319"
 OTHER_LINKS = ["https://jarvis.nist.gov/", "http://quantum-machine.org/datasets/"]
@@ -242,6 +244,7 @@ def main(argv):
         ds_id=ds_id,
         do_hashes=all_do_ids,
         name=DS_NAME,
+        data_license=LICENSE,
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
         description=DS_DESC,

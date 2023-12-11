@@ -65,6 +65,8 @@ DS_DESC = (
     "design challenges."
 )
 
+LICENSE = "https://creativecommons.org/licenses/by/4.0/"
+
 PUBLICATION = "https://doi.org/10.1021/acs.jpca.9b08723"
 DATA_LINK = "https://figshare.com/ndownloader/files/40424156"
 OTHER_LINKS = [
@@ -255,6 +257,7 @@ def main(argv):
         ds_id=ds_id,
         do_hashes=all_do_ids,
         name=DS_NAME,
+        data_license=LICENSE,
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
         description=DS_DESC,

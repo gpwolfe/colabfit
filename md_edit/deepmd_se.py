@@ -36,6 +36,8 @@ DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/deepm
 DATASET_FP = Path().cwd().parent / "data/deepmd-se"
 
 DATASET = "DeePMD_SE"
+LICENSE = "https://www.gnu.org/licenses/lgpl-3.0-standalone.html"
+
 PUBLICATION = "https://doi.org/10.48550/arXiv.1805.09003"
 DATA_LINK = (
     "https://www.aissquare.com/datasets/detail?pageType=datasets&name=deepmd-se-dataset"
@@ -305,6 +307,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         verbose=False,
+        data_license=LICENSE,
     )
 
 

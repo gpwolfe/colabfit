@@ -41,6 +41,7 @@ DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/3bpa"
 DATASET_FP = Path().cwd().parent / ("data/dataset_3BPA")
 DATASET = "3BPA"
 
+LICENSE = "https://creativecommons.org/licenses/by/4.0/"
 SOFTWARE = "ORCA"
 METHODS = "DFT-ωB97X"
 DATA_LINK = "https://doi.org/10.1021/acs.jctc.1c00647"
@@ -251,6 +252,7 @@ def main(argv):
             ds_id=ds_id,
             authors=AUTHORS,
             links=[PUBLICATION, DATA_LINK],
+            data_license=LICENSE,
             description=glob_ds[2],
             verbose=False,
         )

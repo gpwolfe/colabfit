@@ -39,6 +39,8 @@ DATASET_FP = Path(
 )
 DATASET_FP = Path().cwd().parent / "data/dpgen_cu_cpc_2020"
 DATASET = "DP-GEN_Cu"
+LICENSE = "https://www.gnu.org/licenses/lgpl-3.0-standalone.html"
+
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
@@ -200,6 +202,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         verbose=False,
+        data_license=LICENSE,
     )
 
 

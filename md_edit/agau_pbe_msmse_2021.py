@@ -37,6 +37,7 @@ DATASET_FP = Path(
 )
 DATASET_FP = Path().cwd().parent / "data/agau_pbe_msmse_2021"
 DATASET = "AgAu-nanoalloy_MSMSE_2021"
+LICENSE = "https://www.gnu.org/licenses/lgpl-3.0-standalone.html"
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE-D3"
@@ -247,6 +248,7 @@ def main(argv):
         ds_id=ds_id,
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK],
+        data_license=LICENSE,
         description=DS_DESC,
         verbose=False,
     )

@@ -37,6 +37,7 @@ DATASET_FP = Path(
 )
 DATASET_FP = Path().cwd().parent / "data/lisips_sse_pbesol"
 DATASET = "LiSiPS-SSE-PBEsol"
+LICENSE = "https://www.gnu.org/licenses/lgpl-3.0-standalone.html"
 
 SOFTWARE = "VASP 5.4.4"
 METHODS = "DFT-PBEsol"
@@ -208,6 +209,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         verbose=False,
+        data_license=LICENSE,
     )
 
 

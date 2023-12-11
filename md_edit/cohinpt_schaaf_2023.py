@@ -55,6 +55,8 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/cohinpt_schaaf"
 )
 DATASET_FP = Path().cwd().parent / "data/cohinpt_schaaf"
+LICENSE = "https://creativecommons.org/licenses/by/4.0/"
+
 METHOD = "DFT"
 SOFTWARE = "Quantum ESPRESSO"
 PUBLICATION = "https://doi.org/10.48550/arXiv.2301.09931"
@@ -211,6 +213,7 @@ def main(argv):
         " dioxide to methanol over an indium oxide catalyst, with and"
         " without platinum doping.",
         verbose=False,
+        data_license=LICENSE,
     )
 
 

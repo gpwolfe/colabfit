@@ -37,6 +37,7 @@ DATASET_FP = Path(
 )
 DATASET_FP = Path().cwd().parent / "data/sn_scan_prm_2023"
 DATASET = "Sn-SCAN_PRM_2023"
+LICENSE = "https://www.gnu.org/licenses/lgpl-3.0-standalone.html"
 
 SOFTWARE = "VASP"
 METHODS = "DFT-SCAN"
@@ -222,6 +223,7 @@ def main(argv):
         name=DATASET,
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK],
+        data_license=LICENSE,
         description=DS_DESC,
         verbose=False,
     )

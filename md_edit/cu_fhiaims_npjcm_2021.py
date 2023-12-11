@@ -44,6 +44,7 @@ DATASET_FP = Path(
 )
 DATASET_FP = Path().cwd().parent / "data/cu_fhiaims_npjcm_2021"
 DATASET = "Cu_FHI-aims_NPJCM_2021"
+LICENSE = "https://creativecommons.org/licenses/by/4.0/"
 
 SOFTWARE = "FHI-aims"
 METHODS = "DFT-PBE"
@@ -189,6 +190,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         verbose=False,
+        data_license=LICENSE,
     )
 
 

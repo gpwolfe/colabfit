@@ -40,6 +40,7 @@ DATASET_FP = Path(
 # comment out, local testing
 DATASET_FP = Path().cwd().parent / ("data/ti_npjcm_2021")
 DATASET = "Ti_NPJCM_2021"
+LICENSE = "https://www.gnu.org/licenses/lgpl-3.0-standalone.html"
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
@@ -238,6 +239,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
+        data_license=LICENSE,
         verbose=False,
         cs_ids=cs_ids,
     )
