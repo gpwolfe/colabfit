@@ -55,7 +55,7 @@ from colabfit.tools.property_definitions import (
 
 DATASET_FP = Path().cwd().parent / "jarvis_json/"
 GLOB = "jqe_tb_folder.json"
-DS_NAME = "JARVIS-QE-TB"
+DS_NAME = "JARVIS_QE_TB"
 DS_DESC = (
     "The QE-TB dataset is part of the joint automated repository for "
     "various integrated simulations (JARVIS) DFT database. This subset contains "

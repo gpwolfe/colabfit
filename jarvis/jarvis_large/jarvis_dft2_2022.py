@@ -104,7 +104,7 @@ from colabfit.tools.property_definitions import potential_energy_pd
 
 DATASET_FP = Path().cwd().parent / "jarvis_json/"
 GLOB = "d2-12-12-2022.json"
-DS_NAME = "JARVIS-DFT-2D-12-12-2022"
+DS_NAME = "JARVIS_DFT_2D_12_12_2022"
 DS_DESC = (
     "The DFT-2D-12-12-2022 dataset is part of the joint automated repository for "
     "various integrated simulations (JARVIS) DFT database. This subset contains "
