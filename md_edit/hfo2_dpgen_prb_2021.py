@@ -36,8 +36,9 @@ DATASET_FP = Path(
     "/persistent/colabfit_raw_data/gw_scripts/gw_script_data/hfo2_dpgen_prb_2021"
 )
 DATASET_FP = Path().cwd().parent / "data/hfo2_dpgen_prb_2021"
-
 DATASET = "HfO2_DPGEN_PRB_2021"
+LICENSE = "https://www.gnu.org/licenses/lgpl-3.0-standalone.html"
+
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
@@ -201,6 +202,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         verbose=False,
+        data_license=LICENSE,
     )
 
 

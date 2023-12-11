@@ -24,6 +24,8 @@ from colabfit.tools.property_definitions import (
     potential_energy_pd,
 )
 
+LICENSE = "https://creativecommons.org/licenses/by/4.0"
+
 DATASET_FP = Path(
     "/persistent/colabfit_raw_data/new_raw_datasets_2.0/benzene_succinic_acid_glycine"
 )
@@ -317,6 +319,7 @@ def main(argv):
             links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
             description=desc,
             verbose=False,
+            data_license=LICENSE,
         )
 
 

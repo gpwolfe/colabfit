@@ -58,6 +58,8 @@ DS_DESC = (
     "JARVIS is a set of tools and datasets built to meet "
     "current materials design challenges."
 )
+LICENSE = "https://creativecommons.org/licenses/by/4.0/"
+
 PUBLICATION = "https://doi.org/10.1088/2053-1583/aacfc1"
 DATA_LINK = "https://ndownloader.figshare.com/files/28682010"
 OTHER_LINKS = ["https://jarvis.nist.gov/"]
@@ -206,6 +208,7 @@ def main(argv):
         ds_id=ds_id,
         do_hashes=all_do_ids,
         name=DS_NAME,
+        data_license=LICENSE,
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
         description=DS_DESC,

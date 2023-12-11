@@ -30,6 +30,8 @@ DATASET_FP = Path(
 )
 DATASET_FP = Path().cwd().parent / "data/chon_jcp_2020/CHON.extxyz"
 DATASET = "CHON_JCP_2020"
+LICENSE = "https://opensource.org/licenses/MIT"
+
 PUBLICATION = "https://doi.org/10.1063/5.0016005"
 DATA_LINK = (
     "https://github.com/DescriptorZoo/sensitivity-dimensionality-results/tree"
@@ -146,6 +148,7 @@ def main(argv):
         description=DS_DESC,
         resync=True,
         verbose=False,
+        data_license=LICENSE,
     )
 
 

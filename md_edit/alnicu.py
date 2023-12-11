@@ -27,6 +27,7 @@ AUTHORS = [
     "Christoph Ortner",
     "James R. Kermode",
 ]
+LICENSE = "https://opensource.org/licenses/MIT"
 
 PUBLICATION = "https://doi.org/10.1063/5.0016005"
 DATA_LINK = "https://github.com/DescriptorZoo/sensitivity-dimensionality-results"
@@ -138,6 +139,7 @@ def main(argv):
         description=DESCRIPTION,
         resync=True,
         verbose=False,
+        data_license=LICENSE,
     )
 
 

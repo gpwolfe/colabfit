@@ -54,6 +54,8 @@ DATASET_FP = Path(
 DATASET_FP = Path().cwd().parent / "data/c_gardner_2022"
 
 AUTHORS = ["John L. A. Gardner", "Zoé Faure Beaulieu", "Volker L. Deringer"]
+LICENSE = "https://creativecommons.org/licenses/by/4.0/"
+
 PUBLICATION = "https://doi.org/10.48550/arXiv.2211.16443"
 DATA_LINK = "https://github.com/jla-gardner/carbon-data"
 LINKS = [
@@ -154,6 +156,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DESCRIPTION,
         verbose=False,
+        data_license=LICENSE,
     )
 
 

@@ -77,11 +77,14 @@ DATASET_FP = Path(
 )
 DATASET_FP = Path().cwd().parent / ("data/ca_9")
 DATASET = "CA-9"
+LICENSE = "https://creativecommons.org/licenses/by/4.0"
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE"
 PUBLICATION = "https://doi.org/10.1016/j.cartre.2021.100027"
 DATA_LINK = "https://doi.org/10.24435/materialscloud:6h-yj"
+
+
 LINKS = [
     "https://doi.org/10.24435/materialscloud:6h-yj",
     "https://doi.org/10.1016/j.cartre.2021.100027",
@@ -292,6 +295,7 @@ def main(argv):
             links=[PUBLICATION, DATA_LINK],
             description=description,
             verbose=False,
+            data_license=LICENSE,
         )
 
 

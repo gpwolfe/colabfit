@@ -9,7 +9,7 @@ from ase.atoms import Atoms
 
 DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets/sGDML")
 DATASET_FP = Path().cwd().parent / "data/benzene_ccsd_t"
-DATASET = "Benzene_ccsdt_NC2018"
+DATASET = "sGDML_Benzene_ccsdt_NC2018"
 
 PUBLICATION = "https://doi.org/10.1038/s41467-018-06169-2"
 DATA_LINK = "http://sgdml.org/"

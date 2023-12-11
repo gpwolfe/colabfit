@@ -14,6 +14,8 @@ from argparse import ArgumentParser
 from pathlib import Path
 import sys
 
+LICENSE = "https://creativecommons.org/licenses/by/4.0/"
+
 PUBLICATION = "https://doi.org/10.48550/arXiv.2011.14115"
 DATA_LINK = "https://doi.org/10.6084/m9.figshare.13289165.v1"
 LINKS = [
@@ -151,6 +153,7 @@ def main(argv):
             description=desc + DS_DESC,
             resync=True,
             verbose=False,
+            data_license=LICENSE,
         )
 
 

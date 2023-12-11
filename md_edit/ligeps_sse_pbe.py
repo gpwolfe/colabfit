@@ -37,6 +37,8 @@ DATASET_FP = Path(
 )
 DATASET_FP = Path().cwd().parent / "data/ligeps_sse_pbe"
 DATASET = "LiGePS_SSE_PBE"
+LICENSE = "https://www.gnu.org/licenses/lgpl-3.0-standalone.html"
+
 
 SOFTWARE = "VASP 5.4.4"
 METHODS = "DFT-PBE"
@@ -206,6 +208,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         verbose=False,
+        data_license=LICENSE,
     )
 
 

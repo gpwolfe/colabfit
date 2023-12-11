@@ -40,7 +40,7 @@ DATASET = "Ag-PBE_MSMSE_2021"
 
 SOFTWARE = "VASP"
 METHODS = "DFT-PBE-D3"
-
+LICENSE = "https://www.gnu.org/licenses/lgpl-3.0-standalone.html"
 PUBLICATION = "https://doi.org/10.48550/arXiv.2108.06232"
 DATA_LINK = "https://www.aissquare.com/datasets/detail?pageType=datasets&name=Ag-PBE"
 LINKS = [
@@ -199,6 +199,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         verbose=False,
+        data_license=LICENSE,
     )
 
 

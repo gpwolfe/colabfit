@@ -32,6 +32,7 @@ from colabfit.tools.property_definitions import (
 DATASET_FP = Path("/persistent/colabfit_raw_data/new_raw_datasets/agpd")
 DATASET_FP = Path().cwd().parent / "data/agpd"
 DATASET_NAME = "AgPd_NPJ_2021"
+LICENSE = "https://opensource.org/licenses/MIT"
 AUTHORS = [
     "Conrad W. Rosenbrock",
     "Konstantin Gubaev",
@@ -239,6 +240,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DESCRIPTION,
         resync=True,
+        data_license=LICENSE,
         verbose=False,
     )
 

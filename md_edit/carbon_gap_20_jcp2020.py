@@ -28,6 +28,8 @@ DATASET_FP = Path(
 )
 DATASET_FP = Path().cwd().parent / "data/Carbon_GAP_20"
 DATASET = "Carbon_GAP_JCP2020"
+LICENSE = "https://creativecommons.org/licenses/by/4.0/"
+
 DATA_LINK = "https://www.repository.cam.ac.uk/handle/1810/307452"
 PUBLICATION = "https://doi.org/10.1063/5.0005084"
 LINKS = [
@@ -243,6 +245,7 @@ def main(argv):
             description=ds_desc,
             resync=True,
             verbose=False,
+            data_license=LICENSE,
         )
 
 

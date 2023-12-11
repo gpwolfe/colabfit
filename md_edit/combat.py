@@ -32,6 +32,7 @@ import sys
 DATASET_FP = Path("/persistent/colabfit_raw_data/gw_scripts/gw_script_data/combat")
 DATASET_FP = Path().cwd().parent / "data/combat"
 DATASET = "ComBat"
+LICENSE = "https://opensource.org/licenses/MIT"
 
 SOFTWARE = "Gaussian 16"
 PUBLICATION = "https://doi.org/10.1038/s41598-022-20009-w"
@@ -154,6 +155,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],
         description=DS_DESC,
         verbose=False,
+        data_license=LICENSE,
     )
 
 

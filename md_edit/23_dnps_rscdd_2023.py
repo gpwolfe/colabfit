@@ -81,6 +81,7 @@ import sys
 DATASET_FP = Path().cwd().parent / "data/saidi_23_dnps/Training_Data"
 DATASET = "23-Single-Element-DNPs_RSCDD_2023"
 
+LICENSE = "https://www.gnu.org/licenses/gpl-3.0-standalone.html"
 PUBLICATION = "https://doi.org/10.1039/D3DD00046J"
 DATA_LINK = "https://github.com/saidigroup/23-Single-Element-DNPs"
 LINKS = [
