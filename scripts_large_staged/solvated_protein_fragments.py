@@ -28,7 +28,7 @@ from colabfit.tools.property_definitions import (
 # ) #  Kubernetes pod
 DATASET_FP = Path("solvated_protein")  # Greene
 DATASET_FP = Path("data/solvated_protein")  # local
-DATASET_NAME = "solvated_protein_fragments"
+DATASET_NAME = "solvated_protein_fragments_JCTC_2019"
 
 SOFTWARE = "ORCA 4.0.1"
 METHODS = "DFT-revPBE-D3(BJ)"

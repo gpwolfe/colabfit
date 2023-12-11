@@ -14,7 +14,7 @@ from ase.atoms import Atoms
 DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets/sGDML")
 DATASET_FP = Path().cwd().parent / "data/sgdml"  # remove
 
-DATASET_NAME = "Aspirin_ccsd_NC2018"
+DATASET_NAME = "sGDML_Aspirin_ccsd_NC2018"
 AUTHORS = [
     "Stefan Chmiela",
     "Huziel E. Sauceda",
