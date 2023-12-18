@@ -6,7 +6,7 @@ Lattice="5.58828896 -0.0 0.0 0.0 5.78609927 0.0 0.0 0.0 15.33467811" Properties=
 
 """
 from argparse import ArgumentParser
-from ase.io import read
+from ase.io import iread
 from colabfit import ATOMS_LABELS_FIELD, ATOMS_NAME_FIELD
 from colabfit.tools.converters import AtomicConfiguration
 from colabfit.tools.database import MongoDatabase, generate_ds_id
@@ -17,6 +17,7 @@ from colabfit.tools.property_definitions import (
 )
 import functools
 import itertools
+import json
 import logging
 from multiprocessing import Pool
 import numpy as np
@@ -26,7 +27,7 @@ import sys
 from datetime import datetime
 import time
 
-BATCH_SIZE = 100
+BATCH_SIZE = 50
 START_IX = 0  # for testing, in case of errors causing script stop
 
 # Local
@@ -181,7 +182,7 @@ KEYS = [
     "material_id",
     "name",
     "outcar",
-    "output",
+    # "output",
     "stress",
     "task_id",
 ]
@@ -206,6 +207,12 @@ property_map = {
             "stress": {"field": "stress", "units": "GPa"},
             "_metadata": metadata,
         }
+    ],
+    "band-gap": [
+        {
+            "energy": {"field": "band-gap", "units": "eV"},
+            "_metadata": metadata,
+        },
     ],
 }
 NAME_FIELD = "name"
@@ -270,13 +277,22 @@ def auto_reconnect(mongo_func):
 
 
 def reader(file_path):
-    configs = read(file_path, index=":")
-    for i, config in enumerate(configs):
+    for i, config in enumerate(iread(file_path, index=":")):
         info = dict()
         info["outcar"] = reconstruct_nested(config.info, "outcar")
-        info["output"] = reconstruct_nested(config.info, "output")
+        # info["output"] = reconstruct_nested(config.info, "output")
         info["input"] = reconstruct_nested(config.info, "incar")
+
         for key, val in config.info.items():
+            if "output-bandgap" in key:
+                if isinstance(val, str) and "=" in val:
+                    key, val = val.split("=")[-2:]
+                    if val != "F":
+                        try:
+                            val = float(val)
+                        except ValueError:
+                            pass
+                info["band-gap"] = val
             if not any([match in key for match in ["outcar", "incar", "output"]]):
                 if isinstance(val, str) and "=" in val:
                     key, val = val.split("=")[-2:]
@@ -286,17 +302,17 @@ def reader(file_path):
                         except ValueError:
                             pass
                 info[key] = val
-        # yield config
-        if info.get("stress") is not None and len(info["stress"]) != 9:
-            if len(info["stress"]) == 6:
-                stress = info["stress"]
-                info["stress"] = [
-                    [stress[0], stress[5], stress[4]],
-                    [stress[5], stress[1], stress[3]],
-                    [stress[4], stress[3], stress[2]],
-                ]
-            else:
-                info.pop("stress")
+        # # yield config
+        # if info.get("stress") is not None and len(info["stress"]) != 9:
+        #     if len(info["stress"]) == 6:
+        #         stress = info["stress"]
+        #         info["stress"] = [
+        #             [stress[0], stress[5], stress[4]],
+        #             [stress[5], stress[1], stress[3]],
+        #             [stress[4], stress[3], stress[2]],
+        #         ]
+        #     else:
+        #         info.pop("stress")
         atoms = AtomicConfiguration(
             numbers=config.numbers,
             positions=config.positions,
@@ -346,11 +362,9 @@ def main(ip, port, db_name, nprocs):
     # client = MongoDatabase(db_name, nprocs=nprocs, uri=f"mongodb://{ip}:27017")
     client = MongoDatabase(db_name, nprocs=nprocs, uri=f"mongodb://{ip}:{port}")
     ds_id = generate_ds_id()
-    for pd in [
-        atomic_forces_pd,
-        cauchy_stress_pd,
-        free_energy_pd,
-    ]:
+    with open("band_gap.json", "r") as f:
+        band_gap_pd = json.load(f)
+    for pd in [atomic_forces_pd, cauchy_stress_pd, free_energy_pd, band_gap_pd]:
         client.insert_property_definition(pd)
 
     ids = []
