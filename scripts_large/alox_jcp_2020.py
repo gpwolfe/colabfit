@@ -39,7 +39,7 @@ DS_DESC = (
     "Two configurations sets correspond to i) the actual training data and ii) "
     "additional reference data. "
     "Ab initio calculations were performed"
-    "with the Vienna Ab initio Simulation Package. The projector"
+    "with the Vienna Ab initio Simulation Package. The projector "
     "augmented wave method was used to treat the atomic core electrons,"
     "and the Perdew-Burke-Ernzerhof functional within the generalized "
     "gradient approximation was used to describe the electron-electron "
