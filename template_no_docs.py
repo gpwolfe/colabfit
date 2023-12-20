@@ -25,27 +25,23 @@ from colabfit.tools.property_definitions import (
     potential_energy_pd,
 )
 
-# from colabfit_utilities import get_client
 
 DATASET_FP = Path("").cwd()
 DATASET_NAME = ""
-
-SOFTWARE = ""
-METHODS = ""
+LICENSE = ""
 
 PUBLICATION = ""
 DATA_LINK = ""
 # OTHER_LINKS = []
 
-LINKS = ["", ""]
 AUTHORS = [""]
 DATASET_DESC = ""
 ELEMENTS = [""]
 GLOB_STR = "*.*"
 
 PI_METADATA = {
-    "software": {"value": SOFTWARE},
-    "method": {"value": METHODS},
+    "software": {"value": ""},
+    "method": {"value": ""},
     # "basis-set": {"field": "basis_set"}
 }
 
@@ -168,6 +164,7 @@ def main(argv):
         description=DATASET_DESC,
         verbose=False,
         cs_ids=cs_ids,  # remove line if no configuration sets to insert
+        data_license=LICENSE,
     )
 
 
