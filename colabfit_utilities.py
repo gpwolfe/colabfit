@@ -138,7 +138,7 @@ def reader(filepath):
                             ]
                         )
 
-                    if forces:
+                    if "fx" in keys:
                         forces.append(
                             [float(f) for f in [li["fx"], li["fy"], li["fz"]]]
                         )
@@ -155,7 +155,7 @@ def reader(filepath):
                 config.info["energy"] = energy
                 if forces:
                     config.info["forces"] = forces
-                config.info["stress"] = stress
+                config.info["stress"] = stress  # Stress units appear to be GPa
                 config.info["name"] = f"{filepath.stem}_{config_count}"
                 config_count += 1
                 yield config
