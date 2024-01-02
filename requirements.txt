@@ -9,7 +9,7 @@ black==22.12.0
 certifi==2023.7.22
 charset-normalizer==2.1.1
 click==8.1.3
-git+https://github.com/colabfit/colabfit-tools.git@refactor_relationships
+git+https://github.com/colabfit/colabfit-tools.git@master
 comm==0.1.2
 contourpy==1.0.6
 cycler==0.11.0
@@ -58,7 +58,6 @@ prompt-toolkit==3.0.36
 psutil==5.9.4
 ptyprocess==0.7.0
 pure-eval==0.2.2
-pyArango==2.0.1
 pybind11==2.10.3
 pycodestyle==2.9.1
 pyflakes==2.5.0
