@@ -18,25 +18,25 @@ def main():
         #     {"$set": {"potential-energy.energy.source-unit": "hartree"}},
         #     "energy: a.u. to hartree",
         # ),
-        (
-            {
-                "atomization-energy.energy.source-unit": {
-                    "$in": ["Ha", "a.u.", "Hartree"]
-                }
-            },
-            {"$set": {"atomization-energy.energy.source-unit": "hartree"}},
-            "atomization energy: a.u. to hartree",
-        ),
-        (
-            {"formation-energy.energy.source-unit": {"$in": ["Ha", "a.u.", "Hartree"]}},
-            {"$set": {"formation-energy.energy.source-unit": "hartree"}},
-            "formation energy: a.u. to hartree",
-        ),
-        (
-            {"free-energy.energy.source-unit": {"$in": ["Ha", "a.u.", "Hartree"]}},
-            {"$set": {"free-energy.energy.source-unit": "hartree"}},
-            "free energy: a.u. to hartree",
-        ),
+        # (
+        #     {
+        #         "atomization-energy.energy.source-unit": {
+        #             "$in": ["Ha", "a.u.", "Hartree"]
+        #         }
+        #     },
+        #     {"$set": {"atomization-energy.energy.source-unit": "hartree"}},
+        #     "atomization energy: a.u. to hartree",
+        # ),
+        # (
+        #     {"formation-energy.energy.source-unit": {"$in": ["Ha", "a.u.", "Hartree"]}},
+        #     {"$set": {"formation-energy.energy.source-unit": "hartree"}},
+        #     "formation energy: a.u. to hartree",
+        # ),
+        # (
+        #     {"free-energy.energy.source-unit": {"$in": ["Ha", "a.u.", "Hartree"]}},
+        #     {"$set": {"free-energy.energy.source-unit": "hartree"}},
+        #     "free energy: a.u. to hartree",
+        # ),
         #  Forces
         # (
         #     {
@@ -54,15 +54,15 @@ def main():
         #     {"$set": {"atomic-forces.forces.source-unit": "kcal/mol/angstrom"}},
         #     "forces: kcal/mol/A etc. to kcal/mol/angstrom",
         # # ),
-        # (
-        #     {
-        #         "atomic-forces.forces.source-unit": {
-        #             "$in": ["eV/A", "eV/Ang", "meV Å^-1"]
-        #         }
-        #     },
-        #     {"$set": {"atomic-forces.forces.source-unit": "eV/angstrom"}},
-        #     "forces eV/A, Ang to eV/angstrom",
-        # ),
+        (
+            {
+                "atomic-forces.forces.source-unit": {
+                    "$in": ["eV/A", "eV/Ang", "meV Å^-1"]
+                }
+            },
+            {"$set": {"atomic-forces.forces.source-unit": "eV/angstrom"}},
+            "forces eV/A, Ang to eV/angstrom",
+        ),
         # (
         #     {"atomic-forces.forces.source-unit": {"$in": ["Hartree/A", "Ha/A"]}},
         #     {"$set": {"atomic-forces.forces.source-unit": "hartree/angstrom"}},
