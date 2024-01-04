@@ -32,39 +32,39 @@ from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 
 
 DATASET_FP = Path("data/matbench")
-DATASET_NAME = "Matbench_mp_e_form"
+DATASET_NAME = "Matbench_mp_gap"
 LICENSE = "https://opensource.org/licenses/MIT"
 
-PUBLICATION = "https://doi.org/10.1038/s41524-020-00406-3"
+PUBLICATION = "https://doi.org/10.1039/C2EE22341D"
 DATA_LINK = "https://matbench.materialsproject.org/"
-OTHER_LINKS = ["https://doi.org/10.1016/j.commatsci.2014.10.037"]
+# OTHER_LINKS = []
 
 AUTHORS = ["Alexander Dunn", "Qi Wang", "Alex Ganose", "Daniel Dopp", "Anubhav Jain"]
 DATASET_DESC = (
-    "Matbench v0.1 test dataset for predicting DFT formation energy from "
-    "structure. Adapted from Materials Project database. Entries having "
-    "formation energy more than 2.5eV and those containing noble gases are removed. "
-    "Retrieved April 2, 2019. For benchmarking w/ nested cross validation, the order "
-    "of the dataset must be identical to the retrieved data; refer to the "
-    "Automatminer/Matbench publication for more details."
+    "The Matbench_mp_gap dataset is a Matbench v0.1 test dataset for predicting DFT "
+    "PBE band gap from structure, adapted from the Materials Project database. "
+    "Entries having a formation energy (or energy above the convex hull) greater than "
+    "150meV and those containing noble gases have been removed. Retrieved April 2, "
+    "2019. Refer to the Automatminer/Matbench publication for more details. "
+    "This dataset contains band gap as calculated by PBE DFT from the Materials "
+    "Project, in eV. "
     "Matbench is an automated leaderboard for benchmarking state of the art "
     "ML algorithms predicting a diverse range of solid materials' properties. "
     "It is hosted and maintained by the Materials Project."
 )
 ELEMENTS = None
-GLOB_STR = "matbench_mp_e_form_structures.json"
+GLOB_STR = "matbench_mp_gap_structures.json"
 
 PI_METADATA = {
     "software": {"value": "VASP"},
-    "method": {"value": "DFT"},
+    "method": {"value": "DFT-PBE"},
     # "basis-set": {"field": "basis_set"}
 }
 
 PROPERTY_MAP = {
-    "formation-energy": [
+    "band-gap": [
         {
             "energy": {"field": "eform", "units": "eV"},
-            "per-atom": {"value": False, "units": None},
             "_metadata": PI_METADATA,
         }
     ],
@@ -96,7 +96,7 @@ def reader(fp):
 
             config = Atoms(positions=pos, symbols=sym, cell=cell)
             config.info["eform"] = eform
-            config.info["name"] = f"matbench_mp_e_form_{i}"
+            config.info["name"] = f"matbench_mp_gap_{i}"
             config.info["volume"] = atom["lattice"]["volume"]
             config.info["materials-project-version"] = atom["@version"]
             yield config
@@ -126,9 +126,9 @@ def main(argv):
     client = MongoDatabase(
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
-    with open("formation_energy.json", "r") as f:
-        formation_energy_pd = json.load(f)
-    client.insert_property_definition(formation_energy_pd)
+    with open("band_gap.json", "r") as f:
+        band_gap_pd = json.load(f)
+    client.insert_property_definition(band_gap_pd)
 
     ds_id = generate_ds_id()
 
@@ -160,7 +160,7 @@ def main(argv):
         ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
-        links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
+        links=[PUBLICATION, DATA_LINK],  # + OTHER_LINKS,
         description=DATASET_DESC,
         verbose=False,
         # cs_ids=cs_ids,  # remove line if no configuration sets to insert

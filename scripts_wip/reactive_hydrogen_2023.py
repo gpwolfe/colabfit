@@ -9,13 +9,20 @@ Other properties added to metadata
 
 File notes
 ----------
+The configurations in the AIMD folder have no properties associated.
+Additionally, 14 files of the ~3500 are missing the final totals of
+energy and forces. ASE's FHI-aims out file parser fails to parse these
+files. These are skipped.
 
 """
 from argparse import ArgumentParser
 from pathlib import Path
 import sys
+from tqdm import tqdm
 
 from ase.io.aims import read_aims_output
+from ase.calculators.singlepoint import SinglePointCalculator
+
 
 # from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
@@ -43,17 +50,14 @@ AUTHORS = [
     "Reinhard J. Maurer",
 ]
 DATASET_DESC = (
-    "Four Cu facets are included in this dataset: Cu(111), Cu(100), Cu(110), "
-    "and Cu(211). Slab settings are as follows: 3 × 3, 6-layered slabs for Cu(111), "
-    "(100), and (110) surfaces; 1 × 3, 6-layered slabs for Cu(211) surface. The "
-    "initial dataset included 2530 data points. 845 data points represent H2 "
-    "interacting with one of the four Cu surfaces (56 atoms) and 1685 data points "
-    "represent Cu surface structures sampled at different temperatures (54 atoms). "
-    "The final dataset contained 4230 data points (2545 H2/Cu and 1685 clean Cu "
-    "surface structures) after adaptive sampling."
+    "This dataset contains structures of Cu, including Cu(111), Cu(100), Cu(110), "
+    "and Cu(211). Slab settings are as follows: 3 x 3, 6-layered slabs for Cu(111), "
+    "(100), and (110) surfaces; 1 x 3, 6-layered slabs for Cu(211) surface. "
+    "Includes some structures representing interation of H2 with one of the Cu "
+    "surfaces and some structures of Cu sampled at different temperatures."
 )
 ELEMENTS = ["Cu", "H"]
-GLOB_STR = "aims*.out"
+GLOB_STR = "manifest.json"
 
 PI_METADATA = {
     "software": {"value": "FHI-aims"},
@@ -87,28 +91,43 @@ PROPERTY_MAP = {
 }
 
 
-# CSS = [
-#     [
-#         f"{DATASET_NAME}_aluminum",
-#         {"names": {"$regex": "aluminum"}},
-#         f"Configurations of aluminum from {DATASET_NAME} dataset",
-#     ]
-# ]
+CSS = [
+    [
+        f"{DATASET_NAME}_Cu",
+        {"nelements": 1},
+        f"Configurations containing just Cu from {DATASET_NAME} dataset",
+    ],
+    [
+        f"{DATASET_NAME}_HCu",
+        {"nelements": 2},
+        f"Configurations containing H and Cu from {DATASET_NAME} dataset",
+    ],
+]
 
 
 def reader(fp):
     try:
         config = read_aims_output(fp)
-        if isinstance(config, list):
-            print(config)
-            return
+        if not isinstance(config.calc, SinglePointCalculator):
+            return None
         else:
             config.info["energy"] = config.get_potential_energy()
             config.info["forces"] = config.get_forces()
             config.info["name"] = f"{'__'.join(fp.parts[-6:-1])}"
-            return [config]
-    except:
-        print(fp)
+            return config
+    except IndexError:
+        pass
+        # with open("errors_hydrogen.txt", "a") as f:
+        #     f.write(f"{fp}\t\t{e}\n")
+
+
+def reader_wrapper(target_fp):
+    fps = target_fp.parent.rglob("aims*.out")  # target is for load_data function
+    for fp in tqdm(fps):
+        config = reader(fp)
+        if config is not None:
+            # print([config])
+            yield config
 
 
 def main(argv):
@@ -146,7 +165,7 @@ def main(argv):
         file_format="folder",
         name_field="name",
         elements=ELEMENTS,
-        reader=reader,
+        reader=reader_wrapper,
         glob_string=GLOB_STR,
         generator=False,
     )
@@ -163,17 +182,17 @@ def main(argv):
 
     all_co_ids, all_do_ids = list(zip(*ids))
 
-    # cs_ids = []
-    # for i, (name, query, desc) in enumerate(CSS):
-    #     cs_id = client.query_and_insert_configuration_set(
-    #         co_hashes=all_co_ids,
-    #         ds_id=ds_id,
-    #         name=name,
-    #         description=desc,
-    #         query=query,
-    #     )
+    cs_ids = []
+    for i, (name, query, desc) in enumerate(CSS):
+        cs_id = client.query_and_insert_configuration_set(
+            co_hashes=all_co_ids,
+            ds_id=ds_id,
+            name=name,
+            description=desc,
+            query=query,
+        )
 
-    #     cs_ids.append(cs_id)
+        cs_ids.append(cs_id)
 
     client.insert_dataset(
         do_hashes=all_do_ids,
@@ -183,7 +202,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],  # + OTHER_LINKS,
         description=DATASET_DESC,
         verbose=False,
-        # cs_ids=cs_ids,  # remove line if no configuration sets to insert
+        cs_ids=cs_ids,  # remove line if no configuration sets to insert
         data_license=LICENSE,
     )
 
