@@ -10,6 +10,14 @@ Other properties added to metadata
 File notes
 ----------
 
+Matbench files are formatted as a single massive JSON object on one line
+I have reformatted so that one configuration appears per line in a new
+json file. The function used for reformatting appears at the bottom of this file.
+Reformatting allows the dataset to ingest in < 1min as opposed to ~1hour+
+The index object that precedes the configurations+formation energies
+in the original file is omitted, as this is a simple cardinal index. This is
+recreated in the reader function.
+
 """
 from argparse import ArgumentParser
 import json
@@ -44,7 +52,7 @@ DATASET_DESC = (
     "It is hosted and maintained by the Materials Project."
 )
 ELEMENTS = None
-GLOB_STR = "matbench_mp_e_form.json"
+GLOB_STR = "matbench_mp_e_form_structures.json"
 
 PI_METADATA = {
     "software": {"value": "VASP"},
@@ -55,7 +63,7 @@ PI_METADATA = {
 PROPERTY_MAP = {
     "formation-energy": [
         {
-            "energy": {"field": "energy", "units": "eV"},
+            "energy": {"field": "eform", "units": "eV"},
             "per-atom": {"value": False, "units": None},
             "_metadata": PI_METADATA,
         }
@@ -78,7 +86,7 @@ CSS = [
 
 def reader(fp):
     with open(fp, "r") as f:
-        for i, line in tqdm(f):
+        for i, line in tqdm(enumerate(f)):
             row = json.loads(line)
             atom = row[0]
             eform = row[1]
@@ -89,6 +97,7 @@ def reader(fp):
             config = Atoms(positions=pos, symbols=sym, cell=cell)
             config.info["eform"] = eform
             config.info["name"] = f"matbench_mp_e_form_{i}"
+            config.info["volume"] = atom["lattice"]["volume"]
             config.info["materials-project-version"] = atom["@version"]
             yield config
 
@@ -161,3 +170,45 @@ def main(argv):
 
 if __name__ == "__main__":
     main(sys.argv[1:])
+
+
+# def structures_to_file(fp, outfile):
+#     with open(fp, "r") as f:
+#         with open(outfile, "w") as fout:
+#             line = f.readline()
+#             start_index = 0
+#             in_object = False
+#             counter = 0
+#             while True:
+#                 start_marker = line.find("[{", start_index)
+#                 if start_marker == -1:
+#                     break  # No more objects found
+
+#                 if '@module": "pymatgen.core.structure",' in line[start_marker:]:
+#                     in_object = True
+#                     obj_start = start_marker
+
+#                 if in_object:
+#                     end_marker = line.find('"@version":', start_marker)
+#                     if end_marker != -1:
+#                         version_end = line.find(
+#                             ",", end_marker + 11
+#                         )  # Skip "@version": and its value
+#                         end_index = line.find(
+#                             "]", version_end
+#                         )  # Find ending square bracket and curly brace
+#                         object_str = line[obj_start : end_index + 1]
+#                         # json.dumps()
+#                         fout.write(f"{object_str}\n")
+#                         if counter % 100 == 0:
+#                             print(counter)
+#                         counter += 1
+
+#                         in_object = False
+#                         start_index = end_index + 2
+#                     else:
+#                         start_index = (
+#                             start_marker + 1
+#                         )  # Continue searching within the object
+#                 else:
+#                     start_index = start_marker + 1
