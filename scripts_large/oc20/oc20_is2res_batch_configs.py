@@ -50,9 +50,12 @@ import asyncio
 import pymongo
 
 
-BATCH_SIZE = 2
-today = f"{time.strftime('%Y')}_{time.strftime('%m')}_{time.strftime('%d')}"
+BATCH_SIZE = 512
+DATASET_FP = Path("/vast/gw2338/is2res_train_trajectories")  # Greene
+DATASET_FP = Path("is2res_train_trajectories")  # local
 
+
+today = f"{time.strftime('%Y')}_{time.strftime('%m')}_{time.strftime('%d')}"
 AUTHORS = [
     "Lowik Chanussot",
     "Abhishek Das",
@@ -72,7 +75,6 @@ AUTHORS = [
     "C. Lawrence Zitnick",
     "Zachary Ulissi",
 ]
-
 PUBLICATION = "https://arxiv.org/abs/2010.09990"
 DATA_LINK = "https://github.com/Open-Catalyst-Project/ocp/blob/main/DATASET.md"
 LINKS = [
@@ -87,9 +89,6 @@ DS_DESC = (
     "section of the Open Catalyst Project GitHub page."
 )
 DATASET = "OC20_IS2RES_train"
-DATASET_FP = Path("/vast/gw2338/is2res_train_trajectories")  # Greene
-DATASET_FP = Path("is2res_train_trajectories")  # local
-
 PKL_FP = DATASET_FP / "oc20_data_mapping.pkl"
 GLOB_STR = "*.extxyz"
 NAME_FIELD = "name"
@@ -237,7 +236,7 @@ def auto_reconnect(mongo_func):
 
 
 @auto_reconnect
-def get_configs(ds_id, args, client):
+def get_configs(ds_id, client, pool):
     # ids = []
     fps = list(DATASET_FP.rglob(GLOB_STR))
     n_batches = len(fps) // BATCH_SIZE
@@ -245,16 +244,13 @@ def get_configs(ds_id, args, client):
     indices = [((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(n_batches)]
     if leftover:
         indices.append((BATCH_SIZE * n_batches, len(fps)))
-    pool = multiprocessing.Pool(args.nprocs)
+
     for batch_num, batch in tqdm(enumerate(indices)):
         beg, end = batch
         filepaths = fps[beg:end]
         configurations = list(
             itertools.chain.from_iterable(pool.map(read_for_pool, filepaths))
         )
-        # client = MongoDatabase(
-        #     args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
-        # )
 
         ids_batch = list(
             client.insert_data(
@@ -317,8 +313,8 @@ async def main(argv):
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(free_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
-
-    get_configs(ds_id, args, client)
+    pool = multiprocessing.Pool(nprocs)
+    get_configs(ds_id, client, pool)
     # ids = get_configs(ds_id, args)
 
     # all_co_ids, all_do_ids = list(zip(*ids))
