@@ -50,7 +50,7 @@ import asyncio
 import pymongo
 
 
-BATCH_SIZE = 512
+BATCH_SIZE = 2
 today = f"{time.strftime('%Y')}_{time.strftime('%m')}_{time.strftime('%d')}"
 
 AUTHORS = [
@@ -88,7 +88,7 @@ DS_DESC = (
 )
 DATASET = "OC20_IS2RES_train"
 DATASET_FP = Path("/vast/gw2338/is2res_train_trajectories")  # Greene
-# DATASET_FP = Path("is2res_train_trajectories")  # local
+DATASET_FP = Path("is2res_train_trajectories")  # local
 
 PKL_FP = DATASET_FP / "oc20_data_mapping.pkl"
 GLOB_STR = "*.extxyz"
