@@ -52,7 +52,7 @@ import pymongo
 
 BATCH_SIZE = 512
 DATASET_FP = Path("/vast/gw2338/is2res_train_trajectories")  # Greene
-DATASET_FP = Path("is2res_train_trajectories")  # local
+# DATASET_FP = Path("is2res_train_trajectories")  # local
 
 
 today = f"{time.strftime('%Y')}_{time.strftime('%m')}_{time.strftime('%d')}"
@@ -238,7 +238,7 @@ def auto_reconnect(mongo_func):
 @auto_reconnect
 def get_configs(ds_id, client, pool):
     # ids = []
-    fps = list(DATASET_FP.rglob(GLOB_STR))
+    fps = sorted(list(DATASET_FP.rglob(GLOB_STR)))
     n_batches = len(fps) // BATCH_SIZE
     leftover = len(fps) % BATCH_SIZE
     indices = [((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(n_batches)]
