@@ -51,8 +51,9 @@ import pymongo
 
 
 BATCH_SIZE = 512
+BATCH_SIZE = 2
 DATASET_FP = Path("/vast/gw2338/is2res_train_trajectories")  # Greene
-# DATASET_FP = Path("is2res_train_trajectories")  # local
+DATASET_FP = Path("is2res_train_trajectories")  # local
 
 
 today = f"{time.strftime('%Y')}_{time.strftime('%m')}_{time.strftime('%d')}"
@@ -235,49 +236,38 @@ def auto_reconnect(mongo_func):
     return wrapper
 
 
-@auto_reconnect
-def get_configs(ds_id, client, pool):
+async def get_configs(ds_id, client_name, client_uri, nprocs, batch):
     # ids = []
-    fps = sorted(list(DATASET_FP.rglob(GLOB_STR)))
-    n_batches = len(fps) // BATCH_SIZE
-    leftover = len(fps) % BATCH_SIZE
-    indices = [((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(n_batches)]
-    if leftover:
-        indices.append((BATCH_SIZE * n_batches, len(fps)))
-
-    for batch_num, batch in tqdm(enumerate(indices)):
-        beg, end = batch
-        filepaths = fps[beg:end]
-        configurations = list(
-            itertools.chain.from_iterable(pool.map(read_for_pool, filepaths))
+    batch_num, filepaths = batch
+    pool = multiprocessing.Pool(nprocs)
+    configurations = list(
+        itertools.chain.from_iterable(pool.map(read_for_pool, filepaths))
+    )
+    client = MongoDatabase(database_name=client_name, uri=client_uri, nprocs=nprocs)
+    ids_batch = list(
+        client.insert_data(
+            configurations,
+            ds_id=ds_id,
+            co_md_map=co_md_map,
+            property_map=property_map,
+            generator=False,
+            verbose=False,
         )
-
-        ids_batch = list(
-            client.insert_data(
-                configurations,
-                ds_id=ds_id,
-                co_md_map=co_md_map,
-                property_map=property_map,
-                generator=False,
-                verbose=False,
-            )
-        )
-        co_ids, do_ids = list(zip(*ids_batch))
-        co_id_file = Path(
-            f"{ds_id}_co_ids_{today}/{ds_id}_config_ids_batch_{batch_num}.txt"
-        )
-        co_id_file.parent.mkdir(parents=True, exist_ok=True)
-        do_id_file = Path(
-            f"{ds_id}_do_ids_{today}/{ds_id}_do_ids_batch_{batch_num}.txt"
-        )
-        do_id_file.parent.mkdir(parents=True, exist_ok=True)
-        with open(co_id_file, "a") as f:
-            f.writelines([f"{id}\n" for id in co_ids])
-        with open(do_id_file, "a") as f:
-            f.writelines([f"{id}\n" for id in do_ids])
-        # ids.extend(ids_batch)
-        # client.close()
-    return
+    )
+    co_ids, do_ids = list(zip(*ids_batch))
+    co_id_file = Path(
+        f"{ds_id}_co_ids_{today}/{ds_id}_config_ids_batch_{batch_num}.txt"
+    )
+    co_id_file.parent.mkdir(parents=True, exist_ok=True)
+    do_id_file = Path(f"{ds_id}_do_ids_{today}/{ds_id}_do_ids_batch_{batch_num}.txt")
+    do_id_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(co_id_file, "a") as f:
+        f.writelines([f"{id}\n" for id in co_ids])
+    with open(do_id_file, "a") as f:
+        f.writelines([f"{id}\n" for id in do_ids])
+    # ids.extend(ids_batch)
+    # client.close()
+    return do_ids
 
 
 MAX_AUTO_RECONNECT_ATTEMPTS = 100
@@ -313,8 +303,25 @@ async def main(argv):
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(free_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
-    pool = multiprocessing.Pool(nprocs)
-    get_configs(ds_id, client, pool)
+    fps = sorted(list(DATASET_FP.rglob(GLOB_STR)))
+    n_batches = len(fps) // BATCH_SIZE
+    leftover = len(fps) % BATCH_SIZE
+    indices = [((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(n_batches)]
+    if leftover:
+        indices.append((BATCH_SIZE * n_batches, len(fps)))
+    get_configs_partial = functools.partial(
+        get_configs, ds_id, client.database_name, client.uri, nprocs
+    )
+    batches = []
+    for batch_num, batch in tqdm(enumerate(indices)):
+        beg, end = batch
+        filepaths = fps[beg:end]
+        batches.append((batch_num, filepaths))
+    # get_configs_partial(batches[0])
+    tasks = [asyncio.create_task(get_configs_partial(batch)) for batch in batches]
+    print("after tasks")
+    _ = await asyncio.gather(*tasks)
+
     # ids = get_configs(ds_id, args)
 
     # all_co_ids, all_do_ids = list(zip(*ids))
@@ -338,4 +345,4 @@ async def submain(args):
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    asyncio.run(submain(args))
+    asyncio.run(main(args))
