@@ -3,12 +3,16 @@ author: Gregory Wolfe
 
 Properties
 ----------
+forces
+free-energy
 
 Other properties added to metadata
 ----------------------------------
 
 File notes
 ----------
+outcar files provided, custom parser written for vasp settings
+
 
 """
 from argparse import ArgumentParser
@@ -26,22 +30,27 @@ from colabfit.tools.property_definitions import (
 )
 
 
-DATASET_FP = Path("").cwd()
-DATASET_NAME = ""
-LICENSE = ""
+DATASET_FP = Path("data/geng_goddard")
+DATASET_NAME = "N_and_O_columns_non-bonded_potential_JCP2023"
+LICENSE = "https://creativecommons.org/licenses/by/4.0/"
 
-PUBLICATION = ""
-DATA_LINK = ""
+PUBLICATION = "https://doi.org/10.1063/5.0174188"
+DATA_LINK = "https://doi.org/10.1063/5.0174188"
 # OTHER_LINKS = []
 
-AUTHORS = [""]
-DATASET_DESC = ""
-ELEMENTS = [""]
-GLOB_STR = "*.*"
+AUTHORS = ["Peng Geng", "Sergey Zybin", "Saber Naserifar", "William A. Goddard, III"]
+DATASET_DESC = (
+    "This dataset contains structures of materials from the N (15th), "
+    "O (16th) and F (16th) columns of the periodic table for use in generating "
+    "a 2-body non-bonded vdW potential."
+)
+ELEMENTS = None
+GLOB_STR = "OUTCAR*"
 
 PI_METADATA = {
     "software": {"value": ""},
     "method": {"value": ""},
+    "input": {"field": "input"}
     # "input": {"value": {}}
 }
 
