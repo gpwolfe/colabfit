@@ -225,6 +225,8 @@ def auto_reconnect(mongo_func):
                 return mongo_func(*args, **kwargs)
             except pymongo.errors.AutoReconnect as e:
                 wait_t = 0.5 * pow(2, attempt)  # exponential back off
+                if wait_t > 1800:
+                    wait_t = 1800  # cap at 1/2 hour
                 logging.warning(
                     "PyMongo auto-reconnecting... %s. Waiting %.1f seconds.",
                     str(e),
