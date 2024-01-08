@@ -42,7 +42,7 @@ GLOB_STR = "*.*"
 PI_METADATA = {
     "software": {"value": ""},
     "method": {"value": ""},
-    # "basis-set": {"field": "basis_set"}
+    # "input": {"value": {}}
 }
 
 PROPERTY_MAP = {
