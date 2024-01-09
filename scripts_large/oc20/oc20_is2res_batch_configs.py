@@ -51,6 +51,7 @@ import pymongo
 
 
 BATCH_SIZE = 512
+START_BATCH = 611  # in case of interruption
 DATASET_FP = Path("/vast/gw2338/is2res_train_trajectories")  # Greene
 # DATASET_FP = Path("is2res_train_trajectories")  # local
 
@@ -243,11 +244,13 @@ def get_configs(ds_id, client, pool):
     fps = sorted(list(DATASET_FP.rglob(GLOB_STR)))
     n_batches = len(fps) // BATCH_SIZE
     leftover = len(fps) % BATCH_SIZE
-    indices = [((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(n_batches)]
+    indices = [
+        ((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(START_BATCH, n_batches)
+    ]
     if leftover:
         indices.append((BATCH_SIZE * n_batches, len(fps)))
 
-    for batch_num, batch in tqdm(enumerate(indices)):
+    for batch_num, batch in tqdm(enumerate(indices, start=START_BATCH)):
         beg, end = batch
         filepaths = fps[beg:end]
         configurations = list(
