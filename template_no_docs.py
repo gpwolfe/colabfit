@@ -61,7 +61,7 @@ PROPERTY_MAP = {
     ],
     # "cauchy-stress": [
     #     {
-    #         "stress": {"field": "stress", "units": "GPa"},
+    #         "stress": {"field": "stress", "units": "eV/angstrom^3"},
     #         "volume-normalized": {"value": True, "units": None},
     #         "_metadata": PI_METADATA,
     #     }
