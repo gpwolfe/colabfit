@@ -44,7 +44,8 @@ AUTHORS = ["Peng Geng", "Sergey Zybin", "Saber Naserifar", "William A. Goddard, 
 DATASET_DESC = (
     "This dataset contains structures of materials from the N (15th), "
     "O (16th) and F (16th) columns of the periodic table used for generating "
-    "a 2-body non-bonded vdW potential."
+    "a 2-body non-bonded vdW potential. Configuration sets include As, At, "
+    "Bi, O, P, Po, S, Sb, Se and Te."
 )
 ELEMENTS = None
 GLOB_STR = "OUTCAR*"
@@ -277,7 +278,7 @@ def main(argv):
             # co_md_map=CO_METADATA,
             property_map=PROPERTY_MAP,
             generator=False,
-            verbose=False,
+            verbose=True,
         )
     )
 
@@ -302,7 +303,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK],  # + OTHER_LINKS,
         description=DATASET_DESC,
-        verbose=False,
+        verbose=True,
         cs_ids=cs_ids,  # remove line if no configuration sets to insert
         data_license=LICENSE,
     )
