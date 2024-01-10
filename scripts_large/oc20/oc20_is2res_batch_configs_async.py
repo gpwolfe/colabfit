@@ -52,6 +52,7 @@ import pymongo
 
 BATCH_SIZE = 512
 BATCH_SIZE = 2
+START_BATCH = 0  # in case of interruption
 DATASET_FP = Path("/vast/gw2338/is2res_train_trajectories")  # Greene
 DATASET_FP = Path("is2res_train_trajectories")  # local
 
@@ -266,8 +267,8 @@ async def get_configs(ds_id, client_name, client_uri, nprocs, batch):
     with open(do_id_file, "a") as f:
         f.writelines([f"{id}\n" for id in do_ids])
     # ids.extend(ids_batch)
-    # client.close()
-    return do_ids
+    client.close()
+    # return do_ids
 
 
 MAX_AUTO_RECONNECT_ATTEMPTS = 100
@@ -292,28 +293,36 @@ async def main(argv):
         default=4,
     )
     parser.add_argument("-r", "--port", type=int, help="Target port for MongoDB")
-
+    parser.add_argument(
+        "-z",
+        "--ds_id",
+        type=str,
+        default=None,
+        help="Dataset-ID to use if already created. Default=None",
+    )
     args = parser.parse_args(argv)
     nprocs = args.nprocs
-    client = MongoDatabase(
-        args.db_name, nprocs=nprocs, uri=f"mongodb://{args.ip}:{args.port}"
-    )
-
-    ds_id = generate_ds_id()
+    uri = f"mongodb://{args.ip}:{args.port}"
+    db_name = args.db_name
+    client = MongoDatabase(db_name, nprocs=nprocs, uri=uri)
+    ds_id = args.ds_id
+    if ds_id is None:
+        ds_id = generate_ds_id()
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(free_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
+    client.close()
     fps = sorted(list(DATASET_FP.rglob(GLOB_STR)))
     n_batches = len(fps) // BATCH_SIZE
     leftover = len(fps) % BATCH_SIZE
-    indices = [((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(n_batches)]
+    indices = [
+        ((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(START_BATCH, n_batches)
+    ]
     if leftover:
         indices.append((BATCH_SIZE * n_batches, len(fps)))
-    get_configs_partial = functools.partial(
-        get_configs, ds_id, client.database_name, client.uri, nprocs
-    )
+    get_configs_partial = functools.partial(get_configs, ds_id, db_name, uri, nprocs)
     batches = []
-    for batch_num, batch in tqdm(enumerate(indices)):
+    for batch_num, batch in tqdm(enumerate(indices, start=START_BATCH)):
         beg, end = batch
         filepaths = fps[beg:end]
         batches.append((batch_num, filepaths))
