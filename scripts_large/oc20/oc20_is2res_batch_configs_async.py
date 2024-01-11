@@ -52,7 +52,7 @@ import pymongo
 
 BATCH_SIZE = 512
 # BATCH_SIZE = 2
-START_BATCH = 611  # in case of interruption
+START_BATCH = 0  # in case of interruption
 DATASET_FP = Path("/vast/gw2338/is2res_train_trajectories")  # Greene
 # DATASET_FP = Path("is2res_train_trajectories")  # local
 
@@ -268,6 +268,7 @@ async def get_configs(ds_id, client_name, client_uri, nprocs, batch):
         f.writelines([f"{id}\n" for id in do_ids])
     # ids.extend(ids_batch)
     client.close()
+    print(f"{batch}\n")
     # return do_ids
 
 
@@ -347,9 +348,9 @@ async def main(argv):
     # )
 
 
-async def submain(args):
-    asyncio.create_task(main(args))
-    # await run_poke_and_sleep()
+# async def submain(args):
+#     asyncio.create_task(main(args))
+#     # await run_poke_and_sleep()
 
 
 if __name__ == "__main__":
