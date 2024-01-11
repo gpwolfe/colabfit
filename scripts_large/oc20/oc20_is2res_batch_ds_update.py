@@ -26,6 +26,7 @@ from colabfit import (
 )
 from tqdm import tqdm
 
+START_BATCH = 0
 MAX_AUTO_RECONNECT_ATTEMPTS = 100
 
 
@@ -397,6 +398,8 @@ async def insert_dos_to_dataset(args, ds_id=None, verbose=False, fp=None):
         upsert=True,
         hint="hash",
     )
+    with open("ds_batches.txt", "a") as f:
+        f.write(fp, "\n")
     client.close()
 
 
@@ -431,32 +434,36 @@ async def main(argv):
     ds_id = "_".join(do_ids_dir.parts[-1].split("_")[:3])
     fps = sorted(list(do_ids_dir.rglob("*.txt")))
 
-    # Create the dataset with the first file
-    with open(fps[0], "r") as f:
-        do_ids0 = [id.strip() for id in f.readlines()]
-    client.insert_dataset(
-        do_hashes=do_ids0,
-        ds_id=ds_id,
-        name=DATASET,
-        authors=AUTHORS,
-        links=[PUBLICATION, DATA_LINK],
-        description=DS_DESC,
-        verbose=False,
-        data_license="https://creativecommons.org/licenses/by/4.0/",
-    )
-    client.close()
-    # Create async tasks for update dataset
-    tasks = [
-        asyncio.create_task(insert_dos_to_dataset(args, ds_id=ds_id, fp=fp))
-        for fp in fps[1:]
-    ]
-    await asyncio.gather(*tasks)
+    if START_BATCH == 0:
+        # Create the dataset with the first file
+        with open(fps[0], "r") as f:
+            do_ids0 = [id.strip() for id in f.readlines()]
+        client.insert_dataset(
+            do_hashes=do_ids0,
+            ds_id=ds_id,
+            name=DATASET,
+            authors=AUTHORS,
+            links=[PUBLICATION, DATA_LINK],
+            description=DS_DESC,
+            verbose=False,
+            data_license="https://creativecommons.org/licenses/by/4.0/",
+        )
+        client.close()
+        # Create async tasks for update dataset
+        tasks = [
+            asyncio.create_task(insert_dos_to_dataset(args, ds_id=ds_id, fp=fp))
+            for fp in fps[1:]
+        ]
+        await asyncio.gather(*tasks)
+    else:
+        tasks = [
+            asyncio.create_task(insert_dos_to_dataset(args, ds_id=ds_id, fp=fp))
+            for fp in fps[START_BATCH:]
+        ]
+        await asyncio.gather(*tasks)
+
     # for fp in tqdm(fps[1:]):
     #     insert_dos_to_dataset(args, ds_id=ds_id, fp=fp)
-
-
-async def submain(args):
-    asyncio.create_task(main(args))
 
 
 if __name__ == "__main__":
