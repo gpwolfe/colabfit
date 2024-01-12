@@ -399,7 +399,7 @@ async def insert_dos_to_dataset(args, ds_id=None, verbose=False, fp=None):
         hint="hash",
     )
     with open("ds_batches.txt", "a") as f:
-        f.write(fp, "\n")
+        f.write(f"{fp}\n")
     client.close()
 
 
