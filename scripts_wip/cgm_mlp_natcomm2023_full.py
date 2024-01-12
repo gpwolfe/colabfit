@@ -93,64 +93,42 @@ PROPERTY_MAP = {
 CO_METADATA = {
     "config_type": {"field": "config_type"},
 }
+# ds_name, ds_desc, ds_fp, ds_glob
 DSS = (
     (
         DATASET_NAME + "_Cr-C",
-        "Training simulations from {DATASET_NAME} of carbon deposition on Cr. {DATASET_DESC}",
-        DATASET_FP / "CGM-MLP-Cr-C/Training_Dataset_deposition.xyz",
+        "Training simulations from {DATASET_NAME} of carbon deposition on "
+        "a Cr surface. {DATASET_DESC}",
+        DATASET_FP / "CGM-MLP-Cr-C",
+        "Training_Dataset_deposition.xyz",
+    ),
+    (
+        DATASET_NAME + "_Cu-C",
+        "Training simulations from {DATASET_NAME} of carbon deposition on "
+        "a Cu surface. {DATASET_DESC}",
+        DATASET_FP / "CGM-MLP-Cu-C",
+        "Training_Dataset_deposition.xyz",
     ),
     (
         DATASET_NAME + "_CU-C",
-        "Simulations from {DATASET_NAME} of carbon deposition on CU. {DATASET_DESC}",
-        DATASET_FP / "CGM-MLP-Cr-C/Training_Dataset_deposition.xyz",
-    ),
-    (
-        DATASET_NAME + "_amorphous_carbon_test",
-        "493 structures available from the GAP-20 database, excluding any "
-        f"structures present in the training set. {DATASET_DESC}",
-        "Amorphous_Carbon_Testing_Set.xyz",
-    ),
-    (
-        DATASET_NAME + "_carbon-cluster@Cu_train",
-        "588 structures selected from the AIMD simulation of the Cu(111) slab, "
-        f"including both the C1-C18 clusters on the Cu(111) slab. {DATASET_DESC}",
-        "Carbon_Cluster_Training_Set.xyz",
-    ),
-    (
-        DATASET_NAME + "_carbon-cluster@Cu_test",
-        "192 structures were uniformly selected from the AIMD simulation, "
-        f"excluding any structures that are part of the training set. {DATASET_DESC}",
-        "Carbon_Cluster_Testing_Set.xyz",
-    ),
-    (
-        DATASET_NAME + "_deposited-carbon@Cu_train",
-        "1090 structures uniformly selected from the MD/tfMC simulation during "
-        f"the training process of CGM-MLPs. {DATASET_DESC}",
-        "Deposited_Carbon_Training_Set.xyz",
-    ),
-    (
-        DATASET_NAME + "_deposited-carbon@Cu_test",
-        "468 structures uniformly selected from the MD/tfMC simulation, excluding "
-        f"any structures that are part of the training set.. {DATASET_DESC}",
-        "Deposited_Carbon_Testing_Set.xyz",
+        "Training simulations from {DATASET_NAME} of carbon on a Cu metal "
+        "surface. {DATASET_DESC}",
+        DATASET_FP / "CGM-MLP-Cu-C/",
+        "Training_Dataset_metal_surface.xyz",
     ),
 )
-# CSS = [
-#     [
-#         f"{DATASET_NAME}_aluminum",
-#         {"names": {"$regex": "aluminum"}},
-#         f"Configurations of aluminum from {DATASET_NAME} dataset",
-#     ]
-# ]
 
 
 def reader(filepath: Path):
     configs = read(filepath, index=":")
     for i, config in enumerate(configs):
-        config.info["name"] = f"{filepath.stem}_{i}"
+        config.info[
+            "name"
+        ] = f"{'_'.join(filepath.parts[:-2])}_{config.info['config_type']}_{i}"
         stress = config.info.get("dft_virial")
         if stress is not None:
             config.info["stress"] = config.info["dft_virial"].reshape(3, 3)
+
     return configs
 
 
@@ -206,20 +184,33 @@ def main(argv):
                 verbose=False,
             )
         )
-
+        css = [
+            [
+                f"{DATASET_NAME}_deposition",
+                {"names": {"$regex": "deposition"}},
+                f"Configurations of C deposition in a {ds_name.split('_')[-1]} system "
+                f"from {DATASET_NAME} dataset",
+            ],
+            [
+                f"{DATASET_NAME}_metallic_surface",
+                {"names": {"$regex": "metallic_surface"}},
+                f"Configurations of C on a metallic surface in a "
+                f"{ds_name.split('_')[-1]} system from {DATASET_NAME} dataset",
+            ],
+        ]
         all_co_ids, all_do_ids = list(zip(*ids))
 
-        # cs_ids = []
-        # for i, (name, query, desc) in enumerate(CSS):
-        #     cs_id = client.query_and_insert_configuration_set(
-        #         co_hashes=all_co_ids,
-        #         ds_id=ds_id,
-        #         name=name,
-        #         description=desc,
-        #         query=query,
-        #     )
+        cs_ids = []
+        for i, (name, query, desc) in enumerate(css):
+            cs_id = client.query_and_insert_configuration_set(
+                co_hashes=all_co_ids,
+                ds_id=ds_id,
+                name=name,
+                description=desc,
+                query=query,
+            )
 
-        #     cs_ids.append(cs_id)
+            cs_ids.append(cs_id)
 
         client.insert_dataset(
             do_hashes=all_do_ids,
