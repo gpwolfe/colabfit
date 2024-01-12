@@ -96,13 +96,13 @@ CO_METADATA = {
 DSS = (
     (
         DATASET_NAME + "_Cr-C",
-        "Simulations from {DATASET_NAME} of carbon deposition on Cr. {DATASET_DESC}",
+        "Training simulations from {DATASET_NAME} of carbon deposition on Cr. {DATASET_DESC}",
         DATASET_FP / "CGM-MLP-Cr-C/Training_Dataset_deposition.xyz",
     ),
     (
-        DATASET_NAME + "_amorphous_carbon_train",
-        f"2558 structures selected from the GAP-20 database. {DATASET_DESC}",
-        "Amorphous_Carbon_Training_Set.xyz",
+        DATASET_NAME + "_CU-C",
+        "Simulations from {DATASET_NAME} of carbon deposition on CU. {DATASET_DESC}",
+        DATASET_FP / "CGM-MLP-Cr-C/Training_Dataset_deposition.xyz",
     ),
     (
         DATASET_NAME + "_amorphous_carbon_test",
