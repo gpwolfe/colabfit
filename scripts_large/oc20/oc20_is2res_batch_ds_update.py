@@ -50,8 +50,9 @@ AUTHORS = [
     "Zachary Ulissi",
 ]
 
-PUBLICATION = "https://arxiv.org/abs/2010.09990"
+PUBLICATION = "https://doi.org/10.1021/acscatal.0c04525"
 DATA_LINK = "https://github.com/Open-Catalyst-Project/ocp/blob/main/DATASET.md"
+OTHER_LINKS = ["https://arxiv.org/abs/2010.09990"]
 LINKS = [
     "https://arxiv.org/abs/2010.09990",
     "https://github.com/Open-Catalyst-Project/ocp/blob/main/DATASET.md",
@@ -443,7 +444,7 @@ async def main(argv):
             ds_id=ds_id,
             name=DATASET,
             authors=AUTHORS,
-            links=[PUBLICATION, DATA_LINK],
+            links=[PUBLICATION, DATA_LINK] + OTHER_LINKS,
             description=DS_DESC,
             verbose=False,
             data_license="https://creativecommons.org/licenses/by/4.0/",
@@ -458,7 +459,7 @@ async def main(argv):
     else:
         tasks = [
             asyncio.create_task(insert_dos_to_dataset(args, ds_id=ds_id, fp=fp))
-            for fp in fps[START_BATCH:]
+            for fp in fps
         ]
         await asyncio.gather(*tasks)
 

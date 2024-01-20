@@ -52,7 +52,6 @@ import pymongo
 
 BATCH_SIZE = 512
 # BATCH_SIZE = 2
-START_BATCH = 0  # in case of interruption
 DATASET_FP = Path("/vast/gw2338/is2res_train_trajectories")  # Greene
 # DATASET_FP = Path("is2res_train_trajectories")  # local
 
@@ -301,12 +300,28 @@ async def main(argv):
         default=None,
         help="Dataset-ID to use if already created. Default=None",
     )
+    parser.add_argument(
+        "-a",
+        "--start_batch",
+        type=int,
+        default=0,
+        help="Batch number at which to start",
+    )
+    parser.add_argument(
+        "-o",
+        "--end_batch",
+        type=int,
+        default=None,
+        help="Batch number at which to end",
+    )
     args = parser.parse_args(argv)
     nprocs = args.nprocs
     uri = f"mongodb://{args.ip}:{args.port}"
     db_name = args.db_name
     client = MongoDatabase(db_name, nprocs=nprocs, uri=uri)
     ds_id = args.ds_id
+    start_batch = args.start_batch
+    end_batch = args.end_batch
     if ds_id is None:
         ds_id = generate_ds_id()
     client.insert_property_definition(potential_energy_pd)
@@ -315,15 +330,18 @@ async def main(argv):
     client.close()
     fps = sorted(list(DATASET_FP.rglob(GLOB_STR)))
     n_batches = len(fps) // BATCH_SIZE
+    if end_batch is None:
+        end_batch = n_batches
     leftover = len(fps) % BATCH_SIZE
+
     indices = [
-        ((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(START_BATCH, n_batches)
+        ((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(start_batch, end_batch)
     ]
     if leftover:
         indices.append((BATCH_SIZE * n_batches, len(fps)))
     get_configs_partial = functools.partial(get_configs, ds_id, db_name, uri, nprocs)
     batches = []
-    for batch_num, batch in tqdm(enumerate(indices, start=START_BATCH)):
+    for batch_num, batch in tqdm(enumerate(indices, start=start_batch)):
         beg, end = batch
         filepaths = fps[beg:end]
         batches.append((batch_num, filepaths))
@@ -346,11 +364,6 @@ async def main(argv):
     #     verbose=False,
     #     data_license="https://creativecommons.org/licenses/by/4.0/",
     # )
-
-
-# async def submain(args):
-#     asyncio.create_task(main(args))
-#     # await run_poke_and_sleep()
 
 
 if __name__ == "__main__":
