@@ -3,30 +3,19 @@ author: Gregory Wolfe
 
 Properties
 ----------
-energy
-forces
-stress
 
 Other properties added to metadata
 ----------------------------------
-These properties come from the attached single-point calculator
-forces and energy are explicitly matched to file values. stress is
-returned from ase.Atoms object as values in units of GPa.
 
 File notes
 ----------
 
 """
 from argparse import ArgumentParser
-import functools
-import logging
 from pathlib import Path
 import re
 import sys
-import time
-
 from ase.atoms import Atoms
-import pymongo
 
 # from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
@@ -37,30 +26,27 @@ from colabfit.tools.property_definitions import (
 )
 
 
-DATASET_FP = Path("data/paramagnetic_lanthanide")
-DATASET_NAME = "Paramagnetic_lanthanide_compounds"
+DATASET_FP = Path("data/solute_strengthening_of_prism_edge_locations_in_Mg_alloys")
+DATASET_NAME = "solute_strengthening_of_prism_edge_locations_in_Mg_alloys"
+LICENSE = "https://creativecommons.org/licenses/by/4.0"
 
-SOFTWARE = "VASP 6.2.0"
-METHODS = "DFT-PBE-D3"
+PUBLICATION = "http://doi.org/10.1016/j.euromechsol.2023.105128"
+DATA_LINK = "https://doi.org/10.24435/materialscloud:1e-c7"
+# OTHER_LINKS = []
 
-PUBLICATION = "https://doi.org/10.1021/jacs.3c01342"
-DATA_LINK = "https://doi.org/10.48420/22015322.v1"
-LINKS = ["https://doi.org/10.48420/22015322.v1", "https://doi.org/10.1021/jacs.3c01342"]
-AUTHORS = [
-    "Barak Alnami",
-    "Jon G. C. Kragskow",
-    "Jakob K. Staab",
-    "Jonathan M. Skelton",
-    "Nicholas F. Chilton",
-]
-DATASET_DESC = ""
+AUTHORS = ["Masoud Rahbar Niazi", "W. A Curtin"]
+DATASET_DESC = (
+    "This dataset includes Mg and Mg-Zn alloy structures with solute "
+    "atoms at the prism edge locations. The dataset was created to study the "
+    "strengthening effect of solute atoms at the prism edge locations in Mg alloys."
+)
 ELEMENTS = None
 GLOB_STR = "OUTCAR"
 
 PI_METADATA = {
-    "software": {"value": SOFTWARE},
-    "method": {"value": METHODS},
-    # "basis-set": {"field": "basis_set"}
+    "software": {"value": "VASP"},
+    "method": {"value": "DFT-PBE"},
+    "input": {"field": "input"},
 }
 
 PROPERTY_MAP = {
@@ -79,8 +65,8 @@ PROPERTY_MAP = {
     ],
     # "cauchy-stress": [
     #     {
-    #         "stress": {"field": "stress", "units": "kbar"},
-    #         "volume-normalized": {"value": True, "units": None},
+    #         "stress": {"field": "stress", "units": "eV/angstrom^3"},
+    #         "volume-normalized": {"value": False, "units": None},
     #         "_metadata": PI_METADATA,
     #     }
     # ],
@@ -92,48 +78,35 @@ CO_METADATA = {
 
 CSS = [
     [
-        f"{DATASET_NAME}_aluminum",
-        {"names": {"$regex": "aluminum"}},
-        f"Configurations of aluminum from {DATASET_NAME} dataset",
-    ]
+        f"{DATASET_NAME}_Mg_dislocation",
+        {"names": {"$regex": "dislocation"}},
+        f"Relaxed structures of Mg from {DATASET_NAME}",
+    ],
+    [
+        f"{DATASET_NAME}_Mg_step",
+        {"names": {"$regex": "step"}},
+        "Relaxed structures of Mg with a removed extra atom to account for "
+        "presence of edge dislocation; from {DATASET_NAME}",
+    ],
+    [
+        f"{DATASET_NAME}_MgZn_2-atom",
+        {"names": {"$regex": "2_atom"}},
+        "Structures of Mg-Zn with an additional solute atom to to pin edge "
+        "dislocation; from {DATASET_NAME}",
+    ],
+    [
+        f"{DATASET_NAME}_MgZn_perfect",
+        {"names": {"$regex": "perfect"}},
+        f"Structures of MgZn with one Zn atom and no edge dislocation from "
+        f"{DATASET_NAME}",
+    ],
+    [
+        f"{DATASET_NAME}_neigh",
+        {"names": {"$regex": "neigh"}},
+        "Calculations for Zn-Zn interaction energies at different distances and "
+        "directions; from {DATASET_NAME}",
+    ],
 ]
-
-latt_re = re.compile(
-    r"A\d = \(\s+(?P<a>\-?\d+\.\d+),\s+(?P<b>\-?\d+\.\d+),\s+(?P<c>\-?\d+\.\d+)\)"
-)
-latt_typ_re = re.compile(r"\s+LATTYP: Found a (?P<latt_type>[\S\s]+) cell.\n")
-coord_re = re.compile(
-    r"^\s+(?P<x>\-?\d+\.\d+)\s+(?P<y>\-?\d+\.\d+)\s+(?P<z>\-?\d+\.\d+)\s+(?P<fx>\-?"
-    r"\d+\.\d+)\s+(?P<fy>\-?\d+\.\d+)\s+(?P<fz>\-?\d+\.\d+)"
-)
-param_re = re.compile(
-    r"[\s+]?(?P<param>[A-Z_]+)(\s+)?=(\s+)?(?P<val>-?([\d\w\.\-]+)?\.?)"
-    r"[\s;]?(?P<unit>eV)?\:?"
-)
-
-IGNORE_PARAMS = [
-    "VRHFIN",
-    "LEXCH",
-    "EATOM",
-    "TITEL",
-    "LULTRA",
-    "IUNSCR",
-    "RPACOR",
-    "POMASS",
-    "RCORE",
-    "RWIGS",
-    "ENMAX",
-    "RCLOC",
-    "LCOR",
-    "LPAW",
-    "EAUG",
-    "DEXC",
-    "RMAX",
-    "RAUG",
-    "RDEP",
-    "RDEPT",
-]
-
 latt_re = re.compile(
     r"A\d = \(\s+(?P<a>\-?\d+\.\d+),\s+(?P<b>\-?\d+\.\d+),\s+(?P<c>\-?\d+\.\d+)\)"
 )
@@ -153,16 +126,22 @@ def contcar_parser(fp):
     lattice = []
     symbol_counts = dict()
     with open(fp, "r") as f:
-        for i in range(5):
-            _ = f.readline()
-        line = f.readline()
-        symbols = line.strip().split()
-        counts = [int(x) for x in f.readline().strip().split()]
-        symbol_counts = dict(zip(symbols, counts))
-        symbols = []
-        for symbol in symbol_counts:
-            symbols.extend([symbol] * symbol_counts[symbol])
-        return lattice, symbols
+        for line in f:
+            if not len(lattice) == 3 and len(line.strip().split()) == 3:
+                lattice.append([float(x) for x in lattice_re.search(line).groups()])
+            elif line.strip() == "":
+                pass
+            elif line.strip() == "Direct" or line.strip() == "Cartesian":
+                symbols = []
+                for symbol in symbol_counts:
+                    symbols.extend([symbol] * symbol_counts[symbol])
+                return lattice, symbols
+            elif all([(x.isalpha() and len(x) <= 2) for x in line.strip().split()]):
+                symbols = line.strip().split()
+                counts = [int(x) for x in f.readline().strip().split()]
+                symbol_counts = dict(zip(symbols, counts))
+            else:
+                pass
 
 
 def outcar_reader(symbols, fp):
@@ -262,9 +241,7 @@ def outcar_reader(symbols, fp):
             # Check other lines for params, send to outcar or cinput
             elif settings is True:
                 for pmatch in param_re.finditer(line):
-                    if pmatch["param"] in IGNORE_PARAMS:
-                        pass
-                    elif pmatch["unit"] is not None:
+                    if pmatch["unit"] is not None:
                         cinput[pmatch["param"]] = {
                             "value": float(pmatch["val"]),
                             "units": pmatch["unit"],
@@ -287,39 +264,16 @@ def outcar_reader(symbols, fp):
 
 
 def reader(filepath: Path):
-    contcar = next(filepath.parent.glob("POSCAR*"))
-
-    lattice, symbols = contcar_parser(contcar)
+    try:
+        poscar = next(filepath.parent.glob("POSCAR*"))
+    except StopIteration:
+        print(filepath)
+        poscar = next(filepath.parent.glob("CONTCAR*"))
+    lattice, symbols = contcar_parser(poscar)
     configs = outcar_reader(symbols, filepath)
     return configs
 
 
-MAX_AUTO_RECONNECT_ATTEMPTS = 100
-
-
-def auto_reconnect(mongo_func):
-    """Gracefully handle a reconnection event."""
-
-    @functools.wraps(mongo_func)
-    def wrapper(*args, **kwargs):
-        for attempt in range(MAX_AUTO_RECONNECT_ATTEMPTS):
-            try:
-                return mongo_func(*args, **kwargs)
-            except pymongo.errors.AutoReconnect as e:
-                wait_t = 0.5 * pow(2, attempt)  # exponential back off
-                if wait_t > 1800:
-                    wait_t = 1800  # cap at 1/2 hour
-                logging.warning(
-                    "PyMongo auto-reconnecting... %s. Waiting %.1f seconds.",
-                    str(e),
-                    wait_t,
-                )
-                time.sleep(wait_t)
-
-    return wrapper
-
-
-@auto_reconnect
 def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
@@ -344,6 +298,7 @@ def main(argv):
     client = MongoDatabase(
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
     # client.insert_property_definition(cauchy_stress_pd)
@@ -367,7 +322,7 @@ def main(argv):
             co_md_map=CO_METADATA,
             property_map=PROPERTY_MAP,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
@@ -390,10 +345,11 @@ def main(argv):
         ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],  # + OTHER_LINKS,
         description=DATASET_DESC,
-        verbose=True,
+        verbose=False,
         cs_ids=cs_ids,  # remove line if no configuration sets to insert
+        data_license=LICENSE,
     )
 
 

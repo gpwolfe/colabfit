@@ -3,30 +3,21 @@ author: Gregory Wolfe
 
 Properties
 ----------
-energy
-forces
-stress
 
 Other properties added to metadata
 ----------------------------------
-These properties come from the attached single-point calculator
-forces and energy are explicitly matched to file values. stress is
-returned from ase.Atoms object as values in units of GPa.
 
 File notes
 ----------
 
 """
 from argparse import ArgumentParser
-import functools
-import logging
 from pathlib import Path
 import re
 import sys
-import time
 
+# from ase.io import read
 from ase.atoms import Atoms
-import pymongo
 
 # from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
@@ -37,30 +28,38 @@ from colabfit.tools.property_definitions import (
 )
 
 
-DATASET_FP = Path("data/paramagnetic_lanthanide")
-DATASET_NAME = "Paramagnetic_lanthanide_compounds"
+DATASET_FP = Path("data/co2_hydrogenation_mgo2")
+DATASET_NAME = (
+    "water_and_Cu+_synergy_in_selective_CO2_hydrogenation_"
+    "to_methanol_over_Cu/MgO_catalysts"
+)
+LICENSE = "https://creativecommons.org/licenses/by/4.0"
 
-SOFTWARE = "VASP 6.2.0"
-METHODS = "DFT-PBE-D3"
+PUBLICATION = "https://doi.org/10.1021/jacs.3c10685"
+DATA_LINK = "https://doi.org/10.24435/materialscloud:tz-pn"
+# OTHER_LINKS = []
 
-PUBLICATION = "https://doi.org/10.1021/jacs.3c01342"
-DATA_LINK = "https://doi.org/10.48420/22015322.v1"
-LINKS = ["https://doi.org/10.48420/22015322.v1", "https://doi.org/10.1021/jacs.3c01342"]
 AUTHORS = [
-    "Barak Alnami",
-    "Jon G. C. Kragskow",
-    "Jakob K. Staab",
-    "Jonathan M. Skelton",
-    "Nicholas F. Chilton",
+    "Estefanía Fernández Villanueva",
+    "Pablo Germán Lustemberg",
+    "Minjie Zhao",
+    "Jose Soriano",
+    "Patricia Concepción",
+    "María Verónica Ganduglia Pirovano",
 ]
-DATASET_DESC = ""
+DATASET_DESC = (
+    "This dataset was created to investigate the role of surface water and "
+    "hydroxyl groups in facilitating spontaneous CO₂ activation at Cu⁺ sites and "
+    "the formation of monodentate formate species in the context of using CO2 "
+    "hydrogenation to produce methanol."
+)
 ELEMENTS = None
-GLOB_STR = "OUTCAR"
+GLOB_STR = "OUTCAR*"
 
 PI_METADATA = {
-    "software": {"value": SOFTWARE},
-    "method": {"value": METHODS},
-    # "basis-set": {"field": "basis_set"}
+    "software": {"value": "VASP 6.3.0"},
+    "method": {"value": "DFT-PBE-D3"},
+    "input": {"field": "input"},
 }
 
 PROPERTY_MAP = {
@@ -79,8 +78,8 @@ PROPERTY_MAP = {
     ],
     # "cauchy-stress": [
     #     {
-    #         "stress": {"field": "stress", "units": "kbar"},
-    #         "volume-normalized": {"value": True, "units": None},
+    #         "stress": {"field": "stress", "units": "eV/angstrom^3"},
+    #         "volume-normalized": {"value": False, "units": None},
     #         "_metadata": PI_METADATA,
     #     }
     # ],
@@ -90,14 +89,13 @@ CO_METADATA = {
     "outcar": {"field": "outcar"},
 }
 
-CSS = [
-    [
-        f"{DATASET_NAME}_aluminum",
-        {"names": {"$regex": "aluminum"}},
-        f"Configurations of aluminum from {DATASET_NAME} dataset",
-    ]
-]
-
+# CSS = [
+#     [
+#         f"{DATASET_NAME}_aluminum",
+#         {"names": {"$regex": "aluminum"}},
+#         f"Configurations of aluminum from {DATASET_NAME} dataset",
+#     ]
+# ]
 latt_re = re.compile(
     r"A\d = \(\s+(?P<a>\-?\d+\.\d+),\s+(?P<b>\-?\d+\.\d+),\s+(?P<c>\-?\d+\.\d+)\)"
 )
@@ -287,39 +285,13 @@ def outcar_reader(symbols, fp):
 
 
 def reader(filepath: Path):
-    contcar = next(filepath.parent.glob("POSCAR*"))
+    contcar = next(filepath.parent.glob("CONTCAR*"))
 
     lattice, symbols = contcar_parser(contcar)
     configs = outcar_reader(symbols, filepath)
     return configs
 
 
-MAX_AUTO_RECONNECT_ATTEMPTS = 100
-
-
-def auto_reconnect(mongo_func):
-    """Gracefully handle a reconnection event."""
-
-    @functools.wraps(mongo_func)
-    def wrapper(*args, **kwargs):
-        for attempt in range(MAX_AUTO_RECONNECT_ATTEMPTS):
-            try:
-                return mongo_func(*args, **kwargs)
-            except pymongo.errors.AutoReconnect as e:
-                wait_t = 0.5 * pow(2, attempt)  # exponential back off
-                if wait_t > 1800:
-                    wait_t = 1800  # cap at 1/2 hour
-                logging.warning(
-                    "PyMongo auto-reconnecting... %s. Waiting %.1f seconds.",
-                    str(e),
-                    wait_t,
-                )
-                time.sleep(wait_t)
-
-    return wrapper
-
-
-@auto_reconnect
 def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
@@ -344,6 +316,7 @@ def main(argv):
     client = MongoDatabase(
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
+
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
     # client.insert_property_definition(cauchy_stress_pd)
@@ -367,33 +340,34 @@ def main(argv):
             co_md_map=CO_METADATA,
             property_map=PROPERTY_MAP,
             generator=False,
-            verbose=True,
+            verbose=False,
         )
     )
 
     all_co_ids, all_do_ids = list(zip(*ids))
 
-    cs_ids = []
-    for i, (name, query, desc) in enumerate(CSS):
-        cs_id = client.query_and_insert_configuration_set(
-            co_hashes=all_co_ids,
-            ds_id=ds_id,
-            name=name,
-            description=desc,
-            query=query,
-        )
+    # cs_ids = []
+    # for i, (name, query, desc) in enumerate(CSS):
+    #     cs_id = client.query_and_insert_configuration_set(
+    #         co_hashes=all_co_ids,
+    #         ds_id=ds_id,
+    #         name=name,
+    #         description=desc,
+    #         query=query,
+    #     )
 
-        cs_ids.append(cs_id)
+    #     cs_ids.append(cs_id)
 
     client.insert_dataset(
         do_hashes=all_do_ids,
         ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
-        links=LINKS,
+        links=[PUBLICATION, DATA_LINK],  # + OTHER_LINKS,
         description=DATASET_DESC,
-        verbose=True,
-        cs_ids=cs_ids,  # remove line if no configuration sets to insert
+        verbose=False,
+        # cs_ids=cs_ids,  # remove line if no configuration sets to insert
+        data_license=LICENSE,
     )
 
 
