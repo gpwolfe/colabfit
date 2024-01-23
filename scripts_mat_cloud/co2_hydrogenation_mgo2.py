@@ -28,23 +28,38 @@ from colabfit.tools.property_definitions import (
 )
 
 
-DATASET_FP = Path("").cwd()
-DATASET_NAME = ""
-LICENSE = ""
+DATASET_FP = Path("data/co2_hydrogenation_mgo2")
+DATASET_NAME = (
+    "water_and_Cu+_synergy_in_selective_CO2_hydrogenation_"
+    "to_methanol_over_Cu/MgO_catalysts"
+)
+LICENSE = "https://creativecommons.org/licenses/by/4.0"
 
-PUBLICATION = ""
-DATA_LINK = ""
+PUBLICATION = "https://doi.org/10.1021/jacs.3c10685"
+DATA_LINK = "https://doi.org/10.24435/materialscloud:tz-pn"
 # OTHER_LINKS = []
 
-AUTHORS = [""]
-DATASET_DESC = ""
-ELEMENTS = [""]
-GLOB_STR = "*.*"
+AUTHORS = [
+    "Estefanía Fernández Villanueva",
+    "Pablo Germán Lustemberg",
+    "Minjie Zhao",
+    "Jose Soriano",
+    "Patricia Concepción",
+    "María Verónica Ganduglia Pirovano",
+]
+DATASET_DESC = (
+    "This dataset was created to investigate the role of surface water and "
+    "hydroxyl groups in facilitating spontaneous CO₂ activation at Cu⁺ sites and "
+    "the formation of monodentate formate species in the context of using CO2 "
+    "hydrogenation to produce methanol."
+)
+ELEMENTS = None
+GLOB_STR = "OUTCAR*"
 
 PI_METADATA = {
-    "software": {"value": ""},
-    "method": {"value": ""},
-    # "input": {"value": {}}
+    "software": {"value": "VASP 6.3.0"},
+    "method": {"value": "DFT-PBE-D3"},
+    "input": {"field": "input"},
 }
 
 PROPERTY_MAP = {
@@ -71,17 +86,16 @@ PROPERTY_MAP = {
 }
 
 CO_METADATA = {
-    "enthalpy": {"field": "h", "units": "Ha"},
-    "zpve": {"field": "zpve", "units": "Ha"},
+    "outcar": {"field": "outcar"},
 }
 
-CSS = [
-    [
-        f"{DATASET_NAME}_aluminum",
-        {"names": {"$regex": "aluminum"}},
-        f"Configurations of aluminum from {DATASET_NAME} dataset",
-    ]
-]
+# CSS = [
+#     [
+#         f"{DATASET_NAME}_aluminum",
+#         {"names": {"$regex": "aluminum"}},
+#         f"Configurations of aluminum from {DATASET_NAME} dataset",
+#     ]
+# ]
 latt_re = re.compile(
     r"A\d = \(\s+(?P<a>\-?\d+\.\d+),\s+(?P<b>\-?\d+\.\d+),\s+(?P<c>\-?\d+\.\d+)\)"
 )
@@ -118,9 +132,40 @@ IGNORE_PARAMS = [
     "RDEPT",
 ]
 
+latt_re = re.compile(
+    r"A\d = \(\s+(?P<a>\-?\d+\.\d+),\s+(?P<b>\-?\d+\.\d+),\s+(?P<c>\-?\d+\.\d+)\)"
+)
+latt_typ_re = re.compile(r"\s+LATTYP: Found a (?P<latt_type>[\S\s]+) cell.\n")
+coord_re = re.compile(
+    r"^\s+(?P<x>\-?\d+\.\d+)\s+(?P<y>\-?\d+\.\d+)\s+(?P<z>\-?\d+\.\d+)\s+(?P<fx>\-?"
+    r"\d+\.\d+)\s+(?P<fy>\-?\d+\.\d+)\s+(?P<fz>\-?\d+\.\d+)"
+)
+param_re = re.compile(
+    r"[\s+]?(?P<param>[A-Z_]+)(\s+)?=(\s+)?(?P<val>-?([\d\w\.\-]+)?\.?)"
+    r"[\s;]?(?P<unit>eV)?\:?"
+)
+lattice_re = re.compile(r"(?P<a>\d+\.\d+)\s+(?P<b>\d+\.\d+)\s+(?P<c>\d+\.\d+)")
 
-def reader(symbol, fp):
+
+def contcar_parser(fp):
+    lattice = []
+    symbol_counts = dict()
     with open(fp, "r") as f:
+        for i in range(5):
+            _ = f.readline()
+        line = f.readline()
+        symbols = line.strip().split()
+        counts = [int(x) for x in f.readline().strip().split()]
+        symbol_counts = dict(zip(symbols, counts))
+        symbols = []
+        for symbol in symbol_counts:
+            symbols.extend([symbol] * symbol_counts[symbol])
+        return lattice, symbols
+
+
+def outcar_reader(symbols, fp):
+    with open(fp, "r") as f:
+        configs = []
         incar = dict()
         cinput = dict()
         outcar = dict()
@@ -130,9 +175,8 @@ def reader(symbol, fp):
         lattice = []
         pos = []
         forces = []
-        symbols = []
         settings = True
-        for line in f.readlines():
+        for line in f:
             if "conjugate gradient relaxation of ions" in line:
                 settings = False
                 pass
@@ -174,8 +218,6 @@ def reader(symbol, fp):
                         line
                     ):  # sometimes more than one param/line
                         # param, val, unit
-                        if pmatch["param"] in IGNORE_PARAMS:
-                            pass
                         if pmatch["unit"] is not None:
                             incar[pmatch["param"]] = {
                                 "value": float(pmatch["val"]),
@@ -201,12 +243,26 @@ def reader(symbol, fp):
                     forces.append(
                         [float(p) for p in [cmatch["fx"], cmatch["fy"], cmatch["fz"]]]
                     )
-
+            elif "FREE ENERGIE OF THE ION-ELECTRON SYSTEM" in line:
+                _ = f.readline()
+                _, _, _, _, energy, units = f.readline().strip().split()
+                cinput["incar"] = incar
+                config = Atoms(positions=pos, symbols=symbols, cell=lattice)
+                config.info["input"] = cinput
+                config.info["outcar"] = outcar
+                config.info["forces"] = forces
+                config.info["energy"] = float(energy)
+                config.info["name"] = f"{'__'.join(fp.parts[-4:-1])}"
+                configs.append(config)
+                forces = []
+                pos = []
+                energy = None
             # Check other lines for params, send to outcar or cinput
-
             elif settings is True:
                 for pmatch in param_re.finditer(line):
-                    if pmatch["unit"] is not None:
+                    if pmatch["param"] in IGNORE_PARAMS:
+                        pass
+                    elif pmatch["unit"] is not None:
                         cinput[pmatch["param"]] = {
                             "value": float(pmatch["val"]),
                             "units": pmatch["unit"],
@@ -224,15 +280,16 @@ def reader(symbol, fp):
                         outcar[pmatch["param"]] = pmatch["val"]
             else:
                 print("something went wrong")
-        cinput["incar"] = incar
-        symbols = [symbol for c in pos]
-        config = Atoms(positions=pos, symbols=symbols, cell=lattice)
-        config.info["energy"] = outcar.pop("TOTEN")["value"]
-        config.info["input"] = cinput
-        config.info["outcar"] = outcar
-        config.info["forces"] = forces
-        config.info["name"] = f"{symbol}_{fp.stem.split('-')[-1]}"
-        return [config]
+
+        return configs
+
+
+def reader(filepath: Path):
+    contcar = next(filepath.parent.glob("CONTCAR*"))
+
+    lattice, symbols = contcar_parser(contcar)
+    configs = outcar_reader(symbols, filepath)
+    return configs
 
 
 def main(argv):
@@ -289,17 +346,17 @@ def main(argv):
 
     all_co_ids, all_do_ids = list(zip(*ids))
 
-    cs_ids = []
-    for i, (name, query, desc) in enumerate(CSS):
-        cs_id = client.query_and_insert_configuration_set(
-            co_hashes=all_co_ids,
-            ds_id=ds_id,
-            name=name,
-            description=desc,
-            query=query,
-        )
+    # cs_ids = []
+    # for i, (name, query, desc) in enumerate(CSS):
+    #     cs_id = client.query_and_insert_configuration_set(
+    #         co_hashes=all_co_ids,
+    #         ds_id=ds_id,
+    #         name=name,
+    #         description=desc,
+    #         query=query,
+    #     )
 
-        cs_ids.append(cs_id)
+    #     cs_ids.append(cs_id)
 
     client.insert_dataset(
         do_hashes=all_do_ids,
@@ -309,7 +366,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],  # + OTHER_LINKS,
         description=DATASET_DESC,
         verbose=False,
-        cs_ids=cs_ids,  # remove line if no configuration sets to insert
+        # cs_ids=cs_ids,  # remove line if no configuration sets to insert
         data_license=LICENSE,
     )
 

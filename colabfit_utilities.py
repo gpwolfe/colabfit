@@ -6,6 +6,10 @@ from collections import defaultdict
 import numpy as np
 from pathlib import Path
 import re
+from pymongo.errors import AutoReconnect
+import logging
+import functools
+import time
 
 
 def get_client_notebook(ip, port, db_name, nprocs):
@@ -66,7 +70,7 @@ def contcar_parser(fp):
                 lattice.append([float(x) for x in lattice_re.search(line).groups()])
             elif line.strip() == "":
                 pass
-            elif line.strip() == "Direct":
+            elif line.strip() == "Direct" or line.strip() == "Cartesian":
                 symbols = []
                 for symbol in symbol_counts:
                     symbols.extend([symbol] * symbol_counts[symbol])
@@ -646,6 +650,35 @@ def read_np(filepath: str, props: dict):
             )
         )
     return atoms
+
+
+###########################################################################
+# A decorator for handling pymongo AutoReconnect errors
+
+
+MAX_AUTO_RECONNECT_ATTEMPTS = 100
+
+
+def auto_reconnect(mongo_func):
+    """Gracefully handle a reconnection event."""
+
+    @functools.wraps(mongo_func)
+    def wrapper(*args, **kwargs):
+        for attempt in range(MAX_AUTO_RECONNECT_ATTEMPTS):
+            try:
+                return mongo_func(*args, **kwargs)
+            except AutoReconnect as e:
+                wait_t = 0.5 * pow(2, attempt)  # exponential back off
+                if wait_t > 1800:
+                    wait_t = 1800  # cap at 1/2 hour
+                logging.warning(
+                    "PyMongo auto-reconnecting... %s. Waiting %.1f seconds.",
+                    str(e),
+                    wait_t,
+                )
+                time.sleep(wait_t)
+
+    return wrapper
 
 
 ###########################################################################
