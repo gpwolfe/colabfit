@@ -13,9 +13,9 @@ File notes
 """
 from argparse import ArgumentParser
 from pathlib import Path
+import re
 import sys
-
-from ase.io import read
+from ase.atoms import Atoms
 
 # from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
@@ -26,23 +26,27 @@ from colabfit.tools.property_definitions import (
 )
 
 
-DATASET_FP = Path("").cwd()
-DATASET_NAME = ""
-LICENSE = ""
+DATASET_FP = Path("data/solute_strengthening_of_prism_edge_locations_in_Mg_alloys")
+DATASET_NAME = "solute_strengthening_of_prism_edge_locations_in_Mg_alloys"
+LICENSE = "https://creativecommons.org/licenses/by/4.0"
 
-PUBLICATION = ""
-DATA_LINK = ""
+PUBLICATION = "http://doi.org/10.1016/j.euromechsol.2023.105128"
+DATA_LINK = "https://doi.org/10.24435/materialscloud:1e-c7"
 # OTHER_LINKS = []
 
-AUTHORS = [""]
-DATASET_DESC = ""
-ELEMENTS = [""]
-GLOB_STR = "*.*"
+AUTHORS = ["Masoud Rahbar Niazi", "W. A Curtin"]
+DATASET_DESC = (
+    "This dataset includes Mg and Mg-Zn alloy structures with solute "
+    "atoms at the prism edge locations. The dataset was created to study the "
+    "strengthening effect of solute atoms at the prism edge locations in Mg alloys."
+)
+ELEMENTS = None
+GLOB_STR = "OUTCAR"
 
 PI_METADATA = {
-    "software": {"value": ""},
-    "method": {"value": ""},
-    # "input": {"value": {}}
+    "software": {"value": "VASP"},
+    "method": {"value": "DFT-PBE"},
+    "input": {"field": "input"},
 }
 
 PROPERTY_MAP = {
@@ -69,23 +73,204 @@ PROPERTY_MAP = {
 }
 
 CO_METADATA = {
-    "enthalpy": {"field": "h", "units": "Ha"},
-    "zpve": {"field": "zpve", "units": "Ha"},
+    "outcar": {"field": "outcar"},
 }
 
 CSS = [
     [
-        f"{DATASET_NAME}_aluminum",
-        {"names": {"$regex": "aluminum"}},
-        f"Configurations of aluminum from {DATASET_NAME} dataset",
-    ]
+        f"{DATASET_NAME}_Mg_dislocation",
+        {"names": {"$regex": "dislocation"}},
+        f"Relaxed structures of Mg from {DATASET_NAME}",
+    ],
+    [
+        f"{DATASET_NAME}_Mg_step",
+        {"names": {"$regex": "step"}},
+        "Relaxed structures of Mg with a removed extra atom to account for "
+        "presence of edge dislocation; from {DATASET_NAME}",
+    ],
+    [
+        f"{DATASET_NAME}_MgZn_2-atom",
+        {"names": {"$regex": "2_atom"}},
+        "Structures of Mg-Zn with an additional solute atom to to pin edge "
+        "dislocation; from {DATASET_NAME}",
+    ],
+    [
+        f"{DATASET_NAME}_MgZn_perfect",
+        {"names": {"$regex": "perfect"}},
+        f"Structures of MgZn with one Zn atom and no edge dislocation from "
+        f"{DATASET_NAME}",
+    ],
+    [
+        f"{DATASET_NAME}_neigh",
+        {"names": {"$regex": "neigh"}},
+        "Calculations for Zn-Zn interaction energies at different distances and "
+        "directions; from {DATASET_NAME}",
+    ],
 ]
+latt_re = re.compile(
+    r"A\d = \(\s+(?P<a>\-?\d+\.\d+),\s+(?P<b>\-?\d+\.\d+),\s+(?P<c>\-?\d+\.\d+)\)"
+)
+latt_typ_re = re.compile(r"\s+LATTYP: Found a (?P<latt_type>[\S\s]+) cell.\n")
+coord_re = re.compile(
+    r"^\s+(?P<x>\-?\d+\.\d+)\s+(?P<y>\-?\d+\.\d+)\s+(?P<z>\-?\d+\.\d+)\s+(?P<fx>\-?"
+    r"\d+\.\d+)\s+(?P<fy>\-?\d+\.\d+)\s+(?P<fz>\-?\d+\.\d+)"
+)
+param_re = re.compile(
+    r"[\s+]?(?P<param>[A-Z_]+)(\s+)?=(\s+)?(?P<val>-?([\d\w\.\-]+)?\.?)"
+    r"[\s;]?(?P<unit>eV)?\:?"
+)
+lattice_re = re.compile(r"(?P<a>\d+\.\d+)\s+(?P<b>\d+\.\d+)\s+(?P<c>\d+\.\d+)")
+
+
+def contcar_parser(fp):
+    lattice = []
+    symbol_counts = dict()
+    with open(fp, "r") as f:
+        for line in f:
+            if not len(lattice) == 3 and len(line.strip().split()) == 3:
+                lattice.append([float(x) for x in lattice_re.search(line).groups()])
+            elif line.strip() == "":
+                pass
+            elif line.strip() == "Direct" or line.strip() == "Cartesian":
+                symbols = []
+                for symbol in symbol_counts:
+                    symbols.extend([symbol] * symbol_counts[symbol])
+                return lattice, symbols
+            elif all([(x.isalpha() and len(x) <= 2) for x in line.strip().split()]):
+                symbols = line.strip().split()
+                counts = [int(x) for x in f.readline().strip().split()]
+                symbol_counts = dict(zip(symbols, counts))
+            else:
+                pass
+
+
+def outcar_reader(symbols, fp):
+    with open(fp, "r") as f:
+        configs = []
+        incar = dict()
+        cinput = dict()
+        outcar = dict()
+        in_incar = False
+        in_latt = False
+        in_coords = False
+        lattice = []
+        pos = []
+        forces = []
+        settings = True
+        for line in f:
+            if "conjugate gradient relaxation of ions" in line:
+                settings = False
+                pass
+            # Prelim handling
+            elif line.strip() == "":
+                pass
+
+            # handle lattice
+            elif "Lattice vectors" in line:
+                in_latt = True
+                pass
+            elif in_latt is True:
+                if len(lattice) == 3:
+                    in_latt = False
+                    pass
+                else:
+                    latt_match = latt_re.search(line)
+                    lattice.append(
+                        [
+                            float(x)
+                            for x in [latt_match["a"], latt_match["b"], latt_match["c"]]
+                        ]
+                    )
+
+            # handle incar
+
+            elif "INCAR" in line:
+                in_incar = True
+                continue
+
+            elif in_incar is True:
+                if "direct lattice vectors" in line:
+                    in_incar = False
+                    pass
+                elif "POTCAR" in line:
+                    incar["POTCAR"] = " ".join(line.strip().split()[1:])
+                else:
+                    for pmatch in param_re.finditer(
+                        line
+                    ):  # sometimes more than one param/line
+                        # param, val, unit
+                        if pmatch["unit"] is not None:
+                            incar[pmatch["param"]] = {
+                                "value": float(pmatch["val"]),
+                                "units": pmatch["unit"],
+                            }
+                        else:
+                            incar[pmatch["param"]] = pmatch["val"]
+            # handle coords/nums
+            elif "POSITION" in line:
+                in_coords = True
+                pass
+            elif in_coords is True:
+                if "--------" in line:
+                    pass
+                elif "total drift" in line:
+                    in_coords = False
+                    pass
+                else:
+                    cmatch = coord_re.search(line)
+                    pos.append(
+                        [float(p) for p in [cmatch["x"], cmatch["y"], cmatch["z"]]]
+                    )
+                    forces.append(
+                        [float(p) for p in [cmatch["fx"], cmatch["fy"], cmatch["fz"]]]
+                    )
+            elif "FREE ENERGIE OF THE ION-ELECTRON SYSTEM" in line:
+                _ = f.readline()
+                _, _, _, _, energy, units = f.readline().strip().split()
+                cinput["incar"] = incar
+                config = Atoms(positions=pos, symbols=symbols, cell=lattice)
+                config.info["input"] = cinput
+                config.info["outcar"] = outcar
+                config.info["forces"] = forces
+                config.info["energy"] = float(energy)
+                config.info["name"] = f"{'__'.join(fp.parts[-4:-1])}"
+                configs.append(config)
+                forces = []
+                pos = []
+                energy = None
+            # Check other lines for params, send to outcar or cinput
+            elif settings is True:
+                for pmatch in param_re.finditer(line):
+                    if pmatch["unit"] is not None:
+                        cinput[pmatch["param"]] = {
+                            "value": float(pmatch["val"]),
+                            "units": pmatch["unit"],
+                        }
+                    elif pmatch["unit"] is None:
+                        cinput[pmatch["param"]] = pmatch["val"]
+            elif settings is False:
+                for pmatch in param_re.finditer(line):
+                    if pmatch["unit"] is not None:
+                        outcar[pmatch["param"]] = {
+                            "value": float(pmatch["val"]),
+                            "units": pmatch["unit"],
+                        }
+                    elif pmatch["unit"] is None:
+                        outcar[pmatch["param"]] = pmatch["val"]
+            else:
+                print("something went wrong")
+
+        return configs
 
 
 def reader(filepath: Path):
-    configs = read(filepath, index=":")
-    for i, config in enumerate(configs):
-        config.info["name"] = f"{filepath.stem}_{i}"
+    try:
+        poscar = next(filepath.parent.glob("POSCAR*"))
+    except StopIteration:
+        print(filepath)
+        poscar = next(filepath.parent.glob("CONTCAR*"))
+    lattice, symbols = contcar_parser(poscar)
+    configs = outcar_reader(symbols, filepath)
     return configs
 
 
