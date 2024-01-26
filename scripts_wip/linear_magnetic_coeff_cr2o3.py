@@ -16,7 +16,6 @@ from pathlib import Path
 import re
 import sys
 
-# from ase.io import read
 from ase.atoms import Atoms
 
 # from colabfit.tools.configuration import AtomicConfiguration
@@ -28,37 +27,31 @@ from colabfit.tools.property_definitions import (
 )
 
 
-DATASET_FP = Path("data/co2_hydrogenation_mgo2")
-DATASET_NAME = (
-    "water_and_Cu+_synergy_in_selective_CO2_hydrogenation_"
-    "to_methanol_over_Cu/MgO_catalysts"
-)
+DATASET_FP = Path("data/lin_mag_cr2o3/archive/VASP_and_Elk")
+DATASET_NAME = "on_the_sign_of_the_linear_magnetoelectric_coefficient_in_Cr2O3"
 LICENSE = "https://creativecommons.org/licenses/by/4.0"
 
-PUBLICATION = "https://doi.org/10.1021/jacs.3c10685"
-DATA_LINK = "https://doi.org/10.24435/materialscloud:tz-pn"
+PUBLICATION = "http://doi.org/10.48550/arXiv.2309.02095"
+DATA_LINK = "https://doi.org/10.24435/materialscloud:ek-fp"
 # OTHER_LINKS = []
 
 AUTHORS = [
-    "Estefanía Fernández Villanueva",
-    "Pablo Germán Lustemberg",
-    "Minjie Zhao",
-    "Jose Soriano",
-    "Patricia Concepción",
-    "María Verónica Ganduglia Pirovano",
+    "Eric Bousquet",
+    "Eddy Lelièvre-Berna",
+    "Navid Qureshi",
+    "Jian-Rui Soh",
+    "Nicola Ann Spaldin",
+    "Andrea Urru",
+    "Xanthe Henderike Verbeek",
+    "Sophie Francis Weber",
 ]
-DATASET_DESC = (
-    "This dataset was created to investigate the role of surface water and "
-    "hydroxyl groups in facilitating spontaneous CO₂ activation at Cu⁺ sites and "
-    "the formation of monodentate formate species in the context of using CO2 "
-    "hydrogenation to produce methanol."
-)
+DATASET_DESC = ""
 ELEMENTS = None
 GLOB_STR = "OUTCAR*"
 
 PI_METADATA = {
-    "software": {"value": "VASP 6.3.0"},
-    "method": {"value": "DFT-PBE-D3"},
+    "software": {"value": "VASP     "},
+    "method": {"value": ""},
     "input": {"field": "input"},
 }
 
@@ -86,18 +79,29 @@ PROPERTY_MAP = {
 }
 
 CO_METADATA = {
-    "outcar": {"field": "outcar"},
+    "enthalpy": {"field": "h", "units": "Ha"},
+    "zpve": {"field": "zpve", "units": "Ha"},
 }
 
-# CSS = [
-#     [
-#         f"{DATASET_NAME}_aluminum",
-#         {"names": {"$regex": "aluminum"}},
-#         f"Configurations of aluminum from {DATASET_NAME} dataset",
-#     ]
-# ]
-
-
+CSS = [
+    [
+        f"{DATASET_NAME}_aluminum",
+        {"names": {"$regex": "aluminum"}},
+        f"Configurations of aluminum from {DATASET_NAME} dataset",
+    ]
+]
+latt_re = re.compile(
+    r"A\d = \(\s+(?P<a>\-?\d+\.\d+),\s+(?P<b>\-?\d+\.\d+),\s+(?P<c>\-?\d+\.\d+)\)"
+)
+latt_typ_re = re.compile(r"\s+LATTYP: Found a (?P<latt_type>[\S\s]+) cell.\n")
+coord_re = re.compile(
+    r"^\s+(?P<x>\-?\d+\.\d+)\s+(?P<y>\-?\d+\.\d+)\s+(?P<z>\-?\d+\.\d+)\s+(?P<fx>\-?"
+    r"\d+\.\d+)\s+(?P<fy>\-?\d+\.\d+)\s+(?P<fz>\-?\d+\.\d+)"
+)
+param_re = re.compile(
+    r"[\s+]?(?P<param>[A-Z_]+)(\s+)?=(\s+)?(?P<val>-?([\d\w\.\-]+)?\.?)"
+    r"[\s;]?(?P<unit>eV)?\:?"
+)
 IGNORE_PARAMS = [
     "VRHFIN",
     "LEXCH",
@@ -121,23 +125,8 @@ IGNORE_PARAMS = [
     "RDEPT",
 ]
 
-latt_re = re.compile(
-    r"A\d = \(\s+(?P<a>\-?\d+\.\d+),\s+(?P<b>\-?\d+\.\d+),\s+(?P<c>\-?\d+\.\d+)\)"
-)
-latt_typ_re = re.compile(r"\s+LATTYP: Found a (?P<latt_type>[\S\s]+) cell.\n")
-coord_re = re.compile(
-    r"^\s+(?P<x>\-?\d+\.\d+)\s+(?P<y>\-?\d+\.\d+)\s+(?P<z>\-?\d+\.\d+)\s+(?P<fx>\-?"
-    r"\d+\.\d+)\s+(?P<fy>\-?\d+\.\d+)\s+(?P<fz>\-?\d+\.\d+)"
-)
-param_re = re.compile(
-    r"[\s+]?(?P<param>[A-Z_]+)(\s+)?=(\s+)?(?P<val>-?([\d\w\.\-]+)?\.?)"
-    r"[\s;]?(?P<unit>eV)?\:?"
-)
-lattice_re = re.compile(r"(?P<a>\d+\.\d+)\s+(?P<b>\d+\.\d+)\s+(?P<c>\d+\.\d+)")
-
 
 def contcar_parser(fp):
-    lattice = []
     symbol_counts = dict()
     with open(fp, "r") as f:
         for i in range(5):
@@ -149,7 +138,7 @@ def contcar_parser(fp):
         symbols = []
         for symbol in symbol_counts:
             symbols.extend([symbol] * symbol_counts[symbol])
-        return lattice, symbols
+        return symbols
 
 
 def outcar_reader(symbols, fp):
@@ -176,6 +165,7 @@ def outcar_reader(symbols, fp):
             # handle lattice
             elif "Lattice vectors" in line:
                 in_latt = True
+                lattice = []
                 pass
             elif in_latt is True:
                 if len(lattice) == 3:
@@ -273,12 +263,65 @@ def outcar_reader(symbols, fp):
         return configs
 
 
-def reader(filepath: Path):
-    contcar = next(filepath.parent.glob("CONTCAR*"))
+def get_kpoints(fp):
+    with open(fp, "r") as f:
+        f.readline()
+        kpoints = "".join(f.readlines())
+    return kpoints
 
-    lattice, symbols = contcar_parser(contcar)
-    configs = outcar_reader(symbols, filepath)
-    return configs
+
+def parse_incar(fp):
+    with open(fp, "r") as f:
+        lines = f.readlines()
+    incar = dict()
+    for line in lines:
+        if "=" in line:
+            keyvals = line.split("=")
+            key = keyvals[0].strip()
+            value = "".join(keyvals[1:]).strip()
+            incar[key] = value
+    return incar
+
+
+def file_finder(fp, file_glob):
+    count = 0
+    if count > 5:
+        return None
+    elif file_glob in [f.name for f in fp.glob("*")]:
+        return next(fp.glob(file_glob))
+    else:
+        count += 1
+        return file_finder(fp.parent, file_glob)
+
+
+def reader(filepath: Path):
+    try:
+        poscar = next(filepath.parent.glob(filepath.name.replace("OUTCAR", "POSCAR")))
+        symbols = contcar_parser(poscar)
+        kpoints_file = file_finder(filepath.parent, "KPOINTS")
+        # try:
+        #     kpoints = get_kpoints(next(outer_dir.glob("KPOINTS")))
+        # except StopIteration:
+        #     print(filepath)
+        #     kpoints = get_kpoints(next(filepath.parent.glob("KPOINTS")))
+        kpoints = get_kpoints(kpoints_file)
+        incar_file = file_finder(filepath.parent, "INCAR")
+        incar = parse_incar(incar_file)
+        # try:
+        #     incar = parse_incar(next(outer_dir.glob("INCAR")))
+        # except StopIteration:
+        #     print(filepath)
+        #     incar = parse_incar(next(filepath.parent.glob("INCAR")))
+
+        configs = outcar_reader(fp=filepath, symbols=symbols)
+        for i, config in enumerate(configs):
+            config.info["name"] = f"{filepath.stem}_{i}"
+            config.info["input"]["kpoints"] = kpoints
+            config.info["input"]["incar"] = incar
+
+        return configs
+    except:
+        print(filepath)
 
 
 def main(argv):
@@ -335,17 +378,17 @@ def main(argv):
 
     all_co_ids, all_do_ids = list(zip(*ids))
 
-    # cs_ids = []
-    # for i, (name, query, desc) in enumerate(CSS):
-    #     cs_id = client.query_and_insert_configuration_set(
-    #         co_hashes=all_co_ids,
-    #         ds_id=ds_id,
-    #         name=name,
-    #         description=desc,
-    #         query=query,
-    #     )
+    cs_ids = []
+    for i, (name, query, desc) in enumerate(CSS):
+        cs_id = client.query_and_insert_configuration_set(
+            co_hashes=all_co_ids,
+            ds_id=ds_id,
+            name=name,
+            description=desc,
+            query=query,
+        )
 
-    #     cs_ids.append(cs_id)
+        cs_ids.append(cs_id)
 
     client.insert_dataset(
         do_hashes=all_do_ids,
@@ -355,7 +398,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],  # + OTHER_LINKS,
         description=DATASET_DESC,
         verbose=False,
-        # cs_ids=cs_ids,  # remove line if no configuration sets to insert
+        cs_ids=cs_ids,  # remove line if no configuration sets to insert
         data_license=LICENSE,
     )
 

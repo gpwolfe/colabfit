@@ -60,27 +60,44 @@ param_re = re.compile(
 )
 lattice_re = re.compile(r"(?P<a>\d+\.\d+)\s+(?P<b>\d+\.\d+)\s+(?P<c>\d+\.\d+)")
 
+IGNORE_PARAMS = [
+    "VRHFIN",
+    "LEXCH",
+    "EATOM",
+    "TITEL",
+    "LULTRA",
+    "IUNSCR",
+    "RPACOR",
+    "POMASS",
+    "RCORE",
+    "RWIGS",
+    "ENMAX",
+    "RCLOC",
+    "LCOR",
+    "LPAW",
+    "EAUG",
+    "DEXC",
+    "RMAX",
+    "RAUG",
+    "RDEP",
+    "RDEPT",
+]
+
 
 def contcar_parser(fp):
     lattice = []
     symbol_counts = dict()
     with open(fp, "r") as f:
-        for line in f:
-            if not len(lattice) == 3 and len(line.strip().split()) == 3:
-                lattice.append([float(x) for x in lattice_re.search(line).groups()])
-            elif line.strip() == "":
-                pass
-            elif line.strip() == "Direct" or line.strip() == "Cartesian":
-                symbols = []
-                for symbol in symbol_counts:
-                    symbols.extend([symbol] * symbol_counts[symbol])
-                return lattice, symbols
-            elif all([(x.isalpha() and len(x) <= 2) for x in line.strip().split()]):
-                symbols = line.strip().split()
-                counts = [int(x) for x in f.readline().strip().split()]
-                symbol_counts = dict(zip(symbols, counts))
-            else:
-                pass
+        for i in range(5):
+            _ = f.readline()
+        line = f.readline()
+        symbols = line.strip().split()
+        counts = [int(x) for x in f.readline().strip().split()]
+        symbol_counts = dict(zip(symbols, counts))
+        symbols = []
+        for symbol in symbol_counts:
+            symbols.extend([symbol] * symbol_counts[symbol])
+        return lattice, symbols
 
 
 def outcar_reader(symbols, fp):
@@ -180,7 +197,9 @@ def outcar_reader(symbols, fp):
             # Check other lines for params, send to outcar or cinput
             elif settings is True:
                 for pmatch in param_re.finditer(line):
-                    if pmatch["unit"] is not None:
+                    if pmatch["param"] in IGNORE_PARAMS:
+                        pass
+                    elif pmatch["unit"] is not None:
                         cinput[pmatch["param"]] = {
                             "value": float(pmatch["val"]),
                             "units": pmatch["unit"],
@@ -429,6 +448,24 @@ def filter_on_properties(self, ds_id, query=None):
     )
     for datapoint in agg_pipe:
         yield datapoint["pi_data"]
+
+
+###########################################################################
+
+
+def file_finder(fp, file_glob):
+    """
+    Find and return a Path corresponding to glob pattern. Search traverses upward
+    through directory (up to 5 parents).
+    """
+    count = 0
+    if count > 5:
+        return None
+    elif file_glob in [f.name for f in fp.glob("*")]:
+        return next(fp.glob(file_glob))
+    else:
+        count += 1
+        return file_finder(fp.parent, file_glob)
 
 
 ###########################################################################
