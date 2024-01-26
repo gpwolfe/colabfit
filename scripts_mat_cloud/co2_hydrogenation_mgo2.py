@@ -96,18 +96,7 @@ CO_METADATA = {
 #         f"Configurations of aluminum from {DATASET_NAME} dataset",
 #     ]
 # ]
-latt_re = re.compile(
-    r"A\d = \(\s+(?P<a>\-?\d+\.\d+),\s+(?P<b>\-?\d+\.\d+),\s+(?P<c>\-?\d+\.\d+)\)"
-)
-latt_typ_re = re.compile(r"\s+LATTYP: Found a (?P<latt_type>[\S\s]+) cell.\n")
-coord_re = re.compile(
-    r"^\s+(?P<x>\-?\d+\.\d+)\s+(?P<y>\-?\d+\.\d+)\s+(?P<z>\-?\d+\.\d+)\s+(?P<fx>\-?"
-    r"\d+\.\d+)\s+(?P<fy>\-?\d+\.\d+)\s+(?P<fz>\-?\d+\.\d+)"
-)
-param_re = re.compile(
-    r"[\s+]?(?P<param>[A-Z_]+)(\s+)?=(\s+)?(?P<val>-?([\d\w\.\-]+)?\.?)"
-    r"[\s;]?(?P<unit>eV)?\:?"
-)
+
 
 IGNORE_PARAMS = [
     "VRHFIN",
