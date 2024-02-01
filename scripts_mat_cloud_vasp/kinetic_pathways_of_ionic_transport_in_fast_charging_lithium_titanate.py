@@ -49,7 +49,19 @@ DATA_LINK = "https://doi.org/10.24435/materialscloud:2020.0006/v1"
 # OTHER_LINKS = []
 
 AUTHORS = ["Tina Chen", "Dong-hwa Seo"]
-DATASET_DESC = "Test"
+DATASET_DESC = (
+    "This dataset contains configurations of lithium titanate from the publication "
+    "Kinetic Pathways of ionic transport in fast-charging lithium titanate. "
+    "In order to understand the origin of various "
+    "EELS (electron energy-loss spectroscopy) spectra features, EELS spectra were "
+    "simulated using the Vienna Ab initio Simulation (VASP) package. For a specific "
+    "Li in a given configuration, this is done by calculating the DOS and integrated "
+    "DOS considering a Li core-hole on the position of the specific Li and "
+    "calculating the EELS based on the DOS. The minimum energy paths (MEP) and "
+    "migration energy of Li were calculated in various compositions, including "
+    "Li4Ti5O12 with an additional Li carrier, Li5Ti5O12 with an additional Li "
+    "carrier, and Li7Ti5O12 with a Li vacancy carrier."
+)
 ELEMENTS = None
 GLOB_STR = "OUTCAR"
 
@@ -82,32 +94,27 @@ PROPERTY_MAP = {
     # ],
 }
 
-CO_METADATA = {
-    "outcar": {
-        "field": "outcar",
-    },
-}
 
 CSS = [
     [
         f"{DATASET_NAME}_Li4Ti5O12",
         {"names": {"$regex": "__Li4__"}},
-        f"Configurations of BeLi4Ti5O12 from {DATASET_NAME} dataset.",
+        f"Configurations of Li4Ti5O12 from {DATASET_NAME} dataset.",
     ],
     [
         f"{DATASET_NAME}_Li5Ti5O12",
         {"names": {"$regex": "__Li5__"}},
-        f"Configurations of BeLi5Ti5O12 from {DATASET_NAME} dataset.",
+        f"Configurations of Li5Ti5O12 from {DATASET_NAME} dataset.",
     ],
     [
         f"{DATASET_NAME}_Li6Ti5O12",
         {"names": {"$regex": "__Li6__"}},
-        f"Configurations of BeLi6Ti5O12 from {DATASET_NAME} dataset.",
+        f"Configurations of Li6Ti5O12 from {DATASET_NAME} dataset.",
     ],
     [
         f"{DATASET_NAME}_Li7Ti5O12",
         {"names": {"$regex": "__Li7__"}},
-        f"Configurations of BeLi7Ti5O12 from {DATASET_NAME} dataset.",
+        f"Configurations of Li7Ti5O12 from {DATASET_NAME} dataset.",
     ],
     [
         f"{DATASET_NAME}_Li4Ti5O12_add_Li",
@@ -413,7 +420,6 @@ def main(argv):
         client.insert_data(
             configurations=configurations,
             ds_id=ds_id,
-            co_md_map=CO_METADATA,
             property_map=PROPERTY_MAP,
             generator=False,
             verbose=False,
