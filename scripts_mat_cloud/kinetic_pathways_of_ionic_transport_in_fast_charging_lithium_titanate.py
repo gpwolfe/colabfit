@@ -321,15 +321,14 @@ def parse_incar(fp):
     return incar
 
 
-def file_finder(fp, file_glob):
-    count = 0
+def file_finder(fp, file_glob, count=0):
     if count > 5:
         return None
     elif file_glob in [f.name for f in fp.glob("*")]:
         return next(fp.glob(file_glob))
     else:
         count += 1
-        return file_finder(fp.parent, file_glob)
+        return file_finder(fp.parent, file_glob, count)
 
 
 def reader(filepath: Path):
