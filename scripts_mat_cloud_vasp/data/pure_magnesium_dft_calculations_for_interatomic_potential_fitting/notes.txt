@@ -1,0 +1,48 @@
+
+materialscloud:2020.129
+Pure Magnesium DFT calculations for interatomic potential fitting
+Binglun Yin1*, Markus Stricker1*, W. A. Curtin1*
+1 Laboratory for Multiscale Mechanics Modeling, Institute of Mechanical Engineering, École Polytechnique Fédérale de Lausanne (EPFL), CH-1015 Lausanne, Vaud, Switzerland
+* Corresponding authors emails: binglun.yin@epfl.ch, markus.stricker@epfl.ch, william.curtin@epfl.ch
+DOI10.24435/materialscloud:8f-1s [version v2]
+
+Publication date: Oct 22, 2020
+How to cite this record
+Binglun Yin, Markus Stricker, W. A. Curtin, Pure Magnesium DFT calculations for interatomic potential fitting, Materials Cloud Archive 2020.129 (2020), doi: 10.24435/materialscloud:8f-1s.
+Description
+
+This dataset provides DFT (density functional theory as implemented in VASP, Vienna Ab Initio Simulation Package) calculations for pure Magnesium. It was designed by Binglun Yin, Markus Stricker and William A. Curtin for fitting a neural network potential with Behler-Parrinello symmetry functions. Binglun Yin carried out the calculation.
+
+It corresponds to a dataset that is commonly used to fit interatomic potentials for mechanics applications and includes structure-energy relationships for structures used to calculate:
+1. Bulk properties
+2. Generalized stacking fault energies
+3. Decohesion and relaxed surfaces
+4. Dimer
+5. Corner and rod geometries
+6. Vacancy formation energy
+Materials Cloud sections using this data
+
+No Explore or Discover sections associated with this archive record.
+Files
+File name 	Size 	Description
+Mg_DFT_mechanical.tar.xz MD5
+	35.6 MiB 	Dataset of VASP inputs and calculations.
+NNP63.tar.xz MD5
+	119.3 KiB 	The neural-network potential for magnesium.
+README.txt MD5
+	1.4 KiB 	README file.
+License
+Files and data are licensed under the terms of the following license: Creative Commons Attribution 4.0 International.
+Metadata, except for email addresses, are licensed under the Creative Commons Attribution Share-Alike 4.0 International license.
+External references
+Journal reference
+M. Stricker, B. Yin, E. Mak, and W. A. Curtin, Physical Review Materials, 4, 103602 (2020) doi:10.1103/PhysRevMaterials.4.103602
+Keywords
+DFT magnesium metallurgy stacking faults decohesion surfaces elasticity MARVEL/DD2 SNSF EPFL
+Version history:
+2020.129 (version v2) [This version]
+	Oct 22, 2020
+	DOI10.24435/materialscloud:8f-1s
+2020.0046/v1 (version v1)
+	Apr 27, 2020
+	DOI10.24435/materialscloud:2020.0046/v1
