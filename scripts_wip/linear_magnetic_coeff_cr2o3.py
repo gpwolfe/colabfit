@@ -78,18 +78,18 @@ PROPERTY_MAP = {
     # ],
 }
 
-CO_METADATA = {
-    "enthalpy": {"field": "h", "units": "Ha"},
-    "zpve": {"field": "zpve", "units": "Ha"},
-}
+# CO_METADATA = {
+#     "enthalpy": {"field": "h", "units": "Ha"},
+#     "zpve": {"field": "zpve", "units": "Ha"},
+# }
 
-CSS = [
-    [
-        f"{DATASET_NAME}_aluminum",
-        {"names": {"$regex": "aluminum"}},
-        f"Configurations of aluminum from {DATASET_NAME} dataset",
-    ]
-]
+# CSS = [
+#     [
+#         f"{DATASET_NAME}_aluminum",
+#         {"names": {"$regex": "aluminum"}},
+#         f"Configurations of aluminum from {DATASET_NAME} dataset",
+#     ]
+# ]
 latt_re = re.compile(
     r"A\d = \(\s+(?P<a>\-?\d+\.\d+),\s+(?P<b>\-?\d+\.\d+),\s+(?P<c>\-?\d+\.\d+)\)"
 )
