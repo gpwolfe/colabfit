@@ -12,6 +12,7 @@ File notes
 version v2 from materials cloud
 
 """
+
 from argparse import ArgumentParser
 import functools
 import logging
@@ -33,7 +34,7 @@ from colabfit.tools.property_definitions import (
 
 
 DATASET_FP = Path(
-    "data/pure_magnesium_dft_" "calculations_for_interatomic_potential_fitting"
+    "data/pure_magnesium_dft_calculations_for_interatomic_potential_fitting"
 )
 DATASET_NAME = "pure_magnesium_DFT_PRM2020"
 LICENSE = "https://creativecommons.org/licenses/by/4.0"
@@ -268,7 +269,6 @@ def file_finder(fp, file_glob, count=0):
 
 
 def reader(filepath: Path):
-    print(filepath)
     poscar = next(filepath.parent.glob(filepath.name.replace("OUTCAR", "CONTCAR")))
     symbols = contcar_parser(poscar)
     kpoints_file = file_finder(filepath.parent, "KPOINTS")

@@ -9,3 +9,10 @@ The complex non-collinear magnetic orderings in Ba2YOsO6: A new approach to tuni
 Pure Magnesium DFT calculations for interatomic potential fitting
     ingested version 2
 Hydrogen-induced insulating state accompanied by inter-layer charge ordering in SmNiO₃
+    ingested
+Supplementary Data for “Non-Abelian band topology in noninteracting metals”
+    no vasp output files, just input files
+Machine learning guided high-throughput search of non-oxide garnets
+    One long line of json in pymatgen format
+origin_of_high_strength_in_the_cocrfenipd_high-entropy_alloy
+    
