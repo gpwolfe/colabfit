@@ -1,0 +1,11 @@
+Kinetic Pathways of Ionic Transport in Fast Charging Lithium Titanate
+    ingested
+Calculation and interpretation of classical turning surfaces in solids
+    hdf5 files. waiting for later
+Stress-dependence of generalized stacking fault energies: a DFT study
+    ingested
+The complex non-collinear magnetic orderings in Ba2YOsO6: A new approach to tuning spin-lattice interactions and controlling magnetic orderings in frustrated complex oxides
+    only poscar and incar files. no actual data
+Pure Magnesium DFT calculations for interatomic potential fitting
+    ingested version 2
+Hydrogen-induced insulating state accompanied by inter-layer charge ordering in SmNiO₃
