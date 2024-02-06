@@ -41,8 +41,8 @@ DATA_LINK = ""
 
 AUTHORS = [""]
 DATASET_DESC = ""
-ELEMENTS = [""]
-GLOB_STR = "*.*"
+ELEMENTS = None
+GLOB_STR = "OUTCAR"
 
 PI_METADATA = {
     "software": {"value": ""},
@@ -217,7 +217,7 @@ def parse_incar(fp):
         if "=" in line:
             keyvals = line.split("=")
             key = keyvals[0].strip()
-            value = "".join(keyvals[1:]).strip()
+            value = "".join(keyvals[1:]).strip().split("#")[0].strip()
             incar[key] = value
     return incar
 

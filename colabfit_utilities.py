@@ -84,6 +84,26 @@ IGNORE_PARAMS = [
 ]
 
 
+def get_kpoints(fp):
+    with open(fp, "r") as f:
+        # f.readline() # if skipping first line
+        kpoints = "".join(f.readlines())
+    return kpoints
+
+
+def parse_incar(fp):
+    with open(fp, "r") as f:
+        lines = f.readlines()
+    incar = dict()
+    for line in lines:
+        if "=" in line:
+            keyvals = line.split("=")
+            key = keyvals[0].strip()
+            value = "".join(keyvals[1:]).strip().split("#")[0].strip()
+            incar[key] = value
+    return incar
+
+
 def contcar_parser(fp):
     lattice = []
     symbol_counts = dict()
@@ -453,19 +473,18 @@ def filter_on_properties(self, ds_id, query=None):
 ###########################################################################
 
 
-def file_finder(fp, file_glob):
+def file_finder(fp, file_glob, count=0):
     """
     Find and return a Path corresponding to glob pattern. Search traverses upward
     through directory (up to 5 parents).
     """
-    count = 0
     if count > 5:
         return None
     elif file_glob in [f.name for f in fp.glob("*")]:
         return next(fp.glob(file_glob))
     else:
         count += 1
-        return file_finder(fp.parent, file_glob)
+        return file_finder(fp.parent, file_glob, count)
 
 
 ###########################################################################
