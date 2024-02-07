@@ -11,6 +11,7 @@ File notes
 ----------
 
 """
+
 from argparse import ArgumentParser
 import functools
 import logging
@@ -31,7 +32,7 @@ from colabfit.tools.property_definitions import (
 )
 
 
-DATASET_FP = Path("").cwd()
+DATASET_FP = Path("")
 DATASET_NAME = ""
 LICENSE = ""
 
@@ -156,7 +157,7 @@ def outcar_reader(symbols, fp):
                 lattice = []
                 pass
             elif in_latt is True:
-                latt = line.strip().split()
+                latt = line.strip().replace("-", " -").split()
                 lattice.append([float(x) for x in [latt[0], latt[1], latt[2]]])
                 if len(lattice) == 3:
                     in_latt = False
