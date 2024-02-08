@@ -15,4 +15,4 @@ Supplementary Data for “Non-Abelian band topology in noninteracting metals”
 Machine learning guided high-throughput search of non-oxide garnets
     One long line of json in pymatgen format
 origin_of_high_strength_in_the_cocrfenipd_high-entropy_alloy
-    
+    ready for ingest
