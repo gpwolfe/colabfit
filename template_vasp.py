@@ -135,6 +135,16 @@ def contcar_parser(fp):
         return symbols
 
 
+def namer(fp):
+    ds_fp_str = "__".join(DATASET_FP.absolute().parts).replace("/", "")
+    name = (
+        "__".join(fp.absolute().parts[:-1])
+        .replace(ds_fp_str + "__", "")
+        .replace("/", "")
+    )
+    return name
+
+
 def outcar_reader(symbols, fp):
     with open(fp, "r") as f:
         configs = []
@@ -234,6 +244,7 @@ def file_finder(fp, file_glob, count=0):
 
 
 def reader(filepath: Path):
+    name = namer(filepath)
     poscar = next(filepath.parent.glob(filepath.name.replace("OUTCAR", "POSCAR")))
     symbols = contcar_parser(poscar)
     kpoints_file = file_finder(filepath.parent, "KPOINTS")
@@ -243,7 +254,7 @@ def reader(filepath: Path):
 
     configs = outcar_reader(fp=filepath, symbols=symbols)
     for i, config in enumerate(configs):
-        # config.info["name"] = f"{'__'.join(filepath.parts[-4:-1])}_{i}"
+        config.info["name"] = f"{name}_{i}"
         config.info["input"]["kpoints"] = kpoints
         config.info["input"]["incar"] = incar
 

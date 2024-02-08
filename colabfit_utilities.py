@@ -84,6 +84,16 @@ IGNORE_PARAMS = [
 ]
 
 
+def namer(fp):
+    ds_fp_str = "__".join(DATASET_FP.absolute().parts).replace("/", "")
+    name = (
+        "__".join(fp.absolute().parts[:-1])
+        .replace(ds_fp_str + "__", "")
+        .replace("/", "")
+    )
+    return name
+
+
 def get_kpoints(fp):
     with open(fp, "r") as f:
         # f.readline() # if skipping first line
@@ -618,9 +628,9 @@ def npy_reader(filepath):
         c.info["forces"] = props["forces"][i]
         # if energy is not None:
         c.info["energy"] = float(energy[i])
-        c.info[
-            "name"
-        ] = f"{filepath.parts[-3]}_{filepath.parts[-5]}_{filepath.parts[-3]}_{i}"
+        c.info["name"] = (
+            f"{filepath.parts[-3]}_{filepath.parts[-5]}_{filepath.parts[-3]}_{i}"
+        )
     return configs
 
 
