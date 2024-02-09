@@ -146,7 +146,6 @@ def fp_parser(fp):
 
 
 def contcar_parser(fp):
-    print(fp)
     with open(fp, "r") as f:
         elems = fp_parser(fp.absolute())
         for i in range(5):
