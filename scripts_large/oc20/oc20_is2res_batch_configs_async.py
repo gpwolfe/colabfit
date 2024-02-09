@@ -51,9 +51,9 @@ import pymongo
 
 
 BATCH_SIZE = 512
-# BATCH_SIZE = 2
+BATCH_SIZE = 2
 DATASET_FP = Path("/vast/gw2338/is2res_train_trajectories")  # Greene
-# DATASET_FP = Path("is2res_train_trajectories")  # local
+DATASET_FP = Path("is2res_train_trajectories")  # local
 
 
 today = f"{time.strftime('%Y')}_{time.strftime('%m')}_{time.strftime('%d')}"
@@ -330,10 +330,9 @@ async def main(argv):
     client.close()
     fps = sorted(list(DATASET_FP.rglob(GLOB_STR)))
     n_batches = len(fps) // BATCH_SIZE
-    if end_batch is None:
+    if end_batch is None or end_batch > n_batches:
         end_batch = n_batches
     leftover = len(fps) % BATCH_SIZE
-
     indices = [
         ((b * BATCH_SIZE, (b + 1) * BATCH_SIZE)) for b in range(start_batch, end_batch)
     ]
