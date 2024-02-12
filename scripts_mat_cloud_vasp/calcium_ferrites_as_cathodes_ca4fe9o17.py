@@ -10,6 +10,8 @@ Other properties added to metadata
 File notes
 ----------
 
+There 
+
 """
 
 from argparse import ArgumentParser
@@ -32,22 +34,30 @@ from colabfit.tools.property_definitions import (
 )
 
 
-DATASET_FP = Path("")
-DATASET_NAME = ""
+DATASET_FP = Path(
+    "data/appraisal_of_calcium_ferrites_as_cathodes_for_calcium_rechargeable_"
+    "batteries_dft_synthesis_characterization_and_electrochemistry_of_ca4fe9o17"
+)
+DATASET_NAME = "calcium_ferrites_as_cathodes_ca4fe9o17"
 LICENSE = "https://creativecommons.org/licenses/by/4.0/"
 
-PUBLICATION = ""
-DATA_LINK = ""
+PUBLICATION = "http://doi.org/10.1039/c9dt04688g"
+DATA_LINK = "https://doi.org/10.24435/materialscloud:xk-sn"
 # OTHER_LINKS = []
 
-AUTHORS = [""]
-DATASET_DESC = ""
+AUTHORS = ["M. Elena Arroyo-de Dompablo", "José Luis Casals"]
+DATASET_DESC = (
+    'Dataset for "Appraisal of calcium ferrites as cathodes for '
+    "calcium rechargeable batteries: DFT, synthesis, characterization and "
+    'electrochemistry of Ca4Fe9O17" created to explore Fe-based cathode materials '
+    "for Ca-ion batteries. Structures include CaFe(2+n)O(4+n), where 0 < n < 3."
+)
 ELEMENTS = None
 GLOB_STR = "OUTCAR"
 
 PI_METADATA = {
-    "software": {"value": ""},
-    "method": {"value": ""},
+    "software": {"value": "VASP 4.6.35"},
+    "method": {"value": "DFT-PBE"},
     "input": {"field": "input"},
 }
 
@@ -81,11 +91,20 @@ PROPERTY_MAP = {
 
 CSS = [
     [
-        f"{DATASET_NAME}_aluminum",
-        {"names": {"$regex": "aluminum"}},
-        f"Configurations of aluminum from {DATASET_NAME} dataset",
+        f"{DATASET_NAME}_{elem}",
+        {"names": {"$regex": f"{elem}"}},
+        f"Configurations of {elem} from {DATASET_NAME} dataset",
     ]
+    for elem in ["Ca4Fe9O17", "CaFe2O4", "CaFe3O5", "CaFe4O6"]
 ]
+
+ELEM_RE = re.compile(r"([A-Z][a-z]?)[\d+]?")
+
+
+def fp_parser(fp):
+    for elem in ["Ca4Fe9O17", "CaFe2O4", "CaFe3O5", "CaFe4O6"]:
+        if elem in str(fp):
+            return ELEM_RE.findall(elem)
 
 
 coord_re = re.compile(
@@ -121,17 +140,20 @@ IGNORE_PARAMS = [
 
 
 def contcar_parser(fp):
-    symbol_counts = dict()
     with open(fp, "r") as f:
+        elems = fp_parser(fp.absolute())
         for i in range(5):
             _ = f.readline()
-        line = f.readline()
-        symbols = line.strip().split()
-        counts = [int(x) for x in f.readline().strip().split()]
-        symbol_counts = dict(zip(symbols, counts))
+        line = f.readline().strip().split()
+        if all([x.isalpha() for x in line]):
+            elems = line
+            counts = [int(x) for x in f.readline().strip().split()]
+        else:
+            counts = [int(x) for x in line]
+
         symbols = []
-        for symbol in symbol_counts:
-            symbols.extend([symbol] * symbol_counts[symbol])
+        for symbol, count in zip(elems, counts):
+            symbols.extend([symbol] * count)
         return symbols
 
 
@@ -228,12 +250,6 @@ def outcar_reader(symbols, fp):
                     forces.append(
                         [float(p) for p in [cmatch["fx"], cmatch["fy"], cmatch["fz"]]]
                     )
-            # elif "Direction" in line and "XX" in line:
-            #     stress_keys = [x.lower() for x in line.strip().split()[1:]]
-            # elif "in kB" in line:
-            #     stress = [float(x) for x in line.strip().split()[2:]]
-            #     stress = convert_stress(stress_keys, stress)
-
             else:
                 pass
                 # print("something went wrong")
@@ -272,8 +288,9 @@ def file_finder(fp, file_glob, count=0):
 
 
 def reader(filepath: Path):
+    print(filepath)
     name = namer(filepath)
-    poscar = next(filepath.parent.glob(filepath.name.replace("OUTCAR", "POSCAR")))
+    poscar = next(filepath.parent.glob(filepath.name.replace("OUTCAR", "CONTCAR")))
     symbols = contcar_parser(poscar)
     kpoints_file = file_finder(filepath.parent, "KPOINTS")
     kpoints = get_kpoints(kpoints_file)

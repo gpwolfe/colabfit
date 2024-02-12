@@ -27,27 +27,36 @@ import pymongo
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
-    # cauchy_stress_pd,
+    cauchy_stress_pd,
     potential_energy_pd,
 )
 
 
-DATASET_FP = Path("")
-DATASET_NAME = ""
+DATASET_FP = Path(
+    "data/vanadium_is_an_optimal_element_for_"
+    "strengthening_in_both_fcc_and_bcc_high-entropy_alloys"
+)
+DATASET_NAME = "vanadium_in_high_entropy_alloys_AM2020"
 LICENSE = "https://creativecommons.org/licenses/by/4.0/"
 
-PUBLICATION = ""
-DATA_LINK = ""
+PUBLICATION = "http://doi.org/10.1016/j.actamat.2020.01.062"
+DATA_LINK = "https://doi.org/10.24435/materialscloud:2020.0020/v1"
 # OTHER_LINKS = []
 
-AUTHORS = [""]
-DATASET_DESC = ""
+AUTHORS = ["Binglun Yin", "Francesco Maresca", "W. A. Curtin"]
+DATASET_DESC = (
+    'Dataset created for "Vanadium is an optimal element for strengthening in '
+    'both fcc and bcc high-entropy alloys", to explore the effect of V in the '
+    "high-entropy systems fcc Co-Cr-Fe-Mn-Ni-V and bcc Cr-Mo-Nb-Ta-V-W-Hf-Ti-Zr. "
+    "Structures include pure V, misfit volumes of V in Ni, and misfit volumes of Ni2V "
+    "random alloys"
+)
 ELEMENTS = None
 GLOB_STR = "OUTCAR"
 
 PI_METADATA = {
-    "software": {"value": ""},
-    "method": {"value": ""},
+    "software": {"value": "VASP"},
+    "method": {"value": "DFT-PBE"},
     "input": {"field": "input"},
 }
 
@@ -65,13 +74,13 @@ PROPERTY_MAP = {
             "_metadata": PI_METADATA,
         },
     ],
-    # "cauchy-stress": [
-    #     {
-    #         "stress": {"field": "stress", "units": "kilobar"},
-    #         "volume-normalized": {"value": False, "units": None},
-    #         "_metadata": PI_METADATA,
-    #     }
-    # ],
+    "cauchy-stress": [
+        {
+            "stress": {"field": "stress", "units": "kilobar"},
+            "volume-normalized": {"value": False, "units": None},
+            "_metadata": PI_METADATA,
+        }
+    ],
 }
 
 # CO_METADATA = {
@@ -81,10 +90,21 @@ PROPERTY_MAP = {
 
 CSS = [
     [
-        f"{DATASET_NAME}_aluminum",
-        {"names": {"$regex": "aluminum"}},
-        f"Configurations of aluminum from {DATASET_NAME} dataset",
-    ]
+        f"{DATASET_NAME}_vanadium",
+        {"names": {"$regex": "element_V_fcc"}},
+        f"Configurations of pure vanadium from {DATASET_NAME} dataset",
+    ],
+    [
+        f"{DATASET_NAME}_misfit_random_alloy_Ni2V",
+        {"names": {"$regex": "misfit_Ni2V"}},
+        "Random alloy configurations of Ni2V with misfit volumes "
+        f"from {DATASET_NAME} dataset",
+    ],
+    [
+        f"{DATASET_NAME}_misfit_V_in_pure_Ni",
+        {"names": {"$regex": "misfit_V_in_pure_Ni"}},
+        f"Configurations of Ni with misfit volumes of V from {DATASET_NAME} dataset",
+    ],
 ]
 
 
@@ -145,13 +165,13 @@ def namer(fp):
     return name
 
 
-# def convert_stress(keys, stress):
-#     stresses = {k: s for k, s in zip(keys, stress)}
-#     return [
-#         [stresses["xx"], stresses["xy"], stresses["zx"]],
-#         [stresses["xy"], stresses["yy"], stresses["yz"]],
-#         [stresses["zx"], stresses["yz"], stresses["zz"]],
-#     ]
+def convert_stress(keys, stress):
+    stresses = {k: s for k, s in zip(keys, stress)}
+    return [
+        [stresses["xx"], stresses["xy"], stresses["zx"]],
+        [stresses["xy"], stresses["yy"], stresses["yz"]],
+        [stresses["zx"], stresses["yz"], stresses["zz"]],
+    ]
 
 
 def outcar_reader(symbols, fp):
@@ -228,11 +248,11 @@ def outcar_reader(symbols, fp):
                     forces.append(
                         [float(p) for p in [cmatch["fx"], cmatch["fy"], cmatch["fz"]]]
                     )
-            # elif "Direction" in line and "XX" in line:
-            #     stress_keys = [x.lower() for x in line.strip().split()[1:]]
-            # elif "in kB" in line:
-            #     stress = [float(x) for x in line.strip().split()[2:]]
-            #     stress = convert_stress(stress_keys, stress)
+            elif "Direction" in line and "XX" in line:
+                stress_keys = [x.lower() for x in line.strip().split()[1:]]
+            elif "in kB" in line:
+                stress = [float(x) for x in line.strip().split()[2:]]
+                stress = convert_stress(stress_keys, stress)
 
             else:
                 pass
@@ -273,7 +293,7 @@ def file_finder(fp, file_glob, count=0):
 
 def reader(filepath: Path):
     name = namer(filepath)
-    poscar = next(filepath.parent.glob(filepath.name.replace("OUTCAR", "POSCAR")))
+    poscar = next(filepath.parent.glob(filepath.name.replace("OUTCAR", "CONTCAR")))
     symbols = contcar_parser(poscar)
     kpoints_file = file_finder(filepath.parent, "KPOINTS")
     kpoints = get_kpoints(kpoints_file)
@@ -342,7 +362,7 @@ def main(argv):
 
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
-    # client.insert_property_definition(cauchy_stress_pd)
+    client.insert_property_definition(cauchy_stress_pd)
 
     ds_id = generate_ds_id()
 
