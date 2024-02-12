@@ -27,7 +27,7 @@ import pymongo
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
-    # cauchy_stress_pd,
+    cauchy_stress_pd,
     potential_energy_pd,
 )
 
@@ -65,13 +65,13 @@ PROPERTY_MAP = {
             "_metadata": PI_METADATA,
         },
     ],
-    # "cauchy-stress": [
-    #     {
-    #         "stress": {"field": "stress", "units": "eV/angstrom^3"},
-    #         "volume-normalized": {"value": False, "units": None},
-    #         "_metadata": PI_METADATA,
-    #     }
-    # ],
+    "cauchy-stress": [
+        {
+            "stress": {"field": "stress", "units": "kilobar"},
+            "volume-normalized": {"value": False, "units": None},
+            "_metadata": PI_METADATA,
+        }
+    ],
 }
 
 # CO_METADATA = {
@@ -145,6 +145,15 @@ def namer(fp):
     return name
 
 
+def convert_stress(keys, stress):
+    stresses = {k: s for k, s in zip(keys, stress)}
+    return [
+        [stresses["xx"], stresses["xy"], stresses["zx"]],
+        [stresses["xy"], stresses["yy"], stresses["yz"]],
+        [stresses["zx"], stresses["yz"], stresses["zz"]],
+    ]
+
+
 def outcar_reader(symbols, fp):
     with open(fp, "r") as f:
         configs = []
@@ -190,6 +199,11 @@ def outcar_reader(symbols, fp):
                     forces.append(
                         [float(p) for p in [cmatch["fx"], cmatch["fy"], cmatch["fz"]]]
                     )
+            elif "Direction" in line and "XX" in line:
+                stress_keys = [x.lower() for x in line.strip().split()[1:]]
+            elif "in kB" in line:
+                stress = [float(x) for x in line.strip().split()[2:]]
+                stress = convert_stress(stress_keys, stress)
             elif "FREE ENERGIE OF THE ION-ELECTRON SYSTEM" in line:
                 _ = f.readline()
                 _, _, _, _, energy, units = f.readline().strip().split()
@@ -200,6 +214,7 @@ def outcar_reader(symbols, fp):
                 config.info["input"]["potcars"] = list(potcars)
                 # config.info["outcar"] = outcar
                 config.info["forces"] = forces
+                config.info["stress"] = stress
                 config.info["energy"] = float(energy)
                 config.info["name"] = f"{'__'.join(fp.parts[-4:-1])}"
                 configs.append(config)
@@ -314,7 +329,7 @@ def main(argv):
 
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
-    # client.insert_property_definition(cauchy_stress_pd)
+    client.insert_property_definition(cauchy_stress_pd)
 
     ds_id = generate_ds_id()
 

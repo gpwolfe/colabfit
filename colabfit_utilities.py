@@ -46,6 +46,7 @@ def get_client(argv):
 
 ####################################################################################
 """VASP OUTCAR"""
+DATASET_FP = ""  # For the comfort of the linter
 latt_re = re.compile(
     r"A\d = \(\s+(?P<a>\-?\d+\.\d+),\s+(?P<b>\-?\d+\.\d+),\s+(?P<c>\-?\d+\.\d+)\)"
 )
@@ -409,8 +410,8 @@ def n2p2_reader(filepath):
             if (
                 line.startswith("begin")
                 # or line.startswith("end")
-                or line.startswith("charge")
-                or line.startswith("energy")
+                or line.startswith("charge")  # noqa W503
+                or line.startswith("energy")  # noqa W503
             ):
                 pass
             elif line.startswith("lattice"):
