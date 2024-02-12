@@ -27,7 +27,7 @@ import pymongo
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
-    cauchy_stress_pd,
+    # cauchy_stress_pd,
     potential_energy_pd,
 )
 
@@ -65,13 +65,13 @@ PROPERTY_MAP = {
             "_metadata": PI_METADATA,
         },
     ],
-    "cauchy-stress": [
-        {
-            "stress": {"field": "stress", "units": "kilobar"},
-            "volume-normalized": {"value": False, "units": None},
-            "_metadata": PI_METADATA,
-        }
-    ],
+    # "cauchy-stress": [
+    #     {
+    #         "stress": {"field": "stress", "units": "kilobar"},
+    #         "volume-normalized": {"value": False, "units": None},
+    #         "_metadata": PI_METADATA,
+    #     }
+    # ],
 }
 
 # CO_METADATA = {
@@ -145,13 +145,13 @@ def namer(fp):
     return name
 
 
-def convert_stress(keys, stress):
-    stresses = {k: s for k, s in zip(keys, stress)}
-    return [
-        [stresses["xx"], stresses["xy"], stresses["zx"]],
-        [stresses["xy"], stresses["yy"], stresses["yz"]],
-        [stresses["zx"], stresses["yz"], stresses["zz"]],
-    ]
+# def convert_stress(keys, stress):
+#     stresses = {k: s for k, s in zip(keys, stress)}
+#     return [
+#         [stresses["xx"], stresses["xy"], stresses["zx"]],
+#         [stresses["xy"], stresses["yy"], stresses["yz"]],
+#         [stresses["zx"], stresses["yz"], stresses["zz"]],
+#     ]
 
 
 def outcar_reader(symbols, fp):
@@ -165,6 +165,7 @@ def outcar_reader(symbols, fp):
         pos = []
         forces = []
         potcars = set()
+        energy = None
         for line in f:
             # Prelim handling
             if line.strip() == "":
@@ -182,6 +183,21 @@ def outcar_reader(symbols, fp):
                     in_latt = False
             elif "POTCAR" in line:
                 potcars.add(" ".join(line.strip().split()[1:]))
+            elif "FREE ENERGIE OF THE ION-ELECTRON SYSTEM" in line:
+                _ = f.readline()
+                _, _, _, _, energy, units = f.readline().strip().split()
+                if len(pos) > 0:
+                    cinput["incar"] = incar
+                    config = Atoms(positions=pos, symbols=symbols, cell=lattice)
+                    config.info["input"] = cinput
+                    config.info["input"]["potcars"] = list(potcars)
+                    # config.info["outcar"] = outcar
+                    config.info["forces"] = forces
+                    config.info["energy"] = float(energy)
+                    configs.append(config)
+                    forces = []
+                    pos = []
+                    energy = None
             elif "POSITION" in line:
                 in_coords = True
                 pass
@@ -190,7 +206,20 @@ def outcar_reader(symbols, fp):
                     pass
                 elif "total drift" in line:
                     in_coords = False
-                    pass
+                    if energy is not None:
+                        cinput["incar"] = incar
+                        config = Atoms(positions=pos, symbols=symbols, cell=lattice)
+                        config.info["input"] = cinput
+                        config.info["input"]["potcars"] = list(potcars)
+                        # config.info["outcar"] = outcar
+                        config.info["forces"] = forces
+                        config.info["energy"] = float(energy)
+                        configs.append(config)
+                        forces = []
+                        pos = []
+                        energy = None
+                    else:
+                        pass
                 else:
                     cmatch = coord_re.search(line)
                     pos.append(
@@ -199,28 +228,12 @@ def outcar_reader(symbols, fp):
                     forces.append(
                         [float(p) for p in [cmatch["fx"], cmatch["fy"], cmatch["fz"]]]
                     )
-            elif "Direction" in line and "XX" in line:
-                stress_keys = [x.lower() for x in line.strip().split()[1:]]
-            elif "in kB" in line:
-                stress = [float(x) for x in line.strip().split()[2:]]
-                stress = convert_stress(stress_keys, stress)
-            elif "FREE ENERGIE OF THE ION-ELECTRON SYSTEM" in line:
-                _ = f.readline()
-                _, _, _, _, energy, units = f.readline().strip().split()
+            # elif "Direction" in line and "XX" in line:
+            #     stress_keys = [x.lower() for x in line.strip().split()[1:]]
+            # elif "in kB" in line:
+            #     stress = [float(x) for x in line.strip().split()[2:]]
+            #     stress = convert_stress(stress_keys, stress)
 
-                cinput["incar"] = incar
-                config = Atoms(positions=pos, symbols=symbols, cell=lattice)
-                config.info["input"] = cinput
-                config.info["input"]["potcars"] = list(potcars)
-                # config.info["outcar"] = outcar
-                config.info["forces"] = forces
-                config.info["stress"] = stress
-                config.info["energy"] = float(energy)
-                config.info["name"] = f"{'__'.join(fp.parts[-4:-1])}"
-                configs.append(config)
-                forces = []
-                pos = []
-                energy = None
             else:
                 pass
                 # print("something went wrong")
@@ -329,7 +342,7 @@ def main(argv):
 
     client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
-    client.insert_property_definition(cauchy_stress_pd)
+    # client.insert_property_definition(cauchy_stress_pd)
 
     ds_id = generate_ds_id()
 
