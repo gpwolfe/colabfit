@@ -427,13 +427,17 @@ async def main(argv):
     parser.add_argument(
         "-o", "--do", type=str, help="Directory of data_object id files"
     )
+    parser.add_argument(
+        "--ds", type=str, help="Dataset id to update with new data objects"
+    )
     args = parser.parse_args(argv)
     do_ids_dir = Path(args.do)
+    ds_id = args.ds
     nprocs = args.nprocs
     client = MongoDatabase(
         args.db_name, nprocs=nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
-    ds_id = "_".join(do_ids_dir.parts[-1].split("_")[:3])
+    # ds_id = "_".join(do_ids_dir.parts[-1].split("_")[:3])
     fps = sorted(list(do_ids_dir.rglob("*.txt")))
 
     # if START_BATCH == 0:
