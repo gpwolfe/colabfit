@@ -34,7 +34,7 @@ from colabfit.tools.property_definitions import (
 
 DATASET_FP = Path("")
 DATASET_NAME = ""
-LICENSE = ""
+LICENSE = "https://creativecommons.org/licenses/by/4.0/"
 
 PUBLICATION = ""
 DATA_LINK = ""
