@@ -9,17 +9,27 @@ Other properties added to metadata
 
 File notes
 ----------
-
+13.02.2024: Dataset ingest failed before dataset creation.
+ds-id = DS_zlxgrekdla8l_0 is not a valid ds-id
 """
 
 from argparse import ArgumentParser
+import functools
+import logging
 from pathlib import Path
+import time
 import sys
 
 from ase.io import read
+import pymongo
+
 
 # from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
+from colabfit.tools.database import (
+    generate_ds_id,
+    load_data,
+    MongoDatabase,
+)
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     cauchy_stress_pd,
@@ -29,8 +39,8 @@ from colabfit.tools.property_definitions import (
 
 
 DATASET_FP = Path(
-    "data/surface_segregation_in_high-entropy_alloys_from_alchemical_machine"
-    "_learning_dataset_hea25s"
+    "data/surface_segregation_in_high-entropy_alloys_from_alchemical_machine_learning_"
+    "dataset_hea25s"
 )
 DATASET_NAME = "HEA25S_high_entropy_alloys"
 LICENSE = "https://creativecommons.org/licenses/by/4.0"
@@ -109,7 +119,7 @@ CO_METADATA = {
 
 CSS = [
     [
-        f"{DATASET_NAME}_{cs[0]}",
+        f"{DATASET_NAME}_{cs[0]}_{cs[1]}",
         {"names": {"$regex": f".*{cs[0]}.*{cs[1]}.*"}},
         f"Configurations from the {cs[0]}: {cs[1]} split of {DATASET_NAME}",
     ]
@@ -177,6 +187,32 @@ def reader(filepath: Path):
     return configs
 
 
+MAX_AUTO_RECONNECT_ATTEMPTS = 100
+
+
+def auto_reconnect(mongo_func):
+    """Gracefully handle a reconnection event."""
+
+    @functools.wraps(mongo_func)
+    def wrapper(*args, **kwargs):
+        for attempt in range(MAX_AUTO_RECONNECT_ATTEMPTS):
+            try:
+                return mongo_func(*args, **kwargs)
+            except pymongo.errors.AutoReconnect as e:
+                wait_t = 0.5 * pow(2, attempt)  # exponential back off
+                if wait_t > 1800:
+                    wait_t = 1800  # cap at 1/2 hour
+                logging.warning(
+                    "PyMongo auto-reconnecting... %s. Waiting %.1f seconds.",
+                    str(e),
+                    wait_t,
+                )
+                time.sleep(wait_t)
+
+    return wrapper
+
+
+@auto_reconnect
 def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
