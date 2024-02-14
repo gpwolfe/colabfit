@@ -116,19 +116,16 @@ def parse_incar(fp):
 
 
 def contcar_parser(fp):
-    lattice = []
-    symbol_counts = dict()
     with open(fp, "r") as f:
         for i in range(5):
             _ = f.readline()
         line = f.readline()
         symbols = line.strip().split()
         counts = [int(x) for x in f.readline().strip().split()]
-        symbol_counts = dict(zip(symbols, counts))
-        symbols = []
-        for symbol in symbol_counts:
-            symbols.extend([symbol] * symbol_counts[symbol])
-        return lattice, symbols
+        symbol_arr = []
+        for symbol, count in zip(symbols, counts):
+            symbol_arr.extend([symbol] * count)
+        return symbol_arr
 
 
 def outcar_reader(symbols, fp):
