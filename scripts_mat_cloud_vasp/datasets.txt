@@ -30,3 +30,11 @@ Atomic insights into the oxidative degradation mechanisms of sulfide solid elect
     just output files
 Vanadium is an optimal element for strengthening in both fcc and bcc high-entropy alloys
     ingested
+Accurate optical spectra through time-dependent density functional theory based on screening-dependent hybrid functionals
+    no output files; POSCAR only
+Emergence of hidden phases of methylammonium lead-iodide (CH3NH3PbI) upon compression
+    ascii files, save for later possibly. Missing some documentation about file contents
+Influence of the triangular Mn-O breathing mode on magnetic ordering in multiferroic hexagonal manganites
+    no output files
+Surface segregation in high-entropy alloys from alchemical machine learning: dataset HEA25S
+    
