@@ -44,3 +44,9 @@ Analysis of minerals as electrode materials for Ca-based rechargeable batteries
     ingested
 Computational synthesis of substrates by crystal cleavage
     no structure output files
+Unidirectional Kondo scattering in layered NbS2
+    no structure output files
+Non-Abelian reciprocal braiding of Weyl points and its manifestation in ZrTe
+    no output files
+Modeling high-entropy transition-metal alloys with alchemical compression: dataset HEA25
+    ingesting
