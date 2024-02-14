@@ -34,9 +34,13 @@ Accurate optical spectra through time-dependent density functional theory based 
     no output files; POSCAR only
 Emergence of hidden phases of methylammonium lead-iodide (CH3NH3PbI) upon compression
     ascii files, save for later possibly. Missing some documentation about file contents
+Interplay between ferroelectricity and metallicity in BaTiO3
+    ingested
 Influence of the triangular Mn-O breathing mode on magnetic ordering in multiferroic hexagonal manganites
     no output files
 Surface segregation in high-entropy alloys from alchemical machine learning: dataset HEA25S
-    
-
-Interplay between ferroelectricity and metallicity in BaTiO3
+    ingested
+Analysis of minerals as electrode materials for Ca-based rechargeable batteries
+    ingested
+Computational synthesis of substrates by crystal cleavage
+    no structure output files
