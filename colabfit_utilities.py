@@ -136,44 +136,64 @@ def outcar_reader(symbols, fp):
         configs = []
         incar = dict()
         cinput = dict()
+        outcar = dict()
+        in_incar = False
         in_latt = False
         in_coords = False
         lattice = []
         pos = []
         forces = []
-        potcars = set()
+        settings = True
         for line in f:
+            if "conjugate gradient relaxation of ions" in line:
+                settings = False
+                pass
             # Prelim handling
-            if line.strip() == "":
+            elif line.strip() == "":
                 pass
 
             # handle lattice
-            elif "direct lattice vectors" in line:
+            elif "Lattice vectors" in line:
                 in_latt = True
-                lattice = []
                 pass
             elif in_latt is True:
-                latt = line.strip().replace("-", " -").split()
-                lattice.append([float(x) for x in [latt[0], latt[1], latt[2]]])
                 if len(lattice) == 3:
                     in_latt = False
-            elif "POTCAR" in line:
-                potcars.add(" ".join(line.strip().split()[1:]))
-            elif "FREE ENERGIE OF THE ION-ELECTRON SYSTEM" in line:
-                _ = f.readline()
-                _, _, _, _, energy, units = f.readline().strip().split()
-                if len(pos) > 0:
-                    cinput["incar"] = incar
-                    config = Atoms(positions=pos, symbols=symbols, cell=lattice)
-                    config.info["input"] = cinput
-                    config.info["input"]["potcars"] = list(potcars)
-                    # config.info["outcar"] = outcar
-                    config.info["forces"] = forces
-                    config.info["energy"] = float(energy)
-                    configs.append(config)
-                    forces = []
-                    pos = []
-                    energy = None
+                    pass
+                else:
+                    latt_match = latt_re.search(line)
+                    lattice.append(
+                        [
+                            float(x)
+                            for x in [latt_match["a"], latt_match["b"], latt_match["c"]]
+                        ]
+                    )
+
+            # handle incar
+
+            elif "INCAR" in line:
+                in_incar = True
+                continue
+
+            elif in_incar is True:
+                if "direct lattice vectors" in line:
+                    in_incar = False
+                    pass
+                elif "POTCAR:" in line:
+                    incar["POTCAR"] = " ".join(line.strip().split()[1:])
+                else:
+                    for pmatch in param_re.finditer(
+                        line
+                    ):  # sometimes more than one param/line
+                        # param, val, unit
+                        if pmatch["unit"] is not None:
+                            incar[pmatch["param"]] = {
+                                "value": float(pmatch["val"]),
+                                "units": pmatch["unit"],
+                            }
+                        else:
+                            incar[pmatch["param"]] = pmatch["val"]
+            # handle coords/nums
             elif "POSITION" in line:
                 in_coords = True
                 pass
@@ -182,20 +202,7 @@ def outcar_reader(symbols, fp):
                     pass
                 elif "total drift" in line:
                     in_coords = False
-                    if energy is not None:
-                        cinput["incar"] = incar
-                        config = Atoms(positions=pos, symbols=symbols, cell=lattice)
-                        config.info["input"] = cinput
-                        config.info["input"]["potcars"] = list(potcars)
-                        # config.info["outcar"] = outcar
-                        config.info["forces"] = forces
-                        config.info["energy"] = float(energy)
-                        configs.append(config)
-                        forces = []
-                        pos = []
-                        energy = None
-                    else:
-                        pass
+                    pass
                 else:
                     cmatch = coord_re.search(line)
                     pos.append(
@@ -204,33 +211,45 @@ def outcar_reader(symbols, fp):
                     forces.append(
                         [float(p) for p in [cmatch["fx"], cmatch["fy"], cmatch["fz"]]]
                     )
-            # elif "Direction" in line and "XX" in line:
-            #     stress_keys = [x.lower() for x in line.strip().split()[1:]]
-            # elif "in kB" in line:
-            #     stress = [float(x) for x in line.strip().split()[2:]]
-            #     stress = convert_stress(stress_keys, stress)
             elif "FREE ENERGIE OF THE ION-ELECTRON SYSTEM" in line:
                 _ = f.readline()
                 _, _, _, _, energy, units = f.readline().strip().split()
-
                 cinput["incar"] = incar
                 config = Atoms(positions=pos, symbols=symbols, cell=lattice)
                 config.info["input"] = cinput
-                config.info["input"]["potcars"] = list(potcars)
-                # config.info["outcar"] = outcar
+                config.info["outcar"] = outcar
                 config.info["forces"] = forces
-                # config.info["stress"] = stress
                 config.info["energy"] = float(energy)
                 config.info["name"] = f"{'__'.join(fp.parts[-4:-1])}"
                 configs.append(config)
                 forces = []
                 pos = []
                 energy = None
+            # Check other lines for params, send to outcar or cinput
+            elif settings is True:
+                for pmatch in param_re.finditer(line):
+                    if pmatch["param"] in IGNORE_PARAMS:
+                        pass
+                    elif pmatch["unit"] is not None:
+                        cinput[pmatch["param"]] = {
+                            "value": float(pmatch["val"]),
+                            "units": pmatch["unit"],
+                        }
+                    elif pmatch["unit"] is None:
+                        cinput[pmatch["param"]] = pmatch["val"]
+            elif settings is False:
+                for pmatch in param_re.finditer(line):
+                    if pmatch["unit"] is not None:
+                        outcar[pmatch["param"]] = {
+                            "value": float(pmatch["val"]),
+                            "units": pmatch["unit"],
+                        }
+                    elif pmatch["unit"] is None:
+                        outcar[pmatch["param"]] = pmatch["val"]
             else:
-                pass
-                # print("something went wrong")
+                print("something went wrong")
 
-    return configs
+        return configs
 
 
 ####################################################################################

@@ -38,3 +38,5 @@ Influence of the triangular Mn-O breathing mode on magnetic ordering in multifer
     no output files
 Surface segregation in high-entropy alloys from alchemical machine learning: dataset HEA25S
     
+
+Interplay between ferroelectricity and metallicity in BaTiO3
