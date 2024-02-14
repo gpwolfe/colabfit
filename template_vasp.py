@@ -121,17 +121,15 @@ IGNORE_PARAMS = [
 
 
 def contcar_parser(fp):
-    symbol_counts = dict()
     with open(fp, "r") as f:
         for i in range(5):
             _ = f.readline()
         line = f.readline()
         symbols = line.strip().split()
         counts = [int(x) for x in f.readline().strip().split()]
-        symbol_counts = dict(zip(symbols, counts))
         symbols = []
-        for symbol in symbol_counts:
-            symbols.extend([symbol] * symbol_counts[symbol])
+        for symbol, count in zip(symbols, counts):
+            symbols.extend([symbol] * count)
         return symbols
 
 
