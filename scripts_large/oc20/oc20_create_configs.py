@@ -51,9 +51,9 @@ import pymongo
 
 
 BATCH_SIZE = 512
-BATCH_SIZE = 2
+# BATCH_SIZE = 2
 DATASET_FP = Path("/vast/gw2338/is2res_train_trajectories")  # Greene
-DATASET_FP = Path("is2res_train_trajectories")  # local
+# DATASET_FP = Path("is2res_train_trajectories")  # local
 
 
 today = f"{time.strftime('%Y')}_{time.strftime('%m')}_{time.strftime('%d')}"
@@ -96,23 +96,6 @@ NAME_FIELD = "name"
 LABELS_FIELD = "labels"
 
 ID_META_MAP = np.load(PKL_FP, allow_pickle=True)
-
-
-# async def fetch_data():
-#     url = "http://10.32.250.13:30007"
-#     async with aiohttp.ClientSession() as session:
-#         async with session.get(url) as _:
-#             pass
-
-
-# async def poke_nodeport_and_sleep():
-#     while True:
-#         await fetch_data()
-#         await asyncio.sleep(240)
-
-
-# async def run_poke_and_sleep():
-#     await poke_nodeport_and_sleep()
 
 
 with open(DATASET_FP / "system.txt", "r") as f:
@@ -176,11 +159,6 @@ def reader(filepath):
 
     for i, ase_config in enumerate(ase_configs):
         config = AtomicConfiguration().from_ase(ase_config)
-        # positions=ase_config.positions,
-        # numbers=ase_config.numbers,
-        # pbc=ase_config.pbc,
-        # cell=ase_config.cell,
-        # )
         config.info = ase_config.info
         config.info["forces"] = ase_config.arrays["forces"]
         config.info["ref_energy"] = REF_E_DICT[fp_stem]
@@ -238,11 +216,13 @@ def auto_reconnect(mongo_func):
 
 async def get_configs(ds_id, client_name, client_uri, nprocs, batch):
     # ids = []
+    begin = time.time()
     batch_num, filepaths = batch
     pool = multiprocessing.Pool(nprocs)
     configurations = list(
         itertools.chain.from_iterable(pool.map(read_for_pool, filepaths))
     )
+    readtime = time.time() - begin
     client = MongoDatabase(database_name=client_name, uri=client_uri, nprocs=nprocs)
     ids_batch = list(
         client.insert_data(
@@ -254,6 +234,8 @@ async def get_configs(ds_id, client_name, client_uri, nprocs, batch):
             verbose=False,
         )
     )
+    insert_time = time.time() - (begin + readtime)
+    print(f"Read time: {readtime}. Insert time: {insert_time}")
     co_ids, do_ids = list(zip(*ids_batch))
     co_id_file = Path(
         f"{ds_id}_co_ids_{today}/{ds_id}_config_ids_batch_{batch_num}.txt"
@@ -346,23 +328,8 @@ async def main(argv):
         batches.append((batch_num, filepaths))
     # get_configs_partial(batches[0])
     tasks = [asyncio.create_task(get_configs_partial(batch)) for batch in batches]
-    print("after tasks")
+    print(f"Tasks created: {len(tasks)}")
     _ = await asyncio.gather(*tasks)
-
-    # ids = get_configs(ds_id, args)
-
-    # all_co_ids, all_do_ids = list(zip(*ids))
-
-    # client.insert_dataset(
-    #     do_hashes=all_do_ids,
-    #     ds_id=ds_id,
-    #     name=DATASET,
-    #     authors=AUTHORS,
-    #     links=[PUBLICATION, DATA_LINK],
-    #     description=DS_DESC,
-    #     verbose=False,
-    #     data_license="https://creativecommons.org/licenses/by/4.0/",
-    # )
 
 
 if __name__ == "__main__":
