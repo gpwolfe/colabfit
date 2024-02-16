@@ -127,10 +127,10 @@ def contcar_parser(fp):
         line = f.readline()
         symbols = line.strip().split()
         counts = [int(x) for x in f.readline().strip().split()]
-        symbols = []
+        symbol_arr = []
         for symbol, count in zip(symbols, counts):
-            symbols.extend([symbol] * count)
-        return symbols
+            symbol_arr.extend([symbol] * count)
+        return symbol_arr
 
 
 def namer(fp):
