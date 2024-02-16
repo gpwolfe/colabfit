@@ -137,29 +137,6 @@ CSS = [
 ]
 
 
-# def parse_incar(fp):
-#     with open(fp, "r") as f:
-#         lines = f.readlines()
-#     incar = dict()
-#     for line in lines:
-#         if "=" in line:
-#             keyvals = line.split("=")
-#             key = keyvals[0].strip()
-#             value = "".join(keyvals[1:]).strip().split("#")[0].strip()
-#             incar[key] = value
-#     return incar
-
-
-# INCAR_FP = DATASET_FP / "vasp_settings" / "INCAR"
-# INCAR = parse_incar(INCAR_FP)
-
-
-# def namer(fp):
-#     ds_fp_str = "__".join(DATASET_FP.absolute().parts).replace("/", "")
-#     name = "__".join(fp.absolute().parts).replace(ds_fp_str + "__", "").replace("/", "")
-#     return name
-
-
 def reader(filepath: Path):
     configs = read(filepath, index=":")
     # name = namer(filepath)
@@ -254,19 +231,15 @@ def main(argv):
 
     cs_ids = []
     for i, (name, query, desc) in enumerate(CSS):
-        if client.configurations.find_one(query) is None:
-            print(query)
-            pass
-        else:
-            cs_id = client.query_and_insert_configuration_set(
-                co_hashes=all_co_ids,
-                ds_id=ds_id,
-                name=name,
-                description=desc,
-                query=query,
-            )
+        cs_id = client.query_and_insert_configuration_set(
+            co_hashes=all_co_ids,
+            ds_id=ds_id,
+            name=name,
+            description=desc,
+            query=query,
+        )
 
-            cs_ids.append(cs_id)
+        cs_ids.append(cs_id)
 
     client.insert_dataset(
         do_hashes=all_do_ids,
