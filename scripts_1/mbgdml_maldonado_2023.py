@@ -63,6 +63,7 @@ method: MBE
 from gap
 method: MBE
 """
+
 from argparse import ArgumentParser
 from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
 from colabfit.tools.configuration import AtomicConfiguration
@@ -134,6 +135,14 @@ def reader(filepath):
             atom.info[key] = data[key].tolist()
         atom.info["software"] = software
         atom.info["method"] = method
+        print(
+            "e unit: ",
+            atom.info["e_unit"],
+            "r unit: ",
+            atom.info["r_unit"],
+            "v_unit: ",
+            atom.info["v_unit"],
+        )
 
     return atoms
 
