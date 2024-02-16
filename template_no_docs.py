@@ -11,7 +11,12 @@ File notes
 ----------
 
 """
+
 from argparse import ArgumentParser
+import functools
+import logging
+import time
+import pymongo
 from pathlib import Path
 import sys
 
@@ -89,6 +94,32 @@ def reader(filepath: Path):
     return configs
 
 
+MAX_AUTO_RECONNECT_ATTEMPTS = 100
+
+
+def auto_reconnect(mongo_func):
+    """Gracefully handle a reconnection event."""
+
+    @functools.wraps(mongo_func)
+    def wrapper(*args, **kwargs):
+        for attempt in range(MAX_AUTO_RECONNECT_ATTEMPTS):
+            try:
+                return mongo_func(*args, **kwargs)
+            except pymongo.errors.AutoReconnect as e:
+                wait_t = 0.5 * pow(2, attempt)  # exponential back off
+                if wait_t > 1800:
+                    wait_t = 1800  # cap at 1/2 hour
+                logging.warning(
+                    "PyMongo auto-reconnecting... %s. Waiting %.1f seconds.",
+                    str(e),
+                    wait_t,
+                )
+                time.sleep(wait_t)
+
+    return wrapper
+
+
+@auto_reconnect
 def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
