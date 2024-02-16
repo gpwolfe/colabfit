@@ -448,8 +448,7 @@ async def main(argv):
             for fp in fps
         ]
         await asyncio.gather(*tasks)
-        # for fp in tqdm(fps[1:]):
-        #     insert_dos_to_dataset(args, ds_id=ds_id, fp=fp)
+
     else:
         # Create the dataset with the first file
         with open(fps[0], "r") as f:
@@ -471,15 +470,6 @@ async def main(argv):
             for fp in fps[1:]
         ]
         await asyncio.gather(*tasks)
-    # else:
-    #     tasks = [
-    #         asyncio.create_task(insert_dos_to_dataset(args, ds_id=ds_id, fp=fp))
-    #         for fp in fps
-    #     ]
-    #     await asyncio.gather(*tasks)
-
-    # for fp in tqdm(fps[1:]):
-    #     insert_dos_to_dataset(args, ds_id=ds_id, fp=fp)
 
 
 if __name__ == "__main__":
