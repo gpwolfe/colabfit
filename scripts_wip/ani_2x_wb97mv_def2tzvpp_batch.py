@@ -160,7 +160,7 @@ def read_wrapper(dbname, uri, nprocs, ds_id, n_atoms):
     today = time.strftime("%Y-%m-%d")
     with h5py.File(fp) as h5:
         print(h5.keys())
-        for num_atoms in tqdm(n_atoms, desc="Num. Atoms"):
+        for num_atoms in tqdm(n_atoms, desc=f"N atoms: {n_atoms[0]}-{n_atoms[-1]}"):
             if num_atoms in h5.keys():
                 partial_read = partial(ani_reader, num_atoms)
 
