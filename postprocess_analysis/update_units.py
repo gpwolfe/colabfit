@@ -28,7 +28,8 @@ def main():
         #     "atomization energy: a.u. to hartree",
         # ),
         # (
-        #     {"formation-energy.energy.source-unit": {"$in": ["Ha", "a.u.", "Hartree"]}},
+        #     {"formation-energy.energy.source-unit": {"$in":
+        #                                               ["Ha", "a.u.", "Hartree"]}},
         #     {"$set": {"formation-energy.energy.source-unit": "hartree"}},
         #     "formation energy: a.u. to hartree",
         # ),
@@ -54,15 +55,15 @@ def main():
         #     {"$set": {"atomic-forces.forces.source-unit": "kcal/mol/angstrom"}},
         #     "forces: kcal/mol/A etc. to kcal/mol/angstrom",
         # # ),
-        (
-            {
-                "atomic-forces.forces.source-unit": {
-                    "$in": ["eV/A", "eV/Ang", "meV Å^-1"]
-                }
-            },
-            {"$set": {"atomic-forces.forces.source-unit": "eV/angstrom"}},
-            "forces eV/A, Ang to eV/angstrom",
-        ),
+        # (
+        #     {
+        #         "atomic-forces.forces.source-unit": {
+        #             "$in": ["eV/A", "eV/Ang", "meV Å^-1"]
+        #         }
+        #     },
+        #     {"$set": {"atomic-forces.forces.source-unit": "eV/angstrom"}},
+        #     "forces eV/A, Ang to eV/angstrom",
+        # ),
         # (
         #     {"atomic-forces.forces.source-unit": {"$in": ["Hartree/A", "Ha/A"]}},
         #     {"$set": {"atomic-forces.forces.source-unit": "hartree/angstrom"}},
@@ -74,6 +75,16 @@ def main():
         #     {"$set": {"cauchy-stress.stress.source-unit": "eV/angstrom^3"}},
         #     "stress eV/Ang^3 to eV/angstrom^3",
         # ),
+        # 20.02.2024 -- Fixing DS_e94my2wrh074_0  mbGDML_maldonado_2023 energy units
+        (
+            {
+                "atomic-forces.forces.source-unit": {
+                    "$in": ["eV/A", "eV/Ang", "meV Å^-1"]
+                }
+            },
+            {"$set": {"atomic-forces.forces.source-unit": "eV/angstrom"}},
+            "forces eV/A, Ang to eV/angstrom",
+        ),
     ]
     with open("update_units_results.txt", "a") as f:
         timestamp = time.time()
