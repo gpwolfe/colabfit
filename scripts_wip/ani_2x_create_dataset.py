@@ -31,7 +31,7 @@ START_BATCH = 0
 MAX_AUTO_RECONNECT_ATTEMPTS = 100
 
 
-DATASET_FP = Path("data/ani2x/final_h5")
+# DATASET_FP = Path("data/ani2x/final_h5")
 DATASET_NAME = "ANI-2x-wB97MV-def2TZVPP"
 
 LICENSE = "https://creativecommons.org/licenses/by/4.0"
@@ -57,6 +57,68 @@ DATASET_DESC = (
     "level of theory using the def2TZVPP basis set. Configuration sets are divided "
     "by number of atoms per structure."
 )
+
+cs_ids = [
+    "CS_knqfuvyz6hvd_0",
+    "CS_388n2md9es5w_0",
+    "CS_y8wx1zd5osz5_0",
+    "CS_6ln67044rix3_0",
+    "CS_9jwjgajjyvhd_0",
+    "CS_96b0y2vfsovc_0",
+    "CS_9fekwm65w63y_0",
+    "CS_k9wh7ydtiq28_0",
+    "CS_0dk2ktrqgju8_0",
+    "CS_b3enivbtp9mp_0",
+    "CS_2xa45zo5fwak_0",
+    "CS_6os541btg0yk_0",
+    "CS_h390sodyz8jf_0",
+    "CS_pzq68semsnu0_0",
+    "CS_e0nki6w5ykam_0",
+    "CS_ccyz1hgzkkrl_0",
+    "CS_sztquf6aqjwb_0",
+    "CS_7qc7nllbnt4j_0",
+    "CS_clveqfttm1m0_0",
+    "CS_hxd9sd7d37ub_0",
+    "CS_gignoq9d8nvt_0",
+    "CS_pigtmthn19t1_0",
+    "CS_nrs2ye0evma5_0",
+    "CS_ncbmbzrica68_0",
+    "CS_1bq1mqeujw97_0",
+    "CS_qpbkt9hn7nrd_0",
+    "CS_d2y8q05puxb3_0",
+    "CS_sz0bsjj1es5s_0",
+    "CS_3olf902d7j4j_0",
+    "CS_lrs24i3vt46m_0",
+    "CS_ys83rfknk9hc_0",
+    "CS_ebsdkrtsgkgl_0",
+    "CS_oofiqv0utf27_0",
+    "CS_u8253sojyo4a_0",
+    "CS_5h3pa40v4s43_0",
+    "CS_uze6o25xs6fj_0",
+    "CS_78doqhpf1eq6_0",
+    "CS_huoqormjuj69_0",
+    "CS_vvky9rkobo66_0",
+    "CS_4tvanb3102hk_0",
+    "CS_c524m9l2wmg5_0",
+    "CS_uzmcamxbha4m_0",
+    "CS_dksoscwcjvka_0",
+    "CS_86lww7evy75v_0",
+    "CS_0h30zpvxkqvx_0",
+    "CS_5zfo9iaw9gyf_0",
+    "CS_3u23qscjs5op_0",
+    "CS_rg4vefuxo062_0",
+    "CS_tzfupzllwtbi_0",
+    "CS_opnxoox9zmvy_0",
+    "CS_gb5ltvksqwtt_0",
+    "CS_dw0gj0t9ejdp_0",
+    "CS_3g4ufbqmwy8r_0",
+    "CS_0x97c60e485l_0",
+    "CS_128aefaux4db_0",
+    "CS_8z9hd8i75i9t_0",
+    "CS_iecelo453ox7_0",
+    "CS_lal8jez1tu3p_0",
+    "CS_iz2x7oktmzxi_0",
+]
 
 
 def auto_reconnect(mongo_func):
@@ -447,6 +509,7 @@ async def main(argv):
             ds_id=ds_id,
             name=DATASET_NAME,
             authors=AUTHORS,
+            cs_ids=cs_ids,
             links=[PUBLICATION, DATA_LINK],  # + OTHER_LINKS,
             description=DATASET_DESC,
             verbose=False,
