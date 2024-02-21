@@ -7,6 +7,13 @@ usage:
 python oc20_is2res_batch_ds_update.py -i localhost -r 27017 -d oc20 -p 4 \
     -o DS_hcrq1don4k1r_0_do_ids_2024_01_05
 
+    
+Notes
+-----
+Configuration set ids have been added manually as a list. These are referenced
+only once, in the case that the dataset has not yet been created. This is the only time
+they are required for the dataset object.
+
 """
 
 from argparse import ArgumentParser
@@ -481,7 +488,7 @@ async def main(argv):
         "-o", "--do", type=str, help="Directory of data_object id files"
     )
     parser.add_argument(
-        "--ds", type=str, help="Dataset id to update with new data objects"
+        "--ds", type=Path, help="Dataset id to update with new data objects"
     )
     args = parser.parse_args(argv)
     do_ids_dir = Path(args.do)
