@@ -34,7 +34,6 @@ from colabfit import (
 )
 from tqdm import tqdm
 
-START_BATCH = 0
 MAX_AUTO_RECONNECT_ATTEMPTS = 100
 
 
@@ -399,7 +398,7 @@ async def insert_dos_to_dataset(args, ds_id=None, verbose=False, fp=None):
     client = MongoDatabase(
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
-    print(client.name, "\n\n")
+    print(client.name, "\n")
     with open(fp, "r") as f:
         do_hashes = [id.strip() for id in f.readlines()]
     if isinstance(do_hashes, str):
@@ -492,7 +491,7 @@ async def main(argv):
     )
     args = parser.parse_args(argv)
     do_ids_dir = Path(args.do)
-    ds_id = args.ds
+    ds_id = args.ds_id
     nprocs = args.nprocs
     client = MongoDatabase(
         args.db_name, nprocs=nprocs, uri=f"mongodb://{args.ip}:{args.port}"

@@ -192,7 +192,7 @@ def read_wrapper(dbname, uri, nprocs, ds_id, n_atoms):
                 co_ids, do_ids = list(zip(*ids_batch))
                 co_id_file = Path(
                     f"{ds_id}_co_ids_{today}/{ds_id}_"
-                    "config_ids_batch_natoms_{num_atoms}.txt"
+                    f"config_ids_batch_natoms_{num_atoms}.txt"
                 )
                 co_id_file.parent.mkdir(parents=True, exist_ok=True)
                 do_id_file = Path(
