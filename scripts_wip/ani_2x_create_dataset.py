@@ -399,6 +399,7 @@ async def insert_dos_to_dataset(args, ds_id=None, verbose=False, fp=None):
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
     print(client.name, "\n")
+    print(fp, "\n")
     with open(fp, "r") as f:
         do_hashes = [id.strip() for id in f.readlines()]
     if isinstance(do_hashes, str):
@@ -491,12 +492,14 @@ async def main(argv):
     )
     args = parser.parse_args(argv)
     do_ids_dir = Path(args.do)
-    ds_id = args.ds_id
+    ds_id = args.ds
+    print("DS-ID", ds_id)
     nprocs = args.nprocs
     client = MongoDatabase(
         args.db_name, nprocs=nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
     fps = sorted(list(do_ids_dir.rglob("*.txt")))
+    print("nfiles", len(fps))
 
     # check if dataset exists
     if client.datasets.find_one({"colabfit-id": ds_id}) is not None:
@@ -508,6 +511,7 @@ async def main(argv):
 
     else:
         # Create the dataset with the first file
+        print("Creating dataset...")
         with open(fps[0], "r") as f:
             do_ids0 = [id.strip() for id in f.readlines()]
         client.insert_dataset(
@@ -522,6 +526,7 @@ async def main(argv):
             data_license="https://creativecommons.org/licenses/by/4.0/",
         )
         client.close()
+        print("Dataset created with first batch.")
         # Create async tasks for update dataset
         tasks = [
             asyncio.create_task(insert_dos_to_dataset(args, ds_id=ds_id, fp=fp))
