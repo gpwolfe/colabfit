@@ -17,10 +17,12 @@ they are required for the dataset object.
 """
 
 from argparse import ArgumentParser
-import asyncio
+
+# import asyncio
 from collections import defaultdict
 import datetime
 from functools import partial, wraps
+import itertools
 import logging
 from pathlib import Path
 import pymongo
@@ -290,7 +292,7 @@ def aggregate_configuration_summaries(client, hashes, verbose=False):
         aggregated_info["nperiodic_dimensions"]
     )
     aggregated_info["dimension_types"] = list(aggregated_info["dimension_types"])
-    print("Configuration aggregation time:", time.time() - s)
+    print("Configuration aggregation time:", time.time() - s, flush=True)
     return aggregated_info
 
 
@@ -306,25 +308,58 @@ def aggregate_data_object_info(client, do_hashes, verbose=False):
     if isinstance(do_hashes, str):
         do_hashes = [do_hashes]
 
-    property_types = defaultdict(int)
-    aggregated_info = {}
-    co_ids = []
+    # property_types = defaultdict(int)
+    # aggregated_info = {}
+    # co_ids = []
+    pipeline = [
+        {"$match": {"hash": {"$in": do_hashes}}},
+        {
+            "$facet": {
+                "typesCount": [
+                    {"$unwind": "$property_types"},
+                    {"$group": {"_id": "$property_types", "count": {"$sum": 1}}},
+                ],
+                "configuration_ids": [
+                    {
+                        "$group": {
+                            "_id": None,
+                            "configuration_ids": {
+                                "$addToSet": "$relationships.configuration"
+                            },
+                        }
+                    },
+                    {"$project": {"_id": 0, "configuration_ids": 1}},
+                ],
+            }
+        },
+    ]
 
-    for doc in tqdm(
-        client.data_objects.find(
-            {"hash": {"$in": do_hashes}},
-            {"property_types": 1, "relationships": 1},
-        )
-    ):
-        for p_type in doc["property_types"]:
-            property_types[p_type] += 1
-        # get co hashes
-        co_ids.append(doc["relationships"][0]["configuration"].replace("CO_", ""))
-    config_agg = aggregate_configuration_summaries(client, co_ids, verbose=verbose)
+    results = client.data_objects.aggregate(pipeline)
+    results = next(results)
+    p_types = [x["_id"] for x in results["typesCount"]]
+    p_counts = [x["count"] for x in results["typesCount"]]
+    co_ids = itertools.chain.from_iterable(
+        results["configuration_ids"][0]["configuration_ids"]
+    )
+    co_ids = [x.replace("CO_", "") for x in co_ids]
+    # for doc in tqdm(
+    #     client.data_objects.find(
+    #         {"hash": {"$in": do_hashes}},
+    #         {"property_types": 1, "relationships.configuration": 1},
+    #         batch_size=50,
+    #     )
+    # ):
+    #     for p_type in doc["property_types"]:
+    #         property_types[p_type] += 1
+    #     # get co hashes
+    #     co_ids.append(doc["relationships"][0]["configuration"].replace("CO_", ""))
+    # config_agg = aggregate_configuration_summaries(client, co_ids, verbose=verbose)
 
-    aggregated_info.update(config_agg)
-    aggregated_info["property_types"] = list(property_types.keys())
-    aggregated_info["property_types_counts"] = list(property_types.values())
+    aggregated_info = aggregate_configuration_summaries(client, co_ids, verbose=verbose)
+    aggregated_info["property_types"] = p_types
+    aggregated_info["property_types_counts"] = p_counts
+    # aggregated_info["property_types"] = list(property_types.keys())
+    # aggregated_info["property_types_counts"] = list(property_types.values())
     aggregated_info["nconfigurations"] = len(co_ids)
     return aggregated_info
 
@@ -388,7 +423,8 @@ def update_ds_agg_info(aggregated_info, new_info):
 
 
 @auto_reconnect
-async def insert_dos_to_dataset(args, ds_id=None, verbose=False, fp=None):
+# async
+def insert_dos_to_dataset(args, ds_id=None, verbose=False, fp=None):
     """
     Uses aggregate_data_object_info to gather info from a new batch of DOs
 
@@ -398,75 +434,85 @@ async def insert_dos_to_dataset(args, ds_id=None, verbose=False, fp=None):
     client = MongoDatabase(
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
-    print(client.name, "\n")
-    print(fp, "\n")
+    print(client.name, "\n", flush=True)
+    print(fp, "\n", flush=True)
+    batch_size = 100000
     with open(fp, "r") as f:
-        do_hashes = [id.strip() for id in f.readlines()]
-    if isinstance(do_hashes, str):
-        do_hashes = [do_hashes]
+        do_hashes = list(set([id.strip() for id in f.readlines()]))
+    # new_aggregated_info = {}
+    chunked_hashes = [
+        do_hashes[i : i + batch_size] for i in range(0, len(do_hashes), batch_size)
+    ]
+    for hashes in chunked_hashes:
+        if isinstance(hashes, str):
+            hashes = [hashes]
+        new_aggregated_info = aggregate_data_object_info(
+            client, hashes, verbose=verbose
+        )
+        # for k, v in aggregate_data_object_info(
+        #     client, do_hashes, verbose=verbose
+        # ).items():
+        #     new_aggregated_info[k] = v
+        # client.insert_aggregated_info(aggregated_info, "dataset", ds_id)
+        # Remove possible duplicates
+        # do_hashes = list(set(do_hashes))
+        # Insert necessary aggregated info into its collection
+        client.insert_aggregated_info(new_aggregated_info, "dataset", ds_id)
 
-    # Remove possible duplicates
-    do_hashes = list(set(do_hashes))
-
-    new_aggregated_info = {}
-
-    for k, v in aggregate_data_object_info(client, do_hashes, verbose=verbose).items():
-        new_aggregated_info[k] = v
-
-    # Insert necessary aggregated info into its collection
-    client.insert_aggregated_info(new_aggregated_info, "dataset", ds_id)
-
-    current_ds_agg_info = client.datasets.find(
-        {SHORT_ID_STRING_NAME: ds_id},
-        {
-            f"aggregated_info.{key}": 1
-            for key in [
-                "nconfigurations",
-                "nsites",
-                "nelements",
-                "elements",
-                "total_elements_ratios",
-                "nperiodic_dimensions",
-                "dimension_types",
-                "property_types",
-                "property_types_counts",
-            ]
-        },
-    )
-    current_ds_agg_info = next(current_ds_agg_info)
-    current_ds_agg_info = current_ds_agg_info["aggregated_info"]
-
-    # Now update the dataset with the latest iteration of aggregated info
-    for item in [
-        "individual_elements_ratios",
-        "chemical_systems",
-        "chemical_formula_anonymous",
-        "chemical_formula_hill",
-        "chemical_formula_reduced",
-    ]:
-        new_aggregated_info.pop(item)
-    updated_aggregated_info = update_ds_agg_info(
-        current_ds_agg_info, new_aggregated_info
-    )
-
-    client.datasets.update_one(
-        {"colabfit-id": ds_id},
-        {
-            "$set": {
-                "aggregated_info": updated_aggregated_info,
-                "last_modified": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        current_ds_agg_info = client.datasets.find(
+            {SHORT_ID_STRING_NAME: ds_id},
+            {
+                f"aggregated_info.{key}": 1
+                for key in [
+                    "nconfigurations",
+                    "nsites",
+                    "nelements",
+                    "elements",
+                    "total_elements_ratios",
+                    "nperiodic_dimensions",
+                    "dimension_types",
+                    "property_types",
+                    "property_types_counts",
+                ]
             },
-        },
-        upsert=True,
-        hint="hash",
-    )
-    with open("ds_batches.txt", "a") as f:
-        f.write(f"{fp}\n")
+        )
+        current_ds_agg_info = next(current_ds_agg_info)
+        current_ds_agg_info = current_ds_agg_info["aggregated_info"]
+
+        # Now update the dataset with the latest iteration of aggregated info
+        for item in [
+            "individual_elements_ratios",
+            "chemical_systems",
+            "chemical_formula_anonymous",
+            "chemical_formula_hill",
+            "chemical_formula_reduced",
+        ]:
+            new_aggregated_info.pop(item)
+        updated_aggregated_info = update_ds_agg_info(
+            current_ds_agg_info, new_aggregated_info
+        )
+
+        client.datasets.update_one(
+            {"colabfit-id": ds_id},
+            {
+                "$set": {
+                    "aggregated_info": updated_aggregated_info,
+                    "last_modified": datetime.datetime.now().strftime(
+                        "%Y-%m-%dT%H:%M:%SZ"
+                    ),
+                },
+            },
+            upsert=True,
+            hint="hash",
+        )
+        with open("ds_batches.txt", "a") as f:
+            f.write(f"{fp}\n")
     client.close()
 
 
 @auto_reconnect
-async def main(argv):
+# async
+def main(argv):
     parser = ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, help="IP of host mongod")
     parser.add_argument(
@@ -493,25 +539,28 @@ async def main(argv):
     args = parser.parse_args(argv)
     do_ids_dir = Path(args.do)
     ds_id = args.ds
-    print("DS-ID", ds_id)
+    print("DS-ID", ds_id, flush=True)
     nprocs = args.nprocs
     client = MongoDatabase(
         args.db_name, nprocs=nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
     fps = sorted(list(do_ids_dir.rglob("*.txt")))
-    print("nfiles", len(fps))
+    print("nfiles", len(fps), flush=True)
 
     # check if dataset exists
     if client.datasets.find_one({"colabfit-id": ds_id}) is not None:
-        tasks = [
-            asyncio.create_task(insert_dos_to_dataset(args, ds_id=ds_id, fp=fp))
-            for fp in fps
-        ]
-        await asyncio.gather(*tasks)
+        for fp in fps:
+            insert_dos_to_dataset(args, ds_id=ds_id, fp=fp)
+
+        # tasks = [
+        #     asyncio.create_task(insert_dos_to_dataset(args, ds_id=ds_id, fp=fp))
+        #     for fp in fps
+        # ]
+        # await asyncio.gather(*tasks)
 
     else:
         # Create the dataset with the first file
-        print("Creating dataset...")
+        print("Creating dataset...", flush=True)
         with open(fps[0], "r") as f:
             do_ids0 = [id.strip() for id in f.readlines()]
         client.insert_dataset(
@@ -526,15 +575,18 @@ async def main(argv):
             data_license="https://creativecommons.org/licenses/by/4.0/",
         )
         client.close()
-        print("Dataset created with first batch.")
+        print("Dataset created with first batch.", flush=True)
         # Create async tasks for update dataset
-        tasks = [
-            asyncio.create_task(insert_dos_to_dataset(args, ds_id=ds_id, fp=fp))
-            for fp in fps[1:]
-        ]
-        await asyncio.gather(*tasks)
+        for fp in fps[1:]:
+            insert_dos_to_dataset(args, ds_id=ds_id, fp=fp)
+        # tasks = [
+        #     asyncio.create_task(insert_dos_to_dataset(args, ds_id=ds_id, fp=fp))
+        #     for fp in fps[1:]
+        # ]
+        # await asyncio.gather(*tasks)
 
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    asyncio.run(main(args))
+    main(args)
+    # asyncio.run(main(args))
