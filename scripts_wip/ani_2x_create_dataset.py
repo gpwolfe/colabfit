@@ -7,7 +7,7 @@ usage:
 python oc20_is2res_batch_ds_update.py -i localhost -r 27017 -d oc20 -p 4 \
     -o DS_hcrq1don4k1r_0_do_ids_2024_01_05
 
-    
+
 Notes
 -----
 Configuration set ids have been added manually as a list. These are referenced
@@ -485,10 +485,10 @@ async def main(argv):
     )
     parser.add_argument("-r", "--port", type=int, help="Target port for MongoDB")
     parser.add_argument(
-        "-o", "--do", type=str, help="Directory of data_object id files"
+        "-o", "--do", type=Path, help="Directory of data_object id files"
     )
     parser.add_argument(
-        "--ds", type=Path, help="Dataset id to update with new data objects"
+        "--ds", type=str, help="Dataset id to update with new data objects"
     )
     args = parser.parse_args(argv)
     do_ids_dir = Path(args.do)
