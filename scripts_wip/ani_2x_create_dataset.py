@@ -27,6 +27,7 @@ import logging
 from pathlib import Path
 import pymongo
 from multiprocessing import Pool
+import re
 import sys
 import time
 import numpy as np
@@ -34,7 +35,8 @@ from colabfit.tools.database import MongoDatabase
 from colabfit import (
     SHORT_ID_STRING_NAME,
 )
-from tqdm import tqdm
+
+# from tqdm import tqdm
 
 MAX_AUTO_RECONNECT_ATTEMPTS = 100
 
@@ -46,7 +48,6 @@ LICENSE = "https://creativecommons.org/licenses/by/4.0"
 
 PUBLICATION = "https://doi.org/10.1021/acs.jctc.0c00121"
 DATA_LINK = "https://doi.org/10.5281/zenodo.10108942"
-# OTHER_LINKS = []
 
 AUTHORS = [
     "Kate Huddleston",
@@ -162,7 +163,7 @@ def agg(hashes, db, uri):
         "chemical_systems": set(),
         "elements": [],
         "individual_elements_ratios": {},
-        "total_elements_ratios": {},
+        # "total_elements_ratios": {},
         "chemical_formula_reduced": set(),
         "chemical_formula_anonymous": set(),
         "chemical_formula_hill": set(),
@@ -176,7 +177,7 @@ def agg(hashes, db, uri):
             "nsites": 1,
             "elements": 1,
             "elements_ratios": 1,
-            "total_elements_ratios": 1,
+            # "total_elements_ratios": 1,
             "nperiodic_dimensions": 1,
             "dimension_types": 1,
             "elements_ratios": 1,
@@ -193,10 +194,10 @@ def agg(hashes, db, uri):
             for e, er in zip(doc["elements"], doc["elements_ratios"]):
                 if e not in proxy["elements"]:
                     proxy["elements"].append(e)
-                    proxy["total_elements_ratios"][e] = er * doc["nsites"]
+                    # proxy["total_elements_ratios"][e] = er * doc["nsites"]
                     proxy["individual_elements_ratios"][e] = {np.round(er, decimals=2)}
                 else:
-                    proxy["total_elements_ratios"][e] += er * doc["nsites"]
+                    # proxy["total_elements_ratios"][e] += er * doc["nsites"]
                     proxy["individual_elements_ratios"][e].add(np.round(er, decimals=2))
 
             proxy["chemical_formula_reduced"].add(doc["chemical_formula_reduced"])
@@ -220,7 +221,7 @@ def aggregate_configuration_summaries(client, hashes, verbose=False):
         "chemical_systems": set(),
         "elements": [],
         "individual_elements_ratios": {},
-        "total_elements_ratios": {},
+        # "total_elements_ratios": {},
         "chemical_formula_reduced": set(),
         "chemical_formula_anonymous": set(),
         "chemical_formula_hill": set(),
@@ -243,22 +244,9 @@ def aggregate_configuration_summaries(client, hashes, verbose=False):
         aggregated_info["nsites"] += a["nsites"]
         aggregated_info["chemical_systems"].update(a["chemical_systems"])
 
-        for e, er in zip(a["elements"], a["individual_elements_ratios"]):
+        for e in a["elements"]:
             if e not in aggregated_info["elements"]:
                 aggregated_info["elements"].append(e)
-                aggregated_info["total_elements_ratios"][e] = a[
-                    "total_elements_ratios"
-                ][e]
-                aggregated_info["individual_elements_ratios"][e] = a[
-                    "individual_elements_ratios"
-                ][e]
-            else:
-                aggregated_info["total_elements_ratios"][e] += a[
-                    "total_elements_ratios"
-                ][e]
-                aggregated_info["individual_elements_ratios"][e].update(
-                    a["individual_elements_ratios"][e]
-                )
 
         aggregated_info["chemical_formula_reduced"].update(
             a["chemical_formula_reduced"]
@@ -273,10 +261,6 @@ def aggregate_configuration_summaries(client, hashes, verbose=False):
 
     for e in aggregated_info["elements"]:
         aggregated_info["nelements"] += 1
-        aggregated_info["total_elements_ratios"][e] /= aggregated_info["nsites"]
-        aggregated_info["individual_elements_ratios"][e] = list(
-            aggregated_info["individual_elements_ratios"][e]
-        )
 
     aggregated_info["chemical_systems"] = list(aggregated_info["chemical_systems"])
     aggregated_info["chemical_formula_reduced"] = list(
@@ -308,9 +292,6 @@ def aggregate_data_object_info(client, do_hashes, verbose=False):
     if isinstance(do_hashes, str):
         do_hashes = [do_hashes]
 
-    # property_types = defaultdict(int)
-    # aggregated_info = {}
-    # co_ids = []
     pipeline = [
         {"$match": {"hash": {"$in": do_hashes}}},
         {
@@ -342,24 +323,10 @@ def aggregate_data_object_info(client, do_hashes, verbose=False):
         results["configuration_ids"][0]["configuration_ids"]
     )
     co_ids = [x.replace("CO_", "") for x in co_ids]
-    # for doc in tqdm(
-    #     client.data_objects.find(
-    #         {"hash": {"$in": do_hashes}},
-    #         {"property_types": 1, "relationships.configuration": 1},
-    #         batch_size=50,
-    #     )
-    # ):
-    #     for p_type in doc["property_types"]:
-    #         property_types[p_type] += 1
-    #     # get co hashes
-    #     co_ids.append(doc["relationships"][0]["configuration"].replace("CO_", ""))
-    # config_agg = aggregate_configuration_summaries(client, co_ids, verbose=verbose)
 
     aggregated_info = aggregate_configuration_summaries(client, co_ids, verbose=verbose)
     aggregated_info["property_types"] = p_types
     aggregated_info["property_types_counts"] = p_counts
-    # aggregated_info["property_types"] = list(property_types.keys())
-    # aggregated_info["property_types_counts"] = list(property_types.values())
     aggregated_info["nconfigurations"] = len(co_ids)
     return aggregated_info
 
@@ -375,7 +342,7 @@ def update_ds_agg_info(aggregated_info, new_info):
         "nconfigurations": aggregated_info["nconfigurations"],
         "nsites": aggregated_info["nsites"],
         "elements": aggregated_info["elements"],
-        "total_elements_ratios": aggregated_info["total_elements_ratios"],
+        # "total_elements_ratios": aggregated_info["total_elements_ratios"],
         "nperiodic_dimensions": set(aggregated_info["nperiodic_dimensions"]),
         "dimension_types": set([tuple(x) for x in aggregated_info["dimension_types"]]),
     }
@@ -406,13 +373,9 @@ def update_ds_agg_info(aggregated_info, new_info):
 
     # Reset elements and calculate new total elements ratios
     proxy["nelements"] = 0
-    old_nsites = aggregated_info["nsites"]
     proxy["elements"] = sorted(proxy["elements"])
     for e in proxy["elements"]:
-        old_ratio = aggregated_info["total_elements_ratios"].get(e, 0)
-        old_num_e = old_ratio * old_nsites
         proxy["nelements"] += 1
-        proxy["total_elements_ratios"][e] = (old_num_e + new_num_e[e]) / proxy["nsites"]
 
     proxy["nperiodic_dimensions"] = list(proxy["nperiodic_dimensions"])
     proxy["dimension_types"] = list(aggregated_info["dimension_types"])
@@ -439,7 +402,6 @@ def insert_dos_to_dataset(args, ds_id=None, verbose=False, fp=None):
     batch_size = 100000
     with open(fp, "r") as f:
         do_hashes = list(set([id.strip() for id in f.readlines()]))
-    # new_aggregated_info = {}
     chunked_hashes = [
         do_hashes[i : i + batch_size] for i in range(0, len(do_hashes), batch_size)
     ]
@@ -449,13 +411,7 @@ def insert_dos_to_dataset(args, ds_id=None, verbose=False, fp=None):
         new_aggregated_info = aggregate_data_object_info(
             client, hashes, verbose=verbose
         )
-        # for k, v in aggregate_data_object_info(
-        #     client, do_hashes, verbose=verbose
-        # ).items():
-        #     new_aggregated_info[k] = v
-        # client.insert_aggregated_info(aggregated_info, "dataset", ds_id)
-        # Remove possible duplicates
-        # do_hashes = list(set(do_hashes))
+
         # Insert necessary aggregated info into its collection
         client.insert_aggregated_info(new_aggregated_info, "dataset", ds_id)
 
@@ -468,7 +424,7 @@ def insert_dos_to_dataset(args, ds_id=None, verbose=False, fp=None):
                     "nsites",
                     "nelements",
                     "elements",
-                    "total_elements_ratios",
+                    # "total_elements_ratios",
                     "nperiodic_dimensions",
                     "dimension_types",
                     "property_types",
@@ -481,7 +437,6 @@ def insert_dos_to_dataset(args, ds_id=None, verbose=False, fp=None):
 
         # Now update the dataset with the latest iteration of aggregated info
         for item in [
-            "individual_elements_ratios",
             "chemical_systems",
             "chemical_formula_anonymous",
             "chemical_formula_hill",
@@ -507,6 +462,34 @@ def insert_dos_to_dataset(args, ds_id=None, verbose=False, fp=None):
         )
         with open("ds_batches.txt", "a") as f:
             f.write(f"{fp}\n")
+    elem_match = re.compile(r"(?P<elem>[A-Z][a-z]?)(?P<num>\d*)")
+    hill_count_pipeline = [
+        {"$match": {"relationships.dataset": ds_id}},
+        {
+            "$facet": {
+                "hill_counts": [
+                    {"$group": {"_id": "$chemical_formula_hill", "count": {"$sum": 1}}},
+                ],
+            }
+        },
+    ]
+    hill_counts = next(client.configurations.aggregate(hill_count_pipeline))[
+        "hill_counts"
+    ]
+    elem_count = defaultdict(int)
+    for doc in hill_counts:
+        formula = doc["_id"]
+        count = doc["count"]
+        elems = elem_match.findall(formula)
+        for elem, e_count in elems:
+            elem_count[elem] += (int(e_count) * count) if e_count else count
+    total_elems = sum(elem_count.values())
+    elem_ratios = {k: v / total_elems for k, v in elem_count.items()}
+    client.datasets.find_one_and_update(
+        {"colabfit-id": ds_id},
+        {"$set": {"aggregated_info.total_elements_ratios": elem_ratios}},
+    )
+
     client.close()
 
 
