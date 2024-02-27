@@ -33,7 +33,7 @@ import sys
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 from colabfit.tools.property_definitions import (
-    # atomic_forces_pd,
+    atomic_forces_pd,
     # cauchy_stress_pd,
     potential_energy_pd,
 )
@@ -46,7 +46,6 @@ LICENSE = "https://creativecommons.org/licenses/by/4.0"
 
 PUBLICATION = "https://doi.org/10.1021/acs.jctc.0c00121"
 DATA_LINK = "https://doi.org/10.5281/zenodo.10108942"
-# OTHER_LINKS = []
 
 AUTHORS = [
     "Kate Huddleston",
@@ -70,24 +69,7 @@ GLOB_STR = "ANI-2x-wB97X-631Gd.h5"
 PI_METADATA = {
     "software": {"value": "Gaussian 09"},
     "method": {"value": "DFT-wb97x"},
-    "basis_set": {"value": "6-31g*"},
-    "input": {
-        "value": {
-            "step-1:": r"""! quick-dft slowconv loosescf
-%scf maxiter 256 end""",
-            "step-2": '''! wB97m-d3bj def2-tzvpp def2/j rijcosx engrad \
-tightscf SCFConvForced soscf grid4 finalgrid6 gridx7
-%elprop dipole true quadrupole true end
-%output PrintLevel mini Print[P DFTD GRAD] 1 end
-%scf maxiter 256 end
-! MORead
-%moinp "PATH TO .gbw FILE FROM STEP 1"''',
-            "step-3": '''! wb97m-v def2-tzvpp def2/j rijcosx tightscf \
-ScfConvForced grid4 finalgrid6 gridx7 vdwgrid4
-! MORead
-%moinp "PATH TO .gbw FILE FROM STEP 2"''',
-        }
-    },
+    "basis_set": {"value": "6-31G(d)"},
 }
 
 PROPERTY_MAP = {
@@ -107,20 +89,12 @@ PROPERTY_MAP = {
     ],
 }
 
-CO_METADATA = {
-    "dipole": {"field": "dipole", "units": "electron angstrom"},
-    "wB97M-def2-TZVPP-scf-energy": {"field": "scf_energy", "units": "hartree"},
-}
+# Configuration sets appear at bottom of script
 
-CSS = [
-    [
-        f"{DATASET_NAME}_num_atoms_{natoms}",
-        {"names": {"$regex": f"natoms_{natoms:03d}__"}},
-        f"Configurations with {natoms} atoms from {DATASET_NAME} dataset",
-    ]
-    # for natoms in range(2, 64)
-    for natoms in range(2, 4)
-]
+# CO_METADATA = {
+#     "dipole": {"field": "dipole", "units": "electron angstrom"},
+#     "wB97M-def2-TZVPP-scf-energy": {"field": "scf_energy", "units": "hartree"},
+# }
 
 
 def ani_reader(num_atoms, fp):
@@ -130,9 +104,7 @@ def ani_reader(num_atoms, fp):
         coordinates = properties["coordinates"]
         species = properties["species"]
         energies = properties["energies"]
-        en_correction = properties["VV10.energy-corrections"]
-        scf_energies = properties["wB97M_def2-TZVPP.scf-energies"]
-        dipoles = properties["dipoles"]
+        en_correction = properties["forces"]
         configs = []
         while True:
             for i, coord in enumerate(coordinates):
@@ -142,8 +114,6 @@ def ani_reader(num_atoms, fp):
                 )
                 config.info["energy"] = energies[i]
                 config.info["en_correction"] = en_correction[i]
-                config.info["scf_energy"] = scf_energies[i]
-                config.info["dipole"] = dipoles[i]
                 config.info["name"] = (
                     f"ANI-2x-wB97MV-def2TZVPP__natoms_{num_atoms}__ix_{i}"
                 )
@@ -185,7 +155,7 @@ def read_wrapper(dbname, uri, nprocs, ds_id, n_atoms):
                     client.insert_data(
                         configurations=configurations,
                         ds_id=ds_id,
-                        co_md_map=CO_METADATA,
+                        # co_md_map=CO_METADATA,
                         property_map=PROPERTY_MAP,
                         generator=False,
                         verbose=False,
@@ -197,13 +167,13 @@ def read_wrapper(dbname, uri, nprocs, ds_id, n_atoms):
                 insert_time = new_insert_time
                 co_ids, do_ids = list(zip(*ids_batch))
                 co_id_file = Path(
-                    f"{ds_id}_co_ids_{today}/{ds_id}_"
-                    f"config_ids_batch_natoms_{num_atoms}.txt"
+                    f"{ds_id}_ani2x_wb97x_631gd_co_ids_{today}/{ds_id}_"
+                    f"config_ids_ani2x_wb97x_631gd_batch_natoms_{num_atoms}.txt"
                 )
                 co_id_file.parent.mkdir(parents=True, exist_ok=True)
                 do_id_file = Path(
-                    f"{ds_id}_do_ids_{today}/{ds_id}_do_ids_batch_natoms_{num_atoms}"
-                    ".txt"
+                    f"{ds_id}_ani2x_wb97x_631gd_do_ids_{today}/"
+                    f"{ds_id}_do_ids_batch_natoms_{num_atoms}.txt"
                 )
                 do_id_file.parent.mkdir(parents=True, exist_ok=True)
                 with open(co_id_file, "a") as f:
@@ -280,7 +250,9 @@ def main(argv):
     n_atoms = [f"{x:03d}" for x in range(args.start, args.end + 1)]
     print(n_atoms)
     client.insert_property_definition(potential_energy_pd)
+    client.insert_property_definition(atomic_forces_pd)
 
+    client.close()
     ids = read_wrapper(
         dbname=client.database_name,
         uri=client.uri,
@@ -289,31 +261,6 @@ def main(argv):
         n_atoms=n_atoms,
     )
     print("Num. Ids: ", len(ids))
-    # all_co_ids, all_do_ids = list(zip(*ids))
-
-    # cs_ids = []
-    # for i, (name, query, desc) in enumerate(CSS):
-    #     cs_id = client.query_and_insert_configuration_set(
-    #         co_hashes=all_co_ids,
-    #         ds_id=ds_id,
-    #         name=name,
-    #         description=desc,
-    #         query=query,
-    #     )
-
-    #     cs_ids.append(cs_id)
-
-    # client.insert_dataset(
-    #     do_hashes=all_do_ids,
-    #     ds_id=ds_id,
-    #     name=DATASET_NAME,
-    #     authors=AUTHORS,
-    #     links=[PUBLICATION, DATA_LINK],  # + OTHER_LINKS,
-    #     description=DATASET_DESC,
-    #     verbose=False,
-    #     cs_ids=cs_ids,  # remove line if no configuration sets to insert
-    #     data_license=LICENSE,
-    # )
 
 
 DB_KEYS = [
@@ -383,7 +330,6 @@ CSS = [
         {"names": {"$regex": f"natoms_{natoms}__"}},
         f"Configurations with {natoms} atoms from {DATASET_NAME} dataset",
     ]
-    # for natoms in range(2, 64)
     for natoms in DB_KEYS
 ]
 if __name__ == "__main__":
