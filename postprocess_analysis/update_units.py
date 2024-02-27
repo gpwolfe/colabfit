@@ -85,28 +85,36 @@ def main():
         #     {"$set": {"atomic-forces.forces.source-unit": "eV/angstrom"}},
         #     "forces eV/A, Ang to eV/angstrom",
         # ),
+        # (
+        #     {
+        #         "relationships": "DS_e94my2wrh074_0",
+        #         "potential-energy.energy.source-unit.field": "e_unit",
+        #     },
+        #     {"$set": {"potential-energy.energy.source-unit": "kcal/mol"}},
+        # ),
         (
             {
-                "relationships": "DS_e94my2wrh074_0",
-                "potential-energy.energy.source-unit.field": "e_unit",
+                "relationships": "DS_caktb6z8yiy7_0",
+                "potential-energy.energy.source-unit.value": "eV",
             },
-            {"$set": {"potential-energy.energy.source-unit": "kcal/mol"}},
+            {"$set": {"potential-energy.energy.source-unit": "eV"}},
         )
     ]
     timestamp = time.time()
     now = datetime.fromtimestamp(timestamp)
-    with open(f"update_units_results{now}.txt", "a") as f:
+    with open("update_units_results.txt", "a") as f:
 
         f.write(f"{now}\n")
         f.write(f"{db.name}\t{coll.name}\n")
-    for q_u in query_update:
+    for i, q_u in enumerate(query_update):
         query = q_u[0]
         update = q_u[1]
         print(query, update)
         res = coll.update_many(query, update)
         with open("update_units_results.txt", "a") as f:
-            f.write(f"{q_u[2]}\t{res.raw_result}\n")
-        results.append((q_u[2], res))
+            f.write(f"{q_u}\t{res.raw_result}\n")
+        results.append((q_u, res))
+    return results
 
 
 if __name__ == "__main__":

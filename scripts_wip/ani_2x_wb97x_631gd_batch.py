@@ -76,7 +76,7 @@ PROPERTY_MAP = {
     "potential-energy": [
         {
             "energy": {"field": "energy", "units": "hartree"},
-            "reference-energy": {"field": "en_correction", "units": "hartree"},
+            # "reference-energy": {"field": "en_correction", "units": "hartree"},
             "per-atom": {"value": False, "units": None},
             "_metadata": PI_METADATA,
         }
@@ -104,7 +104,7 @@ def ani_reader(num_atoms, fp):
         coordinates = properties["coordinates"]
         species = properties["species"]
         energies = properties["energies"]
-        en_correction = properties["forces"]
+        forces = properties["forces"]
         configs = []
         while True:
             for i, coord in enumerate(coordinates):
@@ -113,10 +113,8 @@ def ani_reader(num_atoms, fp):
                     numbers=species[i],
                 )
                 config.info["energy"] = energies[i]
-                config.info["en_correction"] = en_correction[i]
-                config.info["name"] = (
-                    f"ANI-2x-wB97MV-def2TZVPP__natoms_{num_atoms}__ix_{i}"
-                )
+                config.info["forces"] = forces[i]
+                config.info["name"] = f"{DATASET_NAME}__natoms_{num_atoms}__ix_{i}"
                 configs.append(config)
                 if len(configs) == 50000:
                     for config in configs:
@@ -166,13 +164,14 @@ def read_wrapper(dbname, uri, nprocs, ds_id, n_atoms):
                 print(f"Time to insert: {new_insert_time - insert_time}")
                 insert_time = new_insert_time
                 co_ids, do_ids = list(zip(*ids_batch))
+                file_ds_name = DATASET_NAME.lower().replace("-", "_")
                 co_id_file = Path(
-                    f"{ds_id}_ani2x_wb97x_631gd_co_ids_{today}/{ds_id}_"
-                    f"config_ids_ani2x_wb97x_631gd_batch_natoms_{num_atoms}.txt"
+                    f"{ds_id}_{file_ds_name}_co_ids_{today}/"
+                    f"{ds_id}_config_ids_batch_natoms_{num_atoms}.txt"
                 )
                 co_id_file.parent.mkdir(parents=True, exist_ok=True)
                 do_id_file = Path(
-                    f"{ds_id}_ani2x_wb97x_631gd_do_ids_{today}/"
+                    f"{ds_id}_{file_ds_name}_do_ids_{today}/"
                     f"{ds_id}_do_ids_batch_natoms_{num_atoms}.txt"
                 )
                 do_id_file.parent.mkdir(parents=True, exist_ok=True)
