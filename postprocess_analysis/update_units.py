@@ -76,19 +76,27 @@ def main():
         #     "stress eV/Ang^3 to eV/angstrom^3",
         # ),
         # 20.02.2024 -- Fixing DS_e94my2wrh074_0  mbGDML_maldonado_2023 energy units
+        # (
+        #     {
+        #         "atomic-forces.forces.source-unit": {
+        #             "$in": ["eV/A", "eV/Ang", "meV Å^-1"]
+        #         }
+        #     },
+        #     {"$set": {"atomic-forces.forces.source-unit": "eV/angstrom"}},
+        #     "forces eV/A, Ang to eV/angstrom",
+        # ),
         (
             {
-                "atomic-forces.forces.source-unit": {
-                    "$in": ["eV/A", "eV/Ang", "meV Å^-1"]
-                }
+                "relationships": "DS_e94my2wrh074_0",
+                "potential-energy.energy.source-unit.field": "e_unit",
             },
-            {"$set": {"atomic-forces.forces.source-unit": "eV/angstrom"}},
-            "forces eV/A, Ang to eV/angstrom",
-        ),
+            {"$set": {"potential-energy.energy.source-unit": "kcal/mol"}},
+        )
     ]
-    with open("update_units_results.txt", "a") as f:
-        timestamp = time.time()
-        now = datetime.fromtimestamp(timestamp)
+    timestamp = time.time()
+    now = datetime.fromtimestamp(timestamp)
+    with open(f"update_units_results{now}.txt", "a") as f:
+
         f.write(f"{now}\n")
         f.write(f"{db.name}\t{coll.name}\n")
     for q_u in query_update:
