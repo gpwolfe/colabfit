@@ -496,7 +496,7 @@ def main(argv):
         cs_ids=cs_ids,
         links=[PUBLICATION, DATA_LINK],  # + OTHER_LINKS,
         description=DATASET_DESC,
-        verbose=False,
+        verbose=True,
         data_license="https://creativecommons.org/licenses/by/4.0/",
     )
     # for fp in fps:

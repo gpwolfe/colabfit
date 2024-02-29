@@ -179,7 +179,9 @@ def read_wrapper(dbname, uri, nprocs, ds_id, n_atoms):
                     f.writelines([f"{id}\n" for id in co_ids])
                 with open(do_id_file, "a") as f:
                     f.writelines([f"{id}\n" for id in do_ids])
+
     print(f"Time to read: {time.time() - wrap_time}")
+    client.close()
     return ids
 
 
