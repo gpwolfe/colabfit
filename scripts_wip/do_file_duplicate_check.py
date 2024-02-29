@@ -1,3 +1,11 @@
+"""
+author: gpwolfe
+
+Usage
+-----
+python do_file_duplicate_check.py <dir_path>
+"""
+
 from argparse import ArgumentParser
 from pathlib import Path
 
@@ -24,14 +32,14 @@ def remove_duplicate_lines_across_files(fdir):
         if len(new_lines) > 0:
             print(len(new_lines))
             new_dir = fdir.absolute().parent / (
-                filepath.parts[-4] + "_checked_for_duplicates"
+                filepath.parts[-2] + "_checked_for_duplicates"
             )
             new_dir.mkdir(exist_ok=True)
             new_filepath = new_dir / (filepath.stem + "_checked_for_duplicates.txt")
             with new_filepath.open("w") as new_file:
                 new_file.writelines(new_lines)
         if len(duplicates) > 0:
-            dup_dir = fdir.absolute().parent / (filepath.parts[-4] + "_duplicates")
+            dup_dir = fdir.absolute().parent / (filepath.parts[-2] + "_duplicates")
 
             dup_dir.mkdir(exist_ok=True)
             with (dup_dir / (filepath.stem + "_duplicates.txt")).open(
