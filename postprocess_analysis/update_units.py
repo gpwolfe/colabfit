@@ -92,13 +92,48 @@ def main():
         #     },
         #     {"$set": {"potential-energy.energy.source-unit": "kcal/mol"}},
         # ),
+        # (
+        #     {
+        #         "relationships": "DS_caktb6z8yiy7_0",
+        #         "potential-energy.energy.source-unit.value": "eV",
+        #     },
+        #     {"$set": {"potential-energy.energy.source-unit": "eV"}},
+        # ),
+        # (
+        #     {
+        #         "relationships": "DS_02cqe6a0bobu_0",
+        #         "atomic-forces.forces.source-unit": "eV/angstrom",
+        #     },
+        #     {"$set": {"atomic-forces.forces.source-unit": "hartree/angstrom"}},
+        # ),
+        # (
+        #     {
+        #         "relationships": "DS_9in0wrvt6qg2_0",
+        #         "cauchy-stress.stress.source-unit": "a.u.",
+        #     },
+        #     {"$set": {"cauchy-stress.stress.source-unit": "hartree/bohr"}},
+        # ),
         (
             {
-                "relationships": "DS_caktb6z8yiy7_0",
-                "potential-energy.energy.source-unit.value": "eV",
+                "relationships.dataset": "DS_a0bxs66goqvv_0",
+                "potential-energy.energy.source-unit": "hartree",
             },
             {"$set": {"potential-energy.energy.source-unit": "eV"}},
-        )
+        ),
+        (
+            {
+                "relationships": "DS_a0bxs66goqvv_0",
+                "atomic-forces.forces.source-unit": "Hartree/Bohr",
+            },
+            {"$set": {"atomic-forces.forces.source-unit": "eV/angstrom"}},
+        ),
+        (
+            {
+                "relationships": "DS_mc8p14cpn2ea_0",
+                "cauchy-stress.stress.source-unit": "eV/atom",
+            },
+            {"$set": {"cauchy-stress.stress.source-unit": "eV/angstrom"}},
+        ),
     ]
     timestamp = time.time()
     now = datetime.fromtimestamp(timestamp)

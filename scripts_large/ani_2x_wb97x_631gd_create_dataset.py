@@ -499,41 +499,7 @@ def main(argv):
         verbose=True,
         data_license="https://creativecommons.org/licenses/by/4.0/",
     )
-    # for fp in fps:
-    #     insert_dos_to_dataset(args, ds_id=ds_id, fp=fp)
-
-    # tasks = [
-    #     asyncio.create_task(insert_dos_to_dataset(args, ds_id=ds_id, fp=fp))
-    #     for fp in fps
-    # ]
-    # await asyncio.gather(*tasks)
-
-    # else:
-    #     # Create the dataset with the first file
-    #     print("Creating dataset...", flush=True)
-    #     with open(fps[0], "r") as f:
-    #         do_ids0 = [id.strip() for id in f.readlines()]
-    #     client.insert_dataset(
-    #         do_hashes=do_ids0,
-    #         ds_id=ds_id,
-    #         name=DATASET_NAME,
-    #         authors=AUTHORS,
-    #         cs_ids=cs_ids,
-    #         links=[PUBLICATION, DATA_LINK],  # + OTHER_LINKS,
-    #         description=DATASET_DESC,
-    #         verbose=False,
-    #         data_license="https://creativecommons.org/licenses/by/4.0/",
-    #     )
-    #     client.close()
-    #     print("Dataset created with first batch.", flush=True)
-    # Create async tasks for update dataset
-    # for fp in fps[1:]:
-    #     insert_dos_to_dataset(args, ds_id=ds_id, fp=fp)
-    # tasks = [
-    #     asyncio.create_task(insert_dos_to_dataset(args, ds_id=ds_id, fp=fp))
-    #     for fp in fps[1:]
-    # ]
-    # await asyncio.gather(*tasks)
+    client.close()
 
 
 if __name__ == "__main__":
