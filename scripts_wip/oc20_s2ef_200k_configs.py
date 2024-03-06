@@ -138,7 +138,6 @@ CO_METADATA = {
         "adsorption_site",
         "class",
         "anomaly",
-        "reference_energy",
         "system_id",
         "frame_number",
     ]
@@ -180,7 +179,7 @@ def oc_reader(fp: Path):
         for i, config in tqdm(enumerate(iter_configs)):
             system_id, frame_number, reference_energy = prop_lines[i].split(",")
             reference_energy = float(reference_energy)
-            config.info["constraints"] = config.constraints[0].index
+            config.info["constraints-fix-atoms"] = config.constraints[0].index
             config_data = OC20_MAP[system_id]
             config.info.update(config_data)
             config.info["reference_energy"] = reference_energy
