@@ -1,29 +1,22 @@
+import json
 from argparse import ArgumentParser
-
-# from functools import partial
 from pathlib import Path
 
 from colabfit.tools.database import MongoDatabase
 
-# from multiprocessing import Pool
 
-
-def insert_cs(filepath, ds_id, ds_name):
+def insert_cs(co_id_fp, cs_id_fp, ds_id, ds_name, ip, port, db_name, nprocs):
     try:
-        natoms = int(filepath.stem.split("_")[-1])
-        with open(filepath, "r") as f:
+        natoms = int(co_id_fp.stem.split("_")[-1])
+        with open(co_id_fp, "r") as f:
             co_ids = [line.strip().replace("CO_", "") for line in f.readlines()]
             print(f"number of COs in natoms batch {natoms}: {len(co_ids)}")
         client = MongoDatabase(
-            database_name="ani2x_wb97x_631gd-test2",
-            # uri="mongodb://localhost:30007",
-            # database_name="cf-update-2023-11-30",
-            uri="mongodb://10.32.250.13:30007",
+            database_name=db_name, uri=f"mongodb://{ip}:{port}", nprocs=nprocs
         )
 
         name = f"{ds_name}_num_atoms_{natoms}"
         print(f"CS name: {name}")
-        # query = ({"names": {"$regex": f"natoms_{natoms:03d}__"}},)
         desc = f"Configurations with {natoms} atoms from {ds_name} dataset"
 
         cs_id = client.query_and_insert_configuration_set(
@@ -33,29 +26,50 @@ def insert_cs(filepath, ds_id, ds_name):
             description=desc,
             query=None,
         )
-        with open(f"{ds_id}_cs_ids.txt", "a") as f:
+        with open(cs_id_fp, "a") as f:
             f.write(f"{cs_id}\n")
-
+        client.close()
         return cs_id
     except Exception as e:
         with open(f"{ds_id}_error_log.txt", "a") as f:
-            f.write(f"{ds_id} {filepath} {e}\n")
+            f.write(f"{ds_id} {co_id_fp} {e}\n")
+    finally:
+        client.close()
 
 
-def main(co_dir, ds_id, ds_name):
-    fps = sorted(list(co_dir.rglob(f"{ds_id}*.txt")))
+def main(args):
+
+    nprocs = args.p
+    db_name = args.db
+    ip = args.i
+    port = args.r
+    ds_data = json.load(args.ds_data.open("r"))
+    cs_ids_fp = Path(ds_data["cs_ids_fp"])
+    co_ids_dir = Path(ds_data["co_ids_dir"])
+    ds_id = ds_data["dataset_id"]
+    ds_name = ds_data["dataset_name"]
+
+    fps = sorted(list(co_ids_dir.rglob(f"{ds_id}*.txt")), key=lambda x: x.stem)
     for fp in fps:
         print(fp)
-        insert_cs(fp, ds_id, ds_name)
-    # part_insert_cs = partial(insert_cs, ds_id)
-    # p = Pool(16)
-    # p.map(part_insert_cs, fps)
+        insert_cs(
+            co_id_fp=fp,
+            cs_id_fp=cs_ids_fp,
+            ds_id=ds_id,
+            ds_name=ds_name,
+            ip=ip,
+            port=port,
+            db_name=db_name,
+            nprocs=nprocs,
+        )
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--co_dir", type=Path, required=True)
-    parser.add_argument("--ds_id", type=str, required=True)
-    parser.add_argument("--ds_name", type=str, required=True)
+    parser.add_argument("-p", type=int, default=16)
+    parser.add_argument("-d", "--db", type=str, help="Name of database", required=True)
+    parser.add_argument("-i", type=str, help="IP/host for MongoDB", required=True)
+    parser.add_argument("-r", type=int, help="port for MongoDB", required=True)
+    parser.add_argument("-f", "--ds_data", type=Path, help="File of dataset data")
     args = parser.parse_args()
-    main(args.co_dir, args.ds_id, args.ds_name)
+    main(args)
