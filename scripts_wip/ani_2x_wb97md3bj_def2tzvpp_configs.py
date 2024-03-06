@@ -13,6 +13,16 @@ File notes
 ----------
 "energy" is the result of the wB97M_def2-TZVPP.scf-energies minus the
 VV10.energy-corrections, as given in the source file.
+coordinates | (Nc, Na, 3) | Å
+species     | (Nc, Na)    | Atomic Numbers
+energies    | (Nc)        | Ha
+D3.energy-corrections         | (Nc) | Ha
+wB97M def2-TZVPP.scf-energies | (Nc) | Ha
+dipoles     | (Nc, 3)                | eAngstrom
+
+'D3.energy-corrections', 'coordinates', 'dipoles', 'energies',
+'species', 'wB97M_def2-TZVPP.scf-energies'
+
 
 Keys for the h5 file are 3-digit strings from "002" to "063", with some missing numbers,
 according to the number of atoms in the configuration.
@@ -33,14 +43,14 @@ import sys
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 from colabfit.tools.property_definitions import (
-    atomic_forces_pd,
+    # atomic_forces_pd,
     # cauchy_stress_pd,
     potential_energy_pd,
 )
 
 
 DATASET_FP = Path("data/ani2x/")
-DATASET_NAME = "ANI-2x-wB97X-631Gd"
+DATASET_NAME = "ANI-2x-wB97MD3BJ-def2TZVPP"
 
 LICENSE = "https://creativecommons.org/licenses/by/4.0"
 
@@ -58,53 +68,97 @@ AUTHORS = [
     "Kipton Barros",
 ]
 DATASET_DESC = (
-    "ANI-2x-wB97X-631Gd is a portion of the ANI-2x dataset, which includes "
+    "ANI-2x-wB97MD3BJ-def2TZVPP is a portion of the ANI-2x dataset, which includes "
     "DFT-calculated energies for structures from 2 to 63 atoms in size containing "
-    "H, C, N, O, S, F, and Cl. This portion of ANI-2x was calculated in Gaussian 09 "
-    "at the wB97X level of theory using the 6-31G(d) basis set. Configuration sets "
-    "are divided by number of atoms per structure."
+    "H, C, N, O, S, F, and Cl. This portion of ANI-2x was calculated in ORCA "
+    "at the wB97M level of theory with D3 and BJ energy corrections, using the "
+    "def2-TZVPP basis set. Configuration sets are divided by number of atoms per "
+    "structure. Uncorrected SCF energy values and dipoles are recorded in the metadata."
 )
 ELEMENTS = None
-GLOB_STR = "ANI-2x-wB97X-631Gd.h5"
+GLOB_STR = "ANI-2x-wB97MD3BJ-def2TZVPP.h5"
 PI_METADATA = {
-    "software": {"value": "Gaussian 09"},
-    "method": {"value": "DFT-wb97x"},
-    "basis_set": {"value": "6-31G(d)"},
+    "software": {"value": "ORCA 4.2.1"},
+    "method": {"value": "DFT-wB97M-D3BJ"},
+    "basis_set": {"value": "def2-TZVPP"},
+    "input": {
+        "value": "Step 1: ! quick-dft slowconv loosescf\n"
+        "%scf maxiter 256 end\n"
+        "Step 2:\n"
+        "! wB97m-d3bj def2-tzvpp def2/j rijcosx engrad tightscf SCFConvForced soscf grid4 finalgrid6 gridx7\n"  # noqa: E501
+        "%elprop dipole true quadrupole true end\n"
+        "%output PrintLevel mini Print[P DFTD GRAD] 1 end\n"
+        "%scf maxiter 256 end\n"
+        "! MORead\n"
+        '%moinp "PATH TO .gbw FILE FROM STEP 1"\n'
+        "Step 3:\n"
+        "! wb97m-v def2-tzvpp def2/j rijcosx tightscf ScfConvForced grid4 finalgrid6 gridx7 vdwgrid4\n"  # noqa: E501
+        "! MORead\n"
+        '%moinp "PATH TO .gbw FILE FROM STEP 2"'
+    },
 }
+
 
 PROPERTY_MAP = {
     "potential-energy": [
         {
             "energy": {"field": "energy", "units": "hartree"},
-            # "reference-energy": {"field": "en_correction", "units": "hartree"},
+            "reference-energy": {"field": "en_correction", "units": "hartree"},
             "per-atom": {"value": False, "units": None},
             "_metadata": PI_METADATA,
         }
     ],
-    "atomic-forces": [
-        {
-            "forces": {"field": "forces", "units": "hartree/angstrom"},
-            "_metadata": PI_METADATA,
-        },
-    ],
+    # "atomic-forces": [
+    #     {
+    #         "forces": {"field": "forces", "units": "hartree/angstrom"},
+    #         "_metadata": PI_METADATA,
+    #     },
+    # ],
 }
 
 # Configuration sets appear at bottom of script
 
-# CO_METADATA = {
-#     "dipole": {"field": "dipole", "units": "electron angstrom"},
-#     "wB97M-def2-TZVPP-scf-energy": {"field": "scf_energy", "units": "hartree"},
-# }
+CO_METADATA = {
+    "dipole": {"field": "dipole", "units": "electron angstrom"},
+    "wB97M-def2-TZVPP-scf-energy": {"field": "scf_energy", "units": "hartree"},
+}
+
+MAX_AUTO_RECONNECT_ATTEMPTS = 100
+
+
+def auto_reconnect(mongo_func):
+    """Gracefully handle a reconnection event."""
+
+    @functools.wraps(mongo_func)
+    def wrapper(*args, **kwargs):
+        for attempt in range(MAX_AUTO_RECONNECT_ATTEMPTS):
+            try:
+                return mongo_func(*args, **kwargs)
+            except pymongo.errors.AutoReconnect as e:
+                wait_t = 0.5 * pow(2, attempt)  # exponential back off
+                if wait_t > 1800:
+                    wait_t = 1800  # cap at 1/2 hour
+                logging.warning(
+                    "PyMongo auto-reconnecting... %s. Waiting %.1f seconds.",
+                    str(e),
+                    wait_t,
+                )
+                time.sleep(wait_t)
+
+    return wrapper
 
 
 def ani_reader(num_atoms, fp):
     with h5py.File(fp) as h5:
-        # print(num_atoms)
+        print(num_atoms)
         properties = h5[str(num_atoms)]
         coordinates = properties["coordinates"]
+        reference_en = properties["D3.energy-corrections"]
+        scf_en = properties["wB97M_def2-TZVPP.scf-energies"]
         species = properties["species"]
         energies = properties["energies"]
-        forces = properties["forces"]
+        dipoles = properties["dipoles"]
+        # forces = properties["forces"]
         configs = []
         while True:
             for i, coord in enumerate(coordinates):
@@ -113,7 +167,10 @@ def ani_reader(num_atoms, fp):
                     numbers=species[i],
                 )
                 config.info["energy"] = energies[i]
-                config.info["forces"] = forces[i]
+                config.info["en_correction"] = reference_en[i]
+                config.info["scf_energy"] = scf_en[i]
+                config.info["dipole"] = dipoles[i]
+                # config.info["forces"] = forces[i]
                 config.info["name"] = f"{DATASET_NAME}__natoms_{num_atoms}__ix_{i}"
                 configs.append(config)
                 if len(configs) == 50000:
@@ -126,6 +183,7 @@ def ani_reader(num_atoms, fp):
                 break
 
 
+@auto_reconnect
 def read_wrapper(dbname, uri, nprocs, ds_id, n_atoms):
     wrap_time = time.time()
     client = MongoDatabase(dbname, uri=uri, nprocs=nprocs)
@@ -133,7 +191,7 @@ def read_wrapper(dbname, uri, nprocs, ds_id, n_atoms):
     fp = next(DATASET_FP.rglob(GLOB_STR))
     today = time.strftime("%Y-%m-%d")
     with h5py.File(fp) as h5:
-        print(h5.keys())
+        # print(h5.keys())
         for num_atoms in tqdm(n_atoms, desc=f"N atoms: {n_atoms[0]}-{n_atoms[-1]}"):
             if num_atoms in h5.keys():
                 partial_read = partial(ani_reader, num_atoms)
@@ -153,7 +211,7 @@ def read_wrapper(dbname, uri, nprocs, ds_id, n_atoms):
                     client.insert_data(
                         configurations=configurations,
                         ds_id=ds_id,
-                        # co_md_map=CO_METADATA,
+                        co_md_map=CO_METADATA,
                         property_map=PROPERTY_MAP,
                         generator=False,
                         verbose=False,
@@ -183,31 +241,6 @@ def read_wrapper(dbname, uri, nprocs, ds_id, n_atoms):
     print(f"Time to read: {time.time() - wrap_time}")
     client.close()
     return ids
-
-
-MAX_AUTO_RECONNECT_ATTEMPTS = 100
-
-
-def auto_reconnect(mongo_func):
-    """Gracefully handle a reconnection event."""
-
-    @functools.wraps(mongo_func)
-    def wrapper(*args, **kwargs):
-        for attempt in range(MAX_AUTO_RECONNECT_ATTEMPTS):
-            try:
-                return mongo_func(*args, **kwargs)
-            except pymongo.errors.AutoReconnect as e:
-                wait_t = 0.5 * pow(2, attempt)  # exponential back off
-                if wait_t > 1800:
-                    wait_t = 1800  # cap at 1/2 hour
-                logging.warning(
-                    "PyMongo auto-reconnecting... %s. Waiting %.1f seconds.",
-                    str(e),
-                    wait_t,
-                )
-                time.sleep(wait_t)
-
-    return wrapper
 
 
 @auto_reconnect
@@ -249,9 +282,9 @@ def main(argv):
     if ds_id is None:
         ds_id = generate_ds_id()
     n_atoms = [f"{x:03d}" for x in range(args.start, args.end + 1)]
-    print(n_atoms)
+    # print(n_atoms)
     client.insert_property_definition(potential_energy_pd)
-    client.insert_property_definition(atomic_forces_pd)
+    # client.insert_property_definition(atomic_forces_pd)
 
     client.close()
     ids = read_wrapper(
@@ -325,13 +358,13 @@ DB_KEYS = [
     "062",
     "063",
 ]
-CSS = [
-    [
-        f"{DATASET_NAME}_num_atoms_{natoms}",
-        {"names": {"$regex": f"natoms_{natoms}__"}},
-        f"Configurations with {natoms} atoms from {DATASET_NAME} dataset",
-    ]
-    for natoms in DB_KEYS
-]
+# CSS = [
+#     [
+#         f"{DATASET_NAME}_num_atoms_{natoms}",
+#         {"names": {"$regex": f"natoms_{natoms}__"}},
+#         f"Configurations with {natoms} atoms from {DATASET_NAME} dataset",
+#     ]
+#     for natoms in DB_KEYS
+# ]
 if __name__ == "__main__":
     main(sys.argv[1:])
