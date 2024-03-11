@@ -224,11 +224,13 @@ def read_wrapper(dbname, uri, nprocs, ds_id, n_atoms):
                 co_ids, do_ids = list(zip(*ids_batch))
                 file_ds_name = DATASET_NAME.lower().replace("-", "_")
                 co_id_file = Path(
+                    f"{ds_id}_{file_ds_name}_co_ids/"
                     f"{ds_id}_{file_ds_name}_co_ids_{today}/"
                     f"{ds_id}_config_ids_batch_natoms_{num_atoms}.txt"
                 )
                 co_id_file.parent.mkdir(parents=True, exist_ok=True)
                 do_id_file = Path(
+                    f"{ds_id}_{file_ds_name}_do_ids/"
                     f"{ds_id}_{file_ds_name}_do_ids_{today}/"
                     f"{ds_id}_do_ids_batch_natoms_{num_atoms}.txt"
                 )
