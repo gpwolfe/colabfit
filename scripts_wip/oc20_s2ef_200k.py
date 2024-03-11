@@ -28,7 +28,6 @@ config.info (energy, free_energy)
 """
 
 import functools
-import json
 import logging
 import pickle
 import sys
@@ -40,12 +39,12 @@ import pymongo
 from ase.io import iread
 from tqdm import tqdm
 
-from colabfit.tools.database import MongoDatabase, load_data
+from colabfit.tools.database import load_data, MongoDatabase
 from colabfit.tools.property_definitions import (
-    potential_energy_pd,
-    free_energy_pd,
     atomic_forces_pd,
-)  # atomic_forces_pd,; cauchy_stress_pd,
+    free_energy_pd,
+    potential_energy_pd,
+)
 
 DATASET_FP = Path("data/oc20_s2ef/s2ef_train_200K/s2ef_train_200K")
 DATASET_NAME = "OC20_S2EF_train_200K"
@@ -82,6 +81,8 @@ DATASET_DESC = (
     "Forces dataset. "
 )
 ELEMENTS = None
+
+
 PKL_FP = Path("data/oc20_s2ef/oc20_data_mapping.pkl")
 with open(PKL_FP, "rb") as f:
     OC20_MAP = pickle.load(f)
@@ -143,30 +144,6 @@ CO_METADATA = {
     ]
 }
 
-MAX_AUTO_RECONNECT_ATTEMPTS = 100
-
-
-def auto_reconnect(mongo_func):
-    """Gracefully handle a reconnection event."""
-
-    @functools.wraps(mongo_func)
-    def wrapper(*args, **kwargs):
-        for attempt in range(MAX_AUTO_RECONNECT_ATTEMPTS):
-            try:
-                return mongo_func(*args, **kwargs)
-            except pymongo.errors.AutoReconnect as e:
-                wait_t = 0.5 * pow(2, attempt)  # exponential back off
-                if wait_t > 1800:
-                    wait_t = 1800  # cap at 1/2 hour
-                logging.warning(
-                    "PyMongo auto-reconnecting... %s. Waiting %.1f seconds.",
-                    str(e),
-                    wait_t,
-                )
-                time.sleep(wait_t)
-
-    return wrapper
-
 
 def oc_reader(fp: Path):
     fp_num = f"{int(fp.stem):03d}"
@@ -198,62 +175,29 @@ def oc_reader(fp: Path):
             yield config
 
 
-@auto_reconnect
-def read_wrapper(dbname, uri, nprocs, ds_id):
-    wrap_time = time.time()
-    client = MongoDatabase(dbname, uri=uri, nprocs=nprocs)
-    ids = []
-    fps = DATASET_FP.rglob(GLOB_STR)
-    today = time.strftime("%Y-%m-%d")
-    for fp in fps:
-        fp_num = f"{int(fp.stem):03d}"
+MAX_AUTO_RECONNECT_ATTEMPTS = 100
 
-        insert_time = time.time()
 
-        configurations = load_data(
-            file_path=DATASET_FP,
-            file_format="folder",
-            name_field="name",
-            elements=ELEMENTS,
-            reader=oc_reader,
-            glob_string=fp.name,
-            verbose=True,
-            generator=True,
-        )
-        ids_batch = list(
-            client.insert_data(
-                configurations=configurations,
-                ds_id=ds_id,
-                co_md_map=CO_METADATA,
-                property_map=PROPERTY_MAP,
-                generator=True,
-                verbose=True,
-            )
-        )
-        ids.extend(ids_batch)
-        new_insert_time = time.time()
-        print(f"Time to insert: {new_insert_time - insert_time}")
+def auto_reconnect(mongo_func):
+    """Gracefully handle a reconnection event."""
 
-        co_ids, do_ids = list(zip(*ids_batch))
-        file_ds_name = DATASET_NAME.lower().replace("-", "_")
-        co_id_file = Path(
-            f"{ds_id}_{file_ds_name}_co_ids_{today}/"
-            f"{ds_id}_config_ids_batch_natoms_{fp_num}.txt"
-        )
-        co_id_file.parent.mkdir(parents=True, exist_ok=True)
-        do_id_file = Path(
-            f"{ds_id}_{file_ds_name}_do_ids_{today}/"
-            f"{ds_id}_do_ids_batch_natoms_{fp_num}.txt"
-        )
-        do_id_file.parent.mkdir(parents=True, exist_ok=True)
-        with open(co_id_file, "a") as f:
-            f.writelines([f"{id}\n" for id in co_ids])
-        with open(do_id_file, "a") as f:
-            f.writelines([f"{id}\n" for id in do_ids])
+    @functools.wraps(mongo_func)
+    def wrapper(*args, **kwargs):
+        for attempt in range(MAX_AUTO_RECONNECT_ATTEMPTS):
+            try:
+                return mongo_func(*args, **kwargs)
+            except pymongo.errors.AutoReconnect as e:
+                wait_t = 0.5 * pow(2, attempt)  # exponential back off
+                if wait_t > 1800:
+                    wait_t = 1800  # cap at 1/2 hour
+                logging.warning(
+                    "PyMongo auto-reconnecting... %s. Waiting %.1f seconds.",
+                    str(e),
+                    wait_t,
+                )
+                time.sleep(wait_t)
 
-    print(f"Time to read: {time.time() - wrap_time}")
-    client.close()
-    return ids
+    return wrapper
 
 
 @auto_reconnect
@@ -277,37 +221,63 @@ def main(argv):
     parser.add_argument(
         "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
     )
-    parser.add_argument(
-        "-s", "--ds_id", type=str, help="Dataset ID to use for dataset", default=None
-    )
-    parser.add_argument(
-        "-f",
-        "--ds_data",
-        type=Path,
-        help="File of dataset data",
-    )
-
     args = parser.parse_args(argv)
     client = MongoDatabase(
         args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
     )
-    with open(args.ds_data, "r") as f:
-        ds_data = json.load(f)
-    ds_id = ds_data["dataset_id"]
 
+    client.insert_property_definition(atomic_forces_pd)
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(free_energy_pd)
-    client.insert_property_definition(atomic_forces_pd)
-    client.close()
-    ids = []
 
-    ids = read_wrapper(
-        dbname=client.database_name,
-        uri=client.uri,
-        nprocs=client.nprocs,
-        ds_id=ds_id,
+    ds_id = "DS_zdy2xz6y88nl_0"
+
+    configurations = load_data(
+        file_path=DATASET_FP,
+        file_format="folder",
+        name_field="name",
+        elements=ELEMENTS,
+        reader=oc_reader,
+        glob_string=GLOB_STR,
+        generator=False,
     )
-    print("Num. Ids: ", len(ids))
+
+    ids = list(
+        client.insert_data(
+            configurations=configurations,
+            ds_id=ds_id,
+            co_md_map=CO_METADATA,
+            property_map=PROPERTY_MAP,
+            generator=False,
+            verbose=True,
+        )
+    )
+
+    all_co_ids, all_do_ids = list(zip(*ids))
+
+    # cs_ids = []
+    # for i, (name, query, desc) in enumerate(CSS):
+    #     cs_id = client.query_and_insert_configuration_set(
+    #         co_hashes=all_co_ids,
+    #         ds_id=ds_id,
+    #         name=name,
+    #         description=desc,
+    #         query=query,
+    #     )
+
+    #     cs_ids.append(cs_id)
+
+    client.insert_dataset(
+        do_hashes=all_do_ids,
+        ds_id=ds_id,
+        name=DATASET_NAME,
+        authors=AUTHORS,
+        links=[PUBLICATION, DATA_LINK],  # + OTHER_LINKS,
+        description=DATASET_DESC,
+        verbose=True,
+        # cs_ids=cs_ids,  # remove line if no configuration sets to insert
+        data_license=LICENSE,
+    )
 
 
 if __name__ == "__main__":
