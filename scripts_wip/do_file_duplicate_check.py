@@ -39,6 +39,7 @@ def remove_duplicate_lines_across_files(fdir):
             with new_filepath.open("w") as new_file:
                 new_file.writelines(new_lines)
         if len(duplicates) > 0:
+            print(f"Found {len(duplicates)} duplicates")
             dup_dir = fdir.absolute().parent / (filepath.parts[-2] + "_duplicates")
 
             dup_dir.mkdir(exist_ok=True)
@@ -48,16 +49,8 @@ def remove_duplicate_lines_across_files(fdir):
                 duplicates_file.writelines(duplicates)
 
 
-# dir_path = Path("DS_wxf8f3t3abul_0_do_ids/DS_wxf8f3t3abul_0_do_ids_original_files")
-# dir_path = Path("DS_wxf8f3t3abul_0_co_ids/DS_wxf8f3t3abul_0_co_ids_original_files")
-# remove_duplicate_lines_across_files(dir_path)
 if __name__ == "__main__":
-    # dir_path = Path(
-    #     "DS_wxf8f3t3abul_0_do_ids/DS_wxf8f3t3abul_0_do_ids_original_files"
-    # )
-    # dir_path = Path(
-    #     "DS_wxf8f3t3abul_0_co_ids/DS_wxf8f3t3abul_0_co_ids_original_files"
-    # )
+
     parser = ArgumentParser()
     parser.add_argument("dir_path", type=Path)
     args = parser.parse_args()

@@ -48,8 +48,8 @@ def main(args):
     co_ids_dir = Path(ds_data["co_ids_dir"])
     ds_id = ds_data["dataset_id"]
     ds_name = ds_data["dataset_name"]
-
     fps = sorted(list(co_ids_dir.rglob(f"{ds_id}*.txt")), key=lambda x: x.stem)
+
     for fp in fps:
         print(fp)
         insert_cs(
