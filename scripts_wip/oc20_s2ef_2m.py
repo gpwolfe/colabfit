@@ -34,6 +34,7 @@ import pickle
 import sys
 import time
 from argparse import ArgumentParser
+from functools import partial
 from pathlib import Path
 
 import pymongo
@@ -42,46 +43,15 @@ from tqdm import tqdm
 
 from colabfit.tools.database import MongoDatabase, load_data
 from colabfit.tools.property_definitions import (
-    potential_energy_pd,
-    free_energy_pd,
     atomic_forces_pd,
-)  # atomic_forces_pd,; cauchy_stress_pd,
-
-DATASET_FP = Path("data/oc20_s2ef/s2ef_train_200K/s2ef_train_200K")
-DATASET_NAME = "OC20_S2EF_train_200K"
-
-LICENSE = "https://creativecommons.org/licenses/by/4.0/legalcode"
-
-PUBLICATION = "https://doi.org/10.1021/acscatal.0c04525"
-DATA_LINK = (
-    "https://github.com/Open-Catalyst-Project/ocp/blob"
-    "/main/DATASET.md#open-catalyst-2020-oc20"
+    free_energy_pd,
+    potential_energy_pd,
 )
 
-AUTHORS = [
-    "Lowik Chanussot",
-    "Abhishek Das",
-    "Siddharth Goyal",
-    "Thibaut Lavril",
-    "Muhammed Shuaibi",
-    "Morgane Riviere",
-    "Kevin Tran",
-    "Javier Heras-Domingo",
-    "Caleb Ho",
-    "Weihua Hu",
-    "Aini Palizhati",
-    "Anuroop Sriram",
-    "Brandon Wood",
-    "Junwoong Yoon",
-    "Devi Parikh",
-    "C. Lawrence Zitnick",
-    "Zachary Ulissi",
-]
-DATASET_DESC = (
-    "OC20_S2EF_train_200K is the 200K subset of the OC20 Structure to Energy and "
-    "Forces dataset. "
-)
+
+DATASET_FP = Path("data/oc20_s2ef/s2ef_train_2M")
 ELEMENTS = None
+
 PKL_FP = Path("data/oc20_s2ef/oc20_data_mapping.pkl")
 with open(PKL_FP, "rb") as f:
     OC20_MAP = pickle.load(f)
@@ -168,7 +138,7 @@ def auto_reconnect(mongo_func):
     return wrapper
 
 
-def oc_reader(fp: Path):
+def oc_reader(ds_name: str, fp: Path):
     fp_num = f"{int(fp.stem):03d}"
     prop_fp = fp.with_suffix(".txt")
     configs = []
@@ -186,7 +156,7 @@ def oc_reader(fp: Path):
             config.info["system_id"] = system_id
             config.info["frame_number"] = frame_number
             # config.info["forces"] = forces[i]
-            config.info["name"] = f"{DATASET_NAME}__file_{fp_num}"
+            config.info["name"] = f"{ds_name}__file_{fp_num}"
             configs.append(config)
             if len(configs) == 50000:
                 for config in configs:
@@ -199,23 +169,23 @@ def oc_reader(fp: Path):
 
 
 @auto_reconnect
-def read_wrapper(dbname, uri, nprocs, ds_id):
+def read_wrapper(dbname, uri, nprocs, ds_id, ds_name):
     wrap_time = time.time()
     client = MongoDatabase(dbname, uri=uri, nprocs=nprocs)
     ids = []
-    fps = DATASET_FP.rglob(GLOB_STR)
+    fps = sorted(list(DATASET_FP.rglob(GLOB_STR)))
     today = time.strftime("%Y-%m-%d")
     for fp in fps:
         fp_num = f"{int(fp.stem):03d}"
 
         insert_time = time.time()
-
+        reader_part = partial(oc_reader, ds_name=ds_name)
         configurations = load_data(
             file_path=DATASET_FP,
             file_format="folder",
             name_field="name",
             elements=ELEMENTS,
-            reader=oc_reader,
+            reader=reader_part,
             glob_string=fp.name,
             verbose=True,
             generator=True,
@@ -235,7 +205,7 @@ def read_wrapper(dbname, uri, nprocs, ds_id):
         print(f"Time to insert: {new_insert_time - insert_time}")
 
         co_ids, do_ids = list(zip(*ids_batch))
-        file_ds_name = DATASET_NAME.lower().replace("-", "_")
+        file_ds_name = ds_name.lower().replace("-", "_")
         co_id_file = Path(
             f"{ds_id}_{file_ds_name}_co_ids_{today}/"
             f"{ds_id}_config_ids_batch_natoms_{fp_num}.txt"
@@ -277,9 +247,7 @@ def main(argv):
     parser.add_argument(
         "-r", "--port", type=int, help="Port to use for MongoDB client", default=27017
     )
-    parser.add_argument(
-        "-s", "--ds_id", type=str, help="Dataset ID to use for dataset", default=None
-    )
+
     parser.add_argument(
         "-f",
         "--ds_data",
@@ -295,6 +263,8 @@ def main(argv):
         ds_data = json.load(f)
     ds_id = ds_data["dataset_id"]
 
+    ds_name = ds_data["dataset_name"]
+
     client.insert_property_definition(potential_energy_pd)
     client.insert_property_definition(free_energy_pd)
     client.insert_property_definition(atomic_forces_pd)
@@ -306,6 +276,7 @@ def main(argv):
         uri=client.uri,
         nprocs=client.nprocs,
         ds_id=ds_id,
+        ds_name=ds_name,
     )
     print("Num. Ids: ", len(ids))
 
