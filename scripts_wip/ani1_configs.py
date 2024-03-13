@@ -258,12 +258,6 @@ def main(argv):
         help="JSON file containing dataset information",
         default=None,
     )
-    parser.add_argument(
-        "-a", "--start", type=int, help="Start index for dataset", default=0
-    )
-    parser.add_argument(
-        "-o", "--end", type=int, help="End index for dataset", default=64
-    )
 
     args = parser.parse_args(argv)
     client = MongoDatabase(
