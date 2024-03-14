@@ -25,6 +25,6 @@
     ],
     "description": "OC20_S2EF_train_2M is the 2 million structure training subset of the OC20 Structure to Energy and Forces dataset. Features include potential energy, free energy and atomic forces. Data from the OC20 mappings file, including adsorbate id, materials project bulk id, miller index, shift and others.",
     "do_ids_dir": "DS_7qi6dh0ig7sd_0_oc20_s2ef_train_200m_do_ids",
-    "cs_ids_fp": "DS_7qi6dh0ig7sd_0_oc20_s2ef_train_2m_cs_ids.txt",
+    "cs_ids_fp": null,
     "co_ids_dir": "DS_7qi6dh0ig7sd_0_oc20_s2ef_train_2m_co_ids"
 }
