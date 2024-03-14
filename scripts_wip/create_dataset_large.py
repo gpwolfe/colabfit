@@ -114,8 +114,9 @@ def main(argv):
     ds_desc = ds_data["description"]
     ds_license = ds_data["license"]
     cs_ids_fp = ds_data["cs_ids_fp"]
-    with open(cs_ids_fp, "r") as f:
-        cs_ids = [id.strip() for id in f.readlines()]
+    if cs_ids_fp is not None:
+        with open(cs_ids_fp, "r") as f:
+            cs_ids = [id.strip() for id in f.readlines()]
     print(f"DS-ID: {ds_id}", flush=True)
     nprocs = args.nprocs
     client = MongoDatabase(
@@ -126,18 +127,29 @@ def main(argv):
     do_hashes = list(
         itertools.chain.from_iterable(map(do_file_handler, [fp for fp in fps]))
     )
-
-    client.insert_dataset(
-        do_hashes=do_hashes,
-        ds_id=ds_id,
-        name=ds_name,
-        authors=authors,
-        cs_ids=cs_ids,
-        links=[publication, data_link],
-        description=ds_desc,
-        verbose=True,
-        data_license=ds_license,
-    )
+    if cs_ids_fp is not None:
+        client.insert_dataset(
+            do_hashes=do_hashes,
+            ds_id=ds_id,
+            name=ds_name,
+            authors=authors,
+            cs_ids=cs_ids,
+            links=[publication, data_link],
+            description=ds_desc,
+            verbose=True,
+            data_license=ds_license,
+        )
+    else:
+        client.insert_dataset(
+            do_hashes=do_hashes,
+            ds_id=ds_id,
+            name=ds_name,
+            authors=authors,
+            links=[publication, data_link],
+            description=ds_desc,
+            verbose=True,
+            data_license=ds_license,
+        )
     client.close()
 
 
