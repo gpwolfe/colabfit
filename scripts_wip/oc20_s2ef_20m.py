@@ -49,7 +49,7 @@ from colabfit.tools.property_definitions import (
 )
 
 
-DATASET_FP = Path("/vast/gw2338/s2ef_train_all/s2ef_train_all/")
+DATASET_FP = Path("data/oc20_s2ef/s2ef_train_20M/s2ef_train_20M/")
 ELEMENTS = None
 
 PKL_FP = Path("data/oc20_s2ef/oc20_data_mapping.pkl")
@@ -138,7 +138,7 @@ def auto_reconnect(mongo_func):
     return wrapper
 
 
-def oc_reader(ds_name: str, fp: Path):
+def oc_reader(fp: Path, ds_name: str):
     fp_num = f"{int(fp.stem):03d}"
     prop_fp = fp.with_suffix(".txt")
     configs = []
