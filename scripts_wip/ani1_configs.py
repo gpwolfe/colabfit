@@ -47,7 +47,7 @@ from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import MongoDatabase, load_data
 from colabfit.tools.property_definitions import potential_energy_pd
 
-DATASET_FP = Path("data/ani1/")
+DATASET_FP = Path("data/ANI1_release/")
 
 ELEMENTS = None
 GLOB_STR = "*.h5"
@@ -147,7 +147,7 @@ def read_wrapper(dbname, uri, nprocs, ds_id, ds_name, cs_ids_fp):
     fps = sorted(list(DATASET_FP.rglob(GLOB_STR)))
     today = time.strftime("%Y-%m-%d")
     partial_read = partial(ani_reader, ds_name=ds_name)
-    for fp in tqdm(fps):
+    for fp in tqdm(fps[-2:]):
         num_heavy = int(fp.stem[-1])
 
         insert_time = time.time()
@@ -211,7 +211,12 @@ def read_wrapper(dbname, uri, nprocs, ds_id, ds_name, cs_ids_fp):
         )
         cs_ids = []
         for cs_name, cs_query, cs_desc in css:
-            try:
+            if cs_name in [
+                "ANI-1__num_heavy_1__high_energy",  # 0 configs in sets
+                "ANI-1__num_heavy_3__high_energy",
+            ]:
+                pass
+            else:
                 cs_ids.append(
                     client.query_and_insert_configuration_set(
                         co_hashes=co_ids,
@@ -221,9 +226,6 @@ def read_wrapper(dbname, uri, nprocs, ds_id, ds_name, cs_ids_fp):
                         description=cs_desc,
                     )
                 )
-
-            except pymongo.errors.InvalidOperation:
-                pass
         with open(cs_ids_fp, "a") as f:
             f.writelines([f"{id}\n" for id in cs_ids])
     client.close()
