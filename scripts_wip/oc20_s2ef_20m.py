@@ -139,7 +139,7 @@ def auto_reconnect(mongo_func):
 
 
 def oc_reader(fp: Path, ds_name: str):
-    fp_num = f"{int(fp.stem):03d}"
+    fp_num = f"{int(fp.stem):04d}"
     prop_fp = fp.with_suffix(".txt")
     configs = []
     with prop_fp.open("r") as prop_f:
