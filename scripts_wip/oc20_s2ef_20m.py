@@ -175,7 +175,7 @@ def read_wrapper(dbname, uri, nprocs, ds_id, ds_name):
     ids = []
     fps = sorted(list(DATASET_FP.rglob(GLOB_STR)))
     today = time.strftime("%Y-%m-%d")
-    for fp in fps:
+    for fp in fps[213:]:
         fp_num = f"{int(fp.stem):03d}"
 
         insert_time = time.time()
