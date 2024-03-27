@@ -41,7 +41,7 @@ Influence of the triangular Mn-O breathing mode on magnetic ordering in multifer
 Surface segregation in high-entropy alloys from alchemical machine learning: dataset HEA25S
     ingested
 Analysis of minerals as electrode materials for Ca-based rechargeable batteries
-    
+    ingested
 Computational synthesis of substrates by crystal cleavage
     no structure output files
 Unidirectional Kondo scattering in layered NbS2
@@ -49,7 +49,7 @@ Unidirectional Kondo scattering in layered NbS2
 Non-Abelian reciprocal braiding of Weyl points and its manifestation in ZrTe
     no output files
 Modeling high-entropy transition-metal alloys with alchemical compression: dataset HEA25
-    ingesting
+    ingested
 Efficient Training of ANN Potentials by Including Atomic Forces via Taylor Expansion and Application to Water and a Transition-Metal Oxide
     already ingested as limonitio
 How to verify the precision of density-functional-theory implementations via reproducible and universal workflows
@@ -59,11 +59,11 @@ Observation of Weyl Nodes in Robust Type-II Weyl Semimetal WP2
 A low-temperature prismatic slip instability in Mg understood using machine learning potentials
     no output files
 Mechanism and prediction of hydrogen embrittlement in fcc stainless steels and high entropy alloys
-
-
+    No output files
 Ab initio modeling framework for Majorana transport in 2D materials: towards topological quantum computing
     no output files
 First principles study of the effect of hydrogen in austenitic stainless steels and high entropy alloys
     No output files
 Flat bands with fragile topology through superlattice engineering on single-layer graphene
+    ingested: only 29 data objects
 

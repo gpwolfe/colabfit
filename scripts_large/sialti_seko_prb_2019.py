@@ -15,6 +15,7 @@ File notes
 
 
 """
+
 from argparse import ArgumentParser
 from pathlib import Path
 import sys
@@ -39,7 +40,7 @@ METHODS = "DFT-PBE"
 
 PUBLICATION = "https://doi.org/10.1103/PhysRevB.99.214108"
 # data downloaded from custom link sent by Dr. Seko
-DATA_LINK = "None"
+DATA_LINK = None
 OTHER_LINKS = [
     "https://doi.org/10.1063/5.0129045",
     "https://sekocha.github.io/",

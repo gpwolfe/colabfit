@@ -32,22 +32,51 @@ from colabfit.tools.property_definitions import (
 )
 
 
-DATASET_FP = Path("")
-DATASET_NAME = ""
+DATASET_FP = Path(
+    "data/flat_bands_with_fragile_topology_through_"
+    "superlattice_engineering_on_single-layer_graphene"
+)
+DATASET_NAME = "adatoms_on_single-layer_graphene_PRR2021"
 LICENSE = "https://creativecommons.org/licenses/by/4.0/"
 
-PUBLICATION = ""
-DATA_LINK = ""
+PUBLICATION = "http://doi.org/10.1103/PhysRevResearch.3.L032003"
+DATA_LINK = "https://doi.org/10.24435/materialscloud:bj-bh"
 # OTHER_LINKS = []
 
-AUTHORS = [""]
-DATASET_DESC = ""
+AUTHORS = [
+    "Anastasiia Skurativska",
+    "Stepan S. Tsirkin",
+    "Fabian D Natterer",
+    "Titus Neupert",
+    "Mark H Fischer",
+]
+DATASET_DESC = (
+    "This dataset consists of graphene "
+    "superlattices with tungsten adatoms with properties calculated at the "
+    "DFT level of theory. The authors modeled the "
+    "placement of tungsten adatoms on a graphene monolayer. The resulting "
+    "superlattice structures were then used to calculate electronic band structure "
+    "and phonon dispersion relations. "
+    "The dataset was used to investigate the effect of adatom "
+    "placement on electronic band structure and phonon dispersion relations "
+    "of graphene superlattices. "
+    "The creation of the dataset involved the following steps: "
+    "1. Selection of the graphene monolayer as the starting point for the "
+    "superlattice construction. "
+    "2. Placement of tungsten adatoms in the center of the unit cell "
+    "3. Calculation of the electronic structure and other properties of the "
+    "resulting superlattice using DFT. "
+    "4. Generation of a set of reduced Brillouin zones representing the symmetry "
+    "of the superlattice. "
+    "5. Calculation of the electronic band structure and phonon dispersion "
+    "relations for each superlattice structure in the dataset. "
+)
 ELEMENTS = None
-GLOB_STR = "OUTCAR"
+GLOB_STR = "OUTCAR*"
 
 PI_METADATA = {
-    "software": {"value": ""},
-    "method": {"value": ""},
+    "software": {"value": "VASP"},
+    "method": {"value": "DFT-PBE"},
     "input": {"field": "input"},
 }
 
@@ -65,13 +94,13 @@ PROPERTY_MAP = {
             "_metadata": PI_METADATA,
         },
     ],
-    # "cauchy-stress": [
-    #     {
-    #         "stress": {"field": "stress", "units": "kilobar"},
-    #         "volume-normalized": {"value": False, "units": None},
-    #         "_metadata": PI_METADATA,
-    #     }
-    # ],
+    "cauchy-stress": [
+        {
+            "stress": {"field": "stress", "units": "kilobar"},
+            "volume-normalized": {"value": False, "units": None},
+            "_metadata": PI_METADATA,
+        }
+    ],
 }
 
 # CO_METADATA = {
@@ -135,8 +164,11 @@ def contcar_parser(fp):
 
 def namer(fp):
     ds_fp_str = "__".join(DATASET_FP.absolute().parts).replace("/", "")
-    name = "__".join(fp.absolute().parts[:-1]).replace("/", "")
-    name = name.replace(ds_fp_str + "__", "")
+    name = (
+        "__".join(fp.absolute().parts[:-1])
+        .replace(ds_fp_str + "__", "")
+        .replace("/", "")
+    )
     return name
 
 
@@ -275,7 +307,7 @@ def file_finder(fp, file_glob, count=0):
 
 def reader(filepath: Path):
     name = namer(filepath)
-    poscar = next(filepath.parent.glob(filepath.name.replace("OUTCAR", "POSCAR")))
+    poscar = filepath.with_name("CONTCAR")
     symbols = contcar_parser(poscar)
     kpoints_file = file_finder(filepath.parent, "KPOINTS")
     kpoints = get_kpoints(kpoints_file)
@@ -371,17 +403,17 @@ def main(argv):
 
     all_co_ids, all_do_ids = list(zip(*ids))
 
-    cs_ids = []
-    for i, (name, query, desc) in enumerate(CSS):
-        cs_id = client.query_and_insert_configuration_set(
-            co_hashes=all_co_ids,
-            ds_id=ds_id,
-            name=name,
-            description=desc,
-            query=query,
-        )
+    # cs_ids = []
+    # for i, (name, query, desc) in enumerate(CSS):
+    #     cs_id = client.query_and_insert_configuration_set(
+    #         co_hashes=all_co_ids,
+    #         ds_id=ds_id,
+    #         name=name,
+    #         description=desc,
+    #         query=query,
+    #     )
 
-        cs_ids.append(cs_id)
+    #     cs_ids.append(cs_id)
 
     client.insert_dataset(
         do_hashes=all_do_ids,
@@ -391,7 +423,7 @@ def main(argv):
         links=[PUBLICATION, DATA_LINK],  # + OTHER_LINKS,
         description=DATASET_DESC,
         verbose=True,
-        cs_ids=cs_ids,  # remove line if no configuration sets to insert
+        # cs_ids=cs_ids,  # remove line if no configuration sets to insert
         data_license=LICENSE,
     )
 
