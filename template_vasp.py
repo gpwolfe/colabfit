@@ -135,11 +135,8 @@ def contcar_parser(fp):
 
 def namer(fp):
     ds_fp_str = "__".join(DATASET_FP.absolute().parts).replace("/", "")
-    name = (
-        "__".join(fp.absolute().parts[:-1])
-        .replace(ds_fp_str + "__", "")
-        .replace("/", "")
-    )
+    name = "__".join(fp.absolute().parts[:-1]).replace("/", "")
+    name = name.replace(ds_fp_str + "__", "")
     return name
 
 
@@ -368,7 +365,7 @@ def main(argv):
             # co_md_map=CO_METADATA,
             property_map=PROPERTY_MAP,
             generator=False,
-            verbose=False,
+            verbose=True,
         )
     )
 
@@ -393,7 +390,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK],  # + OTHER_LINKS,
         description=DATASET_DESC,
-        verbose=False,
+        verbose=True,
         cs_ids=cs_ids,  # remove line if no configuration sets to insert
         data_license=LICENSE,
     )
