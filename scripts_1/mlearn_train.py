@@ -266,7 +266,7 @@ def main(argv):
             ds_id=ds_id,
             name="mlearn_" + elem + "_train",
             authors=AUTHORS,
-            links="https://doi.org/10.1021/acs.jpca.9b08723",
+            links=[PUBLICATION, DATA_LINK],
             description=(
                 "A comprehensive DFT data set was generated for six "
                 "elements - Li, Mo, Ni, Cu, Si, and Ge. These elements "
