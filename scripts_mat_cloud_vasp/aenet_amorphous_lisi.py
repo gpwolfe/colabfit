@@ -209,8 +209,9 @@ def main(argv):
         ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
-        links=[PUBLICATION, DATA_LINK],  # + OTHER_LINKS,
         description=DATASET_DESC,
+        publication_link=PUBLICATION,
+        data_link=DATA_LINK,
         verbose=True,
         # cs_ids=cs_ids,  # remove line if no configuration sets to insert
         data_license=LICENSE,

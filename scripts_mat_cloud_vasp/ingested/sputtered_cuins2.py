@@ -105,13 +105,62 @@ PROPERTY_MAP = {
 #     "zpve": {"field": "zpve", "units": "Ha"},
 # }
 
-# CSS = [
-#     [
-#         f"{DATASET_NAME}_aluminum",
-#         {"names": {"$regex": "aluminum"}},
-#         f"Configurations of aluminum from {DATASET_NAME} dataset",
-#     ]
-# ]
+CSS = [
+    [
+        f"{DATASET_NAME}_wurzite-derived",
+        {"names": {"$regex": "WZ_derived"}},
+        f"Configurations of CuInS2 from {DATASET_NAME} dataset in "
+        "disordered wurzite-like phase",
+    ],
+    [
+        f"{DATASET_NAME}_zinc-blende-derived_1",
+        {"names": {"$regex": "ZB_derived_1"}},
+        f"Configurations of CuInS2 from {DATASET_NAME} dataset in "
+        "disordered zinc-blende-like phase from first set of calculations",
+    ],
+    [
+        f"{DATASET_NAME}_zinc-blende-derived_2",
+        {"names": {"$regex": "ZB_derived_2"}},
+        f"Configurations of CuInS2 from {DATASET_NAME} dataset in "
+        "disordered zinc-blende-like phase from second set of calculations",
+    ],
+    [
+        f"{DATASET_NAME}_CIS_polytypes_relax",
+        {"names": {"$regex": "CIS_polytypes__Relax"}},
+        f"Configurations of CuInS2 from {DATASET_NAME} dataset from tight-converged "
+        "ionic relaxations (CIS polytypes)",
+    ],
+    [
+        f"{DATASET_NAME}_CIS_polytypes_raman",
+        {"names": {"$regex": "CIS_polytypes__Raman"}},
+        f"Configurations of CuInS2 from {DATASET_NAME} dataset from calculations of "
+        "macroscopic dielectric tensors for different modes (CIS polytypes)",
+    ],
+    [
+        f"{DATASET_NAME}_CIS_polytypes_phonons",
+        {"names": {"$regex": "CIS_polytypes__Phonons"}},
+        f"Configurations of CuInS2 from {DATASET_NAME} dataset from calculations "
+        "of phonon frequencies at Γ-point (CIS polytypes)",
+    ],
+    [
+        f"{DATASET_NAME}_secondary_phases_relax",
+        {"names": {"$regex": "secondary_phases__Relax"}},
+        f"Configurations of CuInS2 from {DATASET_NAME} dataset from tight-converged "
+        "ionic relaxations (secondary phases)",
+    ],
+    [
+        f"{DATASET_NAME}_secondary_phases_raman",
+        {"names": {"$regex": "secondary_phases__Raman"}},
+        f"Configurations of CuInS2 from {DATASET_NAME} dataset from calculations of "
+        "macroscopic dielectric tensors for different modes (secondary phases)",
+    ],
+    [
+        f"{DATASET_NAME}_secondary_phases_phonons",
+        {"names": {"$regex": "secondary_phases__Phonons"}},
+        f"Configurations of CuInS2 from {DATASET_NAME} dataset from calculations "
+        "of phonon frequencies at Γ-point (secondary phases)",
+    ],
+]
 
 
 coord_re = re.compile(
@@ -400,27 +449,29 @@ def main(argv):
 
     all_co_ids, all_do_ids = list(zip(*ids))
 
-    # cs_ids = []
-    # for i, (name, query, desc) in enumerate(CSS):
-    #     cs_id = client.query_and_insert_configuration_set(
-    #         co_hashes=all_co_ids,
-    #         ds_id=ds_id,
-    #         name=name,
-    #         description=desc,
-    #         query=query,
-    #     )
+    cs_ids = []
+    for i, (name, query, desc) in enumerate(CSS):
+        cs_id = client.query_and_insert_configuration_set(
+            co_hashes=all_co_ids,
+            ds_id=ds_id,
+            name=name,
+            description=desc,
+            query=query,
+        )
 
-    #     cs_ids.append(cs_id)
+        cs_ids.append(cs_id)
 
     client.insert_dataset(
         do_hashes=all_do_ids,
         ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
-        links=[PUBLICATION, DATA_LINK],  # + OTHER_LINKS,
+        publication_link=PUBLICATION,
+        data_link=DATA_LINK,
+        other_links=None,
         description=DATASET_DESC,
         verbose=True,
-        # cs_ids=cs_ids,  # remove line if no configuration sets to insert
+        cs_ids=cs_ids,  # remove line if no configuration sets to insert
         data_license=LICENSE,
     )
 
