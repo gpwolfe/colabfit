@@ -34,7 +34,8 @@ from colabfit.tools.property_definitions import (
 
 DATASET_FP = Path("")
 DATASET_NAME = ""
-LICENSE = "https://creativecommons.org/licenses/by/4.0/"
+LICENSE = "CC-BY-4.0"
+PUB_YEAR = ""
 
 PUBLICATION = ""
 DATA_LINK = ""
@@ -266,7 +267,8 @@ def parse_incar(fp):
 def file_finder(fp, file_glob, count=0):
     if count > 5:
         return None
-    elif file_glob in [f.name for f in fp.glob("*")]:
+    elif next(fp.glob(file_glob), None) is not None:
+        # file_glob in [f.name for f in fp.glob("*")]:
         return next(fp.glob(file_glob))
     else:
         count += 1
@@ -388,8 +390,11 @@ def main(argv):
         ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
-        links=[PUBLICATION, DATA_LINK],  # + OTHER_LINKS,
+        publication_link=PUBLICATION,
+        data_link=DATA_LINK,
+        other_links=None,
         description=DATASET_DESC,
+        publication_year=PUB_YEAR,
         verbose=True,
         cs_ids=cs_ids,  # remove line if no configuration sets to insert
         data_license=LICENSE,
