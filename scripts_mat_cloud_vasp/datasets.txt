@@ -66,4 +66,18 @@ First principles study of the effect of hydrogen in austenitic stainless steels 
     No output files
 Flat bands with fragile topology through superlattice engineering on single-layer graphene
     ingested: only 29 data objects
+Experimental and theoretical study of stable and metastable phases in sputtered CuInS2
+    ingested
+Onsite and intersite electronic correlations in the Hubbard model for halide perovskites
+    only a half-dozen structures as "examples"
+Towards constant potential modeling of CO-CO coupling at liquid water-Cu(100) interfaces
+    ingesting
+CA-9, a dataset of carbon allotropes for training and testing of neural network potentials
+    already ingested as ca-9
+Linear and quadratic magnetoresistance in the semimetal SiP2
+    no output files
+Enlisting potential cathode materials for rechargeable Ca batteries
+    ingested
+On-the-fly assessment of diffusion barriers of disordered transition metal oxyfluorides using local descriptors
+    ingested
 
