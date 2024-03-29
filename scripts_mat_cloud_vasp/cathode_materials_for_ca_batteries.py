@@ -12,50 +12,64 @@ File notes
 
 """
 
+from argparse import ArgumentParser
 import functools
 import logging
 import re
-import sys
 import time
-from argparse import ArgumentParser
-from more_itertools import ichunked
 from pathlib import Path
+import sys
 
-import pymongo
 from ase.atoms import Atoms
+import pymongo
 
 # from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, generate_ds_id, load_data
+from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     cauchy_stress_pd,
     potential_energy_pd,
 )
 
+
 DATASET_FP = Path(
-    "data/towards_constant_potential_modeling_of_co-co_"
-    "coupling_at_liquid_water-cu(100)_interfaces"
+    "data/enlisting_potential_cathode_materials_for_rechargeable_ca_batteries"
 )
-DATASET_NAME = "Co-Co_coupling_at_liquid_water-Cu(100)_interfaces_JC2021"
-LICENSE = "CC-BY-SA-4.0"
+DATASET_NAME = "cathode_materials_for_rechargeable_Ca_batteries_CM2021"
+LICENSE = "CC-BY-4.0"
 PUB_YEAR = "2021"
 
-PUBLICATION = "https://doi.org/10.1016/j.jcat.2021.02.023"
-DATA_LINK = "https://doi.org/10.24435/materialscloud:p9-q7"
+PUBLICATION = "http://doi.org/10.1038/s41598-019-46002-4"
+DATA_LINK = "https://doi.org/10.24435/materialscloud:3n-e8"
 # OTHER_LINKS = []
 
-AUTHORS = ["Henrik H. Kristoffersen", "Karen Chan"]
+AUTHORS = ["M. Elena Arroyo-de Dompablo", "Jose Luis Casals"]
 DATASET_DESC = (
-    "This dataset contains data from eight AIMD simulations run in VASP "
-    "to study electrochemical *CO-*CO coupling -- coupling of two *CO "
-    "molecules -- at the liquid water-Cu(100) interface."
+    "Data from the publication "
+    '"Enlisting Potential Cathode Materials for Rechargeable Ca Batteries". '
+    "The development of rechargeable batteries based on a Ca metal anode demands "
+    "the identification of suitable cathode materials. This work investigates the "
+    "potential application of a variety of compounds, which are selected from the "
+    "In-organic Crystal Structural Database (ICSD) considering 3d-transition metal "
+    "oxysulphides, pyrophosphates, silicates, nitrides, and phosphates with a maximum "
+    "of four different chemical elements in their composition. Cathode perfor-mance "
+    "of CaFeSO, CaCoSO, CaNiN, Ca3MnN3, Ca2Fe(Si2O7), CaM(P2O7) (M = V, Cr, Mn, Fe, "
+    "Co), CaV2(P2O7)2, Ca(VO)2(PO4)2 and α-VOPO4 is evaluated throughout the "
+    "calculation of operation voltages, volume changes associated to the redox "
+    "reaction and mobility of Ca2+ ions. Some materials exhibit attractive specific "
+    "capacities and intercalation voltages combined with energy barriers for Ca "
+    "migration around 1 eV (CaFeSO, Ca2FeSi2O7 and CaV2(P2O7)2). Based on the DFT "
+    "results, αI-VOPO4 is identified as a potential Ca-cathode with a maximum "
+    "theoretical specific capacity of 312 mAh/g, an average intercalation voltage "
+    "of 2.8 V and calculated energy barriers for Ca migration below 0.65 eV "
+    "(GGA functional)."
 )
 ELEMENTS = None
-GLOB_STR = "OUTCAR*"
+GLOB_STR = "OUTCAR"
 
 PI_METADATA = {
     "software": {"value": "VASP"},
-    "method": {"value": "DFT-RPBE+D3"},
+    "method": {"value": "DFT-PBE"},
     "input": {"field": "input"},
 }
 
@@ -86,62 +100,78 @@ PROPERTY_MAP = {
 #     "enthalpy": {"field": "h", "units": "Ha"},
 #     "zpve": {"field": "zpve", "units": "Ha"},
 # }
+symbol_map = {
+    "": ["Ca", "V", "P", "O"],
+    "Ca48Mn16O48": ["Ca", "Mn", "O"],
+    "ca3mnn3": ["Ca", "Mn", "N"],
+    "Ca36Ni36N36": ["Ca", "Ni", "N"],
+    "CaNiN": ["Ca", "N", "Ni"],
+    "icsd72886": ["Ca", "V", "P", "O"],
+    "sc222desdecif": ["Ca", "Mn", "P", "O"],
+    "sc311": ["Ca", "Fe", "S", "O"],
+    "desdeelprimdenavpo4": ["Ca", "V", "P", "O"],
+    "sc222x05": ["Ca", "V", "P", "O"],
+    "LiVOPO499618": ["V", "P", "O"],
+    "duplicado_contcar_opt0": ["Ca", "V", "P", "O"],
+    "sc221ca2cosi2o7": ["Ca", "Co", "Si", "O"],
+    "scdesdeicsdco": ["Ca", "Fe", "Si", "O"],
+    "melilite_imple-icsd31236": ["Ca", "Fe", "Si", "O"],
+    "sc311de74554": ["Ca", "V", "P", "O"],
+    "desdex1ggacontcar": ["Ca", "V", "P", "O"],
+    "icsd74554": ["Ca", "V", "P", "O"],
+    "cafeso_251820": ["Ca", "Fe", "S", "O"],
+}
 
 CSS = [
     [
-        f"{DATASET_NAME}_2CO_2Cs_30H2O-Cu100_k231",
-        {"names": {"$regex": "2CO_2Cs_30H2O-Cu100_k231"}},
-        f"Configurations of 2CO_2Cs_30H2O-Cu100_k231 from {DATASET_NAME} dataset",
+        f"{DATASET_NAME}_ICSD_cloud_CaFeSO",
+        {"names": {"$regex": "^ICSD_cloud__cafeso"}},
+        f"Configurations from CaFeSO calculations from {DATASET_NAME} dataset",
     ],
     [
-        f"{DATASET_NAME}_2CO_2Cs_OH_29H2O-Cu100_k331",
-        {"names": {"$regex": "2CO_2Cs_OH_29H2O-Cu100_k331"}},
-        f"Configurations of 2CO_2Cs_OH_29H2O-Cu100_k331 from {DATASET_NAME} dataset",
+        f"{DATASET_NAME}_ICSD_cloud_CaV2P4O14",
+        {"names": {"$regex": "^ICSD_cloud__CaV2P4O14"}},
+        f"Configurations from CaV2P4O14 calculations from {DATASET_NAME} dataset",
     ],
     [
-        f"{DATASET_NAME}_2CO_30H2O-Cu100_k231",
-        {"names": {"$regex": "2CO_30H2O-Cu100_k231"}},
-        f"Configurations of 2CO_30H2O-Cu100_k231 from {DATASET_NAME} dataset",
+        f"{DATASET_NAME}_ICSD_cloud_melilite",
+        {"names": {"$regex": "^ICSD_cloud__melilite"}},
+        f"Configurations from melilite calculations from {DATASET_NAME} dataset,()",
     ],
     [
-        f"{DATASET_NAME}_2CO_30H2O-Cu100_k331",
-        {"names": {"$regex": "2CO_30H2O-Cu100_k331"}},
-        f"Configurations of 2CO_30H2O-Cu100_k331 from {DATASET_NAME} dataset",
+        f"{DATASET_NAME}_ICSD_cloud_VPO",
+        {"names": {"$regex": "^ICSD_cloud__VPO"}},
+        f"Configurations from VPO calculations from {DATASET_NAME} dataset",
     ],
     [
-        f"{DATASET_NAME}_2CO_Cs_30H2O-Cu100_k231",
-        {"names": {"$regex": "2CO_Cs_30H2O-Cu100_k231"}},
-        f"Configurations of 2CO_Cs_30H2O-Cu100_k231 from {DATASET_NAME} dataset",
+        f"{DATASET_NAME}_ICSD_SI_cloud_Ca3MnN3",
+        {"names": {"$regex": "SI_ICSD_cloud__Ca3MnN3"}},
+        f"Configurations from Ca3MnN3 calculations from {DATASET_NAME} "
+        "dataset, SI data",
     ],
     [
-        f"{DATASET_NAME}_2CO_Cs_30H2O-Cu100_k331",
-        {"names": {"$regex": "2CO_Cs_30H2O-Cu100_k331"}},
-        f"Configurations of 2CO_Cs_30H2O-Cu100_k331 from {DATASET_NAME} dataset",
+        f"{DATASET_NAME}_ICSD_SI_cloud_CaCoSO",
+        {"names": {"$regex": "SI_ICSD_cloud__cacoso"}},
+        f"Configurations from CaCoSO calculations from {DATASET_NAME} "
+        "dataset, SI data",
     ],
     [
-        f"{DATASET_NAME}_2CO_CsFix_30H2O-Cu100_k331",
-        {"names": {"$regex": "2CO_CsFix_30H2O-Cu100_k331"}},
-        f"Configurations of 2CO_CsFix_30H2O-Cu100_k331 from {DATASET_NAME} dataset",
+        f"{DATASET_NAME}_ICSD_SI_cloud_CaMnP2O7",
+        {"names": {"$regex": "SI_ICSD_cloud__CaMP2O7"}},
+        f"Configurations from CaMnP2O7 calculations from {DATASET_NAME} "
+        "dataset, SI data",
     ],
     [
-        f"{DATASET_NAME}_2CO_Li_30H2O-Cu100_k331",
-        {"names": {"$regex": "2CO_Li_30H2O-Cu100_k331"}},
-        f"Configurations of 2CO_Li_30H2O-Cu100_k331 from {DATASET_NAME} dataset",
+        f"{DATASET_NAME}_ICSD_SI_cloud_CaNiN",
+        {"names": {"$regex": "SI_ICSD_cloud__CaNiN"}},
+        f"Configurations from CaNiN calculations from {DATASET_NAME} "
+        "dataset, SI data",
     ],
     [
-        f"{DATASET_NAME}_bulk_calculations_bcc_Cs",
-        {"names": {"$regex": "Bulk_calculations__bccCs"}},
-        f"Configurations of bulk calculations of bcc Cs from {DATASET_NAME} dataset",
-    ],
-    [
-        f"{DATASET_NAME}_bulk_calculations_bcc_Li",
-        {"names": {"$regex": "Bulk_calculations__bccLi"}},
-        f"Configurations of bulk calculations of bcc Li from {DATASET_NAME} dataset",
-    ],
-    [
-        f"{DATASET_NAME}_bulk_calculations_Cu",
-        {"names": {"$regex": "Bulk_calculations__bulkCu"}},
-        f"Configurations of bulk calculations of Cu from {DATASET_NAME} dataset",
+        f"{DATASET_NAME}_ICSD_SI_cloud_CaV2P2O10",
+        {"names": {"$regex": "SI_ICSD_cloud__CaV2P2O10"}},
+        f"Configurations from CaV2P2O10 calculations from {DATASET_NAME} "
+        "dataset, SI data",
     ],
 ]
 
@@ -180,16 +210,20 @@ IGNORE_PARAMS = [
 
 def contcar_parser(fp):
     with open(fp, "r") as f:
-        line = f.readline()
-        symbols = line.strip().split()
+        header = f.readline()
+        for key, val in symbol_map.items():
+            if key in header:
+                symbols = val
+
         for i in range(4):
             _ = f.readline()
-        counts_line = f.readline()
-        counts = [x for x in counts_line.strip().split()]
-        if not counts[0].isnumeric():
-            counts_line = f.readline()
-            counts = [x for x in counts_line.strip().split()]
+        counts = [x for x in f.readline().strip().split()]
+        if not counts[0].isdigit():
+            counts = [x for x in f.readline().strip().split()]
         counts = [int(x) for x in counts]
+        if len(counts) < len(symbols):
+            symbols = [s for s in symbols if s != "Ca"]
+
         symbol_arr = []
         for symbol, count in zip(symbols, counts):
             symbol_arr.extend([symbol] * count)
@@ -295,6 +329,11 @@ def outcar_reader(symbols, fp):
                     )
             elif "Direction" in line and "XX" in line:
                 stress_keys = [x.lower() for x in line.strip().split()[1:]]
+            elif "Direction" in line and " X " in line:
+                stress_keys = [x.lower() for x in line.strip().split()[1:]]
+                for i, key in enumerate(stress_keys):
+                    if len(key) == 1:
+                        stress_keys[i] = key + key
             elif "in kB" in line:
                 stress = [float(x) for x in line.strip().split()[2:]]
                 stress = convert_stress(stress_keys, stress)
@@ -315,15 +354,15 @@ def get_kpoints(fp):
 
 def parse_incar(fp):
     with open(fp, "r") as f:
-        lines = f.readlines()
-    incar = dict()
-    for line in lines:
-        if "=" in line:
-            keyvals = line.split("=")
-            key = keyvals[0].strip()
-            value = "".join(keyvals[1:]).strip().split("#")[0].strip()
-            incar[key] = value
-    return incar
+        #     lines = f.readlines()
+        # incar = dict()
+        # for line in lines:
+        #     if "=" in line:
+        #         keyvals = line.split("=")
+        #         key = keyvals[0].strip()
+        #         value = "".join(keyvals[1:]).strip().split("#")[0].strip()
+        #         incar[key] = value
+        return f.read()
 
 
 def file_finder(fp, file_glob, count=0):
@@ -338,13 +377,22 @@ def file_finder(fp, file_glob, count=0):
 
 
 def reader(filepath: Path):
-    name = namer(filepath).replace("+", "_")
-    poscar = next(filepath.parent.rglob("POSCAR"))
+    print(filepath)
+    name = namer(filepath)
+    poscar = next(filepath.parent.glob(filepath.name.replace("OUTCAR", "CONTCAR")))
     symbols = contcar_parser(poscar)
+    if "cacoso" in name:
+        symbols = [s if s != "Fe" else "Co" for s in symbols]
     kpoints_file = file_finder(filepath.parent, "KPOINTS")
-    kpoints = get_kpoints(kpoints_file)
+    if kpoints_file is not None:
+        kpoints = get_kpoints(kpoints_file)
+    else:
+        kpoints = "no kpoints file found"
     incar_file = file_finder(filepath.parent, "INCAR")
-    incar = parse_incar(incar_file)
+    if incar_file is not None:
+        incar = parse_incar(incar_file)
+    else:
+        incar = "no incar file found"
 
     configs = outcar_reader(fp=filepath, symbols=symbols)
     for i, config in enumerate(configs):
@@ -411,43 +459,29 @@ def main(argv):
     client.insert_property_definition(cauchy_stress_pd)
 
     ds_id = generate_ds_id()
-    co_ids_fp = Path(f"{ds_id}_{DATASET_NAME}_co_ids.txt")
-    do_ids_fp = Path(f"{ds_id}_{DATASET_NAME}_do_ids.txt")
-    all_co_ids = []
-    all_do_ids = []
-    for c_batch in ichunked(
-        load_data(
-            file_path=DATASET_FP,
-            file_format="folder",
-            name_field="name",
-            elements=ELEMENTS,
-            reader=reader,
-            glob_string=GLOB_STR,
-            generator=True,
-        ),
-        10000,
-    ):
 
-        batch_ids = list(
-            client.insert_data(
-                configurations=c_batch,
-                ds_id=ds_id,
-                # co_md_map=CO_METADATA,
-                property_map=PROPERTY_MAP,
-                generator=True,
-                verbose=True,
-            )
+    configurations = load_data(
+        file_path=DATASET_FP,
+        file_format="folder",
+        name_field="name",
+        elements=ELEMENTS,
+        reader=reader,
+        glob_string=GLOB_STR,
+        generator=False,
+    )
+
+    ids = list(
+        client.insert_data(
+            configurations=configurations,
+            ds_id=ds_id,
+            # co_md_map=CO_METADATA,
+            property_map=PROPERTY_MAP,
+            generator=False,
+            verbose=True,
         )
+    )
 
-        batch_co_ids, batch_do_ids = list(zip(*batch_ids))
-        with co_ids_fp.open("a") as f:
-            f.write("\n".join(batch_co_ids))
-            f.write("\n")
-        with do_ids_fp.open("a") as f:
-            f.write("\n".join(batch_do_ids))
-            f.write("\n")
-        all_co_ids.extend(batch_co_ids)
-        all_do_ids.extend(batch_do_ids)
+    all_co_ids, all_do_ids = list(zip(*ids))
 
     cs_ids = []
     for i, (name, query, desc) in enumerate(CSS):
@@ -466,9 +500,10 @@ def main(argv):
         ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
-        description=DATASET_DESC,
         publication_link=PUBLICATION,
         data_link=DATA_LINK,
+        other_links=None,
+        description=DATASET_DESC,
         publication_year=PUB_YEAR,
         verbose=True,
         cs_ids=cs_ids,  # remove line if no configuration sets to insert
