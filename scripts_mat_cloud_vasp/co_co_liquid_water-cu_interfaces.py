@@ -12,32 +12,32 @@ File notes
 
 """
 
-from argparse import ArgumentParser
 import functools
 import logging
 import re
-import time
-from pathlib import Path
 import sys
+import time
+from argparse import ArgumentParser
+from more_itertools import ichunked
+from pathlib import Path
 
-from ase.atoms import Atoms
 import pymongo
+from ase.atoms import Atoms
 
 # from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
+from colabfit.tools.database import MongoDatabase, generate_ds_id, load_data
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     cauchy_stress_pd,
     potential_energy_pd,
 )
 
-
 DATASET_FP = Path(
     "data/towards_constant_potential_modeling_of_co-co_"
     "coupling_at_liquid_water-cu(100)_interfaces"
 )
 DATASET_NAME = "Co-Co_coupling_at_liquid_water-Cu(100)_interfaces_JC2021"
-LICENSE = "CC-BY-4.0"
+LICENSE = "CC-BY-SA-4.0"
 PUB_YEAR = "2021"
 
 PUBLICATION = "https://doi.org/10.1016/j.jcat.2021.02.023"
@@ -184,7 +184,12 @@ def contcar_parser(fp):
         symbols = line.strip().split()
         for i in range(4):
             _ = f.readline()
-        counts = [int(x) for x in f.readline().strip().split()]
+        counts_line = f.readline()
+        counts = [x for x in counts_line.strip().split()]
+        if not counts[0].isnumeric():
+            counts_line = f.readline()
+            counts = [x for x in counts_line.strip().split()]
+        counts = [int(x) for x in counts]
         symbol_arr = []
         for symbol, count in zip(symbols, counts):
             symbol_arr.extend([symbol] * count)
@@ -406,29 +411,43 @@ def main(argv):
     client.insert_property_definition(cauchy_stress_pd)
 
     ds_id = generate_ds_id()
+    co_ids_fp = Path(f"{ds_id}_{DATASET_NAME}_co_ids.txt")
+    do_ids_fp = Path(f"{ds_id}_{DATASET_NAME}_do_ids.txt")
+    all_co_ids = []
+    all_do_ids = []
+    for c_batch in ichunked(
+        load_data(
+            file_path=DATASET_FP,
+            file_format="folder",
+            name_field="name",
+            elements=ELEMENTS,
+            reader=reader,
+            glob_string=GLOB_STR,
+            generator=True,
+        ),
+        10000,
+    ):
 
-    configurations = load_data(
-        file_path=DATASET_FP,
-        file_format="folder",
-        name_field="name",
-        elements=ELEMENTS,
-        reader=reader,
-        glob_string=GLOB_STR,
-        generator=False,
-    )
-
-    ids = list(
-        client.insert_data(
-            configurations=configurations,
-            ds_id=ds_id,
-            # co_md_map=CO_METADATA,
-            property_map=PROPERTY_MAP,
-            generator=False,
-            verbose=True,
+        batch_ids = list(
+            client.insert_data(
+                configurations=c_batch,
+                ds_id=ds_id,
+                # co_md_map=CO_METADATA,
+                property_map=PROPERTY_MAP,
+                generator=True,
+                verbose=True,
+            )
         )
-    )
 
-    all_co_ids, all_do_ids = list(zip(*ids))
+        batch_co_ids, batch_do_ids = list(zip(*batch_ids))
+        with co_ids_fp.open("a") as f:
+            f.write("\n".join(batch_co_ids))
+            f.write("\n")
+        with do_ids_fp.open("a") as f:
+            f.write("\n".join(batch_do_ids))
+            f.write("\n")
+        all_co_ids.extend(batch_co_ids)
+        all_do_ids.extend(batch_do_ids)
 
     cs_ids = []
     for i, (name, query, desc) in enumerate(CSS):
