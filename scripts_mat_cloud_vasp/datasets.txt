@@ -80,4 +80,7 @@ Enlisting potential cathode materials for rechargeable Ca batteries
     ingested
 On-the-fly assessment of diffusion barriers of disordered transition metal oxyfluorides using local descriptors
     ingested
-
+Effects of the density and composition on the properties of amorphous alumina: a high dimensional neural network potential study
+    already ingested
+Large magnetoresistance and nonzero Berry phase in the nodal-line semimetal MoO2
+    no output files

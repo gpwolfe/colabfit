@@ -253,15 +253,7 @@ def get_kpoints(fp):
 
 def parse_incar(fp):
     with open(fp, "r") as f:
-        lines = f.readlines()
-    incar = dict()
-    for line in lines:
-        if "=" in line:
-            keyvals = line.split("=")
-            key = keyvals[0].strip()
-            value = "".join(keyvals[1:]).strip().split("#")[0].strip()
-            incar[key] = value
-    return incar
+        return f.read()
 
 
 def file_finder(fp, file_glob, count=0):
