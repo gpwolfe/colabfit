@@ -84,3 +84,12 @@ Effects of the density and composition on the properties of amorphous alumina: a
     already ingested
 Large magnetoresistance and nonzero Berry phase in the nodal-line semimetal MoO2
     no output files
+Yield strength and misfit volumes of NiCoCr and implications for short-range-order
+    ingested
+Hidden spontaneous polarisation in the chalcohalide photovoltaic Sn2SbS2I3
+    AAiDA files
+On the sign of the linear magnetoelectric coefficient in Cr₂O₃
+
+Transport signatures of temperature-induced chemical potential shift and Lifshitz transition in layered type-II Weyl semimetal TaIrTe4
+    No output files
+Local polarization in oxygen-deficient LaMnO3 induced by charge localization in the Jahn-Teller distorted structure
