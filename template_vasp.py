@@ -341,6 +341,7 @@ def main(argv):
     client.insert_property_definition(cauchy_stress_pd)
 
     ds_id = generate_ds_id()
+    print(f"Dataset ID: {ds_id}\nDS Name: {DATASET_NAME}")
 
     configurations = load_data(
         file_path=DATASET_FP,
