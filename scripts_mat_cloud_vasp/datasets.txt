@@ -1,7 +1,8 @@
 Kinetic Pathways of Ionic Transport in Fast Charging Lithium Titanate
     ingested
 Calculation and interpretation of classical turning surfaces in solids
-    hdf5 files. waiting for later
+    hdf5 files. Appear to contain only property values, such as gap energy,
+    and no configuration structure data.
 Stress-dependence of generalized stacking fault energies: a DFT study
     ingested
 The complex non-collinear magnetic orderings in Ba2YOsO6: A new approach to tuning spin-lattice interactions and controlling magnetic orderings in frustrated complex oxides
@@ -27,7 +28,7 @@ MgTa2N3: A reference Dirac semimetal
 Appraisal of calcium ferrites as cathodes for calcium rechargeable batteries: DFT, synthesis, characterization and electrochemistry of Ca4Fe9O17
     ingested
 Atomic insights into the oxidative degradation mechanisms of sulfide solid electrolytes
-    just output files
+    just input files
 Vanadium is an optimal element for strengthening in both fcc and bcc high-entropy alloys
     ingested
 Accurate optical spectra through time-dependent density functional theory based on screening-dependent hybrid functionals
@@ -71,7 +72,7 @@ Experimental and theoretical study of stable and metastable phases in sputtered 
 Onsite and intersite electronic correlations in the Hubbard model for halide perovskites
     only a half-dozen structures as "examples"
 Towards constant potential modeling of CO-CO coupling at liquid water-Cu(100) interfaces
-    ingesting
+    ingested
 CA-9, a dataset of carbon allotropes for training and testing of neural network potentials
     already ingested as ca-9
 Linear and quadratic magnetoresistance in the semimetal SiP2
@@ -89,7 +90,8 @@ Yield strength and misfit volumes of NiCoCr and implications for short-range-ord
 Hidden spontaneous polarisation in the chalcohalide photovoltaic Sn2SbS2I3
     AAiDA files
 On the sign of the linear magnetoelectric coefficient in Cr₂O₃
-
+    ingested
 Transport signatures of temperature-induced chemical potential shift and Lifshitz transition in layered type-II Weyl semimetal TaIrTe4
     No output files
 Local polarization in oxygen-deficient LaMnO3 induced by charge localization in the Jahn-Teller distorted structure
+    ingested
