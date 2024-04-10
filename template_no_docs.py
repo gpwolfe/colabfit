@@ -33,7 +33,8 @@ from colabfit.tools.property_definitions import (
 
 DATASET_FP = Path("").cwd()
 DATASET_NAME = ""
-LICENSE = ""
+LICENSE = "CC-BY-4.0"
+PUB_YEAR = ""
 
 PUBLICATION = ""
 DATA_LINK = ""
@@ -41,7 +42,7 @@ DATA_LINK = ""
 
 AUTHORS = [""]
 DATASET_DESC = ""
-ELEMENTS = [""]
+ELEMENTS = None
 GLOB_STR = "*.*"
 
 PI_METADATA = {
@@ -73,10 +74,10 @@ PROPERTY_MAP = {
     # ],
 }
 
-CO_METADATA = {
-    "enthalpy": {"field": "h", "units": "Ha"},
-    "zpve": {"field": "zpve", "units": "Ha"},
-}
+# CO_METADATA = {
+#     "enthalpy": {"field": "h", "units": "Ha"},
+#     "zpve": {"field": "zpve", "units": "Ha"},
+# }
 
 CSS = [
     [
@@ -150,6 +151,7 @@ def main(argv):
     # client.insert_property_definition(cauchy_stress_pd)
 
     ds_id = generate_ds_id()
+    print(f"Dataset ID: {ds_id}\nDS Name: {DATASET_NAME}")
 
     configurations = load_data(
         file_path=DATASET_FP,
@@ -165,7 +167,7 @@ def main(argv):
         client.insert_data(
             configurations=configurations,
             ds_id=ds_id,
-            co_md_map=CO_METADATA,
+            # co_md_map=CO_METADATA,
             property_map=PROPERTY_MAP,
             generator=False,
             verbose=False,
@@ -191,9 +193,12 @@ def main(argv):
         ds_id=ds_id,
         name=DATASET_NAME,
         authors=AUTHORS,
-        links=[PUBLICATION, DATA_LINK],  # + OTHER_LINKS,
+        publication_link=PUBLICATION,
+        data_link=DATA_LINK,
+        other_links=None,
         description=DATASET_DESC,
-        verbose=False,
+        publication_year=PUB_YEAR,
+        verbose=True,
         cs_ids=cs_ids,  # remove line if no configuration sets to insert
         data_license=LICENSE,
     )
