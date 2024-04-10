@@ -201,7 +201,7 @@ def main(argv):
     )
     args = parser.parse_args(argv)
     client = MongoDatabase(
-        args.db_name, nprocs=args.nprocs, uri=f"mongodb://{args.ip}:{args.port}"
+        args.db_name, nprocs=32, uri=f"mongodb://{args.ip}:{args.port}"
     )
 
     client.insert_property_definition(atomic_forces_pd)
