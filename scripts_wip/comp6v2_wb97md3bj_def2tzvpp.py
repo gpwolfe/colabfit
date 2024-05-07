@@ -220,7 +220,8 @@ def main(argv):
     client.insert_property_definition(potential_energy_pd)
     # client.insert_property_definition(cauchy_stress_pd)
 
-    ds_id = generate_ds_id()
+    # ds_id = generate_ds_id()
+    ds_id = "DS_rc1rp7a72cfi_0"
     print(f"Dataset ID: {ds_id}\nDS Name: {DATASET_NAME}")
 
     configurations = load_data(

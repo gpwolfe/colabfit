@@ -84,8 +84,8 @@ from colabfit.tools.property_definitions import (
 )
 import numpy as np
 
-DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/data/gap_si/")
-DATASET_FP = Path().cwd().parent / "data/Si_PRX_GAP"
+# DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/data/gap_si/")
+DATASET_FP = Path("data/Si_PRX_GAP")
 
 DATASET = "Si_PRX_GAP"
 
@@ -158,11 +158,11 @@ property_map = {
     ],
     "atomic-forces": [
         {
-            "forces": {"field": "dft-force", "units": "eV/angstrom"},
+            "forces": {"field": "dft_force", "units": "eV/angstrom"},
             "_metadata": PI_MD_DFT,
         },
         {
-            "forces": {"field": "gap-force", "units": "eV/angstrom"},
+            "forces": {"field": "gap_force", "units": "eV/angstrom"},
             "_metadata": PI_MD_GAP,
         },
     ],
@@ -404,7 +404,11 @@ def main(argv):
         ds_id=ds_id,
         name=DATASET,
         authors=AUTHORS,
-        links=[PUBLICATION, DATA_LINK],
+        # links=[PUBLICATION, DATA_LINK],
+        publication_link=PUBLICATION,
+        data_link=DATA_LINK,
+        data_license="GPL-3.0",
+        publication_year=2021,
         description=DS_DESC,
         verbose=False,
     )

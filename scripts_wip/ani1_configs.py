@@ -168,7 +168,7 @@ def read_wrapper(dbname, uri, nprocs, ds_id, ds_name, cs_ids_fp):
         do_id_file.parent.mkdir(parents=True, exist_ok=True)
 
         insert_time = time.time()
-        for i_key in range(0, 47932):  # for number 8
+        for i_key in range(7029, 47932):  # for number 8
             partial_read = partial(ani_reader, ds_name=ds_name, key_ix=i_key)
 
             configurations = load_data(
@@ -192,7 +192,7 @@ def read_wrapper(dbname, uri, nprocs, ds_id, ds_name, cs_ids_fp):
             )
             ids.extend(ids_batch)
             new_insert_time = time.time()
-            print(f"Time to insert: {new_insert_time - insert_time}")
+            print(f"key {i_key}: Time to insert: {new_insert_time - insert_time}")
             insert_time = new_insert_time
             co_ids, do_ids = list(zip(*ids_batch))
             with open(co_id_file, "a") as f:
