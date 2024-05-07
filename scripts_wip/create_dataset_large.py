@@ -110,6 +110,7 @@ def main(argv):
     ds_name = ds_data["dataset_name"]
     authors = ds_data["authors"]
     publication = ds_data["publication"]
+    publication_year = ds_data["publication_year"]
     data_link = ds_data["data_link"]
     ds_desc = ds_data["description"]
     ds_license = ds_data["license"]
@@ -134,7 +135,9 @@ def main(argv):
             name=ds_name,
             authors=authors,
             cs_ids=cs_ids,
-            links=[publication, data_link],
+            publication_link=publication,
+            data_link=data_link,
+            publication_year=publication_year,
             description=ds_desc,
             verbose=True,
             data_license=ds_license,
@@ -145,7 +148,9 @@ def main(argv):
             ds_id=ds_id,
             name=ds_name,
             authors=authors,
-            links=[publication, data_link],
+            publication_link=publication,
+            data_link=data_link,
+            publication_year=publication_year,
             description=ds_desc,
             verbose=True,
             data_license=ds_license,
