@@ -26,7 +26,6 @@ A number of other properties are available, but meanings are
 not all clear
 """
 
-
 # .xyz header:
 # Lattice="10.213697277208299 0.0 0.0 0.0 14.44429697782187 0.0 0.0 0.0 \
 # 15.987396868621472" \
@@ -82,14 +81,18 @@ def namer(info):
         return None
 
 
+# Unfinished edits for free energy/quantum emitter energy
 def reader(file_path):
     file_name = file_path.stem
     atoms = ase.io.read(file_path, index=":")
     for atom in atoms:
         atom.info["name"] = namer(file_name)
-        atom.info["free_energy"] = atom.info.get(
-            "free_energy", atom.info.get("qe4_fenergy")
-        )
+        qe_free_energy = atom.info.get("free_energy")
+        if qe_free_energy is not None:
+            atom.info["qe_free_energy"] = qe_free_energy
+        quantum_emitter_4_f_energy = atom.info.get("qe4_fenergy")
+        if quantum_emitter_4_f_energy is not None:
+            atom.info["quantum_emitter_4_f_energy"] = quantum_emitter_4_f_energy
     return atoms
 
 

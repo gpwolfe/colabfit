@@ -3,15 +3,20 @@ author: Gregory Wolfe
 
 Properties
 ----------
-
+forces
+potential-energy
 Other properties added to metadata
 ----------------------------------
 
 File notes
 ----------
+outcar files provided, custom parser written for vasp settings
+
 
 """
+
 from argparse import ArgumentParser
+from functools import partial
 from pathlib import Path
 import re
 import sys
@@ -27,32 +32,30 @@ from colabfit.tools.property_definitions import (
 )
 
 
-DATASET_FP = Path("data/lin_mag_cr2o3/archive/VASP_and_Elk")
-DATASET_NAME = "on_the_sign_of_the_linear_magnetoelectric_coefficient_in_Cr2O3"
-LICENSE = "https://creativecommons.org/licenses/by/4.0"
+DATASET_FP = Path("data/geng_goddard/DFT outcar")
+DATASET_NAME = "N_O_F_columns_non-bonded_vdW_potential_JCP2023"
+LICENSE = "https://creativecommons.org/licenses/by/4.0/"
 
-PUBLICATION = "http://doi.org/10.48550/arXiv.2309.02095"
-DATA_LINK = "https://doi.org/10.24435/materialscloud:ek-fp"
+PUBLICATION = "https://doi.org/10.1063/5.0174188"
+DATA_LINK = "https://doi.org/10.1063/5.0174188"
 # OTHER_LINKS = []
 
-AUTHORS = [
-    "Eric Bousquet",
-    "Eddy Lelièvre-Berna",
-    "Navid Qureshi",
-    "Jian-Rui Soh",
-    "Nicola Ann Spaldin",
-    "Andrea Urru",
-    "Xanthe Henderike Verbeek",
-    "Sophie Francis Weber",
-]
-DATASET_DESC = ""
+AUTHORS = ["Peng Geng", "Sergey Zybin", "Saber Naserifar", "William A. Goddard, III"]
+DATASET_DESC = (
+    "This dataset contains structures of materials from the N (15th), "
+    "O (16th) and F (16th) columns of the periodic table used for generating "
+    "a 2-body non-bonded vdW potential. Configuration sets include As, At, "
+    "Bi, O, P, Po, S, Sb, Se and Te."
+)
 ELEMENTS = None
 GLOB_STR = "OUTCAR*"
 
 PI_METADATA = {
-    "software": {"value": "VASP     "},
-    "method": {"value": ""},
+    "software": {"value": "VASP 5.4.4"},
+    "method": {"value": "DFT-PBE"},
     "input": {"field": "input"},
+    "outcar": {"field": "outcar"},
+    # "input": {"value": {}}
 }
 
 PROPERTY_MAP = {
@@ -71,25 +74,12 @@ PROPERTY_MAP = {
     ],
     # "cauchy-stress": [
     #     {
-    #         "stress": {"field": "stress", "units": "eV/angstrom^3"},
-    #         "volume-normalized": {"value": False, "units": None},
+    #         "stress": {"field": "stress", "units": "GPa"},
+    #         "volume-normalized": {"value": True, "units": None},
     #         "_metadata": PI_METADATA,
     #     }
     # ],
 }
-
-# CO_METADATA = {
-#     "enthalpy": {"field": "h", "units": "Ha"},
-#     "zpve": {"field": "zpve", "units": "Ha"},
-# }
-
-# CSS = [
-#     [
-#         f"{DATASET_NAME}_aluminum",
-#         {"names": {"$regex": "aluminum"}},
-#         f"Configurations of aluminum from {DATASET_NAME} dataset",
-#     ]
-# ]
 latt_re = re.compile(
     r"A\d = \(\s+(?P<a>\-?\d+\.\d+),\s+(?P<b>\-?\d+\.\d+),\s+(?P<c>\-?\d+\.\d+)\)"
 )
@@ -102,48 +92,23 @@ param_re = re.compile(
     r"[\s+]?(?P<param>[A-Z_]+)(\s+)?=(\s+)?(?P<val>-?([\d\w\.\-]+)?\.?)"
     r"[\s;]?(?P<unit>eV)?\:?"
 )
-IGNORE_PARAMS = [
-    "VRHFIN",
-    "LEXCH",
-    "EATOM",
-    "TITEL",
-    "LULTRA",
-    "IUNSCR",
-    "RPACOR",
-    "POMASS",
-    "RCORE",
-    "RWIGS",
-    "ENMAX",
-    "RCLOC",
-    "LCOR",
-    "LPAW",
-    "EAUG",
-    "DEXC",
-    "RMAX",
-    "RAUG",
-    "RDEP",
-    "RDEPT",
+# CO_METADATA = {
+#     "enthalpy": {"field": "h", "units": "Ha"},
+#     "zpve": {"field": "zpve", "units": "Ha"},
+# }
+SYMBOLS = ["As", "At", "Bi", "O", "P", "Po", "S", "Sb", "Se", "Te"]
+CSS = [
+    [
+        f"{DATASET_NAME}_{symbol}",
+        {"elements": symbol},  # {"$regex": f"{symbol}_*"}},
+        f"Configurations of {symbol} from {DATASET_NAME} dataset",
+    ]
+    for symbol in SYMBOLS
 ]
 
 
-def contcar_parser(fp):
-    symbol_counts = dict()
+def reader(symbol, fp):
     with open(fp, "r") as f:
-        for i in range(5):
-            _ = f.readline()
-        line = f.readline()
-        symbols = line.strip().split()
-        counts = [int(x) for x in f.readline().strip().split()]
-        symbol_counts = dict(zip(symbols, counts))
-        symbols = []
-        for symbol in symbol_counts:
-            symbols.extend([symbol] * symbol_counts[symbol])
-        return symbols
-
-
-def outcar_reader(symbols, fp):
-    with open(fp, "r") as f:
-        configs = []
         incar = dict()
         cinput = dict()
         outcar = dict()
@@ -153,8 +118,9 @@ def outcar_reader(symbols, fp):
         lattice = []
         pos = []
         forces = []
+        symbols = []
         settings = True
-        for line in f:
+        for line in f.readlines():
             if "conjugate gradient relaxation of ions" in line:
                 settings = False
                 pass
@@ -165,7 +131,6 @@ def outcar_reader(symbols, fp):
             # handle lattice
             elif "Lattice vectors" in line:
                 in_latt = True
-                lattice = []
                 pass
             elif in_latt is True:
                 if len(lattice) == 3:
@@ -222,26 +187,12 @@ def outcar_reader(symbols, fp):
                     forces.append(
                         [float(p) for p in [cmatch["fx"], cmatch["fy"], cmatch["fz"]]]
                     )
-            elif "FREE ENERGIE OF THE ION-ELECTRON SYSTEM" in line:
-                _ = f.readline()
-                _, _, _, _, energy, units = f.readline().strip().split()
-                cinput["incar"] = incar
-                config = Atoms(positions=pos, symbols=symbols, cell=lattice)
-                config.info["input"] = cinput
-                config.info["outcar"] = outcar
-                config.info["forces"] = forces
-                config.info["energy"] = float(energy)
-                config.info["name"] = f"{'__'.join(fp.parts[-4:-1])}"
-                configs.append(config)
-                forces = []
-                pos = []
-                energy = None
+
             # Check other lines for params, send to outcar or cinput
+
             elif settings is True:
                 for pmatch in param_re.finditer(line):
-                    if pmatch["param"] in IGNORE_PARAMS:
-                        pass
-                    elif pmatch["unit"] is not None:
+                    if pmatch["unit"] is not None:
                         cinput[pmatch["param"]] = {
                             "value": float(pmatch["val"]),
                             "units": pmatch["unit"],
@@ -259,69 +210,15 @@ def outcar_reader(symbols, fp):
                         outcar[pmatch["param"]] = pmatch["val"]
             else:
                 print("something went wrong")
-
-        return configs
-
-
-def get_kpoints(fp):
-    with open(fp, "r") as f:
-        f.readline()
-        kpoints = "".join(f.readlines())
-    return kpoints
-
-
-def parse_incar(fp):
-    with open(fp, "r") as f:
-        lines = f.readlines()
-    incar = dict()
-    for line in lines:
-        if "=" in line:
-            keyvals = line.split("=")
-            key = keyvals[0].strip()
-            value = "".join(keyvals[1:]).strip()
-            incar[key] = value
-    return incar
-
-
-def file_finder(fp, file_glob):
-    count = 0
-    if count > 5:
-        return None
-    elif file_glob in [f.name for f in fp.glob("*")]:
-        return next(fp.glob(file_glob))
-    else:
-        count += 1
-        return file_finder(fp.parent, file_glob)
-
-
-def reader(filepath: Path):
-    try:
-        poscar = next(filepath.parent.glob(filepath.name.replace("OUTCAR", "POSCAR")))
-        symbols = contcar_parser(poscar)
-        kpoints_file = file_finder(filepath.parent, "KPOINTS")
-        # try:
-        #     kpoints = get_kpoints(next(outer_dir.glob("KPOINTS")))
-        # except StopIteration:
-        #     print(filepath)
-        #     kpoints = get_kpoints(next(filepath.parent.glob("KPOINTS")))
-        kpoints = get_kpoints(kpoints_file)
-        incar_file = file_finder(filepath.parent, "INCAR")
-        incar = parse_incar(incar_file)
-        # try:
-        #     incar = parse_incar(next(outer_dir.glob("INCAR")))
-        # except StopIteration:
-        #     print(filepath)
-        #     incar = parse_incar(next(filepath.parent.glob("INCAR")))
-
-        configs = outcar_reader(fp=filepath, symbols=symbols)
-        for i, config in enumerate(configs):
-            config.info["name"] = f"{filepath.stem}_{i}"
-            config.info["input"]["kpoints"] = kpoints
-            config.info["input"]["incar"] = incar
-
-        return configs
-    except:
-        print(filepath)
+        cinput["incar"] = incar
+        symbols = [symbol for c in pos]
+        config = Atoms(positions=pos, symbols=symbols, cell=lattice)
+        config.info["energy"] = outcar.pop("TOTEN")["value"]
+        config.info["input"] = cinput
+        config.info["outcar"] = outcar
+        config.info["forces"] = forces
+        config.info["name"] = f"{symbol}_{fp.stem.split('-')[-1]}"
+        return [config]
 
 
 def main(argv):
@@ -354,25 +251,34 @@ def main(argv):
     # client.insert_property_definition(cauchy_stress_pd)
 
     ds_id = generate_ds_id()
+    configurations = []
+    for symbol in SYMBOLS:
+        if symbol == "O":
+            fp_dir = DATASET_FP / "O4"
+        else:
+            fp_dir = DATASET_FP / symbol
+        reader_partial = partial(reader, symbol)
 
-    configurations = load_data(
-        file_path=DATASET_FP,
-        file_format="folder",
-        name_field="name",
-        elements=ELEMENTS,
-        reader=reader,
-        glob_string=GLOB_STR,
-        generator=False,
-    )
+        configurations.extend(
+            load_data(
+                file_path=fp_dir,
+                file_format="folder",
+                name_field="name",
+                elements=ELEMENTS,
+                reader=reader_partial,
+                glob_string=GLOB_STR,
+                generator=False,
+            )
+        )
 
     ids = list(
         client.insert_data(
             configurations=configurations,
             ds_id=ds_id,
-            co_md_map=CO_METADATA,
+            # co_md_map=CO_METADATA,
             property_map=PROPERTY_MAP,
             generator=False,
-            verbose=False,
+            verbose=True,
         )
     )
 
@@ -397,7 +303,7 @@ def main(argv):
         authors=AUTHORS,
         links=[PUBLICATION, DATA_LINK],  # + OTHER_LINKS,
         description=DATASET_DESC,
-        verbose=False,
+        verbose=True,
         cs_ids=cs_ids,  # remove line if no configuration sets to insert
         data_license=LICENSE,
     )
