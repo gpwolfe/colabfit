@@ -22,6 +22,7 @@ File notes
 free energy is reported, but values are exactly the same as 'energy'
 
 """
+
 from argparse import ArgumentParser
 from ase.io import read
 from colabfit.tools.database import MongoDatabase, load_data, generate_ds_id
@@ -116,18 +117,8 @@ def main(argv):
             "value": {"encut": {"value": 520, "units": "eV"}, "kpoints": "2 x 2 x 2"},
         },
     }
-    # co_md_map = {
-    #     "free-energy": {"field": "free_energy"}
-    #     # "": {"field": ""}
-    # }
+
     property_map = {
-        # "free-energy": [
-        #     {
-        #         "energy": {"field": "free_energy", "units": "eV"},
-        #         "per-atom": {"value": False, "units": None},
-        #         "_metadata": metadata,
-        #     }
-        # ],
         "potential-energy": [
             {
                 "energy": {"field": "energy", "units": "eV"},
