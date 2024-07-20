@@ -25,6 +25,7 @@ from colabfit.tools.property_definitions import (
     cauchy_stress_pd,
     energy_conjugate_pd,
 )
+from colabfit.tools.utilities import convert_stress
 from colabfit.tools.database import generate_ds_id
 
 DATASET_FP = Path("path/to/dataset")
@@ -77,7 +78,6 @@ CONFIGURATION_SETS = [
 ]
 
 
-# MTPU data
 def convert_stress(keys, stress):
     stresses = {k: s for k, s in zip(keys, stress)}
     return [

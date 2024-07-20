@@ -131,8 +131,7 @@ def compv6_reader(fp):
                     for k, v in config.info.items():
                         if isinstance(v, np.ndarray):
                             config.info[k] = v.tolist()
-                    AtomicConfiguration.from_ase(config, CO_METADATA)
-                    yield config
+                    yield AtomicConfiguration.from_ase(config, CO_METADATA)
 
 
 load_dotenv()
