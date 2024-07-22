@@ -104,34 +104,40 @@ CO_METADATA = {
 }
 
 
-def compv6_reader(fp):
+def compv6_reader(properties, num_atoms):
+    coordinates = properties["coordinates"]
+    species = properties["species"]
+    energies = properties["energies"]
+    en_correction = properties["D3.energy-corrections"]
+    scf_energies = properties["wB97M_def2-TZVPP.scf-energies"]
+    dipoles = properties["dipoles"]
+    for i, coord in enumerate(coordinates):
+        config = Atoms(
+            positions=coord,
+            numbers=species[i],
+        )
+        config.info["energy"] = energies[i]
+        config.info["en_correction"] = en_correction[i]
+        config.info["scf_energy"] = scf_energies[i]
+        config.info["dipole"] = dipoles[i]
+        config.info["_name"] = (
+            f"COMP6v2-wB97MD3BJ-def2TZVPP__natoms_{num_atoms}__ix_{i}"
+        )
+        for k, v in config.info.items():
+            if isinstance(v, np.ndarray):
+                config.info[k] = v.tolist()
+        yield AtomicConfiguration.from_ase(config, CO_METADATA)
+
+
+def wrapper(fp):
     with h5py.File(fp) as h5:
-        for num_atoms in h5.keys():
-            # print(num_atoms)
-            properties = h5[str(num_atoms)]
-            coordinates = properties["coordinates"]
-            species = properties["species"]
-            energies = properties["energies"]
-            en_correction = properties["D3.energy-corrections"]
-            scf_energies = properties["wB97M_def2-TZVPP.scf-energies"]
-            dipoles = properties["dipoles"]
-            while True:
-                for i, coord in enumerate(coordinates):
-                    config = Atoms(
-                        positions=coord,
-                        numbers=species[i],
-                    )
-                    config.info["energy"] = energies[i]
-                    config.info["en_correction"] = en_correction[i]
-                    config.info["scf_energy"] = scf_energies[i]
-                    config.info["dipole"] = dipoles[i]
-                    config.info["_name"] = (
-                        f"COMP6v2-wB97MD3BJ-def2TZVPP__natoms_{num_atoms}__ix_{i}"
-                    )
-                    for k, v in config.info.items():
-                        if isinstance(v, np.ndarray):
-                            config.info[k] = v.tolist()
-                    yield AtomicConfiguration.from_ase(config, CO_METADATA)
+        for key in h5.keys():
+            try:
+                yield from compv6_reader(h5[key], key)
+            except Exception as e:
+                print(e)
+                # handle end of group
+                pass
 
 
 load_dotenv()
@@ -152,12 +158,13 @@ loader.dataset_table = "ndb.colabfit.dev.gpw_test_datasets2"
 loader.prop_object_table = "ndb.colabfit.dev.gpw_test_prop_objects2"
 
 ds_id = "DS_rc1rp7a72cfi_0"
+loader.zero_multiplicity(ds_id)
 print(f"Dataset ID: {ds_id}\nDS Name: {DATASET_NAME}")
 
 
 beg = time()
 
-config_generator = compv6_reader(DATASET_FP)
+config_generator = wrapper(DATASET_FP)
 dm = DataManager(
     nprocs=1,
     configs=config_generator,
