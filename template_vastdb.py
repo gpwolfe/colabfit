@@ -78,15 +78,6 @@ CONFIGURATION_SETS = [
 ]
 
 
-def convert_stress(keys, stress):
-    stresses = {k: s for k, s in zip(keys, stress)}
-    return [
-        [stresses["xx"], stresses["xy"], stresses["xz"]],
-        [stresses["xy"], stresses["yy"], stresses["yz"]],
-        [stresses["xz"], stresses["yz"], stresses["zz"]],
-    ]
-
-
 def reader(fp: Path):
     iter_configs = iread(fp, format="extxyz")
     for i, config in enumerate(iter_configs):
