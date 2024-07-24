@@ -141,21 +141,27 @@ def wrapper(fp):
 
 
 load_dotenv()
+
 loader = SparkDataLoader(
     table_prefix="ndb.colabfit.dev",
 )
+
 access_key = os.getenv("SPARK_ID")
+
 access_secret = os.getenv("SPARK_KEY")
+
 endpoint = os.getenv("SPARK_ENDPOINT")
+
 loader.set_vastdb_session(
     endpoint=endpoint,
     access_key=access_key,
     access_secret=access_secret,
 )
-loader.config_table = "ndb.colabfit.dev.gpw_test_configs2"
-loader.config_set_table = "ndb.colabfit.dev.gpw_test_config_sets2"
-loader.dataset_table = "ndb.colabfit.dev.gpw_test_datasets2"
-loader.prop_object_table = "ndb.colabfit.dev.gpw_test_prop_objects2"
+
+# loader.config_table = "ndb.colabfit.dev.gpw_test_configs2"
+# loader.config_set_table = "ndb.colabfit.dev.gpw_test_config_sets2"
+# loader.dataset_table = "ndb.colabfit.dev.gpw_test_datasets2"
+# loader.prop_object_table = "ndb.colabfit.dev.gpw_test_prop_objects2"
 
 ds_id = "DS_rc1rp7a72cfi_0"
 loader.zero_multiplicity(ds_id)
