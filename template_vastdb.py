@@ -109,11 +109,11 @@ def main():
     loader.set_vastdb_session(
         endpoint=endpoint, access_key=access_key, access_secret=access_secret
     )
-    ds_id = generate_ds_id(DATASET_NAME)
+    ds_id = generate_ds_id()
     config_generator = read_dir(DATASET_FP)
     dm = DataManager(
         nprocs=1,
-        configs=list(config_generator),
+        configs=config_generator,
         prop_defs=[energy_conjugate_pd, atomic_forces_pd, cauchy_stress_pd],
         prop_map=PROPERTY_MAP,
         dataset_id=ds_id,
@@ -138,7 +138,7 @@ def main():
         data_link=DATA_LINK,
         description=DS_DESCRIPTION,
         labels=DS_LABELS,
-        dataset_id=ds_id,
+        license=LICENSE,
     )
     # If running as a script, include below to stop the spark instance
     loader.stop_spark()
