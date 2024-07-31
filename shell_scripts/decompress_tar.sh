@@ -9,7 +9,7 @@ fi
 source_dir="$1"
 
 # Recursively traverse the specified directory tree
-find "$source_dir" -type f \( -name "*.tar" -o -name "*.tar.gz" -o -name "*.bz2" -o -name "*.tar.bz" \) -exec bash -c '
+find "$source_dir" -type f \( -name "*.tar" -o -name "*.tar.gz" -o -name "*.tar.xz" -o -name "*.bz2" -o -name "*.tar.bz" \) -exec bash -c '
   for file do
     # Extract the file in its current directory
     tar xvf "$file" -C "$(dirname "$file")"
