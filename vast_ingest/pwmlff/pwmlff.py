@@ -9,7 +9,9 @@ Other properties added to metadata
 
 File notes
 ----------
-
+about 17K configurations
+There are more data files that might be available, but require downloading and running
+a "netdisk" client in order to download that larger directories of data.
 """
 
 import os
@@ -32,7 +34,7 @@ from colabfit.tools.property_definitions import (
 # from colabfit.tools.utilities import convert_stress
 from colabfit.tools.database import generate_ds_id
 
-DATASET_FP = Path("data/available_data/CH3CH2OH/")
+DATASET_FP = Path("data/available_data/")
 DATASET_NAME = "PWMLFF_feature_comparison_NPJ2023"
 AUTHORS = ["Ting Han", "Jie Li", "Liping Liu", "Fengyu Li", "Lin-Wang Wang"]
 PUBLICATION_LINK = "https://www.doi.org/10.1088/1367-2630/acf2bb"
@@ -95,12 +97,12 @@ CONFIGURATION_SETS = [
         f"{DATASET_NAME}__CH4",
         f"Structures of CH4 from {DATASET_NAME}",
     ),
-    (
-        r"LiGePS__.*",
-        None,
-        f"{DATASET_NAME}__LiGePS",
-        f"Structures of LiGePS from {DATASET_NAME}",
-    ),
+    # (
+    #     r"LiGePS__.*",
+    #     None,
+    #     f"{DATASET_NAME}__LiGePS",
+    #     f"Structures of LiGePS from {DATASET_NAME}",
+    # ),
     (
         r"Mg_2600images__.*",
         None,
@@ -244,14 +246,12 @@ class Image(object):
         ]
         self.pressure = [pressure1, pressure2, pressure3]
 
-    #
     def set_atomic_energy(self, atomic_energy):
         for i in range(0, len(atomic_energy)):
             numbers = re.findall(r"[-+]?\d+(?:\.\d+)?", atomic_energy[i])
             self.atomic_energy.append(float(numbers[1]))
         assert self.atom_num == len(self.atomic_energy)
 
-    #
     def set_content(self, content):
         self.content = content
 
@@ -359,7 +359,11 @@ endpoint = os.getenv("SPARK_ENDPOINT")
 loader.set_vastdb_session(
     endpoint=endpoint, access_key=access_key, access_secret=access_secret
 )
-loader.config_table = pwmlff_cos
+
+loader.config_table = "ndb.colabfit.dev.cos_from_ingest"
+loader.prop_table = "ndb.colabfit.dev.pos_from_ingest"
+loader.dataset_table = "ndb.colabfit.dev.ds_from_ingest"
+loader.config_set_table = "ndb.colabfit.dev.cs_from_ingest"
 ds_id = "DS_cgjdk1e2txjy_1"
 config_generator = read_dir(DATASET_FP)
 dm = DataManager(
@@ -368,9 +372,10 @@ dm = DataManager(
     prop_defs=[energy_conjugate_pd, atomic_forces_pd, cauchy_stress_pd],
     prop_map=PROPERTY_MAP,
     dataset_id=ds_id,
-    read_write_batch_size=1000,
+    read_write_batch_size=10000,
     standardize_energy=True,
 )
+
 print("Loading configurations")
 dm.load_co_po_to_vastdb(loader)
 
