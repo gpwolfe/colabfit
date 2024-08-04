@@ -52,15 +52,13 @@ loader.set_vastdb_session(
     access_key=access_key,
     access_secret=access_secret,
 )
-# loader.config_table = "ndb.colabfit.dev.gpw_test_configs2"
-# loader.config_set_table = "ndb.colabfit.dev.gpw_test_config_sets2"
-# loader.dataset_table = "ndb.colabfit.dev.gpw_test_datasets2"
-# loader.prop_object_table = "ndb.colabfit.dev.gpw_test_prop_objects2"
+loader.config_table = "ndb.colabfit.dev.gpw_co"
+loader.config_set_table = "ndb.colabfit.dev.gpw_cs"
+loader.dataset_table = "ndb.colabfit.dev.gpw_ds"
+loader.prop_object_table = "ndb.colabfit.dev.gpw_po"
 
 
-DATASET_FP = Path(
-    "/scratch/gw2338/oc20_s2ef/data/oc20_s2ef/s2ef_train_20M/s2ef_train_20M/"
-)
+DATASET_FP = Path("data/s2ef_train_20M/s2ef_train_20M/")
 DATASET_NAME = "OC20_S2EF_train_20M"
 ds_id = "DS_rf10ovxd13ne_0"
 AUTHORS = [
@@ -203,7 +201,7 @@ dm.load_co_po_to_vastdb(loader)
 print(f"Time to load: {time() - t}")
 
 
-# dm.load_co_po_to_vastdb(loader)
+dm.load_co_po_to_vastdb(loader)
 print(f"Time to load: {time() - t}")
 
 labels = ["OC20", "Open Catalyst"]
