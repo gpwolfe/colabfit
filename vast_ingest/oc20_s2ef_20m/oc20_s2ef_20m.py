@@ -11,6 +11,8 @@ dipole, original scf energy without the energy correction subtracted
 
 File notes
 ----------
+File /scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/oc20_s2ef/data/s2ef_train_20M/s2ef_train_20M/1050.extxyz is malformed, truncated
+
 columns from txt files: system_id,frame_number,reference_energy
 
 header from extxyz files:
@@ -37,7 +39,7 @@ from dotenv import load_dotenv
 
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import DataManager, SparkDataLoader
-from colabfit.tools.property_definitions import atomic_forces_pd, energy_conjugate_pd
+from colabfit.tools.property_definitions import atomic_forces_pd, energy_pd
 
 
 load_dotenv()
@@ -54,11 +56,13 @@ loader.set_vastdb_session(
 )
 loader.config_table = "ndb.colabfit.dev.gpw_co"
 loader.config_set_table = "ndb.colabfit.dev.gpw_cs"
-loader.dataset_table = "ndb.colabfit.dev.gpw_ds"
-loader.prop_object_table = "ndb.colabfit.dev.gpw_po"
+loader.dataset_table = "ndb.colabfit.dev.oc20_test_ds"
+loader.prop_object_table = "ndb.colabfit.dev.oc20_test_po"
 
 
-DATASET_FP = Path("data/s2ef_train_20M/s2ef_train_20M/")
+DATASET_FP = Path(
+    "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/oc20_s2ef/data/s2ef_train_20M/s2ef_train_20M/"
+)
 DATASET_NAME = "OC20_S2EF_train_20M"
 ds_id = "DS_rf10ovxd13ne_0"
 AUTHORS = [
@@ -94,9 +98,12 @@ DESCRIPTION = (
 )
 
 
-PKL_FP = Path("data/oc20_data_mapping.pkl")
+PKL_FP = Path(
+    "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/oc20_s2ef/data/oc20_data_mapping.pkl"
+)
 with open(PKL_FP, "rb") as f:
     OC20_MAP = pickle.load(f)
+
 GLOB_STR = "*.extxyz"
 PI_METADATA = {
     "software": {"value": "VASP"},
@@ -107,18 +114,22 @@ PI_METADATA = {
             "EDIFFG": "1E-3",
         },
     },
+    "property_keys": {
+        "energy": "free_energy",
+        "atomic_forces": "forces",
+    },
 }
 
 
 PROPERTY_MAP = {
-    "energy-conjugate-with-atomic-forces": [
+    energy_pd["name"]: [
         {
-            "energy": {"field": "energy", "units": "eV"},
+            "energy": {"field": "free_energy", "units": "eV"},
             "per-atom": {"value": False, "units": None},
             "reference-energy": {"field": "reference_energy", "units": "eV"},
         }
     ],
-    "atomic-forces": [
+    atomic_forces_pd["name"]: [
         {
             "forces": {"field": "forces", "units": "eV/angstrom"},
         },
@@ -153,19 +164,30 @@ def oc_reader(fp: Path):
     prop_fp = fp.with_suffix(".txt")
     with prop_fp.open("r") as prop_f:
         prop_lines = [x.strip() for x in prop_f.readlines()]
-        iter_configs = iread(fp, format="extxyz")
+        iter_configs = iread(fp, format="extxyz", index=":")
+        i = 0
+        # while True:
+        #     try:
+        #         try:
+        #             config = next(iter_configs)
         for i, config in enumerate(iter_configs):
-            system_id, frame_number, reference_energy = prop_lines[i].split(",")
-            reference_energy = float(reference_energy)
-            config.info["constraints-fix-atoms"] = config.constraints[0].index
-            config_data = OC20_MAP[system_id]
-            config.info.update(config_data)
-            config.info["reference_energy"] = reference_energy
-            config.info["system_id"] = system_id
-            config.info["frame_number"] = frame_number
-            # config.info["forces"] = forces[i]
-            config.info["_name"] = f"{DATASET_NAME}__file_{fp_num}_config_{i}"
-            yield AtomicConfiguration.from_ase(config, CO_METADATA)
+            try:
+                system_id, frame_number, reference_energy = prop_lines[i].split(",")
+                reference_energy = float(reference_energy)
+                config.info["constraints-fix-atoms"] = config.constraints[0].index
+                config_data = OC20_MAP[system_id]
+                config.info.update(config_data)
+                config.info["reference_energy"] = reference_energy
+                config.info["system_id"] = system_id
+                config.info["frame_number"] = frame_number
+                # config.info["forces"] = forces[i]
+                config.info["_name"] = f"{DATASET_NAME}__file_{fp_num}_config_{i}"
+                yield AtomicConfiguration.from_ase(config, CO_METADATA)
+            except Exception as e:
+                print("Error encountered: ", e)
+                continue
+            # except StopIteration:
+            #     break
 
 
 def oc_wrapper(dir_path: str):
@@ -174,12 +196,16 @@ def oc_wrapper(dir_path: str):
         print(f"Path {dir_path} does not exist")
         return
     xyz_paths = sorted(list(dir_path.rglob("*.extxyz")))
-    print(xyz_paths)
-    for xyz_path in xyz_paths[:1]:
+    # print(xyz_paths)
+    for xyz_path in xyz_paths:
         print(f"Reading {xyz_path}")
         reader = oc_reader(xyz_path)
         for config in reader:
             yield config
+
+
+def oc_wrapper_wrapper(dir_path: str):
+    yield from oc_wrapper(dir_path)
 
 
 beg = time()
@@ -188,7 +214,7 @@ config_generator = oc_wrapper(DATASET_FP)
 dm = DataManager(
     nprocs=1,
     configs=config_generator,
-    prop_defs=[energy_conjugate_pd, atomic_forces_pd],
+    prop_defs=[energy_pd, atomic_forces_pd],
     prop_map=PROPERTY_MAP,
     dataset_id=ds_id,
     standardize_energy=True,

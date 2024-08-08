@@ -28,7 +28,7 @@ from colabfit.tools.database import DataManager, SparkDataLoader
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     cauchy_stress_pd,
-    energy_conjugate_pd,
+    energy_pd,
 )
 
 # from colabfit.tools.utilities import convert_stress
@@ -50,20 +50,25 @@ PI_METADATA = {
     "software": {"value": "PWmat"},
     "method": {"value": "DFT-PBE"},
     "input": {"field": "input"},
+    "property_keys": {
+        "energy": {"field": "eTot"},
+        "forces": {"field": "Force"},
+        "stress": {"field": "Pressure Internal"},
+    },
 }
 PROPERTY_MAP = {
-    "energy-conjugate-with-atomic-forces": [
+    energy_pd["name"]: [
         {
             "energy": {"field": "energy", "units": "eV"},
             "per-atom": {"value": False, "units": None},
         }
     ],
-    "atomic-forces": [
+    atomic_forces_pd["name"]: [
         {
             "forces": {"field": "forces", "units": "eV/angstrom"},
         },
     ],
-    "cauchy-stress": [
+    cauchy_stress_pd["name"]: [
         {
             "stress": {"field": "stress", "units": "hartree/bohr^3"},
             "volume-normalized": {"value": False, "units": None},
