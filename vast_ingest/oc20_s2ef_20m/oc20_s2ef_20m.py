@@ -11,7 +11,8 @@ dipole, original scf energy without the energy correction subtracted
 
 File notes
 ----------
-File /scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/oc20_s2ef/data/s2ef_train_20M/s2ef_train_20M/1050.extxyz is malformed, truncated
+File /scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/oc20_s2ef/data/ \
+    s2ef_train_20M/s2ef_train_20M/1050.extxyz is malformed, truncated
 
 columns from txt files: system_id,frame_number,reference_energy
 
@@ -54,17 +55,23 @@ loader.set_vastdb_session(
     access_key=access_key,
     access_secret=access_secret,
 )
-loader.config_table = "ndb.colabfit.dev.gpw_co"
-loader.config_set_table = "ndb.colabfit.dev.gpw_cs"
-loader.dataset_table = "ndb.colabfit.dev.oc20_test_ds"
-loader.prop_object_table = "ndb.colabfit.dev.oc20_test_po"
-
+loader.config_table = "ndb.`colabfit-prod`.prod.co_20240820"
+loader.config_set_table = "ndb.`colabfit-prod`.prod.cs_20240820"
+loader.dataset_table = "ndb.`colabfit-prod`.prod.ds_20240820"
+loader.prop_object_table = "ndb.`colabfit-prod`.prod.po_20240820"
+print(
+    loader.config_table,
+    loader.config_set_table,
+    loader.dataset_table,
+    loader.prop_object_table,
+)
 
 DATASET_FP = Path(
-    "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/oc20_s2ef/data/s2ef_train_20M/s2ef_train_20M/"
+    "/scratch/gw2338/vast/data-lake-main/spark/scripts/"
+    "gw_scripts/oc20_s2ef/data/s2ef_train_20M/s2ef_train_20M/"
 )
 DATASET_NAME = "OC20_S2EF_train_20M"
-ds_id = "DS_rf10ovxd13ne_0"
+ds_id = "DS_otx1qc9f3pm4_0"
 AUTHORS = [
     "Lowik Chanussot",
     "Abhishek Das",
@@ -99,7 +106,8 @@ DESCRIPTION = (
 
 
 PKL_FP = Path(
-    "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/oc20_s2ef/data/oc20_data_mapping.pkl"
+    "/scratch/gw2338/vast/data-lake-main/spark/scripts/"
+    "gw_scripts/oc20_s2ef/data/oc20_data_mapping.pkl"
 )
 with open(PKL_FP, "rb") as f:
     OC20_MAP = pickle.load(f)
@@ -122,14 +130,14 @@ PI_METADATA = {
 
 
 PROPERTY_MAP = {
-    energy_pd["name"]: [
+    energy_pd["property-name"]: [
         {
             "energy": {"field": "free_energy", "units": "eV"},
             "per-atom": {"value": False, "units": None},
             "reference-energy": {"field": "reference_energy", "units": "eV"},
         }
     ],
-    atomic_forces_pd["name"]: [
+    atomic_forces_pd["property-name"]: [
         {
             "forces": {"field": "forces", "units": "eV/angstrom"},
         },
@@ -190,59 +198,71 @@ def oc_reader(fp: Path):
             #     break
 
 
-def oc_wrapper(dir_path: str):
+def oc_wrapper(dir_path: str, range: tuple):
     dir_path = Path(dir_path)
     if not dir_path.exists():
         print(f"Path {dir_path} does not exist")
         return
-    xyz_paths = sorted(list(dir_path.rglob("*.extxyz")))
-    # print(xyz_paths)
+    xyz_paths = sorted(
+        list(dir_path.rglob("*.extxyz")),
+        key=lambda x: f"{int(x.stem):05d}",
+    )
+    if range[1] == -1:
+        range = (range[0], len(xyz_paths))
+    xyz_paths = xyz_paths[range[0] : range[1]]
+    print(f"{range[0]} to {range[1]}")
     for xyz_path in xyz_paths:
-        print(f"Reading {xyz_path}")
+        print(f"Reading {xyz_path.name}")
         reader = oc_reader(xyz_path)
         for config in reader:
             yield config
 
 
-def oc_wrapper_wrapper(dir_path: str):
-    yield from oc_wrapper(dir_path)
+def oc_wrapper_wrapper(dir_path: str, range: tuple):
+    yield from oc_wrapper(dir_path, range)
 
 
-beg = time()
+def main(range: tuple):
+    beg = time()
+    # loader.zero_multiplicity(ds_id)
+    config_generator = oc_wrapper(DATASET_FP, range)
+    dm = DataManager(
+        nprocs=1,
+        configs=config_generator,
+        prop_defs=[energy_pd, atomic_forces_pd],
+        prop_map=PROPERTY_MAP,
+        dataset_id=ds_id,
+        standardize_energy=True,
+        read_write_batch_size=100000,
+    )
 
-config_generator = oc_wrapper(DATASET_FP)
-dm = DataManager(
-    nprocs=1,
-    configs=config_generator,
-    prop_defs=[energy_pd, atomic_forces_pd],
-    prop_map=PROPERTY_MAP,
-    dataset_id=ds_id,
-    standardize_energy=True,
-    read_write_batch_size=100000,
-)
-print(f"Time to prep: {time() - beg}")
-t = time()
+    print(f"Time to prep: {time() - beg}")
+    t = time()
 
-dm.load_co_po_to_vastdb(loader)
-print(f"Time to load: {time() - t}")
+    dm.load_co_po_to_vastdb(loader, batching_ingest=True)
+    print(f"Time to load: {time() - t}")
 
 
-dm.load_co_po_to_vastdb(loader)
-print(f"Time to load: {time() - t}")
+if __name__ == "__main__":
+    import sys
 
-labels = ["OC20", "Open Catalyst"]
-print("Creating dataset")
-t = time()
-dm.create_dataset(
-    loader,
-    name=DATASET_NAME,
-    authors=AUTHORS,
-    publication_link=PUBLICATION,
-    data_link=DATA_LINK,
-    data_license=LICENSE,
-    description=DESCRIPTION,
-    labels=labels,
-)
-print(f"Time to create dataset: {time() - t}")
-loader.stop_spark()
-print(f"Total time: {time() - beg}")
+    range = (int(sys.argv[1]), int(sys.argv[2]))
+    print(range)
+    main(range)
+
+# labels = ["OC20", "Open Catalyst"]
+# print("Creating dataset")
+# t = time()
+# dm.create_dataset(
+#     loader,
+#     name=DATASET_NAME,
+#     authors=AUTHORS,
+#     publication_link=PUBLICATION,
+#     data_link=DATA_LINK,
+#     data_license=LICENSE,
+#     description=DESCRIPTION,
+#     labels=labels,
+# )
+# print(f"Time to create dataset: {time() - t}")
+# loader.stop_spark()
+# print(f"Total time: {time() - beg}")

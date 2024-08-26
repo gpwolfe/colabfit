@@ -1,10 +1,10 @@
 #!/bin/bash
 
-#SBATCH --job-name=crconi_cao
-#SBATCH --nodes=1
-#SBATCH --cpus-per-task=12
+#SBATCH --job-name=oc_0-20
+#SBATCH --nodes=4
+#SBATCH --cpus-per-task=24
 #SBATCH --mem=160GB
-#SBATCH --time=01:00:00
+#SBATCH --time=10:00:00
 
 export SPARK_SCRIPTS_DIR=/scratch/work/public/apps/pyspark/3.4.2/scripts
 
@@ -26,4 +26,4 @@ for node in ${NODELIST}; do
 done
 echo "run-spark-singularity-no-vdev.bash"
 /scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/run-spark-singularity-no-vdev.bash \
-  bash run-spark-oc2020m_no_dev.bash
+  bash oc20_20m_no_dev_0_1000.bash

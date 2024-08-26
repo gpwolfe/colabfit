@@ -35,7 +35,6 @@ AtomicConfiguration or ase.Atoms object with 'scaled_positions' arg instead of
 
 """
 
-
 import json
 from numpy import isnan
 from pathlib import Path
@@ -109,13 +108,6 @@ PROPERTY_MAP = {
         #     "_metadata": PI_MD,
         # },
     ],
-    # "formation-energy": [
-    #     {
-    #         "energy": {"field": "e_form", "units": "eV"},
-    #         "per-atom": {"value": True, "units": None},
-    #         "_metadata": PI_MD,
-    #     }
-    # ],
     "band-gap": [
         {
             "energy": {"field": "bandgap", "units": "eV"},
