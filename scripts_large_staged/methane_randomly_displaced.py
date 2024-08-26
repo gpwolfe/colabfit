@@ -4,6 +4,7 @@ File notes
 Tested locally with first 100,000 index
 Should work on Kubernetes
 """
+
 from argparse import ArgumentParser
 from pathlib import Path
 import sys
@@ -46,7 +47,7 @@ property_map = {
     "potential-energy": [
         {
             "energy": {"field": "energy", "units": "hartree"},
-            "per-atom": {"field": False, "units": None},
+            "per-atom": {"value": False, "units": None},
             "_metadata": {
                 "software": {"value": "psi4"},
                 "method": {"value": "DFT-PBE"},
