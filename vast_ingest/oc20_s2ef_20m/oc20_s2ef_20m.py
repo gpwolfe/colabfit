@@ -55,10 +55,18 @@ loader.set_vastdb_session(
     access_key=access_key,
     access_secret=access_secret,
 )
-loader.config_table = "ndb.`colabfit-prod`.prod.co_20240820"
-loader.config_set_table = "ndb.`colabfit-prod`.prod.cs_20240820"
-loader.dataset_table = "ndb.`colabfit-prod`.prod.ds_20240820"
-loader.prop_object_table = "ndb.`colabfit-prod`.prod.po_20240820"
+# loader.config_table = "ndb.`colabfit-prod`.prod.co_20240820"
+loader.config_table = "ndb.`colabfit-prod`.prod.co"
+loader.config_set_table = "ndb.`colabfit-prod`.prod.cs"
+# loader.dataset_table = "ndb.`colabfit-prod`.prod.ds_20240820"
+loader.dataset_table = 'ndb.`colabfit-prod`.prod.ds'
+loader.prop_object_table = "ndb.`colabfit-prod`.prod.po"
+# loader.config_table = "ndb.colabfit.dev.co_oc20_test4"
+# loader.config_set_table = "ndb.colabfit.dev.cs_oc20_test4"
+# loader.dataset_table = "ndb.colabfit.dev.ds_oc20_test4"
+# loader.prop_object_table = "ndb.colabfit.dev.po_oc20_test4"
+
+
 print(
     loader.config_table,
     loader.config_set_table,
@@ -66,12 +74,15 @@ print(
     loader.prop_object_table,
 )
 
-DATASET_FP = Path(
-    "/scratch/gw2338/vast/data-lake-main/spark/scripts/"
-    "gw_scripts/oc20_s2ef/data/s2ef_train_20M/s2ef_train_20M/"
-)
+# DATASET_FP = Path(
+#     "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/oc20_s2ef/data/s2ef_train_20M/s2ef_train_20M/"
+# )
+DATASET_FP = Path("/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/oc20_s2ef/oc20_20m/1600_missing.extxyz")
 DATASET_NAME = "OC20_S2EF_train_20M"
+
 ds_id = "DS_otx1qc9f3pm4_0"
+
+PUBLICATION_YEAR = "2024"
 AUTHORS = [
     "Lowik Chanussot",
     "Abhishek Das",
@@ -94,8 +105,7 @@ AUTHORS = [
 LICENSE = "CC-BY-4.0"
 PUBLICATION = "https://doi.org/10.1021/acscatal.0c04525"
 DATA_LINK = (
-    "https://github.com/Open-Catalyst-Project/ocp/blob/main/"
-    "DATASET.md#open-catalyst-2020-oc20"
+    "https://fair-chem.github.io/core/datasets/oc20.html"
 )
 DESCRIPTION = (
     "OC20_S2EF_train_20M is the 20 million structure training subset of the OC20 "
@@ -112,7 +122,7 @@ PKL_FP = Path(
 with open(PKL_FP, "rb") as f:
     OC20_MAP = pickle.load(f)
 
-GLOB_STR = "*.extxyz"
+# GLOB_STR = "*.extxyz"
 PI_METADATA = {
     "software": {"value": "VASP"},
     "method": {"value": "DFT-rPBE"},
@@ -168,16 +178,14 @@ CO_METADATA = {
 
 
 def oc_reader(fp: Path):
-    fp_num = f"{int(fp.stem):03d}"
-    prop_fp = fp.with_suffix(".txt")
+    # fp_num = f"{int(fp.stem):04d}"
+    fp_num = "1600"
+    # prop_fp = fp.with_suffix(".txt")
+    prop_fp = Path("/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/oc20_s2ef/data/s2ef_train_20M/s2ef_train_20M/1600.txt")
     with prop_fp.open("r") as prop_f:
-        prop_lines = [x.strip() for x in prop_f.readlines()]
+        prop_lines = [x.strip() for x in prop_f.readlines()][-525:]
         iter_configs = iread(fp, format="extxyz", index=":")
         i = 0
-        # while True:
-        #     try:
-        #         try:
-        #             config = next(iter_configs)
         for i, config in enumerate(iter_configs):
             try:
                 system_id, frame_number, reference_energy = prop_lines[i].split(",")
@@ -204,12 +212,13 @@ def oc_wrapper(dir_path: str, range: tuple):
         print(f"Path {dir_path} does not exist")
         return
     xyz_paths = sorted(
-        list(dir_path.rglob("*.extxyz")),
+        # list(dir_path.rglob("*.extxyz")),
+        list(dir_path.glob("1060_missing.extxyz")),
         key=lambda x: f"{int(x.stem):05d}",
     )
     if range[1] == -1:
         range = (range[0], len(xyz_paths))
-    xyz_paths = xyz_paths[range[0] : range[1]]
+    xyz_paths = xyz_paths[range[0] : range[1]]  # noqa E203
     print(f"{range[0]} to {range[1]}")
     for xyz_path in xyz_paths:
         print(f"Reading {xyz_path.name}")
@@ -225,7 +234,8 @@ def oc_wrapper_wrapper(dir_path: str, range: tuple):
 def main(range: tuple):
     beg = time()
     # loader.zero_multiplicity(ds_id)
-    config_generator = oc_wrapper(DATASET_FP, range)
+    # config_generator = oc_wrapper(DATASET_FP, range)
+    config_generator = oc_reader(DATASET_FP)
     dm = DataManager(
         nprocs=1,
         configs=config_generator,
@@ -235,34 +245,35 @@ def main(range: tuple):
         standardize_energy=True,
         read_write_batch_size=100000,
     )
-
     print(f"Time to prep: {time() - beg}")
+    # t = time()
+    # dm.load_co_po_to_vastdb(loader, batching_ingest=True)
+    # print(f"Time to load: {time() - t}")
+    labels = ["OC20", "Open Catalyst"]
+    print("Creating dataset")
     t = time()
-
-    dm.load_co_po_to_vastdb(loader, batching_ingest=True)
-    print(f"Time to load: {time() - t}")
+    dm.create_dataset(
+        loader,
+        name=DATASET_NAME,
+        authors=AUTHORS,
+        publication_link=PUBLICATION,
+        data_link=DATA_LINK,
+        data_license=LICENSE,
+        description=DESCRIPTION,
+        publication_year=PUBLICATION_YEAR,
+        labels=labels,
+    )
+    print(f"Time to create dataset: {time() - t}")
+    loader.stop_spark()
+    print(f"Total time: {time() - beg}")
 
 
 if __name__ == "__main__":
-    import sys
+    # import sys
 
-    range = (int(sys.argv[1]), int(sys.argv[2]))
-    print(range)
-    main(range)
+    # range = (int(sys.argv[1]), int(sys.argv[2]))
+    # print(range)
+    # main(range)
+    main((0, 1))
 
-# labels = ["OC20", "Open Catalyst"]
-# print("Creating dataset")
-# t = time()
-# dm.create_dataset(
-#     loader,
-#     name=DATASET_NAME,
-#     authors=AUTHORS,
-#     publication_link=PUBLICATION,
-#     data_link=DATA_LINK,
-#     data_license=LICENSE,
-#     description=DESCRIPTION,
-#     labels=labels,
-# )
-# print(f"Time to create dataset: {time() - t}")
-# loader.stop_spark()
-# print(f"Total time: {time() - beg}")
+    
