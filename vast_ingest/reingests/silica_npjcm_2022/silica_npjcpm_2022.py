@@ -58,15 +58,15 @@ loader.set_vastdb_session(
 )
 
 # Define which tables will be used
-# loader.config_table = "ndb.colabfit.dev.co_remove_dataset_ids_stage3"
-# loader.config_set_table = "ndb.colabfit.dev.cs_remove_dataset_ids"
-# loader.dataset_table = "ndb.colabfit.dev.ds_remove_dataset_ids_stage2"
-# loader.prop_object_table = "ndb.colabfit.dev.po_remove_dataset_ids"
+loader.config_table = "ndb.colabfit.dev.co_remove_dataset_ids_stage3"
+loader.config_set_table = "ndb.colabfit.dev.cs_remove_dataset_ids"
+loader.dataset_table = "ndb.colabfit.dev.ds_remove_dataset_ids_stage2"
+loader.prop_object_table = "ndb.colabfit.dev.po_remove_dataset_ids"
 
-loader.config_table = "ndb.colabfit.dev.co_silica_npjcm_2"
-loader.config_set_table = "ndb.colabfit.dev.cs_silica_npjcm_2"
-loader.dataset_table = "ndb.colabfit.dev.ds_silica_npjcm_2"
-loader.prop_object_table = "ndb.colabfit.dev.po_silica_npjcm_2"
+# loader.config_table = "ndb.colabfit.dev.co_silica_npjcm_2"
+# loader.config_set_table = "ndb.colabfit.dev.cs_silica_npjcm_2"
+# loader.dataset_table = "ndb.colabfit.dev.ds_silica_npjcm_2"
+# loader.prop_object_table = "ndb.colabfit.dev.po_silica_npjcm_2"
 
 
 print(
@@ -187,31 +187,31 @@ def reader(fp):
         """
 css = {
     (
-        ".*bulk_amo.*",
+        "bulk_amo",
         None,
         f"{DATASET_NAME}_SiO2_bulk_amorphous",
         "SiO2 snapshot taken after equilibration of the amorphous phase.",
     ),
     (
-        ".*bulk_cryst.*",
+        "bulk_cryst",
         None,
         f"{DATASET_NAME}_SiO2_bulk_crystal",
         "SiO2 structures in crystalline phase",
     ),
     (
-        ".*quench.*",
+        "quench",
         None,
         f"{DATASET_NAME}_SiO2_quench_phase",
         "SiO2 snapshots taken during the quenching process",
     ),
     (
-        ".*cluster.*",
+        "cluster",
         None,
         f"{DATASET_NAME}_SiO2_small_cluster",
         "SiO2 dimers and configurations with added oxygen clusters",
     ),
     (
-        ".*liquid.*",
+        "liquid",
         None,
         f"{DATASET_NAME}_SiO2_liquid_phase",
         "SiO2 snapshots taken after equilibrating the liquid phase",
@@ -236,10 +236,10 @@ def main():
         read_write_batch_size=100000,
     )
     print(f"Time to prep: {time() - beg}")
-    t = time()
-    dm.load_co_po_to_vastdb(loader, batching_ingest=False)
-    print(f"Time to load: {time() - t}")
-    print("Creating dataset")
+    # t = time()
+    # dm.load_co_po_to_vastdb(loader, batching_ingest=False)
+    # print(f"Time to load: {time() - t}")
+    # print("Creating dataset")
     t = time()
     dm.create_configuration_sets(loader, css)
     print(f"Time to create configuration sets: {time() - t}")
@@ -253,7 +253,7 @@ def main():
         data_license=LICENSE,
         description=DESCRIPTION,
         publication_year=PUBLICATION_YEAR,
-        doi=DOI
+        doi=DOI,
     )
     print(f"Time to create dataset: {time() - t}")
     loader.stop_spark()
