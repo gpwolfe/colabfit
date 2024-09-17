@@ -39,10 +39,16 @@ loader.set_vastdb_session(
 
 # Define which tables will be used
 
-loader.config_table = "ndb.colabfit.dev.co_remove_dataset_ids_stage3"
-loader.config_set_table = "ndb.colabfit.dev.cs_remove_dataset_ids"
-loader.dataset_table = "ndb.colabfit.dev.ds_remove_dataset_ids_stage2"
-loader.prop_object_table = "ndb.colabfit.dev.po_remove_dataset_ids"
+
+loader.config_table = "ndb.colabfit.dev.co_test"
+loader.config_set_table = "ndb.colabfit.dev.cs_test"
+loader.dataset_table = "ndb.colabfit.dev.ds_test"
+loader.prop_object_table = "ndb.colabfit.dev.po_test"
+
+# loader.config_table = "ndb.colabfit.dev.co_remove_dataset_ids_stage3"
+# loader.config_set_table = "ndb.colabfit.dev.cs_remove_dataset_ids"
+# loader.dataset_table = "ndb.colabfit.dev.ds_remove_dataset_ids_stage3"
+# loader.prop_object_table = "ndb.colabfit.dev.po_remove_dataset_ids"
 
 
 print(
@@ -51,76 +57,79 @@ print(
     loader.dataset_table,
     loader.prop_object_table,
 )
-
+#######################################################################################
 # Either set anew or copy over from old script
 
-# DATASET_FP = Path("")
-# DATASET_NAME = ""
+DATASET_FP = Path("")
+DATASET_NAME = ""
 
 # # Set ds_id to same dataset id as before, in order to keep DOI valid
 
-# DOI = ""
-# ds_id = ""
+DOI = ""
+DATASET_ID = ""
 
-# PUBLICATION_YEAR = "2024"
-# AUTHORS = [
-#     "Lowik Chanussot",
-#     "Abhishek Das",
-#     "Siddharth Goyal",
-# ]
-# LICENSE = "CC-BY-4.0"
-# PUBLICATION = "https://doi.org/10.1021/acscatal.0c04525"
-# DATA_LINK = (
-#     "https://fair-chem.github.io/core/datasets/oc20.html"
-# )
-# DESCRIPTION = ''
-# LABELS = ['label1', 'label2']
+PUBLICATION_YEAR = ""
+AUTHORS = [
+    "",
+    "",
+    "",
+]
+LICENSE = "CC-BY-4.0"
+PUBLICATION = "https://doi.org/10.1021/acscatal.0c04525"
+DATA_LINK = "https://fair-chem.github.io/core/datasets/oc20.html"
+DESCRIPTION = ""
+LABELS = ["label1", "label2"]
 
 
-# PI_METADATA = {
-#     "software": {"value": "VASP"},
-#     "method": {"value": "DFT-rPBE"},
-#     "basis_set": {"value": "def2-TZVPP"},
-#     "input": {
-#         "value": {
-#             "EDIFFG": "1E-3",
-#         },
-#     },
-#     "property_keys": {
-#         "energy": "free_energy",
-#         "atomic_forces": "forces",
-#     },
-# }
+PI_METADATA = {
+    "software": {"value": "VASP"},
+    "method": {"value": "DFT-rPBE"},
+    "basis_set": {"value": "def2-TZVPP"},
+    "input": {
+        "value": {
+            "EDIFFG": "1E-3",
+        },
+    },
+    "property_keys": {
+        "energy": "free_energy",
+        "atomic_forces": "forces",
+    },
+}
 
 # MAKE SURE METADATA IS MOVED TO OUTSIDE LAYER OF PROPERTY MAP
 
-# PROPERTY_MAP = {
-#     energy_pd["property-name"]: [
-#         {
-#             "energy": {"field": "free_energy", "units": "eV"},
-#             "per-atom": {"value": False, "units": None},
-#             "reference-energy": {"field": "reference_energy", "units": "eV"},
-#         }
-#     ],
-#     atomic_forces_pd["property-name"]: [
-#         {
-#             "forces": {"field": "forces", "units": "eV/angstrom"},
-#         },
-#     ],
-#     "_metadata": PI_METADATA,
-# }
+PROPERTY_MAP = {
+    energy_pd["property-name"]: [
+        {
+            "energy": {"field": "free_energy", "units": "eV"},
+            "per-atom": {"value": False, "units": None},
+            "reference-energy": {"field": "reference_energy", "units": "eV"},
+        }
+    ],
+    atomic_forces_pd["property-name"]: [
+        {
+            "forces": {"field": "forces", "units": "eV/angstrom"},
+        },
+    ],
+    "_metadata": PI_METADATA,
+}
 
-# CO_METADATA = {
-#     key: {"field": key}
-#     for key in [
-#         "constraints",
-#         "bulk_id",
-#     ]
-# }
+CO_METADATA = {
+    key: {"field": key}
+    for key in [
+        "constraints",
+        "bulk_id",
+    ]
+}
+
+#######################################################################################
+#######################################################################################
 
 
 def reader(fp):
-    pass
+    for i, config in enumerate(iread(fp, index=":", format="extxyz")):
+        config.info["_name"] = f"{fp.stem}__{i}"
+        yield AtomicConfiguration.from_ase(config, co_md_map=CO_METADATA)
 
 
 # In case of directory of files, create wrapper to apply reader function
@@ -157,7 +166,7 @@ def main(range: tuple):
         configs=config_generator,
         prop_defs=[energy_pd, atomic_forces_pd],
         prop_map=PROPERTY_MAP,
-        dataset_id=ds_id,
+        dataset_id=DATASET_ID,
         standardize_energy=True,
         read_write_batch_size=100000,
     )
@@ -165,7 +174,6 @@ def main(range: tuple):
     t = time()
     dm.load_co_po_to_vastdb(loader, batching_ingest=False)
     print(f"Time to load: {time() - t}")
-    labels = LABELS
     print("Creating dataset")
     t = time()
     dm.create_dataset(
@@ -178,7 +186,7 @@ def main(range: tuple):
         description=DESCRIPTION,
         publication_year=PUBLICATION_YEAR,
         doi=DOI,
-        labels=labels,
+        labels=LABELS,
     )
     print(f"Time to create dataset: {time() - t}")
     loader.stop_spark()

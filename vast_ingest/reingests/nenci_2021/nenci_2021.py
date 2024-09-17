@@ -27,13 +27,12 @@ import os
 from pathlib import Path
 from time import time
 
-from ase.io import iread
 from ase.io.extxyz import read_xyz
 from dotenv import load_dotenv
 
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import DataManager, SparkDataLoader
-from colabfit.tools.property_definitions import atomic_forces_pd, energy_pd
+from colabfit.tools.property_definitions import energy_pd
 
 # Set up data loader environment
 load_dotenv()
@@ -51,15 +50,15 @@ loader.set_vastdb_session(
 
 # Define which tables will be used
 
-# loader.config_table = "ndb.colabfit.dev.co_remove_dataset_ids_stage3"
-# loader.config_set_table = "ndb.colabfit.dev.cs_remove_dataset_ids"
-# loader.dataset_table = "ndb.colabfit.dev.ds_remove_dataset_ids_stage2"
-# loader.prop_object_table = "ndb.colabfit.dev.po_remove_dataset_ids"
+loader.config_table = "ndb.colabfit.dev.co_remove_dataset_ids_stage3"
+loader.config_set_table = "ndb.colabfit.dev.cs_remove_dataset_ids"
+loader.dataset_table = "ndb.colabfit.dev.ds_remove_dataset_ids_stage2"
+loader.prop_object_table = "ndb.colabfit.dev.po_remove_dataset_ids"
 
-loader.config_table = "ndb.colabfit.dev.co_nenci"
-loader.config_set_table = "ndb.colabfit.dev.cs_nenci"
-loader.dataset_table = "ndb.colabfit.dev.ds_nenci"
-loader.prop_object_table = "ndb.colabfit.dev.po_nenci"
+# loader.config_table = "ndb.colabfit.dev.co_nenci"
+# loader.config_set_table = "ndb.colabfit.dev.cs_nenci"
+# loader.dataset_table = "ndb.colabfit.dev.ds_nenci"
+# loader.prop_object_table = "ndb.colabfit.dev.po_nenci"
 
 
 print(
@@ -70,7 +69,8 @@ print(
 )
 
 # DATASET_FP = Path(
-#     " /persistent/colabfit_raw_data/new_raw_datasets_2.0/nenci2021/nenci2021/xyzfiles/"
+#     "/persistent/colabfit_raw_data/new_raw_datasets_2.0/nenci2021/"
+#     "nenci2021/xyzfiles/"
 # )
 # DATASET_FP = Path().cwd().parent / ("data/nenci2021/xyzfiles")  # local
 DATASET_FP = Path(
