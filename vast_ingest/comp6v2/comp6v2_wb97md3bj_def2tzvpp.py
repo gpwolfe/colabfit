@@ -64,6 +64,9 @@ PI_METADATA = {
     "software": {"value": "ORCA 4.2.1"},
     "method": {"value": "DFT-wB97MV"},
     "basis-set": {"value": "def2TZVPP"},
+    "dipole": {"field": "dipole", "units": "electron angstrom"},
+    "wB97M-def2-TZVPP-scf-energy": {"field": "scf_energy", "units": "hartree"},
+    "D3-energy-corrections": {"field": "en_correction", "units": "hartree"},
     "input": {
         "value": """Step 1:
 !  quick-dft slowconv loosescf
@@ -95,12 +98,6 @@ PROPERTY_MAP = {
         }
     ],
     "_metadata": PI_METADATA,
-}
-
-CO_METADATA = {
-    "dipole": {"field": "dipole", "units": "electron angstrom"},
-    "wB97M-def2-TZVPP-scf-energy": {"field": "scf_energy", "units": "hartree"},
-    "D3-energy-corrections": {"field": "en_correction", "units": "hartree"},
 }
 
 
