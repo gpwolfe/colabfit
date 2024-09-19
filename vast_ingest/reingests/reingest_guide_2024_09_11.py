@@ -6,7 +6,10 @@ metadata must be in outside layer of keys in PROPERTY_MAP
 reader function must return AtomicConfiguration object, not ase.Atoms object
 config.info['_name'] must be defined in reader function
 all property definitions must be included in DataManager instantiation
-set doi in create_dataset
+set existing doi in create_dataset
+set existing dataset_id in create_dataset
+
+add original keys for data to the pi metadata
 """
 
 # Imports
@@ -40,15 +43,15 @@ loader.set_vastdb_session(
 # Define which tables will be used
 
 
-loader.config_table = "ndb.colabfit.dev.co_test"
-loader.config_set_table = "ndb.colabfit.dev.cs_test"
-loader.dataset_table = "ndb.colabfit.dev.ds_test"
-loader.prop_object_table = "ndb.colabfit.dev.po_test"
+loader.config_table = "ndb.colabfit.dev.co_"
+loader.config_set_table = "ndb.colabfit.dev.cs_"
+loader.dataset_table = "ndb.colabfit.dev.ds_"
+loader.prop_object_table = "ndb.colabfit.dev.po_"
 
 # loader.config_table = "ndb.colabfit.dev.co_remove_dataset_ids_stage3"
 # loader.config_set_table = "ndb.colabfit.dev.cs_remove_dataset_ids"
-# loader.dataset_table = "ndb.colabfit.dev.ds_remove_dataset_ids_stage3"
-# loader.prop_object_table = "ndb.colabfit.dev.po_remove_dataset_ids"
+# loader.dataset_table = "ndb.colabfit.dev.ds_remove_dataset_ids_stage5"
+# loader.prop_object_table = "ndb.colabfit.dev.po_remove_dataset_ids_stage4"
 
 
 print(
@@ -156,11 +159,12 @@ def wrapper(dir_path: str, range: tuple):
             yield config
 
 
-def main(range: tuple):
+# def main(range: tuple):
+def main():
     beg = time()
     # loader.zero_multiplicity(ds_id)
-    # config_generator = wrapper(DATASET_FP)
-    config_generator = wrapper(DATASET_FP, range)
+    config_generator = wrapper(DATASET_FP)
+    # config_generator = wrapper(DATASET_FP, range)
     dm = DataManager(
         nprocs=1,
         configs=config_generator,

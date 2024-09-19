@@ -96,8 +96,8 @@ loader.set_vastdb_session(
 
 loader.config_table = "ndb.colabfit.dev.co_remove_dataset_ids_stage3"
 loader.config_set_table = "ndb.colabfit.dev.cs_remove_dataset_ids"
-loader.dataset_table = "ndb.colabfit.dev.ds_remove_dataset_ids_stage3"
-loader.prop_object_table = "ndb.colabfit.dev.po_remove_dataset_ids"
+loader.dataset_table = "ndb.colabfit.dev.ds_remove_dataset_ids_stage5"
+loader.prop_object_table = "ndb.colabfit.dev.po_remove_dataset_ids_stage4"
 
 
 print(
@@ -147,6 +147,18 @@ AUTHORS = [
     "Kristin A. Persson",
 ]
 
+PI_MD = {
+    "software": {"value": "VASP"},
+    "method": {"value": "DFT"},
+    "keys": {
+        "value": {
+            formation_energy_pd["property-name"]: "formation_energy_per_atom",
+            band_gap_pd["property-name"]: "band_gap",
+            energy_pd["property-name"]: "energy",
+        },
+    },
+}
+
 PROPERTY_MAP = {
     formation_energy_pd["property-name"]: [
         {
@@ -157,6 +169,7 @@ PROPERTY_MAP = {
     band_gap_pd["property-name"]: [
         {
             "energy": {"field": "band_gap", "units": "eV"},
+            "type": {"value": "unknown", "units": None},
         },
     ],
     energy_pd["property-name"]: [
@@ -165,11 +178,7 @@ PROPERTY_MAP = {
             "per-atom": {"value": False, "units": None},
         },
     ],
-    "_metadata": {
-        "software": {"value": "VASP"},
-        "method": {"value": "DFT"},
-        # "ecut": {"field": "encut"},
-    },
+    "_metadata": PI_MD,
 }
 
 
@@ -192,7 +201,9 @@ def reader(fp):
             )
         info = {}
         for key, val in row.items():
-            if isinstance(val, str) and val != "na" and len(val) > 0:
+            if key in ["formation_energy_per_atom", "band_gap", "energy"]:
+                info[key] = float(val)
+            elif isinstance(val, str) and val != "na" and len(val) > 0:
                 info[key] = val
             elif isinstance(val, list) and len(val) > 0 and any([x != "" for x in val]):
                 info[key] = val
