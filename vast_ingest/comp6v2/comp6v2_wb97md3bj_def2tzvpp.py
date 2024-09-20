@@ -23,13 +23,55 @@ from dotenv import load_dotenv
 
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import DataManager, SparkDataLoader
-from colabfit.tools.property_definitions import energy_conjugate_pd
+from colabfit.tools.property_definitions import (
+    # atomic_forces_pd,
+    energy_pd,
+)
 
-DATASET_FP = Path("data/COMP6v2-wB97MD3BJ-def2TZVPP.h5")
+# Set up data loader environment
+load_dotenv()
+loader = SparkDataLoader(
+    table_prefix="ndb.colabfit.dev",
+)
+access_key = os.getenv("SPARK_ID")
+access_secret = os.getenv("SPARK_KEY")
+endpoint = os.getenv("SPARK_ENDPOINT")
+loader.set_vastdb_session(
+    endpoint=endpoint,
+    access_key=access_key,
+    access_secret=access_secret,
+)
+
+# Define which tables will be used
+
+
+# loader.config_table = "ndb.colabfit.dev.co_comp"
+# loader.config_set_table = "ndb.colabfit.dev.cs_comp"
+# loader.dataset_table = "ndb.colabfit.dev.ds_comp"
+# loader.prop_object_table = "ndb.colabfit.dev.po_comp"
+
+loader.config_table = "ndb.colabfit.dev.co_remove_dataset_ids_stage4"
+loader.prop_object_table = "ndb.colabfit.dev.po_remove_dataset_ids_stage4"
+loader.config_set_table = "ndb.colabfit.dev.cs_remove_dataset_ids"
+loader.dataset_table = "ndb.colabfit.dev.ds_remove_dataset_ids_stage5"
+
+
+print(
+    loader.config_table,
+    loader.config_set_table,
+    loader.dataset_table,
+    loader.prop_object_table,
+)
+
+
+DATASET_FP = Path(
+    "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/data/COMP6v2-wB97MD3BJ-def2TZVPP.h5"  # noqa
+)
 DATASET_NAME = "COMP6v2-wB97MD3BJ-def2TZVPP"
 LICENSE = "CC-BY-4.0"  # Creative Commons Attribution 4.0 International
-PUB_YEAR = "2023"
-
+PUBLICATION_YEAR = "2024"
+DOI = None
+DATASET_ID = "DS_mznjdz4oqv11_0"
 PUBLICATION = "https://doi.org/10.1021/acs.jctc.0c00121"
 DATA_LINK = "https://doi.org/10.5281/zenodo.10126157"
 # OTHER_LINKS = []
@@ -58,11 +100,11 @@ DESCRIPTION = (
     "Tripeptides, and s66x8) are contained in each of the COMP6v2 datasets "
     "corresponding to the above levels of theory."
 )
-GLOB_STR = "COMP6v2-wB97MD3BJ-def2TZVPP.h5"
 
 PI_METADATA = {
     "software": {"value": "ORCA 4.2.1"},
     "method": {"value": "DFT-wB97MV"},
+    "keys": {"value": {energy_pd["property-name"]: "energies"}},
     "basis-set": {"value": "def2TZVPP"},
     "dipole": {"field": "dipole", "units": "electron angstrom"},
     "wB97M-def2-TZVPP-scf-energy": {"field": "scf_energy", "units": "hartree"},
@@ -91,7 +133,7 @@ vdwgrid4
 
 
 PROPERTY_MAP = {
-    energy_conjugate_pd["property-name"]: [
+    energy_pd["property-name"]: [
         {
             "energy": {"field": "energy", "units": "hartree"},
             "per-atom": {"value": False, "units": None},
@@ -123,7 +165,7 @@ def compv6_reader(properties, num_atoms):
         for k, v in config.info.items():
             if isinstance(v, np.ndarray):
                 config.info[k] = v.tolist()
-        yield AtomicConfiguration.from_ase(config, CO_METADATA)
+        yield AtomicConfiguration.from_ase(config)
 
 
 def wrapper(fp):
@@ -137,69 +179,45 @@ def wrapper(fp):
                 pass
 
 
-load_dotenv()
-
-loader = SparkDataLoader(
-    table_prefix="ndb.colabfit.dev",
-)
-
-access_key = os.getenv("SPARK_ID")
-
-access_secret = os.getenv("SPARK_KEY")
-
-endpoint = os.getenv("SPARK_ENDPOINT")
-
-loader.set_vastdb_session(
-    endpoint=endpoint,
-    access_key=access_key,
-    access_secret=access_secret,
-)
-
-# loader.config_table = "ndb.colabfit.dev.gpw_test_configs2"
-# loader.config_set_table = "ndb.colabfit.dev.gpw_test_config_sets2"
-# loader.dataset_table = "ndb.colabfit.dev.gpw_test_datasets2"
-# loader.prop_object_table = "ndb.colabfit.dev.gpw_test_prop_objects2"
-
-ds_id = "DS_rc1rp7a72cfi_0"
-loader.zero_multiplicity(ds_id)
-print(f"Dataset ID: {ds_id}\nDS Name: {DATASET_NAME}")
-
-
-beg = time()
-
-config_generator = wrapper(DATASET_FP)
-dm = DataManager(
-    nprocs=1,
-    configs=config_generator,
-    prop_defs=[energy_conjugate_pd],
-    prop_map=PROPERTY_MAP,
-    dataset_id=ds_id,
-    standardize_energy=True,
-    read_write_batch_size=100000,
-)
-print(f"Time to prep: {time() - beg}")
-t = time()
-
-dm.load_co_po_to_vastdb(loader)
-print(f"Time to load: {time() - t}")
+# def main(range: tuple):
+def main():
+    beg = time()
+    # loader.zero_multiplicity(ds_id)
+    config_generator = wrapper(DATASET_FP)
+    # config_generator = wrapper(DATASET_FP, range)
+    dm = DataManager(
+        nprocs=1,
+        configs=config_generator,
+        prop_defs=[energy_pd],
+        prop_map=PROPERTY_MAP,
+        dataset_id=DATASET_ID,
+        standardize_energy=True,
+        read_write_batch_size=100000,
+    )
+    print(f"Time to prep: {time() - beg}")
+    t = time()
+    dm.load_co_po_to_vastdb(loader, batching_ingest=False)
+    print(f"Time to load: {time() - t}")
+    print("Creating dataset")
+    t = time()
+    dm.create_dataset(
+        loader,
+        name=DATASET_NAME,
+        authors=AUTHORS,
+        publication_link=PUBLICATION,
+        data_link=DATA_LINK,
+        data_license=LICENSE,
+        description=DESCRIPTION,
+        publication_year=PUBLICATION_YEAR,
+        doi=DOI,
+        # labels=LABELS,
+    )
+    print(f"Time to create dataset: {time() - t}")
+    loader.stop_spark()
+    print(f"Total time: {time() - beg}")
 
 
-# dm.load_co_po_to_vastdb(loader)
-print(f"Time to load: {time() - t}")
-
-labels = ["ANI", "benchmark"]
-print("Creating dataset")
-t = time()
-dm.create_dataset(
-    loader,
-    name=DATASET_NAME,
-    authors=AUTHORS,
-    publication_link=PUBLICATION,
-    data_link=DATA_LINK,
-    data_license=LICENSE,
-    description=DESCRIPTION,
-    labels=labels,
-)
-print(f"Time to create dataset: {time() - t}")
-loader.stop_spark()
-print(f"Total time: {time() - beg}")
+if __name__ == "__main__":
+    # import sys
+    # range = (int(sys.argv[1]), int(sys.argv[2]))
+    main()
