@@ -44,14 +44,14 @@ loader.set_vastdb_session(
 
 
 loader.config_table = "ndb.colabfit.dev.co_"
+loader.prop_object_table = "ndb.colabfit.dev.po_"
 loader.config_set_table = "ndb.colabfit.dev.cs_"
 loader.dataset_table = "ndb.colabfit.dev.ds_"
-loader.prop_object_table = "ndb.colabfit.dev.po_"
 
 # loader.config_table = "ndb.colabfit.dev.co_remove_dataset_ids_stage3"
+# loader.prop_object_table = "ndb.colabfit.dev.po_remove_dataset_ids_stage4"
 # loader.config_set_table = "ndb.colabfit.dev.cs_remove_dataset_ids"
 # loader.dataset_table = "ndb.colabfit.dev.ds_remove_dataset_ids_stage5"
-# loader.prop_object_table = "ndb.colabfit.dev.po_remove_dataset_ids_stage4"
 
 
 print(
@@ -93,9 +93,11 @@ PI_METADATA = {
             "EDIFFG": "1E-3",
         },
     },
-    "property_keys": {
-        "energy": "free_energy",
-        "atomic_forces": "forces",
+    "keys": {
+        "value": {
+            "energy": "free_energy",
+            "atomic_forces": "forces",
+        },
     },
 }
 
