@@ -50,10 +50,10 @@ loader.set_vastdb_session(
 # loader.dataset_table = "ndb.colabfit.dev.ds_comp"
 # loader.prop_object_table = "ndb.colabfit.dev.po_comp"
 
-loader.config_table = "ndb.colabfit.dev.co_remove_dataset_ids_stage4"
-loader.prop_object_table = "ndb.colabfit.dev.po_remove_dataset_ids_stage4"
-loader.config_set_table = "ndb.colabfit.dev.cs_remove_dataset_ids"
-loader.dataset_table = "ndb.colabfit.dev.ds_remove_dataset_ids_stage5"
+loader.config_table = "ndb.colabfit.dev.co_wip"
+loader.prop_object_table = "ndb.colabfit.dev.po_wip"
+loader.config_set_table = "ndb.colabfit.dev.cs_wip"
+loader.dataset_table = "ndb.colabfit.dev.ds_wip"
 
 
 print(
