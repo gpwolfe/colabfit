@@ -66,15 +66,15 @@ loader.set_vastdb_session(
 
 # Define which tables will be used
 
-loader.config_table = "ndb.colabfit.dev.co_cr"
-loader.prop_object_table = "ndb.colabfit.dev.po_cr"
-loader.config_set_table = "ndb.colabfit.dev.cs_cr"
-loader.dataset_table = "ndb.colabfit.dev.ds_cr"
+# loader.config_table = "ndb.colabfit.dev.co_cr"
+# loader.prop_object_table = "ndb.colabfit.dev.po_cr"
+# loader.config_set_table = "ndb.colabfit.dev.cs_cr"
+# loader.dataset_table = "ndb.colabfit.dev.ds_cr"
 
-# loader.config_table = "ndb.colabfit.dev.co_wip"
-# loader.prop_object_table = "ndb.colabfit.dev.po_wip2"
-# loader.config_set_table = "ndb.colabfit.dev.cs_wip"
-# loader.dataset_table = "ndb.colabfit.dev.ds_wip2"
+loader.config_table = "ndb.colabfit.dev.co_wip"
+loader.prop_object_table = "ndb.colabfit.dev.po_wip"
+loader.config_set_table = "ndb.colabfit.dev.cs_wip"
+loader.dataset_table = "ndb.colabfit.dev.ds_wip"
 
 
 PI_METADATA = {
@@ -110,6 +110,7 @@ PROPERTY_MAP = {
     cauchy_stress_pd["property-name"]: [
         {
             "stress": {"field": "stress", "units": "kbar"},
+            "volume-normalized": {"value": False, "units": None},
         },
     ],
     "_metadata": PI_METADATA,
@@ -149,7 +150,6 @@ def main():
         description=DESCRIPTION,
         # labels=DS_LABELS,
         publication_year=PUBLICATION_YEAR,
-        license=LICENSE,
     )
     # If running as a script, include below to stop the spark instance
     print(f"Time to create dataset: {time() - t}")
