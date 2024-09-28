@@ -34,20 +34,6 @@ from colabfit.tools.property_definitions import (
     cauchy_stress_pd,
 )
 
-DATASET_FP = Path("path/to/dataset")
-DATASET_NAME = "DATASET_NAME"
-AUTHORS = ["author1", "author2"]
-PUBLICATION_LINK = "https://example.com"
-DATA_LINK = "https://example.com"
-OTHER_LINKS = ["https://example.com"]
-DESCRIPTION = "Description of dataset"
-# DS_LABELS = ["label1", "label2"]
-LICENSE = "CC-BY-4.0"
-GLOB_STR = "*.extxyz"
-DOI = ""
-DATASET_ID = ""
-PUBLICATION_YEAR = ""
-
 load_dotenv()
 loader = SparkDataLoader(
     table_prefix="ndb.colabfit.dev",
@@ -72,6 +58,21 @@ loader.dataset_table = "ndb.colabfit.dev.ds_"
 # loader.prop_object_table = "ndb.colabfit.dev.po_wip2"
 # loader.config_set_table = "ndb.colabfit.dev.cs_wip"
 # loader.dataset_table = "ndb.colabfit.dev.ds_wip2"
+
+
+DATASET_FP = Path("path/to/dataset")
+DATASET_NAME = "DATASET_NAME"
+AUTHORS = ["author1", "author2"]
+PUBLICATION_LINK = "https://example.com"
+DATA_LINK = "https://example.com"
+OTHER_LINKS = ["https://example.com"]
+DESCRIPTION = "Description of dataset"
+# DS_LABELS = ["label1", "label2"]
+LICENSE = "CC-BY-4.0"
+GLOB_STR = "*.extxyz"
+DOI = ""
+DATASET_ID = ""
+PUBLICATION_YEAR = ""
 
 PI_METADATA = {
     "software": {"value": "Quantum ESPRESSO"},
@@ -178,7 +179,6 @@ def main():
         description=DESCRIPTION,
         # labels=DS_LABELS,
         publication_year=PUBLICATION_YEAR,
-        license=LICENSE,
     )
     # If running as a script, include below to stop the spark instance
     print(f"Time to create dataset: {time() - t}")
