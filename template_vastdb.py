@@ -55,9 +55,9 @@ loader.config_set_table = "ndb.colabfit.dev.cs_"
 loader.dataset_table = "ndb.colabfit.dev.ds_"
 
 # loader.config_table = "ndb.colabfit.dev.co_wip"
-# loader.prop_object_table = "ndb.colabfit.dev.po_wip2"
+# loader.prop_object_table = "ndb.colabfit.dev.po_wip"
 # loader.config_set_table = "ndb.colabfit.dev.cs_wip"
-# loader.dataset_table = "ndb.colabfit.dev.ds_wip2"
+# loader.dataset_table = "ndb.colabfit.dev.ds_wip"
 
 
 DATASET_FP = Path("path/to/dataset")
