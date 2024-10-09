@@ -49,7 +49,7 @@ from tqdm import tqdm
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import (
     DataManager,
-    SparkDataLoader,
+    VastDataLoader,
 )
 from colabfit.tools.property_definitions import (
     formation_energy_pd,
@@ -58,7 +58,7 @@ from colabfit.tools.property_definitions import (
 
 # Set up data loader environment
 load_dotenv()
-loader = SparkDataLoader(
+loader = VastDataLoader(
     table_prefix="ndb.colabfit.dev",
 )
 access_key = os.getenv("SPARK_ID")

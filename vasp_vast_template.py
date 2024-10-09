@@ -17,7 +17,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from colabfit.tools.database import DataManager, SparkDataLoader
+from colabfit.tools.database import DataManager, VastDataLoader
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     cauchy_stress_pd,
@@ -96,7 +96,7 @@ ds_id = generate_ds_id()
 print(f"Dataset ID: {ds_id}\nDS Name: {DATASET_NAME}")
 
 load_dotenv()
-loader = SparkDataLoader(table_prefix="ndb.colabfit.dev")
+loader = VastDataLoader(table_prefix="ndb.colabfit.dev")
 access_key = os.getenv("SPARK_ID")
 access_secret = os.getenv("SPARK_KEY")
 endpoint = os.getenv("SPARK_ENDPOINT")

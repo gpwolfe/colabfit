@@ -49,13 +49,13 @@ from numpy import isnan
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import (
     DataManager,
-    SparkDataLoader,
+    VastDataLoader,
 )
 from colabfit.tools.property_definitions import band_gap_pd
 
 # Set up data loader environment
 load_dotenv()
-loader = SparkDataLoader(
+loader = VastDataLoader(
     table_prefix="ndb.colabfit.dev",
 )
 access_key = os.getenv("SPARK_ID")

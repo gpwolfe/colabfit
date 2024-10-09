@@ -31,7 +31,7 @@ from dotenv import load_dotenv
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import (
     DataManager,
-    SparkDataLoader,
+    VastDataLoader,
 )
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
@@ -41,7 +41,7 @@ from colabfit.tools.property_definitions import (
 
 # Set up data loader environment
 load_dotenv()
-loader = SparkDataLoader(
+loader = VastDataLoader(
     table_prefix="ndb.colabfit.dev",
 )
 access_key = os.getenv("SPARK_ID")

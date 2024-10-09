@@ -19,7 +19,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from colabfit.tools.database import DataManager, SparkDataLoader
+from colabfit.tools.database import DataManager, VastDataLoader
 from colabfit.tools.parsers import mlip_cfg_reader
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
@@ -52,7 +52,7 @@ DATASET_ID = "DS_z2mkok0egrm8_0"
 PUBLICATION_YEAR = "2024"
 
 load_dotenv()
-loader = SparkDataLoader(
+loader = VastDataLoader(
     table_prefix="ndb.colabfit.dev",
 )
 access_key = os.getenv("SPARK_ID")
