@@ -71,13 +71,13 @@ from numpy import isnan
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import (
     DataManager,
-    SparkDataLoader,
+    VastDataLoader,
 )
 from colabfit.tools.property_definitions import atomization_energy_pd, band_gap_pd
 
 # from colabfit.tools.property_definitions import potential_energy_pd
 load_dotenv()
-loader = SparkDataLoader(
+loader = VastDataLoader(
     table_prefix="ndb.colabfit.dev",
 )
 

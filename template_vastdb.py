@@ -27,7 +27,7 @@ from ase.io import iread
 from dotenv import load_dotenv
 
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import DataManager, SparkDataLoader
+from colabfit.tools.database import DataManager, VastDataLoader
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     energy_pd,
@@ -35,7 +35,7 @@ from colabfit.tools.property_definitions import (
 )
 
 load_dotenv()
-loader = SparkDataLoader(
+loader = VastDataLoader(
     table_prefix="ndb.colabfit.dev",
 )
 access_key = os.getenv("SPARK_ID")
@@ -46,6 +46,8 @@ loader.set_vastdb_session(
     access_key=access_key,
     access_secret=access_secret,
 )
+
+loader.bucket_dir = "test_md"  # comment out upon full ingest
 
 # Define which tables will be used
 
@@ -70,7 +72,7 @@ DESCRIPTION = "Description of dataset"
 # DS_LABELS = ["label1", "label2"]
 LICENSE = "CC-BY-4.0"
 GLOB_STR = "*.extxyz"
-DOI = ""
+DOI = None
 DATASET_ID = ""
 PUBLICATION_YEAR = ""
 

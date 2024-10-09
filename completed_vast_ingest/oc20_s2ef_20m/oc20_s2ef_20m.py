@@ -39,12 +39,12 @@ from ase.io import iread
 from dotenv import load_dotenv
 
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import DataManager, SparkDataLoader
+from colabfit.tools.database import DataManager, VastDataLoader
 from colabfit.tools.property_definitions import atomic_forces_pd, energy_pd
 
 
 load_dotenv()
-loader = SparkDataLoader(
+loader = VastDataLoader(
     table_prefix="ndb.colabfit.dev",
 )
 access_key = os.getenv("SPARK_ID")
@@ -59,7 +59,7 @@ loader.set_vastdb_session(
 loader.config_table = "ndb.`colabfit-prod`.prod.co"
 loader.config_set_table = "ndb.`colabfit-prod`.prod.cs"
 # loader.dataset_table = "ndb.`colabfit-prod`.prod.ds_20240820"
-loader.dataset_table = 'ndb.`colabfit-prod`.prod.ds'
+loader.dataset_table = "ndb.`colabfit-prod`.prod.ds"
 loader.prop_object_table = "ndb.`colabfit-prod`.prod.po"
 # loader.config_table = "ndb.colabfit.dev.co_oc20_test4"
 # loader.config_set_table = "ndb.colabfit.dev.cs_oc20_test4"
@@ -77,7 +77,9 @@ print(
 # DATASET_FP = Path(
 #     "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/oc20_s2ef/data/s2ef_train_20M/s2ef_train_20M/"
 # )
-DATASET_FP = Path("/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/oc20_s2ef/oc20_20m/1600_missing.extxyz")
+DATASET_FP = Path(
+    "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/oc20_s2ef/oc20_20m/1600_missing.extxyz"
+)
 DATASET_NAME = "OC20_S2EF_train_20M"
 
 ds_id = "DS_otx1qc9f3pm4_0"
@@ -104,9 +106,7 @@ AUTHORS = [
 ]
 LICENSE = "CC-BY-4.0"
 PUBLICATION = "https://doi.org/10.1021/acscatal.0c04525"
-DATA_LINK = (
-    "https://fair-chem.github.io/core/datasets/oc20.html"
-)
+DATA_LINK = "https://fair-chem.github.io/core/datasets/oc20.html"
 DESCRIPTION = (
     "OC20_S2EF_train_20M is the 20 million structure training subset of the OC20 "
     "Structure to Energy and Forces dataset. Features include potential energy, "
@@ -181,7 +181,9 @@ def oc_reader(fp: Path):
     # fp_num = f"{int(fp.stem):04d}"
     fp_num = "1600"
     # prop_fp = fp.with_suffix(".txt")
-    prop_fp = Path("/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/oc20_s2ef/data/s2ef_train_20M/s2ef_train_20M/1600.txt")
+    prop_fp = Path(
+        "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/oc20_s2ef/data/s2ef_train_20M/s2ef_train_20M/1600.txt"
+    )
     with prop_fp.open("r") as prop_f:
         prop_lines = [x.strip() for x in prop_f.readlines()][-525:]
         iter_configs = iread(fp, format="extxyz", index=":")
@@ -275,5 +277,3 @@ if __name__ == "__main__":
     # print(range)
     # main(range)
     main((0, 1))
-
-    
