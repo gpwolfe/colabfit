@@ -31,44 +31,80 @@ from colabfit.tools.property_definitions import (
     energy_pd,
 )
 
-# from colabfit.tools.utilities import convert_stress
-from colabfit.tools.database import generate_ds_id
+load_dotenv()
+loader = VastDataLoader(
+    table_prefix="ndb.colabfit.dev",
+)
+access_key = os.getenv("SPARK_ID")
+access_secret = os.getenv("SPARK_KEY")
+endpoint = os.getenv("SPARK_ENDPOINT")
+loader.set_vastdb_session(
+    endpoint=endpoint,
+    access_key=access_key,
+    access_secret=access_secret,
+)
 
-DATASET_FP = Path("data/available_data/")
+# loader.metadata_dir = (
+#     "test_md/MD"  # comment out upon full ingest  # comment out upon full ingest
+# )
+
+# Define which tables will be used
+
+# loader.config_table = "ndb.colabfit.dev.co_pwm"
+# loader.prop_object_table = "ndb.colabfit.dev.po_pwm"
+# loader.config_set_table = "ndb.colabfit.dev.cs_pwm"
+# loader.dataset_table = "ndb.colabfit.dev.ds_pwm"
+# loader.co_cs_map_table = "ndb.colabfit.dev.co_cs_map_pwm"
+
+loader.config_table = "ndb.colabfit.dev.co_wip"
+loader.prop_object_table = "ndb.colabfit.dev.po_wip"
+loader.config_set_table = "ndb.colabfit.dev.cs_wip"
+loader.dataset_table = "ndb.colabfit.dev.ds_wip"
+loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_wip"
+
+
+DATASET_FP = Path(
+    "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/data/pwmlff/available_data"  # noqa E501
+)
+
 DATASET_NAME = "PWMLFF_feature_comparison_NPJ2023"
 AUTHORS = ["Ting Han", "Jie Li", "Liping Liu", "Fengyu Li", "Lin-Wang Wang"]
 PUBLICATION_LINK = "https://www.doi.org/10.1088/1367-2630/acf2bb"
 DATA_LINK = "https://github.com/LonxunQuantum/PWMLFF_library/tree/main"
 OTHER_LINKS = None
-DS_DESCRIPTION = ""
+DS_DESCRIPTION = 'Partial dataset for "Accuracy evaluation of different machine learning force field features". The included data is limited to that hosted directly on the repository at the related GitHub link. From publication abstract: Predicting energies and forces using machine learning force field (MLFF) depends on accurate descriptions (features) of chemical environment. Despite the numerous features proposed, there is a lack of controlled comparison among them for their universality and accuracy. In this work, we compared several commonly used feature types for their ability to describe physical systems. These different feature types include cosine feature, Gaussian feature, moment tensor potential (MTP) feature, spectral neighbor analysis potential feature, simplified smooth deep potential with Chebyshev polynomials feature and Gaussian polynomials feature, and atomic cluster expansion feature. We evaluated the training root mean square error (RMSE) for the atomic group energy, total energy, and force using linear regression model regarding to the density functional theory results. We applied these MLFF models to an amorphous sulfur system and carbon systems, and the fitting results show that MTP feature can yield the smallest RMSE results compared with other feature types for either sulfur system or carbon system in the disordered atomic configurations. Moreover, as an extending test of other systems, the MTP feature combined with linear regression model can also reproduce similar quantities along the ab initio molecular dynamics trajectory as represented by Cu systems. Our results are helpful in selecting the proper features for the MLFF development.'  # noqa E501
 DS_LABELS = None  # ["label1", "label2"]
 LICENSE = "CC-BY-4.0"
 GLOB_STR = "MOVEMENT"
 
+ds_id = "DS_cgjdk1e2txjy_0"
 
 PI_METADATA = {
     "software": {"value": "PWmat"},
     "method": {"value": "DFT-PBE"},
     "input": {"field": "input"},
     "property_keys": {
-        "energy": {"field": "eTot"},
-        "forces": {"field": "Force"},
-        "stress": {"field": "Pressure Internal"},
+        "value": {
+            "energy": "eTot",
+            "forces": "Force",
+            "stress": "Pressure Internal",
+        }
     },
 }
+
 PROPERTY_MAP = {
-    energy_pd["name"]: [
+    energy_pd["property-name"]: [
         {
             "energy": {"field": "energy", "units": "eV"},
             "per-atom": {"value": False, "units": None},
         }
     ],
-    atomic_forces_pd["name"]: [
+    atomic_forces_pd["property-name"]: [
         {
             "forces": {"field": "forces", "units": "eV/angstrom"},
         },
     ],
-    cauchy_stress_pd["name"]: [
+    cauchy_stress_pd["property-name"]: [
         {
             "stress": {"field": "stress", "units": "hartree/bohr^3"},
             "volume-normalized": {"value": False, "units": None},
@@ -76,28 +112,23 @@ PROPERTY_MAP = {
     ],
     "_metadata": PI_METADATA,
 }
-# CO_METADATA = {
-#     key: {"field": key}
-#     for key in [
-#         "constraints",
-#         "bulk_id",
-#     ]
-# }
+
+
 CONFIGURATION_SETS = [
     (
-        r"C__.*",
+        r"C__",
         None,
         f"{DATASET_NAME}__carbon",
         f"Structures of carbon from {DATASET_NAME}",
     ),
     (
-        r"CH3CH2OH__.*",
+        r"CH3CH2OH__",
         None,
         f"{DATASET_NAME}__CH3CH2OH",
         f"Structures of CH3CH2OH from {DATASET_NAME}",
     ),
     (
-        r"CH4__.*",
+        r"CH4__",
         None,
         f"{DATASET_NAME}__CH4",
         f"Structures of CH4 from {DATASET_NAME}",
@@ -109,21 +140,21 @@ CONFIGURATION_SETS = [
     #     f"Structures of LiGePS from {DATASET_NAME}",
     # ),
     (
-        r"Mg_2600images__.*",
+        r"Mg_2600images__",
         None,
-        f"{DATASET_NAME}__Mg_2600images",
+        f"{DATASET_NAME}__Mg_2600_images",
         f"Structures of Mg from the 2600images split of {DATASET_NAME}",
     ),
     (
-        r"Ni__.*",
+        r"Ni__",
         None,
         f"{DATASET_NAME}__Ni",
         f"Structures of Ni from {DATASET_NAME}",
     ),
     (
-        r"Si_4600images__.*",
+        r"Si_4600images__",
         None,
-        f"{DATASET_NAME}__Si",
+        f"{DATASET_NAME}__Si_4600_images",
         f"Structures of Si from the 4600images split of {DATASET_NAME}",
     ),
 ]
@@ -268,22 +299,18 @@ class MOVEMENT(object):
     """Adapted from https://github.com/LonxunQuantum/PWMLFF_library/tree/main"""
 
     def load_movement_file(self):
-        # seperate content to image contents
         with open(self.movement_file, "r") as rf:
             mvm_contents = rf.readlines()
         ix = 0
         i = 0
         while i < len(mvm_contents):
             if "Iteration" in mvm_contents[i]:
-                # image_start = i
-                # set energy info
                 image = Image()
-                # self.image_list.append(image)
                 image.set_energy_info(mvm_contents[i])
                 i += 1
             elif "Lattice" in mvm_contents[i]:
                 # three line for lattic info
-                image.set_lattice_stress(mvm_contents[i + 1 : i + 4])
+                image.set_lattice_stress(mvm_contents[i + 1 : i + 4])  # noqa E203
                 i += 4
             elif "MD_INFO" in mvm_contents[i]:
                 md_keys = mvm_contents[i].strip().split()[1:]
@@ -300,7 +327,6 @@ class MOVEMENT(object):
                 image.set_input(input)
                 i += 2
             elif " Position" in mvm_contents[i]:
-                # atom_nums line for postion
                 image.set_position(mvm_contents[i + 1 : i + image.atom_num + 1])
                 i = i + 1 + image.atom_num
             elif "Force" in mvm_contents[i]:
@@ -315,12 +341,19 @@ class MOVEMENT(object):
                 i = i + 4
             else:
                 i = i + 1  # to next line
-            # image content end at the line "------------END"
             if "-------------" in mvm_contents[i]:
+                labels = []
+                if (
+                    self.movement_file.parts[-2].endswith("k")
+                    and self.movement_file.parts[-2][:-1].isdigit()
+                ):
+                    labels.append(f"temperature:{self.movement_file.parts[-2][:-1]}")
+                labels.append(f"frame:{ix}")
                 info = {
                     "forces": image.force,
                     "stress": image.pressure,
                     "energy": image.Etot,
+                    "_labels": labels,
                     "_name": "__".join(
                         self.movement_file.parts[
                             self.movement_file.parts.index("available_data") + 1 :
@@ -355,26 +388,12 @@ def read_dir(dir_path: str):
             yield config
 
 
-# def main():
-load_dotenv()
-loader = VastDataLoader(table_prefix="ndb.colabfit.dev")
-access_key = os.getenv("SPARK_ID")
-access_secret = os.getenv("SPARK_KEY")
-endpoint = os.getenv("SPARK_ENDPOINT")
-loader.set_vastdb_session(
-    endpoint=endpoint, access_key=access_key, access_secret=access_secret
-)
-
-loader.config_table = "ndb.colabfit.dev.cos_from_ingest"
-loader.prop_table = "ndb.colabfit.dev.pos_from_ingest"
-loader.dataset_table = "ndb.colabfit.dev.ds_from_ingest"
-loader.config_set_table = "ndb.colabfit.dev.cs_from_ingest"
-ds_id = "DS_cgjdk1e2txjy_1"
 config_generator = read_dir(DATASET_FP)
+
 dm = DataManager(
     nprocs=1,
     configs=config_generator,
-    prop_defs=[energy_conjugate_pd, atomic_forces_pd, cauchy_stress_pd],
+    prop_defs=[energy_pd, atomic_forces_pd, cauchy_stress_pd],
     prop_map=PROPERTY_MAP,
     dataset_id=ds_id,
     read_write_batch_size=10000,

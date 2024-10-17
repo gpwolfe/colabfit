@@ -47,7 +47,7 @@ loader.set_vastdb_session(
     access_secret=access_secret,
 )
 
-loader.bucket_dir = "test_md"  # comment out upon full ingest
+loader.metadata_dir = "test_md"  # comment out upon full ingest
 
 # Define which tables will be used
 
@@ -55,11 +55,13 @@ loader.config_table = "ndb.colabfit.dev.co_"
 loader.prop_object_table = "ndb.colabfit.dev.po_"
 loader.config_set_table = "ndb.colabfit.dev.cs_"
 loader.dataset_table = "ndb.colabfit.dev.ds_"
+loader.co_cs_map_table = "ndb.colabfit.dev.co_cs_"
 
 # loader.config_table = "ndb.colabfit.dev.co_wip"
 # loader.prop_object_table = "ndb.colabfit.dev.po_wip"
 # loader.config_set_table = "ndb.colabfit.dev.cs_wip"
 # loader.dataset_table = "ndb.colabfit.dev.ds_wip"
+# loader.co_cs_map_table = "ndb.colabfit.dev.co_cs_wip"
 
 
 DATASET_FP = Path("path/to/dataset")
