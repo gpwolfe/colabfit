@@ -58,17 +58,17 @@ loader.set_vastdb_session(
 # Define which tables will be used
 loader.metadata_dir = "test_md/MD"  # comment out upon full ingest
 
-loader.config_table = "ndb.colabfit.dev.co_aee"
-loader.prop_object_table = "ndb.colabfit.dev.po_aee"
-loader.config_set_table = "ndb.colabfit.dev.cs_aee"
-loader.dataset_table = "ndb.colabfit.dev.ds_aee"
-loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_aee"
+# loader.config_table = "ndb.colabfit.dev.co_aee"
+# loader.prop_object_table = "ndb.colabfit.dev.po_aee"
+# loader.config_set_table = "ndb.colabfit.dev.cs_aee"
+# loader.dataset_table = "ndb.colabfit.dev.ds_aee"
+# loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_aee"
 
-# loader.config_table = "ndb.colabfit.dev.co_wip"
+loader.config_table = "ndb.colabfit.dev.co_wip"
 # loader.prop_object_table = "ndb.colabfit.dev.po_wip"
-# loader.config_set_table = "ndb.colabfit.dev.cs_wip"
+loader.config_set_table = "ndb.colabfit.dev.cs_wip"
 # loader.dataset_table = "ndb.colabfit.dev.ds_wip"
-# loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_wip"
+loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_wip"
 
 DATASET_FP = Path(
     "/scratch/gw2338/vast/data-lake-main/spark/scripts/"
@@ -168,7 +168,7 @@ file_map = {
         "10-5 eV/angstrom",
     ),
     "ch2o_3601-RKHS-gaussian-noise-SD-0-000001.npz": (
-        f"{DATASET_NAME}_ch2o_perturbed_energy_10-5",  # noqa E501
+        f"{DATASET_NAME}_ch2o_perturbed_energy_10-6",  # noqa E501
         "Configurations containing perturbed energies with amplitude of 10-6 eV (2.31 X 10-5 kcal/mol)",  # noqa E501
         "10-6 eV",
         "0",
