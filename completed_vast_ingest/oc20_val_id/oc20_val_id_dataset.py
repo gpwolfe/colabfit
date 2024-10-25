@@ -154,8 +154,10 @@ PI_METADATA = {
         },
     },
     "property_keys": {
-        "energy": "free_energy",
-        "atomic_forces": "forces",
+        "value": {
+            "energy": "free_energy",
+            "atomic_forces": "forces",
+        },
     },
 }
 
