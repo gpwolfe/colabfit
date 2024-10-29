@@ -42,27 +42,21 @@ import pyspark
 
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import DataManager, VastDataLoader
-from colabfit.tools.property_definitions import atomic_forces_pd, energy_pd
+from colabfit.tools.property_definitions import (
+    atomic_forces_pd,
+    energy_pd,
+    adsorption_energy_pd,
+)
 
 print("pyspark version: ", pyspark.__version__)
 # Set up data loader environment
 load_dotenv()
 SLURM_TASK_ID = int(os.getenv("SLURM_ARRAY_TASK_ID", -1))
 SLURM_JOB_ID = os.getenv("SLURM_JOB_ID", -1)
-n_cpus = os.getenv("SLURM_CPUS_PER_TASK")
-if not n_cpus:
-    n_cpus = 1
 
-spark_ui_port = os.getenv("__SPARK_UI_PORT")
-jars = os.getenv("VASTDB_CONNECTOR_JARS")
-print(jars)
-spark_session = (
-    SparkSession.builder.appName(f"cf_oc20_valid_{SLURM_JOB_ID}_{SLURM_TASK_ID}")
-    .master(f"local[{n_cpus}]")
-    .config("spark.ui.port", f"{spark_ui_port}")
-    .config("spark.jars", jars)
-    .getOrCreate()
-)
+spark_session = SparkSession.builder.appName(
+    f"cf_oc20_valid_{SLURM_JOB_ID}_{SLURM_TASK_ID}"
+).getOrCreate()
 
 loader = VastDataLoader(
     table_prefix="ndb.colabfit.dev",
@@ -78,26 +72,29 @@ loader.set_vastdb_session(
 )
 
 
+SLURM_TASK_ID = int(os.getenv("SLURM_ARRAY_TASK_ID", -1))
+SLURM_JOB_ID = os.getenv("SLURM_JOB_ID", -1)
+
+
 # loader.metadata_dir = "test_md/MD"
-# loader.config_table = "ndb.colabfit.dev.co_oodsads"
-# loader.prop_object_table = "ndb.colabfit.dev.po_oodsads"
-# loader.config_set_table = "ndb.colabfit.dev.cs_oodsads"
-# loader.dataset_table = "ndb.colabfit.dev.ds_oodsads"
-# loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_oodsads"
+# loader.config_table = "ndb.colabfit.dev.co_oodboth"
+# loader.prop_object_table = "ndb.colabfit.dev.po_oodboth"
+# loader.config_set_table = "ndb.colabfit.dev.cs_oodboth"
+# loader.dataset_table = "ndb.colabfit.dev.ds_oodboth"
+# loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_oodboth"
 
-
-loader.config_table = "ndb.colabfit.dev.co_with_struct_hash_long_str"
-loader.prop_object_table = "ndb.colabfit.dev.po_wip"
+loader.config_table = "ndb.colabfit.dev.co_oc_reset"
+loader.prop_object_table = "ndb.colabfit.dev.po_oc_reset"
 loader.config_set_table = "ndb.colabfit.dev.cs_wip"
-loader.dataset_table = "ndb.colabfit.dev.ds_wip"
+loader.dataset_table = "ndb.colabfit.dev.ds_oc_reset"
 loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_wip"
 
 
 DATASET_FP = Path(
-    "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/data/s2ef_val_ood_ads/"
+    "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/data/s2ef_val_ood_both/"
 )
-DATASET_NAME = "OC20_S2EF_val_ood_ads"
-DATASET_ID = "DS_cgdsc3gxoamu_0"
+DATASET_NAME = "OC20_S2EF_val_ood_both"
+DATASET_ID = "DS_889euoe7akyy_0"
 DOI = None
 
 PUBLICATION_YEAR = "2024"
@@ -124,13 +121,12 @@ LICENSE = "CC-BY-4.0"
 PUBLICATION = "https://doi.org/10.1021/acscatal.0c04525"
 DATA_LINK = "https://fair-chem.github.io/core/datasets/oc20.html"
 DESCRIPTION = (
-    "OC20_S2EF_val_ood_ads is the out-of-domain validation set of the OC20 "
-    "Structure to Energy and Forces (S2EF) dataset featuring unseen adsorbate. "
-    "Features include energy, "
+    "OC20_S2EF_val_ood_both is the out-of-domain validation set of the OC20 "
+    "Structure to Energy and Forces (S2EF) dataset featuring both unseen catalyst "
+    "composition and unseen adsorbate. Features include energy, "
     "atomic forces and data from the OC20 mappings file, including "
     "adsorbate id, materials project bulk id and miller index."
 )
-
 
 PKL_FP = Path(
     "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/data/oc20_data_mapping.pkl"  # noqa
@@ -151,7 +147,11 @@ PI_METADATA = {
         "value": {
             "energy": "free_energy",
             "atomic_forces": "forces",
+            "adsorption_energy": "free_energy - reference_energy",
         }
+    },
+    "reference_energy_for_adsorption_energy": {
+        "field": "reference_energy",
     },
 }
 
@@ -161,7 +161,13 @@ PROPERTY_MAP = {
         {
             "energy": {"field": "free_energy", "units": "eV"},
             "per-atom": {"value": False, "units": None},
-            "reference-energy": {"field": "reference_energy", "units": "eV"},
+            # "reference-energy": {"field": "reference_energy", "units": "eV"},
+        }
+    ],
+    adsorption_energy_pd["property-name"]: [
+        {
+            "energy": {"field": "adsorption_energy", "units": "eV"},
+            "per-atom": {"value": False, "units": None},
         }
     ],
     atomic_forces_pd["property-name"]: [
@@ -171,7 +177,6 @@ PROPERTY_MAP = {
     ],
     "_metadata": PI_METADATA,
 }
-
 
 CO_METADATA = {
     key: {"field": key}
@@ -208,6 +213,9 @@ def oc_reader(fp: Path):
                 config_data = OC20_MAP[system_id]
                 config.info.update(config_data)
                 config.info["reference_energy"] = reference_energy
+                config.info["adsorption_energy"] = (
+                    config.info["free_energy"] - reference_energy
+                )
                 config.info["system_id"] = system_id
                 config.info["frame_number"] = frame_number.replace("frame", "")
                 config.info["_name"] = f"{DATASET_NAME}__file_{fp_num}__config_{i}"
@@ -224,8 +232,6 @@ def oc_reader(fp: Path):
 
 
 def oc_wrapper(dir_path: str):
-    # slurm_task_count = int(os.getenv("SLURM_ARRAY_TASK_COUNT", 1))
-    # slurm_job_id = os.getenv("SLURM_JOB_ID", -1)
     dir_path = Path(dir_path)
     if not dir_path.exists():
         print(f"Path {dir_path} does not exist")
@@ -250,40 +256,31 @@ def main():
     dm = DataManager(
         nprocs=1,
         configs=config_generator,
-        prop_defs=[energy_pd, atomic_forces_pd],
+        prop_defs=[energy_pd, atomic_forces_pd, adsorption_energy_pd],
         prop_map=PROPERTY_MAP,
         dataset_id=DATASET_ID,
         standardize_energy=True,
         read_write_batch_size=10000,
     )
     print(f"Time to prep: {time() - beg}")
-    t = time()
-    dm.load_co_po_to_vastdb(loader, batching_ingest=True)
-    print(f"Time to load: {time() - t}")
-    print("complete")
     # labels = ["OC20", "Open Catalyst"]
-    # print("Creating dataset")
-    # t = time()
-    # dm.create_dataset(
-    #     loader,
-    #     name=DATASET_NAME,
-    #     authors=AUTHORS,
-    #     publication_link=PUBLICATION,
-    #     data_link=DATA_LINK,
-    #     data_license=LICENSE,
-    #     description=DESCRIPTION,
-    #     publication_year=PUBLICATION_YEAR,
-    #     labels=labels,
-    # )
-    # print(f"Time to create dataset: {time() - t}")
-    # loader.stop_spark()
-    # print(f"Total time: {time() - beg}")
+    print("Creating dataset")
+    t = time()
+    dm.create_dataset(
+        loader,
+        name=DATASET_NAME,
+        authors=AUTHORS,
+        publication_link=PUBLICATION,
+        data_link=DATA_LINK,
+        data_license=LICENSE,
+        description=DESCRIPTION,
+        publication_year=PUBLICATION_YEAR,
+    )
+    print("complete")
+
+    print(f"Time to create dataset: {time() - t}")
+    print(f"Total time: {time() - beg}")
 
 
 if __name__ == "__main__":
-    # import sys
-
-    # range = (int(sys.argv[1]), int(sys.argv[2]))
-    # print(range)
-    # main(range)
     main()
