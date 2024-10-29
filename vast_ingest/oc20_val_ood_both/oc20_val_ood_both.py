@@ -42,7 +42,11 @@ import pyspark
 
 from colabfit.tools.configuration import AtomicConfiguration
 from colabfit.tools.database import DataManager, VastDataLoader
-from colabfit.tools.property_definitions import atomic_forces_pd, energy_pd
+from colabfit.tools.property_definitions import (
+    atomic_forces_pd,
+    energy_pd,
+    adsorption_energy_pd,
+)
 
 print("pyspark version: ", pyspark.__version__)
 # Set up data loader environment
@@ -85,10 +89,10 @@ loader.set_vastdb_session(
 # loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_oodboth"
 
 
-loader.config_table = "ndb.colabfit.dev.co_wip"
-loader.prop_object_table = "ndb.colabfit.dev.po_wip"
+loader.config_table = "ndb.colabfit.dev.co_oc_reset"
+loader.prop_object_table = "ndb.colabfit.dev.po_oc_reset"
 loader.config_set_table = "ndb.colabfit.dev.cs_wip"
-loader.dataset_table = "ndb.colabfit.dev.ds_wip"
+loader.dataset_table = "ndb.colabfit.dev.ds_oc_reset"
 loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_wip"
 
 
@@ -149,7 +153,11 @@ PI_METADATA = {
         "value": {
             "energy": "free_energy",
             "atomic_forces": "forces",
-        },
+            "adsorption_energy": "free_energy - reference_energy",
+        }
+    },
+    "reference_energy_for_adsorption_energy": {
+        "field": "reference_energy",
     },
 }
 
@@ -159,7 +167,12 @@ PROPERTY_MAP = {
         {
             "energy": {"field": "free_energy", "units": "eV"},
             "per-atom": {"value": False, "units": None},
-            "reference-energy": {"field": "reference_energy", "units": "eV"},
+        }
+    ],
+    adsorption_energy_pd["property-name"]: [
+        {
+            "energy": {"field": "adsorption_energy", "units": "eV"},
+            "per-atom": {"value": False, "units": None},
         }
     ],
     atomic_forces_pd["property-name"]: [
@@ -206,6 +219,9 @@ def oc_reader(fp: Path):
                 config_data = OC20_MAP[system_id]
                 config.info.update(config_data)
                 config.info["reference_energy"] = reference_energy
+                config.info["adsorption_energy"] = (
+                    config.info["free_energy"] - reference_energy
+                )
                 config.info["system_id"] = system_id
                 config.info["frame_number"] = frame_number.replace("frame", "")
                 config.info["_name"] = f"{DATASET_NAME}__file_{fp_num}__config_{i}"
@@ -248,7 +264,7 @@ def main():
     dm = DataManager(
         nprocs=1,
         configs=config_generator,
-        prop_defs=[energy_pd, atomic_forces_pd],
+        prop_defs=[energy_pd, atomic_forces_pd, adsorption_energy_pd],
         prop_map=PROPERTY_MAP,
         dataset_id=DATASET_ID,
         standardize_energy=True,
