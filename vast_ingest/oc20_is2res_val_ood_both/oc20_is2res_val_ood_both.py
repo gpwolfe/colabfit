@@ -61,7 +61,7 @@ spark_ui_port = os.getenv("__SPARK_UI_PORT")
 jars = os.getenv("VASTDB_CONNECTOR_JARS")
 print(jars)
 spark_session = (
-    SparkSession.builder.appName(f"cf_oc20_valid_{SLURM_JOB_ID}_{SLURM_TASK_ID}")
+    SparkSession.builder.appName(f"colabfit_{SLURM_JOB_ID}_{SLURM_TASK_ID}")
     .master(f"local[{n_cpus}]")
     .config("spark.ui.port", f"{spark_ui_port}")
     .config("spark.jars", jars)
@@ -82,11 +82,11 @@ loader.set_vastdb_session(
 )
 
 # loader.metadata_dir = "test_md/MD"
-# loader.config_table = "ndb.colabfit.dev.co_oodcat"
-# loader.prop_object_table = "ndb.colabfit.dev.po_oodcat"
-# loader.config_set_table = "ndb.colabfit.dev.cs_oodcat"
-# loader.dataset_table = "ndb.colabfit.dev.ds_oodcat"
-# loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_oodcat"
+# loader.config_table = "ndb.colabfit.dev.co_is2ads"
+# loader.prop_object_table = "ndb.colabfit.dev.po_is2ads"
+# loader.config_set_table = "ndb.colabfit.dev.cs_is2ads"
+# loader.dataset_table = "ndb.colabfit.dev.ds_is2ads"
+# loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_is2ads"
 
 loader.config_table = "ndb.colabfit.dev.co_oc_reset"
 loader.prop_object_table = "ndb.colabfit.dev.po_oc_reset"
@@ -94,12 +94,18 @@ loader.config_set_table = "ndb.colabfit.dev.cs_wip"
 loader.dataset_table = "ndb.colabfit.dev.ds_oc_reset"
 loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_wip"
 
+print(
+    loader.config_table,
+    loader.config_set_table,
+    loader.dataset_table,
+    loader.prop_object_table,
+)
 
 DATASET_FP = Path(
-    "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/data/s2ef_val_ood_cat/"  # noqa E501
+    "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/data/is2res_val_ood_both_trajectories"  # noqa
 )
-DATASET_NAME = "OC20_S2EF_val_ood_cat"
-DATASET_ID = "DS_wmgdq06mzdys_0"
+DATASET_NAME = "OC20_IS2RES_val_ood_both"
+DATASET_ID = "DS_u9jm7oxyusjc_0"
 DOI = None
 
 PUBLICATION_YEAR = "2024"
@@ -126,17 +132,22 @@ LICENSE = "CC-BY-4.0"
 PUBLICATION = "https://doi.org/10.1021/acscatal.0c04525"
 DATA_LINK = "https://fair-chem.github.io/core/datasets/oc20.html"
 DESCRIPTION = (
-    "OC20_S2EF_val_ood_cat is the out-of-domain validation set of the OC20 "
-    "Structure to Energy and Forces (S2EF) dataset featuring unseen catalyst "
-    "composition. Features include energy, "
+    "OC20_IS2RES_val_ood_both is the out-of-domain validation set for the OC20 "
+    "Initial Structure to Relaxed Structure (IS2RS) and Initial Structure to Relaxed "
+    "Energy (IS2RE) tasks with unseen adsorbates and unseen catalyst composition. "
+    "Features include energy, "
     "atomic forces and data from the OC20 mappings file, including "
     "adsorbate id, materials project bulk id and miller index."
 )
 
-
 PKL_FP = Path(
     "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/data/oc20_data_mapping.pkl"  # noqa
 )
+
+with open(DATASET_FP / "system.txt", "r") as f:
+    ref_text = [x.strip().split(",") for x in f.readlines()]
+    REF_E_DICT = {k: float(v) for k, v in ref_text}
+
 with open(PKL_FP, "rb") as f:
     OC20_MAP = pickle.load(f)
 
@@ -206,35 +217,31 @@ CO_METADATA = {
 
 
 def oc_reader(fp: Path):
-    fp_num = f"{int(fp.stem):04d}"
-    prop_fp = fp.with_suffix(".txt")
-    with prop_fp.open("r") as prop_f:
-        prop_lines = [x.strip() for x in prop_f.readlines()]
-        iter_configs = iread(fp, format="extxyz", index=":")
-        for i, config in enumerate(iter_configs):
-            try:
-                system_id, frame_number, reference_energy = prop_lines[i].split(",")
-                reference_energy = float(reference_energy)
-                config.info["constraints-fix-atoms"] = config.constraints[0].index
-                config_data = OC20_MAP[system_id]
-                config.info.update(config_data)
-                config.info["reference_energy"] = reference_energy
-                config.info["adsorption_energy"] = (
-                    config.info["free_energy"] - reference_energy
-                )
-                config.info["system_id"] = system_id
-                config.info["frame_number"] = frame_number.replace("frame", "")
-                config.info["_name"] = f"{DATASET_NAME}__file_{fp_num}__config_{i}"
-                config.info["_labels"] = [
-                    f"frame:{frame_number}",
-                    f"system:{system_id}",
-                    f"materials_project_id:{config_data['bulk_mpid']}",
-                    f"file:{fp.name}",
-                ]
-                yield AtomicConfiguration.from_ase(config, CO_METADATA)
-            except Exception as e:
-                print("Error encountered: ", e)
-                continue
+    oc_id = fp.stem
+    iter_configs = iread(fp, format="extxyz", index=":")
+    for i, config in enumerate(iter_configs):
+        try:
+            reference_energy = REF_E_DICT[oc_id]
+            config.info["constraints-fix-atoms"] = config.constraints[0].index
+            config_data = OC20_MAP[oc_id]
+            config.info.update(config_data)
+            config.info["reference_energy"] = reference_energy
+            config.info["adsorption_energy"] = (
+                config.info["free_energy"] - reference_energy
+            )
+            config.info["system_id"] = oc_id
+            config.info["frame_number"] = str(i)
+            config.info["_name"] = f"{DATASET_NAME}__file_{oc_id}__config_{i}"
+            config.info["_labels"] = [
+                f"frame:{i}",
+                f"open_catalyst_id:{oc_id}",
+                f"materials_project_id:{config_data['bulk_mpid']}",
+                f"file:{fp.name}",
+            ]
+            yield AtomicConfiguration.from_ase(config, CO_METADATA)
+        except Exception as e:
+            print("Error encountered: ", e)
+            continue
 
 
 def oc_wrapper(dir_path: str):
@@ -244,19 +251,31 @@ def oc_wrapper(dir_path: str):
         return
     xyz_paths = sorted(
         list(dir_path.rglob("*.extxyz")),
-        key=lambda x: int(x.stem),
+        key=lambda x: int(x.stem.replace("random", "")),
     )
-    if SLURM_TASK_ID > len(xyz_paths):
-        raise ValueError(f"This task ID {SLURM_TASK_ID} greater than number of files")
-    xyz_path = xyz_paths[SLURM_TASK_ID]
-    reader = oc_reader(xyz_path)
-    for config in reader:
-        yield config
+    # step_size = (len(xyz_paths) // 200) + 1
+    step_size = 10
+    xyz_range = (SLURM_TASK_ID * step_size, (SLURM_TASK_ID + 1) * step_size)
+    # if SLURM_TASK_ID > len(xyz_paths):
+    #     raise ValueError(f"This task ID {SLURM_TASK_ID} greater than number of files")
+    # xyz_path = xyz_paths[SLURM_TASK_ID]
+    # for xyz_path in xyz_paths:
+    #     print(f"Reading {xyz_path.name}")
+    if xyz_range[0] >= len(xyz_paths):
+        return
+    if xyz_range[1] > len(xyz_paths):
+        xyz_range = (xyz_range[0], len(xyz_paths))
+    xyz_paths = xyz_paths[xyz_range[0] : xyz_range[1]]  # noqa
+    print(f"slurm task id: {SLURM_TASK_ID}")
+    for path in xyz_paths:
+        print(f"Processing file: {path}")
+        reader = oc_reader(path)
+        for config in reader:
+            yield config
 
 
 def main():
     beg = time()
-    print(beg)
     config_generator = oc_wrapper(DATASET_FP)
     print("Creating DataManager")
     dm = DataManager(
@@ -293,4 +312,9 @@ def main():
 
 
 if __name__ == "__main__":
+    # import sys
+
+    # range = (int(sys.argv[1]), int(sys.argv[2]))
+    # print(range)
+    # main(range)
     main()

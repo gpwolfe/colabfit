@@ -11,9 +11,6 @@ dipole, original scf energy without the energy correction subtracted
 
 File notes
 ----------
-File /scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/oc20_s2ef/data/ \
-    s2ef_train_20M/s2ef_train_20M/1050.extxyz is malformed, truncated
-
 columns from txt files: system_id,frame_number,reference_energy
 
 header from extxyz files:
@@ -82,11 +79,11 @@ loader.set_vastdb_session(
 )
 
 # loader.metadata_dir = "test_md/MD"
-# loader.config_table = "ndb.colabfit.dev.co_20m"
-# loader.prop_object_table = "ndb.colabfit.dev.po_20m"
-# loader.config_set_table = "ndb.colabfit.dev.cs_20m"
-# loader.dataset_table = "ndb.colabfit.dev.ds_20m"
-# loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_20m"
+# loader.config_table = "ndb.colabfit.dev.co_oodcat"
+# loader.prop_object_table = "ndb.colabfit.dev.po_oodcat"
+# loader.config_set_table = "ndb.colabfit.dev.cs_oodcat"
+# loader.dataset_table = "ndb.colabfit.dev.ds_oodcat"
+# loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_oodcat"
 
 loader.config_table = "ndb.colabfit.dev.co_oc_reset"
 loader.prop_object_table = "ndb.colabfit.dev.po_oc_reset3"
@@ -95,19 +92,17 @@ loader.dataset_table = "ndb.colabfit.dev.ds_oc_reset"
 loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_wip"
 
 
-print(
-    loader.config_table,
-    loader.config_set_table,
-    loader.dataset_table,
-    loader.prop_object_table,
-)
-
 DATASET_FP = Path(
-    "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/data/s2ef_train_20M"
+    "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/data/s2ef_train_200K"
 )
-DATASET_NAME = "OC20_S2EF_train_20M"
-DATASET_ID = "DS_otx1qc9f3pm4_0"
+DATASET_NAME = "OC20_S2EF_train_200K"
+DATASET_ID = "DS_zdy2xz6y88nl_0"
+LICENSE = "CC-BY-4.0"
+DOI = None
 PUBLICATION_YEAR = "2024"
+PUBLICATION = "https://doi.org/10.1021/acscatal.0c04525"
+DATA_LINK = "https://fair-chem.github.io/core/datasets/oc20.html"
+
 AUTHORS = [
     "Lowik Chanussot",
     "Abhishek Das",
@@ -127,16 +122,10 @@ AUTHORS = [
     "C. Lawrence Zitnick",
     "Zachary Ulissi",
 ]
-LICENSE = "CC-BY-4.0"
-PUBLICATION = "https://doi.org/10.1021/acscatal.0c04525"
-DATA_LINK = "https://fair-chem.github.io/core/datasets/oc20.html"
 DESCRIPTION = (
-    "OC20_S2EF_train_20M is the 20 million structure training subset of the OC20 "
-    "Structure to Energy and Forces dataset. Features include potential energy, "
-    "free energy and atomic forces. Data from the OC20 mappings file, including "
-    "adsorbate id, materials project bulk id, miller index, shift and others."
+    "OC20_S2EF_train_200K is the 200K training split of the OC20 Structure to Energy "
+    "and Forces (S2EF) task."
 )
-
 
 PKL_FP = Path(
     "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/data/oc20_data_mapping.pkl"  # noqa
@@ -253,319 +242,47 @@ def oc_wrapper(dir_path: str):
     if SLURM_TASK_ID > len(xyz_paths):
         raise ValueError(f"This task ID {SLURM_TASK_ID} greater than number of files")
     xyz_path = xyz_paths[SLURM_TASK_ID]
-    print(xyz_path.name)
     reader = oc_reader(xyz_path)
     for config in reader:
         yield config
 
 
-skips = [
-    2000,
-    2001,
-    2002,
-    2003,
-    2004,
-    2005,
-    2006,
-    2007,
-    2008,
-    2009,
-    2010,
-    2011,
-    2012,
-    2013,
-    2014,
-    2015,
-    2016,
-    2017,
-    2018,
-    2019,
-    2020,
-    2021,
-    2022,
-    2023,
-    2024,
-    2025,
-    2026,
-    2027,
-    2028,
-    2029,
-    2030,
-    2031,
-    2032,
-    2033,
-    2034,
-    2035,
-    2036,
-    2037,
-    2038,
-    2039,
-    2040,
-    2041,
-    2042,
-    2043,
-    2044,
-    2045,
-    2046,
-    2047,
-    2048,
-    2049,
-    2050,
-    2051,
-    2052,
-    2053,
-    2054,
-    2055,
-    2056,
-    2057,
-    2058,
-    2059,
-    2060,
-    2061,
-    2062,
-    2063,
-    2064,
-    2065,
-    2066,
-    2067,
-    2068,
-    2069,
-    2070,
-    2071,
-    2072,
-    2073,
-    2074,
-    2075,
-    2076,
-    2077,
-    2078,
-    2079,
-    2080,
-    2081,
-    2082,
-    2083,
-    2084,
-    2085,
-    2086,
-    2087,
-    2088,
-    2089,
-    2090,
-    2091,
-    2092,
-    2093,
-    2094,
-    2095,
-    2096,
-    2097,
-    2098,
-    2099,
-    2100,
-    2101,
-    2102,
-    2103,
-    2104,
-    2105,
-    2106,
-    2107,
-    2108,
-    2109,
-    2110,
-    2111,
-    2112,
-    2113,
-    2114,
-    2115,
-    2116,
-    2117,
-    2118,
-    2119,
-    2120,
-    2121,
-    2122,
-    2123,
-    2124,
-    2125,
-    2126,
-    2127,
-    2128,
-    2129,
-    2130,
-    2131,
-    2132,
-    2133,
-    2134,
-    2135,
-    2136,
-    2137,
-    2138,
-    2139,
-    2140,
-    2141,
-    2142,
-    2143,
-    2144,
-    2145,
-    2146,
-    2147,
-    2148,
-    2149,
-    2150,
-    2151,
-    2152,
-    2153,
-    2154,
-    2155,
-    2156,
-    2157,
-    2158,
-    2159,
-    2160,
-    2161,
-    2162,
-    2163,
-    2164,
-    2165,
-    2166,
-    2167,
-    2168,
-    2169,
-    2170,
-    2171,
-    2172,
-    2173,
-    2174,
-    2175,
-    2176,
-    2177,
-    2178,
-    2179,
-    2180,
-    2181,
-    2182,
-    2183,
-    2184,
-    2185,
-    2186,
-    2188,
-    2192,
-    2193,
-    2195,
-    2196,
-    2197,
-    2198,
-    2199,
-    2207,
-    2208,
-    2210,
-    2211,
-    2212,
-    2213,
-    2215,
-    2216,
-    2218,
-    2219,
-    2221,
-    2222,
-    2224,
-    2225,
-    2227,
-    2229,
-    2232,
-    2234,
-    2236,
-    2237,
-    2239,
-    2245,
-    2291,
-    2298,
-    2312,
-    2347,
-    2396,
-    2527,
-    2528,
-    2529,
-    2531,
-    2540,
-    2576,
-    2580,
-    2592,
-    2593,
-    2596,
-    2597,
-    2630,
-    2658,
-    2672,
-    2693,
-    2694,
-    2699,
-    2719,
-    2720,
-    2731,
-    2738,
-    2751,
-    2769,
-    2796,
-    2837,
-    2844,
-    2845,
-    2848,
-    2851,
-    2853,
-    2854,
-    2871,
-    2872,
-    2885,
-    2893,
-    2909,
-    2916,
-    2917,
-    2947,
-    2959,
-    2972,
-    2982,
-    2983,
-]
-
-
 def main():
-    if int(SLURM_TASK_ID) in skips or SLURM_TASK_ID in skips:
-        raise ValueError(f"Skipping task {SLURM_TASK_ID}")
-    else:
-        beg = time()
-        config_generator = oc_wrapper(DATASET_FP)
-        print("Creating DataManager")
-        dm = DataManager(
-            nprocs=1,
-            configs=config_generator,
-            prop_defs=[energy_pd, atomic_forces_pd, adsorption_energy_pd],
-            prop_map=PROPERTY_MAP,
-            dataset_id=DATASET_ID,
-            standardize_energy=True,
-            read_write_batch_size=10000,
-        )
-        print(f"Time to prep: {time() - beg}")
-        t = time()
-        dm.load_co_po_to_vastdb(loader, batching_ingest=True)
-        print(f"Time to load: {time() - t}")
-        print("complete")
-        # labels = ["OC20", "Open Catalyst"]
-        # print("Creating dataset")
-        # t = time()
-        # dm.create_dataset(
-        #     loader,
-        #     name=DATASET_NAME,
-        #     authors=AUTHORS,
-        #     publication_link=PUBLICATION,
-        #     data_link=DATA_LINK,
-        #     data_license=LICENSE,
-        #     description=DESCRIPTION,
-        #     publication_year=PUBLICATION_YEAR,
-        #     labels=labels,
-        # )
-        # print(f"Time to create dataset: {time() - t}")
-        # loader.stop_spark()
-        # print(f"Total time: {time() - beg}")
+    beg = time()
+    print(beg)
+    config_generator = oc_wrapper(DATASET_FP)
+    print("Creating DataManager")
+    dm = DataManager(
+        nprocs=1,
+        configs=config_generator,
+        prop_defs=[energy_pd, atomic_forces_pd, adsorption_energy_pd],
+        prop_map=PROPERTY_MAP,
+        dataset_id=DATASET_ID,
+        standardize_energy=True,
+        read_write_batch_size=10000,
+    )
+    print(f"Time to prep: {time() - beg}")
+    t = time()
+    dm.load_co_po_to_vastdb(loader, batching_ingest=True)
+    print(f"Time to load: {time() - t}")
+    print("complete")
+    # labels = ["OC20", "Open Catalyst"]
+    # print("Creating dataset")
+    # t = time()
+    # dm.create_dataset(
+    #     loader,
+    #     name=DATASET_NAME,
+    #     authors=AUTHORS,
+    #     publication_link=PUBLICATION,
+    #     data_link=DATA_LINK,
+    #     data_license=LICENSE,
+    #     description=DESCRIPTION,
+    #     publication_year=PUBLICATION_YEAR,
+    #     labels=labels,
+    # )
+    # print(f"Time to create dataset: {time() - t}")
+    # loader.stop_spark()
+    # print(f"Total time: {time() - beg}")
 
 
 if __name__ == "__main__":
