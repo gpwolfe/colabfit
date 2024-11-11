@@ -238,8 +238,6 @@ def oc_reader(fp: Path):
 
 
 def oc_wrapper(dir_path: str):
-    # slurm_task_count = int(os.getenv("SLURM_ARRAY_TASK_COUNT", 1))
-    # slurm_job_id = os.getenv("SLURM_JOB_ID", -1)
     dir_path = Path(dir_path)
     if not dir_path.exists():
         print(f"Path {dir_path} does not exist")
@@ -295,9 +293,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # import sys
-
-    # range = (int(sys.argv[1]), int(sys.argv[2]))
-    # print(range)
-    # main(range)
     main()
