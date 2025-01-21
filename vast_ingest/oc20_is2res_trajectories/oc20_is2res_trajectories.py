@@ -53,7 +53,8 @@ print("pyspark version: ", pyspark.__version__)
 load_dotenv()
 SLURM_TASK_ID = int(os.getenv("SLURM_ARRAY_TASK_ID", -1))
 SLURM_JOB_ID = os.getenv("SLURM_JOB_ID", -1)
-ACTUAL_INDEX = int(os.getenv("ACTUAL_INDEX"))
+# ACTUAL_INDEX = int(os.getenv("ACTUAL_INDEX"))
+ACTUAL_INDEX = 2589
 n_cpus = os.getenv("SLURM_CPUS_PER_TASK")
 if not n_cpus:
     n_cpus = 1
