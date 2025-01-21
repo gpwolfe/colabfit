@@ -53,22 +53,22 @@ print("pyspark version: ", pyspark.__version__)
 load_dotenv()
 SLURM_TASK_ID = int(os.getenv("SLURM_ARRAY_TASK_ID", -1))
 SLURM_JOB_ID = os.getenv("SLURM_JOB_ID", -1)
-# ACTUAL_INDEX = int(os.getenv("ACTUAL_INDEX"))
-ACTUAL_INDEX = 2589
-n_cpus = os.getenv("SLURM_CPUS_PER_TASK")
-if not n_cpus:
-    n_cpus = 1
 
-spark_ui_port = os.getenv("__SPARK_UI_PORT")
-jars = os.getenv("VASTDB_CONNECTOR_JARS")
-print(jars)
+# n_cpus = os.getenv("SLURM_CPUS_PER_TASK")
+# if not n_cpus:
+#     n_cpus = 1
+
+# spark_ui_port = os.getenv("__SPARK_UI_PORT")
+# jars = os.getenv("VASTDB_CONNECTOR_JARS")
+# print(jars)
 spark_session = (
     SparkSession.builder.appName(f"colabfit_{SLURM_JOB_ID}_{SLURM_TASK_ID}")
-    .master(f"local[{n_cpus}]")
-    .config("spark.ui.port", f"{spark_ui_port}")
-    .config("spark.jars", jars)
+    # .master(f"local[{n_cpus}]")
+    # .config("spark.ui.port", f"{spark_ui_port}")
+    # .config("spark.jars", jars)
     .getOrCreate()
 )
+
 
 loader = VastDataLoader(
     table_prefix="ndb.colabfit.dev",
@@ -83,12 +83,13 @@ loader.set_vastdb_session(
     access_secret=access_secret,
 )
 
-loader.metadata_dir = "test_md/MDtest"
-loader.config_table = "ndb.colabfit.dev.co_is2res_test1"
-loader.prop_object_table = "ndb.colabfit.dev.po_is2res_test1"
-loader.config_set_table = "ndb.colabfit.dev.cs_is2res_test1"
-loader.dataset_table = "ndb.colabfit.dev.ds_is2res_test1"
-loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_is2res_test1"
+
+loader.metadata_dir = "test_md/MD"
+loader.config_table = "ndb.colabfit.dev.co_is2res"
+loader.prop_object_table = "ndb.colabfit.dev.po_is2res"
+loader.config_set_table = "ndb.colabfit.dev.cs_is2res"
+loader.dataset_table = "ndb.colabfit.dev.ds_is2res"
+loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_is2res"
 
 
 # loader.config_table = "ndb.colabfit.dev.co_wip"
@@ -96,6 +97,7 @@ loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_is2res_test1"
 # loader.config_set_table = "ndb.colabfit.dev.cs_wip"
 # loader.dataset_table = "ndb.colabfit.dev.ds_wip"
 # loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_wip"
+
 
 print(
     loader.config_table,
@@ -110,7 +112,6 @@ DATASET_FP = Path(
 DATASET_NAME = "OC20_IS2RES_train"
 DATASET_ID = "DS_dgop3abwq9ya_0"
 DOI = "10.60732/0c188beb"
-
 
 PUBLICATION_YEAR = "2024"
 AUTHORS = [
@@ -192,6 +193,7 @@ PROPERTY_MAP = {
     "_metadata": PI_METADATA,
 }
 
+
 CO_METADATA = {
     key: {"field": key}
     for key in [
@@ -263,21 +265,18 @@ def oc_wrapper(dir_path: str):
     if not dir_path.exists():
         print(f"Path {dir_path} does not exist")
         return
-    all_xyz_paths = sorted(
+    xyz_paths = sorted(
         list(dir_path.rglob("*.extxyz")),
         key=lambda x: int(x.stem.replace("random", "")),
     )
     step_size = 10
-    xyz_range = (ACTUAL_INDEX * step_size, (ACTUAL_INDEX + 1) * step_size)
-    if xyz_range[0] >= len(all_xyz_paths):
+    xyz_range = (SLURM_TASK_ID * step_size, (SLURM_TASK_ID + 1) * step_size)
+    if xyz_range[0] >= len(xyz_paths):
         return
-    if xyz_range[1] > len(all_xyz_paths):
-        xyz_range = (xyz_range[0], len(all_xyz_paths))
-    xyz_paths = all_xyz_paths[xyz_range[0] : xyz_range[1]]  # noqa
+    if xyz_range[1] > len(xyz_paths):
+        xyz_range = (xyz_range[0], len(xyz_paths))
+    xyz_paths = xyz_paths[xyz_range[0] : xyz_range[1]]  # noqa
     print(f"slurm task id: {SLURM_TASK_ID}")
-    print(f"Range: {xyz_range}")
-    print(f"Processing files: {xyz_paths}")
-    print(f"ACTUAL_INDEX: {ACTUAL_INDEX}")
     for path in xyz_paths:
         print(f"Processing file: {path}")
         reader = oc_reader(path)
@@ -287,6 +286,7 @@ def oc_wrapper(dir_path: str):
 
 def main():
     beg = time()
+    print(beg)
     config_generator = oc_wrapper(DATASET_FP)
     print("Creating DataManager")
     dm = DataManager(
@@ -299,26 +299,21 @@ def main():
         read_write_batch_size=10000,
     )
     print(f"Time to prep: {time() - beg}")
-    t = time()
-    dm.load_co_po_to_vastdb(loader, batching_ingest=True)
-    print(f"Time to load: {time() - t}")
-    print("complete")
     # labels = ["OC20", "Open Catalyst"]
-    # print("Creating dataset")
-    # t = time()
-    # dm.create_dataset(
-    #     loader,
-    #     name=DATASET_NAME,
-    #     authors=AUTHORS,
-    #     publication_link=PUBLICATION,
-    #     data_link=DATA_LINK,
-    #     data_license=LICENSE,
-    #     description=DESCRIPTION,
-    #     publication_year=PUBLICATION_YEAR,
-    #     labels=labels,
-    # )
-    # print(f"Time to create dataset: {time() - t}")
-    # loader.stop_spark()
+    print("Creating dataset")
+    t = time()
+    dm.create_dataset(
+        loader,
+        name=DATASET_NAME,
+        authors=AUTHORS,
+        publication_link=PUBLICATION,
+        data_link=DATA_LINK,
+        data_license=LICENSE,
+        description=DESCRIPTION,
+        publication_year=PUBLICATION_YEAR,
+    )
+    print("complete")
+    print(f"Time to create dataset: {time() - t}")
     print(f"Total time: {time() - beg}")
 
 

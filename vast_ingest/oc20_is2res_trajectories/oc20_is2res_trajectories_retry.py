@@ -53,8 +53,11 @@ print("pyspark version: ", pyspark.__version__)
 load_dotenv()
 SLURM_TASK_ID = int(os.getenv("SLURM_ARRAY_TASK_ID", -1))
 SLURM_JOB_ID = os.getenv("SLURM_JOB_ID", -1)
-# ACTUAL_INDEX = int(os.getenv("ACTUAL_INDEX"))
-ACTUAL_INDEX = 2589
+# with open("ix_errs_0_999.txt", "r") as f:
+#     ixs = sorted([int(x.strip()) for x in f.readlines()])
+# ACTUAL_INDEX = ixs[SLURM_TASK_ID]
+ACTUAL_INDEX = 16455
+print(f"ACTUAL_INDEX: {ACTUAL_INDEX}")
 n_cpus = os.getenv("SLURM_CPUS_PER_TASK")
 if not n_cpus:
     n_cpus = 1
@@ -83,19 +86,19 @@ loader.set_vastdb_session(
     access_secret=access_secret,
 )
 
-loader.metadata_dir = "test_md/MDtest"
-loader.config_table = "ndb.colabfit.dev.co_is2res_test1"
-loader.prop_object_table = "ndb.colabfit.dev.po_is2res_test1"
-loader.config_set_table = "ndb.colabfit.dev.cs_is2res_test1"
-loader.dataset_table = "ndb.colabfit.dev.ds_is2res_test1"
-loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_is2res_test1"
+# loader.metadata_dir = "test_md/MDtest"
+# loader.config_table = "ndb.colabfit.dev.co_is2res_test1"
+# loader.prop_object_table = "ndb.colabfit.dev.po_is2res_test1"
+# loader.config_set_table = "ndb.colabfit.dev.cs_is2res_test1"
+# loader.dataset_table = "ndb.colabfit.dev.ds_is2res_test1"
+# loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_is2res_test1"
 
 
-# loader.config_table = "ndb.colabfit.dev.co_wip"
-# loader.prop_object_table = "ndb.colabfit.dev.po_wip"
-# loader.config_set_table = "ndb.colabfit.dev.cs_wip"
-# loader.dataset_table = "ndb.colabfit.dev.ds_wip"
-# loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_wip"
+loader.config_table = "ndb.colabfit.dev.co_wip"
+loader.prop_object_table = "ndb.colabfit.dev.po_wip"
+loader.config_set_table = "ndb.colabfit.dev.cs_wip"
+loader.dataset_table = "ndb.colabfit.dev.ds_wip"
+loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_wip"
 
 print(
     loader.config_table,
@@ -216,9 +219,10 @@ CO_METADATA = {
 def oc_reader(fp: Path):
     final = False
     oc_id = fp.stem
-    final_frame = read(fp, format="extxyz", index=-1)
-    final_pos = str(final_frame.get_positions())
-    final_forces = str(final_frame.get_forces())
+    frame_count = sum(1 for line in open(fp) if "Lattice" in line)
+    # final_frame = read(fp, format="extxyz", index=-1)
+    # final_pos = str(final_frame.get_positions())
+    # final_forces = str(final_frame.get_forces())
     iter_configs = iread(fp, format="extxyz", index=":")
     for i, config in enumerate(iter_configs):
         if final is True:
@@ -226,8 +230,10 @@ def oc_reader(fp: Path):
                 f"Index {i} is supposedly final, but {i-1} already set final to True"
             )
         if (
-            str(config.get_positions()) == final_pos
-            and str(config.get_forces()) == final_forces
+            # str(config.get_positions()) == final_pos
+            # and str(config.get_forces()) == final_forces
+            i
+            == (frame_count - 1)
         ):
             final = True
         try:
