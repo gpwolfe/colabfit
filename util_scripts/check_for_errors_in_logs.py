@@ -9,7 +9,7 @@ from pprint import pprint
 def get_nums_from_fnames(fnames):
     nums = []
     for fname in fnames:
-        num = fname.split("_")[1].split(".")[0]
+        num = fname.split(".")[0].split("_")[-1]
         if num:
             nums.append(int(num))
     nums = sorted(nums)
@@ -26,6 +26,7 @@ def main(file_path: str):
     fps = sorted(list(fps))
     time_limit = []
     disk_quota = []
+    duplicates = []
     other_err = []
     for fp in fps:
         with open(fp, "r") as f:
@@ -36,6 +37,8 @@ def main(file_path: str):
                 disk_quota.append(fp.name)
             elif "DUE TO TIME LIMIT" in text:
                 time_limit.append(fp.name)
+            elif "ValueError: Duplicate IDs found in table. Not writing" in text:
+                duplicates.append(fp.name)
             elif "complete" in text:
                 continue
             else:
@@ -45,10 +48,13 @@ def main(file_path: str):
     pprint(sorted(disk_quota))
     print("time limit exceeded: ")
     pprint(sorted(time_limit))
+    print("duplicates found: ")
+    pprint(sorted(duplicates))
     print("error is present, but not like above: ")
     pprint(sorted(other_err))
     print(get_nums_from_fnames(sorted(disk_quota)))
     print(get_nums_from_fnames(sorted(time_limit)))
+    print(get_nums_from_fnames(sorted(duplicates)))
     print(get_nums_from_fnames(sorted(other_err)))
 
 
