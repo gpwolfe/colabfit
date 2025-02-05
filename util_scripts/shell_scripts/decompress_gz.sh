@@ -14,13 +14,13 @@ if (! -d $input_dir) then
     exit 1
 endif
 
-set files = `find $input_dir -type f -name "*.gz"`
+set files = `find $input_dir -type f -name "*tar.gz"`
 
 foreach file ($files)
     # Extract the file without the .gz extension
-    set output_subdir = `basename $file .gz`
+    set output_subdir = `basename $file tar.gz`
 
-    tar -xzvf $file -C `dirname $file`
+    tar -xvf $file -C `dirname $file`
 
     rm $file
 end
