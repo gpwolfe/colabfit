@@ -44,7 +44,6 @@ from colabfit.tools.database import DataManager, VastDataLoader
 from dotenv import load_dotenv
 from pyspark.sql import SparkSession
 
-# Set up data loader environment
 load_dotenv()
 SLURM_TASK_ID = int(os.getenv("SLURM_ARRAY_TASK_ID", -1))
 SLURM_JOB_ID = os.getenv("SLURM_JOB_ID", -1)
@@ -54,7 +53,7 @@ spark_session = (
     SparkSession.builder.appName(f"colabfit_{SLURM_JOB_ID}_{SLURM_TASK_ID}")
     .config("spark.executor.memoryOverhead", "600")
     .config("spark.driver.memory", "12g")
-    # .config("spark.ui.showConsoleProgress", "false")
+    .config("spark.ui.showConsoleProgress", "true")
     .config("spark.driver.maxResultSize", 0)
     .config("spark.sql.adaptive.enabled", "true")
     .config("spark.rpc.message.maxSize", "2047")
@@ -95,13 +94,12 @@ print(
     loader.prop_object_table,
 )
 
-DATASET_NAME = "OMat24_validation_aimd-from-PBE-3000-nvt"
-DATASET_ID = "DS_4vdrw3cfi4s7_0"
-DESCRIPTION = "The val_aimd-from-PBE-3000-nvt validation split of OMat24 (Open Materials 2024). OMat24 is a large-scale open dataset of density functional theory (DFT) calculations. The dataset is available in subdatasets and subsampled sub-datasets based on the structure generation strategy used. There are two main splits in OMat24: train and validation, each divided into the aforementioned subsampling and sub-datasets."  # noqa
+DATASET_NAME = "OMat24_train_aimd_from_PBE_3000_npt"
+DATASET_ID = "DS_6xvvh8yl7rfd_0"
+DESCRIPTION = "The aimd-from-PBE-3000-npt training split of OMat24 (Open Materials 2024). OMat24 is a large-scale open dataset of density functional theory (DFT) calculations. The dataset is available in sub-datasets and subsampled sub-datasets based on the structure generation strategy used. There are two main splits in OMat24: train and validation, each divided into the aforementioned subsampling and sub-datasets."  # noqa
+
 
 DOI = None
-
-
 PUBLICATION_YEAR = "2024"
 AUTHORS = [
     "Luis Barroso-Luque",

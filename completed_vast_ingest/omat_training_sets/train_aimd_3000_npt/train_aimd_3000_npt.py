@@ -12,7 +12,7 @@ File notes
 ----------
 Due to unreliable install of fairchem (dependencies on torch, torch-geometric,
 torch-scatter), I have preprocessed all files locally, where the install worked.
-The data is stored in pickle files of ASE atoms objects, which are read in here.
+The data is stored in a pickle file of ASE atoms objects, which is read in here.
 
 There is an associated metadata.npz file, but this contains only the number of
 atoms in each structure
@@ -51,8 +51,8 @@ from pyspark.sql import SparkSession
 
 # Set up data loader environment
 load_dotenv()
-SLURM_TASK_ID = int(os.getenv("SLURM_ARRAY_TASK_ID", -1))
-SLURM_JOB_ID = os.getenv("SLURM_JOB_ID", -1)
+SLURM_TASK_ID = int(os.getenv("SLURM_ARRAY_TASK_ID"))
+SLURM_JOB_ID = os.getenv("SLURM_JOB_ID")
 ACTUAL_INDEX = SLURM_TASK_ID
 
 n_cpus = os.getenv("SLURM_CPUS_PER_TASK")
@@ -68,7 +68,6 @@ spark_session = (
     .config("spark.executor.memoryOverhead", "600")
     .config("spark.ui.port", f"{spark_ui_port}")
     .config("spark.jars", jars)
-    .config("spark.driver.memory", "12g")
     .config("spark.ui.showConsoleProgress", "false")
     .config("spark.driver.maxResultSize", 0)
     .config("spark.sql.adaptive.enabled", "true")
@@ -111,11 +110,11 @@ print(
 )
 
 DATASET_FP = Path(
-    "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/omat/omat_val_pickles/omat24_val_aimd-from-PBE-3000-nvt/"  # noqa
+    "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/omat/omat_train_pickles/aimd-from-PBE-3000-npt/"  # noqa
 )
-DATASET_NAME = "OMat24_validation_aimd-from-PBE-3000-nvt"
-DATASET_ID = "DS_4vdrw3cfi4s7_0"
-DESCRIPTION = "The val_aimd-from-PBE-3000-nvt validation split of OMat24 (Open Materials 2024). OMat24 is a large-scale open dataset of density functional theory (DFT) calculations. The dataset is available in subdatasets and subsampled sub-datasets based on the structure generation strategy used. There are two main splits in OMat24: train and validation, each divided into the aforementioned subsampling and sub-datasets."  # noqa
+DATASET_NAME = "OMat24_train_aimd_from_PBE_3000_npt"
+DATASET_ID = "DS_6xvvh8yl7rfd_0"
+DESCRIPTION = "The aimd-from-PBE-3000-npt training split of OMat24 (Open Materials 2024). OMat24 is a large-scale open dataset of density functional theory (DFT) calculations. The dataset is available in sub-datasets and subsampled sub-datasets based on the structure generation strategy used. There are two main splits in OMat24: train and validation, each divided into the aforementioned subsampling and sub-datasets."  # noqa
 
 DOI = None
 
