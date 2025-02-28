@@ -24,6 +24,8 @@ def main(file_path: str):
         return
     fps = fp.glob("*.out")
     fps = sorted(list(fps))
+    print("Num files:")
+    print(len(fps))
     time_limit = []
     disk_quota = []
     duplicates = []
@@ -39,7 +41,7 @@ def main(file_path: str):
                 time_limit.append(fp.name)
             elif "ValueError: Duplicate IDs found in table. Not writing" in text:
                 duplicates.append(fp.name)
-            elif "complete" in text:
+            elif "complete" in text or "Finished!" in text:
                 continue
             else:
                 other_err.append(fp.name)
