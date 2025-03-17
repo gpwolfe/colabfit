@@ -113,7 +113,7 @@ print(
 DATASET_FP = Path(
     "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/omat/omat_val_pickles/omat24_val_aimd-from-PBE-1000-nvt/"  # noqa
 )
-DATASET_NAME = "OMat24_validation_val_aimd-from-PBE-1000-nvt"
+DATASET_NAME = "OMat24_validation_aimd-from-PBE-1000-nvt"
 DATASET_ID = "DS_sng40qq19dak_0"
 DESCRIPTION = "The val_aimd-from-PBE-1000-nvt validation split of OMat24 (Open Materials 2024). OMat24 is a large-scale open dataset of density functional theory (DFT) calculations. The dataset is available in subdatasets and subsampled sub-datasets based on the structure generation strategy used. There are two main splits in OMat24: train and validation, each divided into the aforementioned subsampling and sub-datasets."  # noqa
 

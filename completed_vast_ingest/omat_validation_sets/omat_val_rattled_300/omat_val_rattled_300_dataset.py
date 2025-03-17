@@ -40,7 +40,7 @@ Thank you for these units
 import os
 from time import time
 
-from colabfit.tools.database import DataManager, VastDataLoader
+from colabfit.tools.vast.database import DataManager, VastDataLoader
 from dotenv import load_dotenv
 from pyspark.sql import SparkSession
 
@@ -50,16 +50,9 @@ SLURM_TASK_ID = int(os.getenv("SLURM_ARRAY_TASK_ID", -1))
 SLURM_JOB_ID = os.getenv("SLURM_JOB_ID", -1)
 ACTUAL_INDEX = SLURM_TASK_ID
 
-spark_session = (
-    SparkSession.builder.appName(f"colabfit_{SLURM_JOB_ID}_{SLURM_TASK_ID}")
-    .config("spark.executor.memoryOverhead", "600")
-    .config("spark.driver.memory", "12g")
-    .config("spark.ui.showConsoleProgress", "false")
-    .config("spark.driver.maxResultSize", 0)
-    .config("spark.sql.adaptive.enabled", "true")
-    .config("spark.rpc.message.maxSize", "2047")
-    .getOrCreate()
-)
+spark_session = SparkSession.builder.appName(
+    f"colabfit_{SLURM_JOB_ID}_{SLURM_TASK_ID}"
+).getOrCreate()
 
 loader = VastDataLoader(
     table_prefix="ndb.colabfit.dev",

@@ -40,7 +40,7 @@ Thank you for these units
 import os
 from time import time
 
-from colabfit.tools.database import DataManager, VastDataLoader
+from colabfit.tools.vast.database import DataManager, VastDataLoader
 from dotenv import load_dotenv
 from pyspark.sql import SparkSession
 
@@ -50,16 +50,9 @@ SLURM_TASK_ID = int(os.getenv("SLURM_ARRAY_TASK_ID", -1))
 SLURM_JOB_ID = os.getenv("SLURM_JOB_ID", -1)
 ACTUAL_INDEX = SLURM_TASK_ID
 
-spark_session = (
-    SparkSession.builder.appName(f"colabfit_{SLURM_JOB_ID}_{SLURM_TASK_ID}")
-    .config("spark.executor.memoryOverhead", "600")
-    .config("spark.driver.memory", "12g")
-    # .config("spark.ui.showConsoleProgress", "false")
-    .config("spark.driver.maxResultSize", 0)
-    .config("spark.sql.adaptive.enabled", "true")
-    .config("spark.rpc.message.maxSize", "2047")
-    .getOrCreate()
-)
+spark_session = SparkSession.builder.appName(
+    f"colabfit_{SLURM_JOB_ID}_{SLURM_TASK_ID}"
+).getOrCreate()
 
 loader = VastDataLoader(
     table_prefix="ndb.colabfit.dev",
@@ -74,19 +67,19 @@ loader.set_vastdb_session(
     access_secret=access_secret,
 )
 
-loader.metadata_dir = "test_md/MDtest"
-loader.config_table = "ndb.colabfit.dev.co_omat"
-loader.prop_object_table = "ndb.colabfit.dev.po_omat"
-loader.config_set_table = "ndb.colabfit.dev.cs_omat"
-loader.dataset_table = "ndb.colabfit.dev.ds_omat"
-loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_omat"
+# loader.metadata_dir = "test_md/MDtest"
+# loader.config_table = "ndb.colabfit.dev.co_omat"
+# loader.prop_object_table = "ndb.colabfit.dev.po_omat"
+# loader.config_set_table = "ndb.colabfit.dev.cs_omat"
+# loader.dataset_table = "ndb.colabfit.dev.ds_omat"
+# loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_omat"
 
 
-# loader.config_table = "ndb.colabfit.dev.co_wip"
-# loader.prop_object_table = "ndb.colabfit.dev.po_wip"
-# loader.config_set_table = "ndb.colabfit.dev.cs_wip"
-# loader.dataset_table = "ndb.colabfit.dev.ds_wip"
-# loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_wip"
+loader.config_table = "ndb.colabfit.dev.co_wip"
+loader.prop_object_table = "ndb.colabfit.dev.po_wip"
+loader.config_set_table = "ndb.colabfit.dev.cs_wip"
+loader.dataset_table = "ndb.colabfit.dev.ds_wip"
+loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_wip"
 
 print(
     loader.config_table,
