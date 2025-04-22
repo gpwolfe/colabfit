@@ -2,7 +2,24 @@ import os
 import sys
 import requests
 from bs4 import BeautifulSoup
+from multiprocessing import Pool
 from urllib.parse import urljoin
+
+
+def download_file(args):
+    file_url, target_directory = args
+    file_name = os.path.basename(file_url)
+    target_path = os.path.join(target_directory, file_name)
+    try:
+        print(f"Downloading {file_url}...")
+        file_response = requests.get(file_url, stream=True)
+        file_response.raise_for_status()
+        with open(target_path, "wb") as file:
+            for chunk in file_response.iter_content(chunk_size=8192):
+                file.write(chunk)
+        print(f"Saved: {target_path}")
+    except requests.RequestException as e:
+        print(f"Failed to download {file_url}: {e}")
 
 
 def download_json_bz2_files(url, target_directory):
@@ -23,19 +40,10 @@ def download_json_bz2_files(url, target_directory):
     if not json_bz2_links:
         print("No .json.bz2 files found on the given URL.")
         return
-    for file_url in json_bz2_links:
-        file_name = os.path.basename(file_url)
-        target_path = os.path.join(target_directory, file_name)
-        try:
-            print(f"Downloading {file_url}...")
-            file_response = requests.get(file_url, stream=True)
-            file_response.raise_for_status()
-            with open(target_path, "wb") as file:
-                for chunk in file_response.iter_content(chunk_size=8192):
-                    file.write(chunk)
-            print(f"Saved: {target_path}")
-        except requests.RequestException as e:
-            print(f"Failed to download {file_url}: {e}")
+    with Pool(24) as p:
+        p.map(
+            download_file, [(file_url, target_directory) for file_url in json_bz2_links]
+        )
 
 
 if __name__ == "__main__":
