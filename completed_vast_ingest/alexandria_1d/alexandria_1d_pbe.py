@@ -34,25 +34,30 @@ import os
 from pathlib import Path
 from pickle import load
 from time import time
-
+import logging
 import pyspark
-from colabfit.tools.configuration import AtomicConfiguration  # noqa
-from colabfit.tools.database import DataManager, VastDataLoader
-from colabfit.tools.property import PropertyMap, property_info
+from colabfit.tools.vast.database import DataManager, VastDataLoader
+from colabfit.tools.vast.property import PropertyMap, property_info
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     cauchy_stress_pd,
     energy_pd,
 )
+import sys
 from dotenv import load_dotenv
 from pyspark.sql import SparkSession
 
-print("pyspark version: ", pyspark.__version__)
-# Set up data loader environment
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+handler.setFormatter(formatter)
+logger = logging.getLogger(f"{__name__}.hasher")
+logger.setLevel("INFO")
+logger.addHandler(handler)
+
+logging.info(f"pyspark version: {pyspark.__version__}")
 load_dotenv()
-SLURM_TASK_ID = int(os.getenv("SLURM_ARRAY_TASK_ID"))
 SLURM_JOB_ID = os.getenv("SLURM_JOB_ID")
-ACTUAL_INDEX = int(os.getenv("ACTUAL_INDEX"))
 
 n_cpus = os.getenv("SLURM_CPUS_PER_TASK")
 if not n_cpus:
@@ -61,7 +66,7 @@ if not n_cpus:
 spark_ui_port = os.getenv("__SPARK_UI_PORT")
 jars = os.getenv("VASTDB_CONNECTOR_JARS")
 spark_session = (
-    SparkSession.builder.appName(f"colabfit_{SLURM_JOB_ID}_{SLURM_TASK_ID}")
+    SparkSession.builder.appName(f"colabfit_{SLURM_JOB_ID}")
     .master(f"local[{n_cpus}]")
     .config("spark.executor.memoryOverhead", "600")
     .config("spark.ui.port", f"{spark_ui_port}")
@@ -74,17 +79,12 @@ spark_session = (
 
 
 loader = VastDataLoader(
-    table_prefix="ndb.colabfit.dev",
+    spark_session=spark_session,
+    access_key=os.getenv("SPARK_ID"),
+    access_secret=os.getenv("SPARK_KEY"),
+    endpoint=os.getenv("SPARK_ENDPOINT"),
 )
-loader.set_spark_session(spark_session)
-access_key = os.getenv("SPARK_ID")
-access_secret = os.getenv("SPARK_KEY")
-endpoint = os.getenv("SPARK_ENDPOINT")
-loader.set_vastdb_session(
-    endpoint=endpoint,
-    access_key=access_key,
-    access_secret=access_secret,
-)
+
 
 loader.metadata_dir = "test_md/MDtest"
 loader.config_table = "ndb.colabfit.dev.co_alex"
@@ -100,19 +100,17 @@ loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_alex"
 # loader.dataset_table = "ndb.colabfit.dev.ds_wip"
 # loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_wip"
 
-print(
-    loader.config_table,
-    loader.config_set_table,
-    loader.dataset_table,
-    loader.prop_object_table,
-)
+logging.info(loader.config_table)
+logging.info(loader.config_set_table)
+logging.info(loader.dataset_table)
+logging.info(loader.prop_object_table)
 
 DATASET_FP = Path(
-    "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/alexandria_3d_pbe_traj/alexandria_pickles"  # noqa
+    "/scratch/gw2338/vast/data-lake-main/spark/scripts/gw_scripts/alex_1d/alexandria_1d_pickles"  # noqa
 )
-DATASET_NAME = "Alexandria_geometry_optimization_paths_PBE_3D"
-DATASET_ID = "DS_s6gf4z2hcjqy_0"
-DESCRIPTION = "The Alexandria Materials Database contains theoretical crystal structures in 1D, 2D and 3D discovered by machine learning approaches using DFT with PBE, PBEsol and SCAN methods. This dataset represents the geometry optimization paths for 3D crystal structures from Alexandria calculated using PBE methods."  # noqa
+DATASET_NAME = "Alexandria_geometry_optimization_paths_PBE_1D"
+DATASET_ID = "DS_xnio123pebli_0"
+DESCRIPTION = "The Alexandria Materials Database contains theoretical crystal structures in 1D, 2D and 3D discovered by machine learning approaches using DFT with PBE, PBEsol and SCAN methods. This dataset represents the geometry optimization paths for 1D crystal structures from Alexandria calculated using PBE methods."  # noqa
 
 DOI = None
 PUBLICATION_YEAR = "2024"
@@ -168,41 +166,22 @@ def read_alexandria(fp: Path):
             yield config
 
 
-# cs_name_match = f"alexandria_3d__file_{fp.stem}__id_{id}__trajectory_{j}"
-# cs_label_match = None
-# cs_name = f"{DATASET_NAME}__{fp.stem}__{id}__{j}"
-# cs_description = f"Alexandria 3D PBE trajectory number {j} for material {id} from file {fp.name}"  # noqa
-# CSS[cs_name] = {}
-# CSS[cs_name]["name"] = cs_name
-# CSS[cs_name]["description"] = cs_description
-# CSS[cs_name]["ids"] = []
-# (cs_name_match, cs_label_match, cs_name, cs_description)]
-
-
 def read_wrapper(dir_path: str):
     dir_path = Path(dir_path)
     if not dir_path.exists():
-        print(f"Path {dir_path} does not exist")
+        logging.info(f"Path {dir_path} does not exist")
         return
     all_json_paths = sorted(list(dir_path.rglob("*.pkl")), key=lambda x: x.stem)
-    print(f"slurm task id: {SLURM_TASK_ID}")
-    print(f"ACTUAL_INDEX: {ACTUAL_INDEX}")
-    if ACTUAL_INDEX > len(all_json_paths):
-        print("ACTUAL_INDEX is greater than the number of files")
-        return
-    path = all_json_paths[ACTUAL_INDEX]
-    css_dir = Path("alexandria_css")
-    css_dir.mkdir(exist_ok=True)
-    css_path = css_dir / f"{path.stem}.csv"
-    with css_path.open("a") as f:
-        f.write("cs_name,config_id\n")
-        print(f"Processing file: {path}")
-        reader = read_alexandria(path)
-        for config in reader:
-            if config.info["_name"] != [
-                "alexandria_3d__file_alex_go_aad_020__id_agm005676148__trajectory_0__frame_5"  # noqa
-            ]:
-                _, filename, mat_id, traj, ix = config.info["_name"][0].split("__")
+    for path in all_json_paths:
+        css_dir = Path("alexandria_1d_css")
+        css_dir.mkdir(exist_ok=True)
+        css_path = css_dir / f"{path.stem}.csv"
+        with css_path.open("a") as f:
+            f.write("cs_name,config_id\n")
+            logging.info(f"Processing file: {path}")
+            reader = read_alexandria(path)
+            for config in reader:
+                _, filename, mat_id, traj, ix = config.info["_name"].split("__")
                 cs_name = f"{DATASET_NAME}__{filename}__{mat_id}__{traj}"
                 f.write(f"{cs_name},{config.id}\n")
                 yield config
@@ -211,9 +190,8 @@ def read_wrapper(dir_path: str):
 def main():
     t0 = time()
     config_generator = read_wrapper(DATASET_FP)
-    print("Creating DataManager")
+    logging.info("Creating DataManager")
     dm = DataManager(
-        nprocs=1,
         configs=config_generator,
         prop_defs=[energy_pd, atomic_forces_pd, cauchy_stress_pd],
         prop_map=PROPERTY_MAP,
@@ -221,13 +199,13 @@ def main():
         standardize_energy=True,
         read_write_batch_size=10000,
     )
-    print(f"Time to prep: {time() - t0}")
+    logging.info(f"Time to prep: {time() - t0}")
     t1 = time()
     dm.load_co_po_to_vastdb(loader, batching_ingest=True)
     t2 = time()
-    print(f"Time to load: {t2 - t1}")
-    print(f"Total time: {time() - t0}")
-    print("complete")
+    logging.info(f"Time to load: {t2 - t1}")
+    logging.info(f"Total time: {time() - t0}")
+    logging.info("complete")
 
 
 if __name__ == "__main__":
