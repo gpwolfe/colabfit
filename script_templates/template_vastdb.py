@@ -26,8 +26,8 @@ from time import time
 from ase.io import iread
 from dotenv import load_dotenv
 
-from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import DataManager, VastDataLoader
+from colabfit.tools.vast.configuration import AtomicConfiguration
+from colabfit.tools.vast.database import DataManager, VastDataLoader
 from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     energy_pd,
