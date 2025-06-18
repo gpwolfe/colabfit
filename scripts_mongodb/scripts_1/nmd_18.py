@@ -19,7 +19,7 @@ from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 #     potential_energy_pd,
 # )
 
-DATASET = "NMD-18"
+DATASET = "p-18"
 DATASET_FP = Path("/persistent/colabfit_raw_data/colabfit_data/new_raw_datasets/NMD_18")
 DATASET_FP = Path().cwd().parent / "data/NMD_18"
 
