@@ -28,13 +28,8 @@ from dotenv import load_dotenv
 from fairchem.core.datasets import AseDBDataset
 from pyspark.sql import SparkSession
 
-handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-handler.setFormatter(formatter)
 logger = logging.getLogger(f"{__name__}.hasher")
 logger.setLevel("INFO")
-logger.addHandler(handler)
 
 logging.info(f"pyspark version: {pyspark.__version__}")
 load_dotenv()
