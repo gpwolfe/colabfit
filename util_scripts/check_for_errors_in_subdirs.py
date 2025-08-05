@@ -16,8 +16,12 @@ def get_nums_from_fnames(fnames):
     return nums
 
 
-def main(path: str, pattern: str = None):
-    subdirs = sorted(list(Path(path).glob(pattern)))
+def main(path: str = None, pattern: str = None):
+
+    if pattern is None and path is None:
+        subdirs = [Path().cwd()]
+    else:
+        subdirs = sorted(list(Path(path).glob(pattern)))
     print(subdirs)
     for sd in subdirs:
         print("Processing subdir:")
@@ -46,7 +50,7 @@ def main(path: str, pattern: str = None):
                     oom.append(fp.name)
                 elif "ValueError: Duplicate IDs found in table. Not writing" in text:
                     duplicates.append(fp.name)
-                elif "Done!" in text or "Finished!" in text:
+                elif "Done!" in text or "Finished!" in text or "Total runtime" in text:
                     continue
                 else:
                     other_err.append(fp.name)
@@ -66,4 +70,7 @@ def main(path: str, pattern: str = None):
 if __name__ == "__main__":
     import sys
 
-    main(sys.argv[1], sys.argv[2])
+    if len(sys.argv) < 3:
+        main()
+    else:
+        main(sys.argv[1], sys.argv[2])
