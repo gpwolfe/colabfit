@@ -42,7 +42,6 @@ loader = VastDataLoader(
 
 loader.metadata_dir = "test_md/MDtest"
 loader.config_table = "ndb.colabfit.dev.co_temp"
-loader.prop_object_table = "ndb.colabfit.dev.po_temp"
 loader.config_set_table = "ndb.colabfit.dev.cs_temp"
 loader.dataset_table = "ndb.colabfit.dev.ds_temp"
 loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_temp"
@@ -58,15 +57,7 @@ OTHER_LINKS = []
 PUBLICATION_YEAR = "2025"
 
 
-AUTHORS = [
-    "Christian Devereux",
-    "Justin S. Smith",
-    "Kate K. Huddleston",
-    "Kipton Barros",
-    "Roman Zubatyuk",
-    "Olexandr Isayev",
-    "Adrian E. Roitberg",
-]
+AUTHORS = [""]
 LICENSE = "CC-BY-4.0"
 DOI = None
 property_keys = []
@@ -88,7 +79,7 @@ energy_info = property_info(
 force_info = property_info(
     property_name="atomic-forces",
     field="forces",
-    units="eV/angstron",
+    units="eV/angstrom",
     original_file_key="forces",
     additional=None,
 )
@@ -96,7 +87,7 @@ stress_info = property_info(
     property_name="cauchy-stress",
     field="stress",
     units="eV/angstrom^3",
-    original_file_key="in header",
+    original_file_key="stress",
     additional=[("volume-normalized", {"value": False, "units": None})],
 )
 property_map.set_properties([energy_info, force_info, stress_info])
