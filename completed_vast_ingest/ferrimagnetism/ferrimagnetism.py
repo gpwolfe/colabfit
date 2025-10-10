@@ -1,6 +1,10 @@
 """
 Requires deactivating an assertion in ase site package espresso-out reader for ibzkpts.
 skip all /tmp/ files
+
+according to ase documentation in ase.io.espresso.py:
+In PW the forces are consistent with the "total energy"; that's why
+its value must be assigned to free_energy.
 """
 
 import os
@@ -16,7 +20,7 @@ from colabfit.tools.vast.configuration import AtomicConfiguration
 
 from colabfit.tools.vast.configuration_set import configuration_set_info
 from colabfit.tools.vast.database import DataManager, VastDataLoader
-from colabfit.tools.vast.property import PropertyMap, property_info
+from colabfit.tools.vast.property import PropertyMap, PropertyInfo
 from pyspark.sql import SparkSession
 from vastdb.session import Session
 
@@ -45,7 +49,6 @@ loader = VastDataLoader(
     endpoint=envvars.get("SPARK_ENDPOINT"),
 )
 
-# loader.metadata_dir = "test_md/MDtest"
 loader.config_table = "ndb.colabfit.dev.co_ferro"
 loader.config_set_table = "ndb.colabfit.dev.cs_ferro"
 loader.dataset_table = "ndb.colabfit.dev.ds_ferro"
@@ -56,11 +59,10 @@ DATASET_FP = Path("diffmag/diffmag/data")
 DATASET_NAME = "Ferrimagnetism_induced_by_thermal_vibrations_in_oxygen-deficient_manganite_heterostructures"  # noqa: E501
 DATASET_ID = "DS_vesysby9oheq_0"
 DESCRIPTION = "Data from the paper 'Ferrimagnetism induced by thermal vibrations in oxygen-deficient manganite heterostructures'. Includes Quantum ESPRESSO calculations of SrCaMnO3 and SrMnO3, stoichiometric and defective cells."  # noqa: E501
-PUBLICATION = "https://doi.org/10.48550/arXiv.2405.04630"
+PUBLICATION = "https://doi.org/10.1103/2266-h6bk"
 DATA_LINK = "https://doi.org/10.24435/materialscloud:9q-vd"
-OTHER_LINKS = []
+OTHER_LINKS = ["https://doi.org/10.48550/arXiv.2405.04630"]
 PUBLICATION_YEAR = "2025"
-
 
 AUTHORS = [
     "Moloud Kaviani",
@@ -73,7 +75,7 @@ property_keys = []
 property_map = PropertyMap([energy_pd, cauchy_stress_pd, atomic_forces_pd])
 
 property_map.set_metadata_field("software", "Quantum ESPRESSO")
-property_map.set_metadata_field("method", "DFT-PBE+U")
+property_map.set_metadata_field("method", "DFT-PBEsol+U")
 property_map.set_metadata_field(
     "input",
     {
@@ -87,27 +89,28 @@ property_map.set_metadata_field(
 for property in property_keys:
     property_map.set_metadata_field(property, property, dynamic=True)
 
-energy_info = property_info(
+energy_info = PropertyInfo(
     property_name="energy",
-    field="energy",
+    field="free_energy",
     units="eV",
     original_file_key="total energy",
     additional=[("per-atom", {"value": False, "units": None})],
 )
-force_info = property_info(
+force_info = PropertyInfo(
     property_name="atomic-forces",
     field="forces",
     units="eV/angstrom",
     original_file_key="force",
     additional=None,
 )
-stress_info = property_info(
+stress_info = PropertyInfo(
     property_name="cauchy-stress",
     field="cauchy-stress",
     units="eV/angstrom^3",
     original_file_key="total   stress",
     additional=[("volume-normalized", {"value": False, "units": None})],
 )
+
 property_map.set_properties([energy_info, force_info, stress_info])
 
 PROPERTY_MAP = property_map.get_property_map()
