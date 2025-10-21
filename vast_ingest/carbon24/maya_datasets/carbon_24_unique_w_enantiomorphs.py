@@ -30,7 +30,6 @@ loader = VastDataLoader(
 
 # generate_ds_id()
 # DS_ll0wuxuhe5g9_0
-loader = VastDataLoader()
 loader.config_table = "ndb.colabfit.dev.co_c24enant"
 loader.config_set_table = "ndb.colabfit.dev.cs_c24enant"
 loader.dataset_table = "ndb.colabfit.dev.ds_c24enant"
@@ -68,7 +67,7 @@ property_map.set_metadata_field(
 for key in [
     "original_id",
     "index",
-    "index_of_enantiomorph",
+    "enantiomorph_pair_index",
 ]:
     property_map.set_metadata_field(key, key, dynamic=True)
 
@@ -82,7 +81,7 @@ def reader(xyz, csv_file):
     for i, atoms in enumerate(iread(xyz, format="extxyz")):
         atoms.info["original_id"] = orig_ids[i]
         atoms.info["index"] = i
-        atoms.info["index_of_enantiomorph"] = atoms.info["enantiomorph"]
+        atoms.info["enantiomorph_pair_index"] = atoms.info["enantiomorph"]
         atoms.info["_name"] = f"{DATASET_NAME}_index_{i}"
         yield AtomicConfiguration.from_ase(atoms)
 
