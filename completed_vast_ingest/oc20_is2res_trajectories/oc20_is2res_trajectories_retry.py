@@ -35,7 +35,7 @@ import pickle
 from pathlib import Path
 from time import time
 
-from ase.io import iread, read
+from ase.io import iread
 from dotenv import load_dotenv
 from pyspark.sql import SparkSession
 import pyspark

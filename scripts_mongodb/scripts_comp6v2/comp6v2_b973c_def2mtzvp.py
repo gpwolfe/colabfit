@@ -23,7 +23,7 @@ from pathlib import Path
 import pymongo
 
 from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import MongoDatabase, generate_ds_id, load_data
+from colabfit.tools.database import MongoDatabase, load_data
 from colabfit.tools.property_definitions import (
     potential_energy_pd,
     atomic_forces_pd,

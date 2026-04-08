@@ -4,7 +4,6 @@ from itertools import islice
 from pathlib import Path
 from pickle import dump
 from time import time
-from multiprocessing import Pool
 
 from colabfit.tools.vast.configuration import AtomicConfiguration
 from pymatgen.core import Structure

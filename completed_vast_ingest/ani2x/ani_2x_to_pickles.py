@@ -1,5 +1,4 @@
 import logging
-import os
 from multiprocessing import Pool
 from pathlib import Path
 from pickle import dump
@@ -7,11 +6,8 @@ import h5py
 from colabfit.tools.property_definitions import energy_pd
 from colabfit.tools.vast.configuration import AtomicConfiguration
 from colabfit.tools.vast.configuration_set import configuration_set_info
-from colabfit.tools.vast.database import DataManager, VastDataLoader, batched
 from colabfit.tools.vast.property import PropertyMap, property_info
 from dotenv import load_dotenv
-from pyspark.sql import SparkSession
-from vastdb.session import Session
 
 load_dotenv()
 logger = logging.getLogger(__name__)
