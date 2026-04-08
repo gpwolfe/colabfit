@@ -59,11 +59,9 @@ Keys from JARVIS-polymer-genome
 
 import json
 import os
-import sys
 from pathlib import Path
 from time import time
 
-from ase.io import iread
 from ase.atoms import Atoms
 from dotenv import load_dotenv
 from numpy import isnan
