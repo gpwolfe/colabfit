@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from pyspark.sql import SparkSession
 
-from colabfit.tools.database import (
+from colabfit.tools.vast.database import (
     VAST_BUCKET_DIR,
     S3FileManager,
 )
