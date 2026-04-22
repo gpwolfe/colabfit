@@ -1,13 +1,11 @@
 import os
 from pathlib import Path
-from time import time
 
 import numpy as np
 import pandas as pd
 import pyspark
 from ase.io import iread
 from colabfit.tools.vast.configuration import AtomicConfiguration
-from colabfit.tools.vast.configuration_set import configuration_set_info
 from colabfit.tools.vast.database import DataManager, VastDataLoader
 from colabfit.tools.vast.property import PropertyMap, property_info
 from colabfit.tools.property_definitions import (

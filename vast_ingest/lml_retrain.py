@@ -27,7 +27,6 @@ from ase.io import read
 from colabfit.tools.database import generate_ds_id, load_data, MongoDatabase
 from colabfit.tools.property_definitions import (
     cauchy_stress_pd,
-    atomic_forces_pd,
     potential_energy_pd,
     free_energy_pd,
 )

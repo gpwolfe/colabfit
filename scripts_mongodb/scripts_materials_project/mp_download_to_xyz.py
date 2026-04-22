@@ -1,7 +1,6 @@
 from ase.io import write
 from collections import defaultdict
 from mp_api.client import MPRester
-from multiprocessing import Pool
 import numpy as np
 import pickle
 from pymatgen.io.ase import AseAtomsAdaptor

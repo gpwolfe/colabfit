@@ -8,7 +8,7 @@ from ase.atoms import Atoms
 
 from colabfit.tools.vast.configuration import AtomicConfiguration
 from colabfit.tools.vast.database import DataManager, VastDataLoader
-from colabfit.tools.vast.property import PropertyMap, property_info
+from colabfit.tools.vast.property import PropertyMap
 
 from dotenv import load_dotenv
 from pyspark.sql import SparkSession

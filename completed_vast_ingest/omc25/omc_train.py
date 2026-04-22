@@ -12,11 +12,9 @@ from colabfit.tools.property_definitions import (
     cauchy_stress_pd,
     energy_pd,
 )
-from colabfit.tools.vast.configuration import AtomicConfiguration
 from colabfit.tools.vast.database import DataManager, VastDataLoader
 from colabfit.tools.vast.property import PropertyMap, property_info
 from dotenv import load_dotenv
-from fairchem.core.datasets import AseDBDataset
 from pyspark.sql import SparkSession
 from vastdb.session import Session
 

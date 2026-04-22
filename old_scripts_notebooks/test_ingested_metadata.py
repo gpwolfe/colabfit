@@ -1,19 +1,11 @@
-import json
 import os
-from pathlib import Path
-from time import time
 
-from ase.atoms import Atoms
 from dotenv import load_dotenv
-from numpy import isnan
 from pyspark.sql import SparkSession
 
-from colabfit.tools.configuration import AtomicConfiguration
-from colabfit.tools.database import (
+from colabfit.tools.vast.database import (
     VAST_BUCKET_DIR,
-    DataManager,
     S3FileManager,
-    VastDataLoader,
 )
 
 load_dotenv()

@@ -38,7 +38,6 @@ Thank you for these units
 """
 
 import os
-from pathlib import Path
 from time import time
 
 from colabfit.tools.database import DataManager, VastDataLoader
