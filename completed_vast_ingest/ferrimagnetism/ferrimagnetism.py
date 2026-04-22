@@ -129,7 +129,7 @@ def reader(dataset_fp):
                 config.info["_name"] = f"{DATASET_NAME}__{fpname}_{i}"
                 try:
                     config.info["cauchy-stress"] = config.get_stress(voigt=False)
-                except Exception as e:
+                except Exception:
                     config.info["cauchy-stress"] = None
                 yield AtomicConfiguration.from_ase(config)
         except Exception as e:

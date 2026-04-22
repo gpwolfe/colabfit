@@ -1,5 +1,4 @@
 import logging
-from multiprocessing import Pool
 from pathlib import Path
 from pickle import dump
 from colabfit.tools.vast.database import batched

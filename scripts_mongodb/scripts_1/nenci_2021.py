@@ -3,8 +3,8 @@ authors: Gregory Wolfe, Alexander Tao
 
 XYZ header
 ----------
-Dimer charge, Dimer multiplicity, Momomer A charge, Monomer A multiplicity,
-Momomer B charge, Monomer B multiplicity, # of atoms in Monomer A,
+Dimer charge, Dimer multiplicity, monomer A charge, Monomer A multiplicity,
+monomer B charge, Monomer B multiplicity, # of atoms in Monomer A,
 # of atoms in Monomer B, CCSD(T)/CBS,   CCSD(T)/haTZ,   MP2/haTZ,   MP2/CBS,
 MP2/aTZ,   MP2/aQZ,   HF/haTZ,   HF/aTZ,   HF/aQZ,   SAPT2+/aDZ Tot,
 SAPT2+/aDZ Elst,   SAPT2+/aDZ Exch,   SAPT2+/aDZ Ind,   SAPT2+/aDZ Disp
@@ -115,9 +115,9 @@ def reader(file_path):
 co_md = {
     "dimer-charge": {"field": "dimer_charge"},
     "dimer-multiplicity": {"field": "dimer_multiplicity"},
-    "monomer_a_charge": {"field": "momomer_a_charge"},
+    "monomer_a_charge": {"field": "monomer_a_charge"},
     "monomer_a_multiplicity": {"field": "monomer_a_multiplicity"},
-    "monomer_b_charge": {"field": "momomer_b_charge"},
+    "monomer_b_charge": {"field": "monomer_b_charge"},
     "monomer_b_multiplicity": {"field": "monomer_b_multiplicity"},
     "num_atoms_monomer_a": {"field": "natoms_monomer_a"},
     "num_atoms_monomer_b": {"field": "natoms_monomer_b"},
