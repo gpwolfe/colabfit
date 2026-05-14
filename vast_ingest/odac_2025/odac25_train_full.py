@@ -78,7 +78,7 @@ LICENSE = "CC-BY-4.0"
 DOI = None
 DATA_PATH = Path("odac25_full_train/train")
 PARTITIONS = ["mof_plus_adsorbate", "mof", "gcmc"]
-CHUNK_SIZE = 5_000
+CHUNK_SIZE = 2_000
 PROGRESS_FILE = Path(f"progress_{DATASET_ID}.jsonl")
 
 
@@ -189,6 +189,7 @@ if __name__ == "__main__":
         access_key=access_key,
         access_secret=access_secret,
         endpoint=endpoint,
+        limit_rows_per_sub_split=250000,
     )
     loader.config_table = "ndb.colabfit.dev.co_odac25_trn_full"
     loader.config_set_table = "ndb.colabfit.dev.cs_odac25_trn_full"
@@ -304,7 +305,7 @@ if __name__ == "__main__":
     logger.info(f"Worker chunks remaining: {len(worker_args)}")
 
     n_workers = int(
-        os.getenv("COLABFIT_WORKERS", os.getenv("SLURM_CPUS_PER_TASK", "8"))
+        os.getenv("COLABFIT_WORKERS", os.getenv("SLURM_CPUS_PER_TASK", "4"))
     )
     dm = DataManager(
         prop_defs=prop_defs,
@@ -318,7 +319,7 @@ if __name__ == "__main__":
         worker_fn=_odac25_worker,
         worker_args=worker_args,
         n_workers=n_workers,
-        write_batch_size=100_000,
+        write_batch_size=20_000,
         check_existing=False,
         progress_file=PROGRESS_FILE,
     )
