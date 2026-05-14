@@ -187,11 +187,11 @@ if __name__ == "__main__":
     access_key = os.getenv("VAST_DB_ACCESS")
     access_secret = os.getenv("VAST_DB_SECRET")
     endpoint = os.getenv("SPARK_ENDPOINT")
-
     loader = VastDataLoader(
         access_key=access_key,
         access_secret=access_secret,
         endpoint=endpoint,
+        limit_rows_per_sub_split=250000,
     )
     loader.config_table = "ndb.colabfit.dev.co_odac25_trn_filt"
     loader.config_set_table = "ndb.colabfit.dev.cs_odac25_trn_filt"
@@ -200,13 +200,17 @@ if __name__ == "__main__":
 
     logger.info("Checking for existing config table")
     if PROGRESS_FILE.exists():
-        logger.info(f"Progress file found at {PROGRESS_FILE}; resuming ingest, skipping table drop.")
+        logger.info(
+            f"Progress file found at {PROGRESS_FILE}; resuming ingest, skipping table drop."
+        )
     else:
         with get_session().transaction() as tx:
             _, b, s, t = loader.config_table.split(".")
             sch = tx.bucket(b).schema(s)
             if sch.table(t, fail_if_missing=False) is not None:
-                logger.info(f"Config table exists. Dropping config table {loader.config_table}")
+                logger.info(
+                    f"Config table exists. Dropping config table {loader.config_table}"
+                )
                 sch.table(t).drop()
     logger.info("Post check")
 
@@ -284,7 +288,10 @@ if __name__ == "__main__":
             indices = list(shard.indices)
             for i in range(0, len(indices), CHUNK_SIZE):
                 chunk_indices = indices[i : i + CHUNK_SIZE]
-                if completed_chunks and (str(part_file), chunk_indices[0]) in completed_chunks:
+                if (
+                    completed_chunks
+                    and (str(part_file), chunk_indices[0]) in completed_chunks
+                ):
                     continue
                 worker_args.append(
                     (
@@ -301,7 +308,9 @@ if __name__ == "__main__":
                 )
     logger.info(f"Worker chunks remaining: {len(worker_args)}")
 
-    n_workers = int(os.getenv("COLABFIT_WORKERS", os.getenv("SLURM_CPUS_PER_TASK", "4")))
+    n_workers = int(
+        os.getenv("COLABFIT_WORKERS", os.getenv("SLURM_CPUS_PER_TASK", "4"))
+    )
     logger.info(f"Using n_workers={n_workers}")
     dm = DataManager(
         prop_defs=prop_defs,
