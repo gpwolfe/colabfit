@@ -1,5 +1,5 @@
 """
-Open_Catalyst_2025_OC25_Train ingest script for ColabFit VAST database.
+Open_Catalyst_2025_OC25_Val ingest script for ColabFit VAST database.
 
 Properties
 ----------
@@ -8,16 +8,16 @@ atomic-forces: forces in eV/Å
 
 File notes
 ----------
-Source: vast_ingest/oc25/train/ (20 .aselmdb shards)
+Source: vast_ingest/oc25/val/ (20 .aselmdb shards)
 OC25 is the largest solid-liquid interface dataset, containing 7,801,261
 single-point DFT calculations of catalyst/solvent/ion/adsorbate structures
 spanning 88 elements, 8 solvents, 9 ionic species, and adsorbates from OC20
-plus reactive intermediates. Structures are highly off-equilibrium, sampled
-from short AIMD (10-50 steps, 1000K, NVT) or short DFT relaxations (5 ionic
-steps). The training split (7,395,512 structures) is filtered to total force
-drift < 1 eV/Å. DFT: VASP 6.3.2, non-spin-polarized RPBE+D3 (zero damping),
-ENCUT=400 eV, EDIFF=1e-4 eV, k-point reciprocal density=40, dipole correction
-in z.
+plus reactive intermediates. The validation split (203,630 structures)
+represents out-of-distribution (OOD) bulk-solvent combinations (~2.5% of
+~260,000 unique pairings held out). Val/test calculations used tighter DFT
+convergence (EDIFF=1e-6 eV) for higher-quality force labels. DFT: VASP 6.3.2,
+non-spin-polarized RPBE+D3 (zero damping), ENCUT=400 eV, k-point reciprocal
+density=40, dipole correction in z.
 """
 
 import json
@@ -35,10 +35,10 @@ from fairchem.core.datasets import AseDBDataset
 
 logger = getLogger(__name__)
 
-DATASET_ID = "DS_fanupene3rn7_0"
-DATASET_NAME = "Open_Catalyst_2025_OC25_Train"
+DATASET_ID = "DS_lob79won5rp2_0"
+DATASET_NAME = "Open_Catalyst_2025_OC25_Val"
 DESCRIPTION = (
-    "The training split of the Open Catalyst 2025 (OC25) dataset for solid-liquid "
+    "The validation split of the Open Catalyst 2025 (OC25) dataset for solid-liquid "
     "interfaces. OC25 consists of single-point DFT calculations of "
     "catalyst/solvent/ion/adsorbate structures, covering 88 elements, 8 solvents "
     "(water, methanol, CCl4, DMSO, benzene, hexane, THF, diethyl ether), 9 ionic "
@@ -46,12 +46,15 @@ DESCRIPTION = (
     "from the OC20 set plus reactive intermediates. Surfaces are derived from 39,821 "
     "Materials Project bulk structures with miller indices <= 3. Structures are highly "
     "off-equilibrium, sampled from short ab initio molecular dynamics simulations "
-    "(10-50 steps, 1000K, NVT) or short DFT relaxations (5 ionic steps). The training "
-    "split contains ~7.4 million structures filtered to total force drift < 1 eV/Å. All "
-    "DFT calculations used VASP 6.3.2 with the non-spin-polarized RPBE functional "
+    "(10-50 steps, 1000K, NVT) or short DFT relaxations (5 ionic steps). The "
+    "validation split contains 203,630 structures representing out-of-distribution "
+    "(OOD) bulk-solvent combinations (approximately 2.5% of ~260,000 unique pairings "
+    "held out). Validation calculations used tighter DFT convergence (EDIFF=1e-6 eV) "
+    "compared to the training set to provide higher-quality force labels. All DFT "
+    "calculations used VASP 6.3.2 with the non-spin-polarized RPBE functional "
     "supplemented with D3 dispersion correction (zero damping), plane wave cutoff "
-    "400 eV, EDIFF=1e-4 eV, k-point reciprocal density of 40, and a dipole correction "
-    "in the z-direction."
+    "400 eV, k-point reciprocal density of 40, and a dipole correction in the "
+    "z-direction."
 )
 PUBLICATION = "https://doi.org/10.48550/arXiv.2509.17862"
 DATA_LINK = "https://huggingface.co/facebook/OC25"
@@ -70,8 +73,8 @@ AUTHORS = [
 ]
 LICENSE = "CC-BY-4.0"
 DOI = None
-DATA_PATH = Path("oc25/train")
-CHUNK_SIZE = 2_000
+DATA_PATH = Path("oc25/val")
+CHUNK_SIZE = 5_000
 PROGRESS_FILE = Path(f"progress_{DATASET_ID}.jsonl")
 
 
@@ -163,12 +166,11 @@ if __name__ == "__main__":
         access_key=access_key,
         access_secret=access_secret,
         endpoint=endpoint,
-        limit_rows_per_sub_split=250000,
     )
-    loader.config_table = "ndb.colabfit.dev.co_oc25_trn"
-    loader.config_set_table = "ndb.colabfit.dev.cs_oc25_trn"
-    loader.dataset_table = "ndb.colabfit.dev.ds_oc25_trn"
-    loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_oc25_trn"
+    loader.config_table = "ndb.colabfit.dev.co_oc25_val"
+    loader.config_set_table = "ndb.colabfit.dev.cs_oc25_val"
+    loader.dataset_table = "ndb.colabfit.dev.ds_oc25_val"
+    loader.co_cs_map_table = "ndb.colabfit.dev.cs_co_map_oc25_val"
 
     if PROGRESS_FILE.exists():
         logger.info(
@@ -186,19 +188,19 @@ if __name__ == "__main__":
 
     property_map = PropertyMap([energy_pd, atomic_forces_pd])
     property_map.set_metadata_field("software", "VASP 6.3.2")
-    property_map.set_metadata_field("method", "DFT-rPBE+D3")
+    property_map.set_metadata_field("method", "DFT-RPBE+D3")
     property_map.set_metadata_field(
         "input",
         {
             "functional": "RPBE (non-spin-polarized)",
             "dispersion": "D3 with zero damping",
             "ENCUT": "400 eV",
-            "EDIFF": "1e-4 eV",
+            "EDIFF": "1e-6 eV",
             "kpoints": "reciprocal density of 40",
             "dipole_correction": "z-direction",
             "sampling": (
                 "Short AIMD (10-50 steps, 1000K, NVT) or DFT relaxations (5 ionic steps); "
-                "filtered to total force drift < 1 eV/Å"
+                "OOD bulk-solvent combinations held out from training"
             ),
         },
     )
@@ -261,7 +263,7 @@ if __name__ == "__main__":
     logger.info(f"Worker chunks remaining: {len(worker_args)}")
 
     n_workers = int(
-        os.getenv("COLABFIT_WORKERS", os.getenv("SLURM_CPUS_PER_TASK", "4"))
+        os.getenv("COLABFIT_WORKERS", os.getenv("SLURM_CPUS_PER_TASK", "8"))
     )
     dm = DataManager(
         prop_defs=prop_defs,
@@ -275,27 +277,11 @@ if __name__ == "__main__":
         worker_fn=_oc25_worker,
         worker_args=worker_args,
         n_workers=n_workers,
-        write_batch_size=20_000,
+        write_batch_size=100_000,
         check_existing=False,
         progress_file=PROGRESS_FILE,
     )
 
-    dm.create_configuration_sets(
-        loader=loader,
-        name_label_match=[
-            (
-                f"{DATASET_NAME}__.*",
-                None,
-                f"{DATASET_NAME}",
-                (
-                    "Training split of OC25: 7,395,512 single-point DFT calculations "
-                    "of catalyst/solvent/ion/adsorbate solid-liquid interface structures, "
-                    "filtered to total force drift < 1 eV/Å."
-                ),
-                False,
-            ),
-        ],
-    )
     dm.create_dataset(
         loader=loader,
         name=DATASET_NAME,
