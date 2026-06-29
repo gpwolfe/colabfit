@@ -58,7 +58,7 @@ from colabfit.tools.property_definitions import (
     atomic_forces_pd,
     # atomization_energy_pd,  # uncomment if needed
     # adsorption_energy_pd,   # uncomment if needed
-    cauchy_stress_pd,          # remove if molecular (pbc=False)
+    cauchy_stress_pd,  # remove if molecular (pbc=False)
     energy_pd,
 )
 from colabfit.tools.vast.configuration import AtomicConfiguration
@@ -103,12 +103,12 @@ DATASET_ID = "DS_xxxxxxxxxxxx_0"
 DATASET_NAME = "<DatasetName_Split>"
 
 DESCRIPTION = (
-    # Open with scientific purpose (what problem, what materials/systems covered).
-    # State scale (number of structures/calculations).
+    # Open with dataset name AND SPLIT (if applicable): e.g. "nablaDFT is a dataset
+    # consisting of ... This is the <split name> split of nablaDFT, which ...
+    # State the scientific purpose (what problem, what materials/systems covered).
+    # State rough scale (number of structures/calculations).
     # Name DFT software+version, functional, key convergence settings.
     # Note improvements vs predecessors if applicable.
-    # For multi-split datasets, share a common base and vary only the last sentence.
-    # Last sentence example: "This is the validation split (~10% of cleaned data)."
     "<description>"
 )
 
@@ -158,6 +158,7 @@ DATA_PATH = Path(__file__).parent / "<filename.xyz>"
 # -----------------------------------------------------------------------------
 # READER
 # -----------------------------------------------------------------------------
+
 
 def reader(fp: Path):
     """Yield AtomicConfiguration objects from fp."""
